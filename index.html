@@ -189,16 +189,20 @@
    指定资源文件的路径,也就是指定
    WEB-INF/classes/hello/application.properties</code></p>
 <h6 id="10-编译-发布-1"><a href="#10-编译-发布-1" class="headerlink" title="10. 编译,发布"></a>10. 编译,发布</h6><p>编译,发布.编辑打包war..</p>
-<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p> 服务器端执行表单验证流程如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">1. servlet容器在web.xml文件中寻找&lt;url-pattern&gt;属性为*.do的 &lt;servlet-mapping&gt;元素</div><div class="line"> &lt;servlet-mapping&gt;</div><div class="line">    &lt;servlet-name&gt;action&lt;/servlet-name&gt;</div><div class="line">    &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;</div><div class="line"> &lt;/servlet-mapping&gt;</div></pre></td></tr></table></figure></p>
-<ol>
-<li>servlet容器依据以上</li>
-</ol>
+<h3 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h3><p> 服务器端执行表单验证流程如下:</p>
+<p> 1 servlet容器在<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">web.xml文件中寻找&lt;url-pattern&gt;属性为*.do的 &lt;servlet-mapping&gt;元素</div><div class="line">  &lt;servlet-mapping&gt;</div><div class="line">     &lt;servlet-name&gt;action&lt;/servlet-name&gt;</div><div class="line">     &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;</div><div class="line">  &lt;/servlet-mapping&gt;</div></pre></td></tr></table></figure></p>
+<p> 2 servlet容器依据以上</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;servlet-mapping&gt;元素的&lt;servlet-name&gt;属性action,</div><div class="line"> 在web.xml文件中寻找匹配的&lt;servlet&gt;元素</div><div class="line">   &lt;servlet&gt;</div><div class="line">      &lt;servlet-name&gt;action&lt;/servlet-name&gt;</div><div class="line">      &lt;servlet-class&gt;org.apache.struts.action.ActionServlet&lt;/servlet-class&gt;</div><div class="line">   &lt;/servlet&gt;</div></pre></td></tr></table></figure>
-<ol>
-<li>servlet容器把请求转发到<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;servlet-class&gt;, ActionServlet依据用户请求路径HelloWorld.do, 在struts配置文件中检索</div><div class="line">path属性为/HelloWorld的action元素</div><div class="line">  &lt;action path=&quot;/HelloWorld&quot;</div><div class="line">  type = &quot;hello.HelloAction&quot;</div><div class="line">  name = &quot;HelloForm&quot;</div><div class="line">  scope = &quot;request&quot;</div><div class="line">  validate = true</div><div class="line">  input = &quot;/hello.jsp&quot;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>4 ActionServlet根据,action元素的name属性, 创建一个HelloForm对象, 把客户提交的表单数据传给HelloForm对象,<br>再把HelloForm对象保存再scope指定的request返回内<br>5 由于Action元素的validate属性为true, ActionServlet调用HelloForm对象的validate进行表单验证,事实上validate总是为true,<br>  只要你重写了public ActionErrors validate(ActionMapping mapping, HttpServerRequest request) 都会验证表单</p>
+<p>3 servlet容器把请求转发到</p>
+<pre><code>&lt;servlet-class&gt;, ActionServlet依据用户请求路径HelloWorld.do, 在struts配置文件中检索
+path属性为/HelloWorld的action元素
+  &lt;action path=&quot;/HelloWorld&quot;
+  type = &quot;hello.HelloAction&quot;
+  name = &quot;HelloForm&quot;
+  scope = &quot;request&quot;
+  validate = true
+  input = &quot;/hello.jsp&quot;
+</code></pre><p>4 ActionServlet根据,action元素的name属性, 创建一个HelloForm对象, 把客户提交的表单数据传给HelloForm对象,<br>再把HelloForm对象保存再scope指定的request返回内<br>5 由于Action元素的validate属性为true, ActionServlet调用HelloForm对象的validate进行表单验证,事实上validate总是为true,只要你重写了public ActionErrors validate(ActionMapping mapping, HttpServerRequest request) 都会验证表单</p>
 
       
     </div>
