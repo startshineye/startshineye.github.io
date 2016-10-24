@@ -1,0 +1,663 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>Redis入门 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="一:Redis简介 Redis是一个开源，先进的key-value存储，并用于构建高性能，可扩展的Web应用程序的完美解决方案。
+1.主要特点
+Redis数据库完全在内存中，使用磁盘仅用于持久性。  
+相比许多键值数据存储，Redis拥有一套较为丰富的数据类型。  
+Redis可以将数据复制到任意数量的从服务器。  
+
+2.Redis优势
+异常快速：Redis的速度非常快，每秒能执行约11万集合">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis入门">
+<meta property="og:url" content="https://github.com/startshineye/2016/10/24/Redis入门/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="一:Redis简介 Redis是一个开源，先进的key-value存储，并用于构建高性能，可扩展的Web应用程序的完美解决方案。
+1.主要特点
+Redis数据库完全在内存中，使用磁盘仅用于持久性。  
+相比许多键值数据存储，Redis拥有一套较为丰富的数据类型。  
+Redis可以将数据复制到任意数量的从服务器。  
+
+2.Redis优势
+异常快速：Redis的速度非常快，每秒能执行约11万集合">
+<meta property="og:image" content="https://github.com/startshineye/redis.jpg">
+<meta property="og:image" content="http://p1.bqimg.com/576993/414e333aa881e08d.png">
+<meta property="og:image" content="http://p1.bqimg.com/576993/abcab85d53687b25.png">
+<meta property="og:image" content="http://p1.bqimg.com/576993/931992d7a6187cf5.png">
+<meta property="og:image" content="http://p1.bqimg.com/576993/06da0a8b89099176.png">
+<meta property="og:updated_time" content="2016-10-24T15:48:38.087Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis入门">
+<meta name="twitter:description" content="一:Redis简介 Redis是一个开源，先进的key-value存储，并用于构建高性能，可扩展的Web应用程序的完美解决方案。
+1.主要特点
+Redis数据库完全在内存中，使用磁盘仅用于持久性。  
+相比许多键值数据存储，Redis拥有一套较为丰富的数据类型。  
+Redis可以将数据复制到任意数量的从服务器。  
+
+2.Redis优势
+异常快速：Redis的速度非常快，每秒能执行约11万集合">
+<meta name="twitter:image" content="https://github.com/startshineye/redis.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Redis入门" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis入门
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="redis.jpg" alt=""></p>
+<h3 id="一-Redis简介"><a href="#一-Redis简介" class="headerlink" title="一:Redis简介"></a>一:Redis简介</h3><p> Redis是一个开源，先进的key-value存储，并用于构建高性能，<br>可扩展的Web应用程序的完美解决方案。</p>
+<h5 id="1-主要特点"><a href="#1-主要特点" class="headerlink" title="1.主要特点"></a>1.主要特点</h5><ul>
+<li>Redis数据库完全在内存中，使用磁盘仅用于持久性。  </li>
+<li>相比许多键值数据存储，Redis拥有一套较为丰富的数据类型。  </li>
+<li>Redis可以将数据复制到任意数量的从服务器。  </li>
+</ul>
+<h5 id="2-Redis优势"><a href="#2-Redis优势" class="headerlink" title="2.Redis优势"></a>2.Redis优势</h5><ol>
+<li>异常快速：<br>Redis的速度非常快，每秒能执行约11万集合，每秒约81000+条记录。</li>
+<li>支持丰富的数据类型：<br>Redis支持最大多数开发人员已经知道像列表，集合，有序集合，散列数据类型。这使得它非常容易解决各种各样的问题，因为我们知道哪些问题是可以处理通过它的数据类型更好。</li>
+<li>操作都是原子性：<br>所有Redis操作是原子的，这保证了如果两个客户端同时访问的Redis服务器将获得更新后的值。</li>
+<li>多功能实用工具：<br>Redis是一个多实用的工具，可以在多个用例如缓存，消息，队列使用(Redis原生支持发布/订阅)，<br>任何短暂的数据，应用程序，如Web应用程序会话，网页命中计数等。</li>
+</ol>
+<hr>
+<h3 id="二-Redis下载和安装"><a href="#二-Redis下载和安装" class="headerlink" title="二:Redis下载和安装"></a>二:Redis下载和安装</h3><h5 id="1-下载"><a href="#1-下载" class="headerlink" title="1.下载"></a>1.下载</h5><p><a href="http://redis.io/download" target="_blank" rel="external">http://redis.io/download</a><br><img src="http://p1.bqimg.com/576993/414e333aa881e08d.png" alt="Markdown"></p>
+<h5 id="2-安装"><a href="#2-安装" class="headerlink" title="2.安装"></a>2.安装</h5><p>解压到硬盘即完成安装<br><img src="http://p1.bqimg.com/576993/abcab85d53687b25.png" alt="Markdown"></p>
+<h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><ol>
+<li>启动服务器<br>双击redis-server.exe<br><img src="http://p1.bqimg.com/576993/931992d7a6187cf5.png" alt="Markdown"> </li>
+<li>起动客户端<br>双redis-cli.exe  </li>
+<li>测试<br><img src="http://p1.bqimg.com/576993/06da0a8b89099176.png" alt="Markdown"></li>
+</ol>
+<hr>
+<h3 id="三-Java中使用"><a href="#三-Java中使用" class="headerlink" title="三:Java中使用"></a>三:Java中使用</h3><h5 id="1-Redis-官方首选的-Java-客户端开发包"><a href="#1-Redis-官方首选的-Java-客户端开发包" class="headerlink" title="1.Redis 官方首选的 Java 客户端开发包"></a>1.Redis 官方首选的 Java 客户端开发包</h5><pre><code>&lt;projectxmlns=&quot;http://maven.apache.org/POM/4.0.0&quot;xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+&lt;groupId&gt;bjpowernode&lt;/groupId&gt;
+&lt;artifactId&gt;redis&lt;/artifactId&gt;
+&lt;version&gt;1.0&lt;/version&gt;
+&lt;packaging&gt;jar&lt;/packaging&gt;
+&lt;name&gt;redis&lt;/name&gt;
+&lt;dependencies&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;redis.clients&lt;/groupId&gt;
+        &lt;artifactId&gt;jedis&lt;/artifactId&gt;
+        &lt;version&gt;2.8.0&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;junit&lt;/groupId&gt;
+        &lt;artifactId&gt;junit&lt;/artifactId&gt;
+        &lt;version&gt;4.11&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.slf4j&lt;/groupId&gt;
+        &lt;artifactId&gt;slf4j-log4j12&lt;/artifactId&gt;
+        &lt;version&gt;1.7.9&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;commons-logging&lt;/groupId&gt;
+        &lt;artifactId&gt;commons-logging&lt;/artifactId&gt;
+        &lt;version&gt;1.2&lt;/version&gt;
+    &lt;/dependency&gt;
+&lt;/dependencies&gt;
+&lt;build&gt;
+    &lt;plugins&gt;
+        &lt;plugin&gt;
+            &lt;artifactId&gt;maven-compiler-plugin&lt;/artifactId&gt;
+            &lt;version&gt;3.5.1&lt;/version&gt;
+            &lt;configuration&gt;
+                &lt;source&gt;1.8&lt;/source&gt;
+                &lt;target&gt;1.8&lt;/target&gt;
+                &lt;encoding&gt;UTF-8&lt;/encoding&gt;
+            &lt;/configuration&gt;
+        &lt;/plugin&gt;
+    &lt;/plugins&gt;
+&lt;/build&gt;
+&lt;/project&gt;
+</code></pre><h5 id="2-jedis第一个小例子"><a href="#2-jedis第一个小例子" class="headerlink" title="2.jedis第一个小例子"></a>2.jedis第一个小例子</h5><ol>
+<li><p>测试redis连接关闭<br>public class testRedis {<br>   public static void main(String[] args) {</p>
+<pre><code>//获取logg  
+Log logger = LogFactory.getLog(testRedis.class);  
+//建立redis连接  
+Jedis jedis = new Jedis(&quot;localhost&quot;);  
+//导入数据  
+jedis.set(&quot;key&quot;,&quot;hello world&quot;);  
+//获取数据输出  
+logger.info(jedis.get(&quot;key&quot;));  
+//关闭资源  
+jedis.close();  
+</code></pre><p>  }</p>
+<p> }</p>
+</li>
+<li><p>测试redis存放数据<br>  public class testRedis02 {<br>  private Log logger;<br>  private Jedis jedis;<br>  @Test<br>  public void run() {  </p>
+<pre><code>//导入数据  
+jedis.set(&quot;key&quot;,&quot;hello world&quot;);  
+//获取数据输出  
+logger.info(jedis.get(&quot;key&quot;));  
+//关闭资源  
+</code></pre><p>  }<br>  @Before<br>  public void init(){  </p>
+<pre><code> //获取logg  
+logger = LogFactory.getLog(testRedis02.class);  
+ //建立redis连接  
+jedis = new Jedis(&quot;localhost&quot;);  
+</code></pre><p>  }<br>  @After<br>  public void after(){  </p>
+<pre><code>jedis.close();  
+</code></pre><p>  }<br> }  </p>
+</li>
+<li><p>测试redis其他数据类型<br>  public class TestRedisSomeOperation {<br>  private Log logger;<br>  private Jedis jedis = null;<br>  @Before<br>  public void init(){<br>   jedis = new Jedis(“localhost”);<br>   logger = LogFactory.getLog(TestRedisSomeOperation.class);<br>  }  </p>
+<pre><code>字符串操作  
+</code></pre><p>  //@Test<br>  public void testString() {  </p>
+<pre><code>// -----添加数据----------  
+jedis.set(&quot;name&quot;, &quot;红烧肉&quot;);// 向key--&gt;name中放入了value--&gt;红烧肉  
+logger.info(jedis.get(&quot;name&quot;));// 执行结果：xinxin  
+
+jedis.append(&quot;name&quot;, &quot; 我的最爱&quot;); // 拼接  
+logger.info(jedis.get(&quot;name&quot;));  
+
+jedis.del(&quot;name&quot;); // 删除某个键  
+logger.info(jedis.get(&quot;name&quot;));  
+// 设置多个键值对  
+jedis.mset(&quot;name&quot;, &quot;孙悟空&quot;, &quot;age&quot;, &quot;501&quot;, &quot;qq&quot;, &quot;4623007&quot;);  
+jedis.incr(&quot;age&quot;); // 进行加1操作  
+logger.info(jedis.get(&quot;name&quot;) + &quot;-&quot; + jedis.get(&quot;age&quot;) + &quot;-&quot; + jedis.get  (&quot;qq&quot;));  
+</code></pre><p> }</p>
+</li>
+</ol>
+<pre><code>  Map操作  
+
+  //@Test  
+     public void testMap() {  
+     // -----添加数据----------  
+    Map&lt;String, String&gt; map = new HashMap&lt;String, String&gt;();    
+    map.put(&quot;name&quot;, &quot;xinxin&quot;);  
+    map.put(&quot;age&quot;, &quot;22&quot;);  
+    map.put(&quot;qq&quot;, &quot;123456&quot;);  
+    logger.info(map);  
+    jedis.hmset(&quot;use&quot;,map);  
+    //jedis.hmset(&quot;user&quot;, map);  
+    // 取出user中的name，执行结果:[minxr]--&gt;注意结果是一个泛型的List  
+    // 第一个参数是存入redis中map对象的key，后面跟的是放入map中的对象的key，后面的key可以跟多个，是可变参数  
+    List&lt;String&gt; rsmap = jedis.hmget(&quot;user&quot;, &quot;name&quot;, &quot;age&quot;, &quot;qq&quot;);  
+    logger.info(rsmap);  
+
+    // 删除map中的某个键值    
+    jedis.hdel(&quot;user&quot;, &quot;age&quot;);  
+    logger.info(jedis.hmget(&quot;user&quot;, &quot;age&quot;)); // 因为删除了，所以返回的是null  
+    logger.info(jedis.hlen(&quot;user&quot;)); // 返回key为user的键中存放的值的个数2  
+    logger.info(jedis.exists(&quot;user&quot;));// 是否存在key为user的记录返回true  
+    logger.info(jedis.hkeys(&quot;user&quot;));// 返回map对象中的所有key  
+    logger.info(jedis.hvals(&quot;user&quot;));// 返回map对象中的所有value  
+
+    Iterator&lt;String&gt;iter = jedis.hkeys(&quot;user&quot;).iterator();  
+    while (iter.hasNext()) {  
+        String key = iter.next();  
+        logger.info(key + &quot;:&quot; + jedis.hmget(&quot;user&quot;, key));  
+    }  
+  }  
+
+
+ jedis操作List
+
+ //@Test  
+public void testList(){  
+    // 开始前，先移除所有的内容  
+    jedis.del(&quot;java framework&quot;);  
+    logger.info(jedis.lrange(&quot;java framework&quot;, 0, -1));  
+    // 先向key java framework中存放三条数据  
+    jedis.lpush(&quot;java framework&quot;, &quot;spring&quot;);  
+    jedis.lpush(&quot;java framework&quot;, &quot;struts&quot;);  
+    jedis.lpush(&quot;java framework&quot;, &quot;hibernate&quot;);  
+    // 再取出所有数据jedis.lrange是按范围取出，  
+    // 第一个是key，第二个是起始位置，第三个是结束位置，jedis.llen获取长度 -1表示取得所有  
+    logger.info(jedis.lrange(&quot;java framework&quot;, 0, -1));  
+
+    jedis.del(&quot;java framework&quot;);  
+    jedis.rpush(&quot;java framework&quot;, &quot;spring&quot;);  
+    jedis.rpush(&quot;java framework&quot;, &quot;struts&quot;);  
+    jedis.rpush(&quot;java framework&quot;, &quot;hibernate&quot;);  
+    logger.info(jedis.lrange(&quot;java framework&quot;, 0, -1));  
+}  
+
+
+  jedis操作Set  
+
+//@Test  
+public void testSet() {  
+    jedis.del(&quot;user&quot;);  
+    // 添加  
+    jedis.sadd(&quot;user&quot;, &quot;liuling&quot;);  
+    jedis.sadd(&quot;user&quot;, &quot;xinxin&quot;);  
+    jedis.sadd(&quot;user&quot;, &quot;ling&quot;);  
+    jedis.sadd(&quot;user&quot;, &quot;zhangxinxin&quot;);  
+    jedis.sadd(&quot;user&quot;, &quot;who&quot;);  
+    // 移除noname  
+    jedis.srem(&quot;user&quot;, &quot;who&quot;);  
+    logger.info(jedis.smembers(&quot;user&quot;));// 获取所有加入的value  
+    logger.info(jedis.sismember(&quot;user&quot;, &quot;who&quot;));// 判断 who  
+                                                // 是否是user集合的元素  
+    logger.info(jedis.srandmember(&quot;user&quot;));  
+    logger.info(jedis.scard(&quot;user&quot;));// 返回集合的元素个数  
+}  
+
+
+@Test
+public void test() {  
+    // jedis排序  
+    // 注意，此处的rpush和lpush是List的操作。是一个双向链表（但从表现来看的）  
+    jedis.del(&quot;a&quot;);// 先清除数据，再加入数据进行测试  
+    jedis.rpush(&quot;a&quot;, &quot;1&quot;);  
+    jedis.lpush(&quot;a&quot;, &quot;6&quot;);  
+    jedis.lpush(&quot;a&quot;, &quot;3&quot;);  
+    jedis.lpush(&quot;a&quot;, &quot;9&quot;);//9,3,6,1  
+    logger.info(jedis.lrange(&quot;a&quot;, 0, -1));// [9, 3, 6, 1]  
+    logger.info(jedis.sort(&quot;a&quot;)); // [1, 3, 6, 9] //输入排序后结果  
+    logger.info(jedis.lrange(&quot;a&quot;, 0, -1));  
+}  
+
+ @After  
+ public void after(){  
+   jedis.close();  
+}  
+}    
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/24/Redis入门/" class="archive-article-date">
+  	<time datetime="2016-10-24T15:44:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术/">技术</a><a class="article-category-link" href="/categories/技术/Reids/">Reids</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2016/10/23/org-apache-jasper-JasperException-Unable-to-compile-class-for-JSP/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">org.apache.jasper.JasperException: Unable to compile class for JSP</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Redis入门" data-title="Redis入门" data-url="https://github.com/startshineye/2016/10/24/Redis入门/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/struts1-servlet/" style="font-size: 10px;">-struts1 -servlet -</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Oracle/" style="font-size: 10px;">Oracle</a> <a href="/tags/hibernate/" style="font-size: 20px;">hibernate</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java集合/" style="font-size: 10px;">java集合</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 10px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 10px;">struts1</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
