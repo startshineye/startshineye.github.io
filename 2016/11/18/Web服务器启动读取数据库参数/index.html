@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="前言  今天，项目需要在服务器一启动就加载数据库参数，之前考虑到使用监听器，但是在考虑到如何读取数据库的数据时候出现了问题，我在监听器里面配置service，然后service调用dao，所以就出现了空指针异常，后面想到了用Servlet里面的init方法
 内容自启动，在web.xml文件配置如下：12345&amp;lt;servlet&amp;gt;     &amp;lt;servlet-name&amp;gt;Syste">
-<meta property="og:updated_time" content="2016-11-18T16:07:02.011Z">
+<meta property="og:updated_time" content="2016-11-18T16:16:44.929Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Web服务器启动读取数据库参数">
 <meta name="twitter:description" content="前言  今天，项目需要在服务器一启动就加载数据库参数，之前考虑到使用监听器，但是在考虑到如何读取数据库的数据时候出现了问题，我在监听器里面配置service，然后service调用dao，所以就出现了空指针异常，后面想到了用Servlet里面的init方法
@@ -179,27 +179,40 @@
 <li>当值为0或者大于0时，表示web容器在应用启动时就加载这个servlet  </li>
 <li>当是一个负数时或者没有指定时，则指示容器在该servlet被选择时才加载,正数的值越小，启动该servlet的优先级越高</li>
 </ol>
-<h6 id="systemInitService如下"><a href="#systemInitService如下" class="headerlink" title="systemInitService如下:"></a>systemInitService如下:</h6><p> 重启web容器，在控制台可以看到执行的信息。<br>然后我们来修改我们的代码，让这个Servlet可以读取数据库的内容，并进行相关的处理。<br>我操作数据库用的是spring的注入，访问数据库是以bean注入的方式，在 SystemInit里对应的service注入service的实现，读取数据库数据，其实现在的关键就是得到这个service的实例化对象，<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">@Service(&quot;systemInitService&quot;)</div><div class="line">public class SystemInitServiceImpl implements SystemInitService&#123;</div><div class="line">	</div><div class="line">	@Autowired</div><div class="line">	private ParamDao paramDao;</div><div class="line">	@Override</div><div class="line">	public List&lt;ParamVO&gt; getAllParam() &#123;</div><div class="line">		return paramDao.getAll();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">###### 这个Servlet实现</div></pre></td></tr></table></figure></p>
-<p>public class SystemInit extends HttpServlet {<br>    /**</p>
-<pre><code> * 
- */
-private static final long serialVersionUID = 1L;
+<h6 id="systemInitService如下"><a href="#systemInitService如下" class="headerlink" title="systemInitService如下:"></a>systemInitService如下:</h6><p> 重启web容器，在控制台可以看到执行的信息。<br>然后我们来修改我们的代码，让这个Servlet可以读取数据库的内容，并进行相关的处理。<br>我操作数据库用的是spring的注入，访问数据库是以bean注入的方式，在 SystemInit里对应的service注入service的实现，读取数据库数据，其实现在的关键就是得到这个service的实例化对象，</p>
+<pre><code>//service
+@Service(&quot;systemInitService&quot;)
+public class SystemInitServiceImpl implements SystemInitService{
 
-public SystemInit() {
-    super();
-}
+    @Autowired
+    private ParamDao paramDao;
+    @Override
+    public List&lt;ParamVO&gt; getAllParam() {
+        return paramDao.getAll();
+    }
+}  
+//这个Servlet实现  
+public class SystemInit extends HttpServlet {
+    /**
+     * 
+     */
+    private static final long serialVersionUID = 1L;
 
-public void init() throws ServletException {
-  ServletContext sc= getServletContext(); 
-  WebApplicationContext ac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
-  SystemInitService service = (SystemInitService)ac.getBean(&quot;systemInitService&quot;);
-  List&lt;ParamVO&gt; allParam = service.getAllParam();
-  for (ParamVO paramVO : allParam) {
-      SystemInitParamUtil.paramList.add(paramVO);
-  }
+    public SystemInit() {
+        super();
+    }
+
+    public void init() throws ServletException {
+      ServletContext sc= getServletContext(); 
+      WebApplicationContext ac = WebApplicationContextUtils.getRequiredWebApplicationContext(sc);
+      SystemInitService service = (SystemInitService)ac.getBean(&quot;systemInitService&quot;);
+      List&lt;ParamVO&gt; allParam = service.getAllParam();
+      for (ParamVO paramVO : allParam) {
+          SystemInitParamUtil.paramList.add(paramVO);
+      }
+    }
 }
-</code></pre><p>}<br>```  </p>
-<p>systemInitService也可以是在spring配置文件里面配置的<bean id="systemInitService">当然以上是注解</bean></p>
+</code></pre><p>systemInitService也可以是在spring配置文件里面配置的<bean id="systemInitService">当然以上是注解</bean></p>
 
       
     </div>
