@@ -152,246 +152,6 @@
       <div class="body-wrap">
         
   
-    <article id="post-Oracle" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/31/Oracle/">Oracle</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://p1.bqimg.com/576993/436c361c169a74bc.jpg" alt="Markdown"></p>
-<h3 id="Oracle重要知识点"><a href="#Oracle重要知识点" class="headerlink" title="Oracle重要知识点"></a>Oracle重要知识点</h3><hr>
-<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="内容分为四部分"><a href="#内容分为四部分" class="headerlink" title="内容分为四部分"></a>内容分为四部分</h4><h4 id="一-Oracle注意语法"><a href="#一-Oracle注意语法" class="headerlink" title="一: Oracle注意语法"></a>一: Oracle注意语法</h4><ol>
-<li>条件查询相关</li>
-<li>单行函数相关</li>
-<li>分组函数相关</li>
-<li>查询相关<h4 id="二-Oracle数据类型"><a href="#二-Oracle数据类型" class="headerlink" title="二: Oracle数据类型"></a>二: Oracle数据类型</h4></li>
-<li>数字类型</li>
-<li>字符类型</li>
-<li>日期类型</li>
-<li>扩充类型<h4 id="三-Oracle中to-date-to-char-to-number解析"><a href="#三-Oracle中to-date-to-char-to-number解析" class="headerlink" title="三: Oracle中to  date,to  char,to_number解析"></a>三: Oracle中to <em> date,to </em> char,to_number解析</h4></li>
-<li>to_date解析</li>
-<li>to_char解析</li>
-<li>to_number解析<h4 id="四-Oracle与分页相关的rownum解析"><a href="#四-Oracle与分页相关的rownum解析" class="headerlink" title="四: Oracle与分页相关的rownum解析"></a>四: Oracle与分页相关的rownum解析</h4></li>
-</ol>
-<hr>
-<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="二-Oracle数据类型-1"><a href="#二-Oracle数据类型-1" class="headerlink" title="二:Oracle数据类型"></a>二:Oracle数据类型</h3><h5 id="1-数字类型"><a href="#1-数字类型" class="headerlink" title="1.数字类型"></a>1.数字类型</h5><p>   number(数字类型)[包括整数类型和浮点数类型]:<br>   number(3):表示该字段是整数类型,位数最大为三位,最大值是999<br>   number(3,2):该字段可以出现小数，3表示有效数字的位数，2表示小数位数  </p>
-<h6 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h6><pre><code>创建一张测试表,向其中插入数据 :t_test(id number(3,1))  
- create table t_test(id number(3,2));
-</code></pre><p><img src="http://i1.piimg.com/576993/aa8301564a01b658.png" alt="Markdown"></p>
-<pre><code>1. 向表中插入数据9
- insert into t_test values(9);
-</code></pre><p><img src="http://i1.piimg.com/576993/15a8194d5104f997.png" alt="Markdown"></p>
-<pre><code>2. 向表中插入数据10  
- insert into t_test values(10);
-</code></pre><p><img src="http://i1.piimg.com/576993/c6adb1312063bfaf.png" alt="Markdown"><br>     出现以上错误原是因为我们定义的id有效数字是3位,且保留两位小数,对于10会变成10.00此时有效数字位数是4位,超出了指定位数.</p>
-<hr>
-<h5 id="2-字符类型"><a href="#2-字符类型" class="headerlink" title="2.字符类型"></a>2.字符类型</h5><ul>
-<li>char 字符类型：定长字符串，不可变长度字符串。 在Oracle数据库中：char(10)，假如传递的数据是’jack’，底层实际存储的是’jack+6个空格’</li>
-<li>varchar 字符类型：可变长度字符串。<br>varchar是SQL语句规范中的标准。 通用的。 Varchar默认采用一个字节编码，汉字、全角等采用两个。</li>
-<li><p>varchar2 字符类型：可变长度字符串<br>varchar2只有Oracle数据库采用， 不是通用的，但是varchar2采用默认采用两个字节编码，可以容纳更多种类的语言。 兼容性更好一些。和数据库的字符集有关系</p>
-<pre><code>字符类型有两种char与varchar(varchar2)有什么区别?
-CHAR存储定长字符串。
-varchar,VARCHAR2存储可变长字符串
-</code></pre></li>
-</ul>
-<hr>
-<h4 id="3-日期类型"><a href="#3-日期类型" class="headerlink" title="3.日期类型"></a>3.日期类型</h4><ul>
-<li>date 日期类型 </li>
-</ul>
-<hr>
-<h4 id="4扩充类型"><a href="#4扩充类型" class="headerlink" title="4扩充类型"></a>4扩充类型</h4><ul>
-<li>blob Binary Large OBject(二进制大对象)<br>  通常存储：图片、声音、视频等二进制数据。 </li>
-<li>clob Character Large OBject(字符大对象)<br>通常存储：大文本</li>
-</ul>
-<hr>
-<h6 id="案例-1"><a href="#案例-1" class="headerlink" title="案例"></a>案例</h6><pre><code>思考:设计一张电影表 t_movie
-id(number)    name(varchar2)    上映日期(date)    海报(BLOB)
-__________________________________________________________
-</code></pre><hr>
-<h4 id="三-Oracle中to-date-to-char-to-number解析-1"><a href="#三-Oracle中to-date-to-char-to-number解析-1" class="headerlink" title="三: Oracle中to  date,to  char,to_number解析"></a>三: Oracle中to <em> date,to </em> char,to_number解析</h4><h5 id="1-to-date解析"><a href="#1-to-date解析" class="headerlink" title="1 to_date解析"></a>1 to_date解析</h5><p>to_date   </p>
-<ol>
-<li><p>to_date函数的作用:将”字符类型数据”转换为”日期类型”</p>
-</li>
-<li><p>to_date函数的运算结果类型:date</p>
-</li>
-<li><p>to_date函数的语法格式:to_date(“字符类型数据”,”日期格式”)</p>
-</li>
-<li><p>关于日期格式<br><img src="http://i1.piimg.com/576993/a020bfac89ab7174.png" alt="Markdown"></p>
-</li>
-<li><p>to_date函数的使用场景  </p>
-<pre><code>案例:创建一张表  t_person(name varchar2(32),birthday date)
-create tale t_person(name varchar2(32),birthday date);
-
---向表中插入数据1
-insert into t_person values(&apos;zs&apos;,&apos;1987-10月-13&apos;);--ORA-01861: 文字与格式字符串不匹配
-
-修改SQL语句
-insert into t_person values(&apos;zs&apos;,to_date(&apos;1987-10月-13&apos;,&apos;YYYY-MON-DD&apos;));
-
---向表中插入数据2
-insert into t_person values(&apos;LS&apos;,&apos;11月-15-1988&apos;);--ORA-01861: 文字与格式字符串不匹配
-修改SQL语句
-insert into t_person values(&apos;LS&apos;,to_date(&apos;11月-15-1988&apos;,&apos;MON-DD-YYYY&apos;));
-
---向表中插入数据3
-insert into t_person values(&apos;ww&apos;,&apos;22-12月-86&apos;);//可以插入
-底层会自动调用to_date函数进行转换
-</code></pre></li>
-<li><p>结论<br> 大多使用在插入操作,如果数据库字段定义的是date类型,但是传递的数据是字符类型<br> 那么需要手动调用to_date函数进行转换;除非插入的字符串的格式和oracle数据库默认的日期格式<br> 相同,会自动进行类型转换</p>
-<h5 id="2-to-char解析"><a href="#2-to-char解析" class="headerlink" title="2 to_char解析"></a>2 to_char解析</h5><p>to_char  </p>
-</li>
-<li><p>to_char函数的作用:将”日期类型”数据转换为字符类型</p>
-</li>
-<li><p>to_char函数的运算结果类型:char</p>
-</li>
-<li><p>to_char函数的语法格式:to_char(“日期数据”,”日期格式”)</p>
-</li>
-<li><p>常用的数字格式<br><img src="http://i1.piimg.com/576993/05d9dce459c4dfe4.png" alt="Markdown"></p>
-</li>
-<li><p>to_char函数的使用场景  </p>
-<pre><code>案例:查询员工的编号,姓名,雇用日期
-select empno,ename,hiredate from emp;
-
-要求:雇佣日期按照年-月-日 时:分:秒的格式进行展示
-select empno,ename,to_char(hiredate,&apos;YYYY-MON-DD HH24:MI:SS&apos;) from emp;
-</code></pre></li>
-<li><p>结论   </p>
-<pre><code>大多使用在select操作中,如果默认的日期转
-换格式不符合用户的要求,可以手动调用to_char函数进行转换
-</code></pre></li>
-</ol>
-<hr>
-<h5 id="3-to-number解析"><a href="#3-to-number解析" class="headerlink" title="3 to_number解析"></a>3 to_number解析</h5><p>to_number(了解)  </p>
-<ol>
-<li><p>to_number函数的作用:将”字符类型”数据转换为”数字类型”</p>
-</li>
-<li><p>to_number函数的运算结果类型:number</p>
-</li>
-<li><p>to_number函数的语法格式:to_number(“字符类型数据”,”数字格式”)</p>
-</li>
-<li><p>to_number函数的使用场景  </p>
-<pre><code>大多使用插入操作中,如果数据库字段定义的是number类型,
-但是传递的是一个字符类型数据
-那么需要手动调用to_number进行转换
-</code></pre></li>
-</ol>
-<hr>
-<h4 id="四-Oracle与分页相关的rownum解析-1"><a href="#四-Oracle与分页相关的rownum解析-1" class="headerlink" title="四: Oracle与分页相关的rownum解析"></a>四: Oracle与分页相关的rownum解析</h4><ol>
-<li><p>rownum<br>是oracle数据库特有的内容,是一个隐含字段,为每一个查询的结果集维护了一个自增的行号行号从1开始,以1递增</p>
-</li>
-<li><p>不同的数据库,分页的SQL不同<br> mysql–&gt;limit<br> oracle–&gt;三层嵌套select+rownum</p>
-</li>
-<li><p>rownum都支持哪些操作?<br> 在进行查询的时候,行号一定要包含1<br> &lt;,&lt;=,&gt;0,&gt;=1</p>
-</li>
-<li><p>rownum和表中的记录是否存在绑定关系?<br>不存在</p>
-</li>
-</ol>
-<hr>
-<p>#####——-oracle分页实例(重点)——</p>
-<h6 id="5-案例-查询出员工表的前5条记录"><a href="#5-案例-查询出员工表的前5条记录" class="headerlink" title="5.案例: 查询出员工表的前5条记录"></a>5.案例: 查询出员工表的前5条记录</h6><pre><code>select empno,ename from emp where rownum&lt;=5;
-</code></pre><p>######6.案例: 查询出员工工资排名在前5条记录<br>错误的写法:  </p>
-<pre><code>select empno,ename,sal 
-from emp 
-where rownum&lt;=5 order by sal desc;
-</code></pre><p>正确的写法:  </p>
-<pre><code>    第一步:先按照工资降序排序
-select empno,ename,sal,rownum from emp order by sal desc;
-
-    第二步:将上面查询的结果作为一张临时表t,取出前5条
-    select 
-        empno,ename,sal
-    from
-    (select empno,ename,sal from emp order by sal desc)t
-    where
-        rownum&lt;=5;
-</code></pre><h6 id="7案例-查询出员工工资排名在前-3-9-条记录"><a href="#7案例-查询出员工工资排名在前-3-9-条记录" class="headerlink" title="7案例:查询出员工工资排名在前[3-9]条记录"></a>7案例:查询出员工工资排名在前[3-9]条记录</h6><pre><code>第一步:将工资排名在前9的员工查询出来
-select 
-    empno,ename,sal,rownum
-from
-(select empno,ename,sal from emp order by sal desc)t
-where
-    rownum&lt;=9;
-第二步:将上面的查询结果作为一个临时表 tt
-select 
-    empno,ename,sal
-from
-    (select 
-empno,ename,sal,rownum linenum
-    from
-(select empno,ename,sal from emp order by sal desc)t
-    where
-    rownum&lt;=9)
-where 
-    linenum &gt;=3;
-</code></pre><hr>
-<h6 id="8-通用的分页sql"><a href="#8-通用的分页sql" class="headerlink" title="8.通用的分页sql"></a>8.通用的分页sql</h6><pre><code>每页显示3条
-第1页 (0-3]
-第2页 (3-6]
-第3页 (6-9]
-...
-
-每页显示pageSize条
-第pageNo页 ( (pageNo-1)*pageSize-pageNo*pageSize]
-
-    select 
-        tt.*
-    from
-        (select 
-            t.*,rownum linenum
-        from
-            (业务SQL)t
-        where
-        rownum&lt;=pageNo*pageSize)tt
-    where 
-        linenum &gt;(pageNo-1)*pageSize;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/31/Oracle/" class="archive-article-date">
-  	<time datetime="2016-10-31T15:27:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/数据库-Oracle/">数据库 Oracle</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
     <article id="post-im开发参考网址" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -952,6 +712,67 @@ where
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
 	<a class="article-category-link" href="/categories/CTI/">CTI</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-华为软电话简单调节" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/25/华为软电话简单调节/">华为软电话简单调节</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-安装虚拟机"><a href="#1-安装虚拟机" class="headerlink" title="1.安装虚拟机"></a>1.安装虚拟机</h4><h4 id="2-将华为CTI软电话装入到虚拟机中"><a href="#2-将华为CTI软电话装入到虚拟机中" class="headerlink" title="2.将华为CTI软电话装入到虚拟机中"></a>2.将华为CTI软电话装入到虚拟机中</h4><p>打开华为软电话：<br><img src="http://i1.piimg.com/576993/823d3a461aa8b9ae.png" alt="Markdown"></p>
+<h4 id="3-华为智能呼叫中心会自动启动"><a href="#3-华为智能呼叫中心会自动启动" class="headerlink" title="3.华为智能呼叫中心会自动启动"></a>3.华为智能呼叫中心会自动启动</h4><p>如果下面一排5个指示灯都变绿表示启动成功<br><img src="http://i1.piimg.com/576993/31dc86f3aae71516.png" alt="Markdown"></p>
+<h4 id="4-打开CTI-Link协议服务器"><a href="#4-打开CTI-Link协议服务器" class="headerlink" title="4.打开CTI-Link协议服务器"></a>4.打开CTI-Link协议服务器</h4><p><img src="http://i1.piimg.com/576993/25f426416b7ab2b8.png" alt="Markdown"></p>
+<h4 id="5-点击开始接入坐席"><a href="#5-点击开始接入坐席" class="headerlink" title="5.点击开始接入坐席"></a>5.点击开始接入坐席</h4><p><img src="http://i1.piimg.com/576993/de2cdfe810634e62.png" alt="Markdown"></p>
+<h4 id="6-输入密码登录打开一个电话（坐席）"><a href="#6-输入密码登录打开一个电话（坐席）" class="headerlink" title="6.输入密码登录打开一个电话（坐席）"></a>6.输入密码登录打开一个电话（坐席）</h4><p><img src="http://i1.piimg.com/576993/3ba3ae955b051967.png" alt="Markdown"></p>
+<h4 id="7-打开一个电话（客户）"><a href="#7-打开一个电话（客户）" class="headerlink" title="7.打开一个电话（客户）"></a>7.打开一个电话（客户）</h4><p><img src="http://i1.piimg.com/576993/3149507956459cfd.png" alt="Markdown"></p>
+<h4 id="8-打10086对话"><a href="#8-打10086对话" class="headerlink" title="8.打10086对话"></a>8.打10086对话</h4><p><img src="http://i1.piimg.com/576993/7401a9abe1f0cd92.png" alt="Markdown"></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/25/华为软电话简单调节/" class="archive-article-date">
+  	<time datetime="2016-10-25T15:07:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTI/">CTI</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/智能呼叫中心/">智能呼叫中心</a>
 	</div>
 
 
