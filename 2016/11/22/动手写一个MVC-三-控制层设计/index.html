@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>动手写一个MVC(三)-控制层设计 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="简介
+控制层主要用来转发从视图层传来的数据和请求到相对应的模型层，因此，实现它最好的方式莫过于使用Servlet了。  
+当从视图层获取请求后，首先通过对web.xml文件的配置，使其转入Servlet，在Servlet中完成对页面中数据的封装和对相应模型的选择。  
+然后再到相应的模型层进行数据处理；当在模型层数据处理完毕后，通过RequestDispatcher将处理后的数据返回相应的视图页面">
+<meta property="og:type" content="article">
+<meta property="og:title" content="动手写一个MVC(三)-控制层设计">
+<meta property="og:url" content="https://github.com/startshineye/2016/11/22/动手写一个MVC-三-控制层设计/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="简介
+控制层主要用来转发从视图层传来的数据和请求到相对应的模型层，因此，实现它最好的方式莫过于使用Servlet了。  
+当从视图层获取请求后，首先通过对web.xml文件的配置，使其转入Servlet，在Servlet中完成对页面中数据的封装和对相应模型的选择。  
+然后再到相应的模型层进行数据处理；当在模型层数据处理完毕后，通过RequestDispatcher将处理后的数据返回相应的视图页面">
+<meta property="og:updated_time" content="2016-11-22T16:37:59.980Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="动手写一个MVC(三)-控制层设计">
+<meta name="twitter:description" content="简介
+控制层主要用来转发从视图层传来的数据和请求到相对应的模型层，因此，实现它最好的方式莫过于使用Servlet了。  
+当从视图层获取请求后，首先通过对web.xml文件的配置，使其转入Servlet，在Servlet中完成对页面中数据的封装和对相应模型的选择。  
+然后再到相应的模型层进行数据处理；当在模型层数据处理完毕后，通过RequestDispatcher将处理后的数据返回相应的视图页面">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-动手写一个MVC-三-控制层设计" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      动手写一个MVC(三)-控制层设计
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
+<li>控制层主要用来转发从视图层传来的数据和请求到相对应的模型层，因此，实现它最好的方式莫过于使用Servlet了。  </li>
+<li>当从视图层获取请求后，首先通过对web.xml文件的配置，使其转入Servlet，在Servlet中完成对页面中数据的封装和对相应模型的选择。  </li>
+<li>然后再到相应的模型层进行数据处理；当在模型层数据处理完毕后，通过RequestDispatcher将处理后的数据返回相应的视图页面。  </li>
+</ol>
+<h6 id="使用servlet"><a href="#使用servlet" class="headerlink" title="使用servlet"></a>使用servlet</h6><p>使用doPost()来处理相应的中转请求, 示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public void doGet(HttpServletRequest req, HttpServletResponse res) </div><div class="line">throws ServletException, IOException &#123; </div><div class="line">doPost(req, res); </div><div class="line">&#125;</div><div class="line">//使用post提交方式</div><div class="line">public void doPost(HttpServletRequest req, HttpServletResponse res) </div><div class="line">throws ServletException, IOException &#123; </div><div class="line">do_Dispatcher (req, res); </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>不论采用get还是post提交方式，都将执行do_Dispatcher(req, res)方法。   </li>
+<li>do_Dispatcher(req, res)是用来处理视图层发送来的请求的方法。  </li>
+</ol>
+<h6 id="获取从视图传来的值"><a href="#获取从视图传来的值" class="headerlink" title="获取从视图传来的值"></a>获取从视图传来的值</h6><p>直接使用request方式来获取从页面提交的数据，在要获取的数据比较多的情况下，会比较烦琐，而且直接将request传递给模型层不符合Model2规范. 将对从页面传来的值进行封装，将其放在一个Map中，然后再传递给模型层，这样在模型层就可以直接使用Map中的值。示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">private Map getRequestToMap(HttpServletRequest req) throws Exception &#123; </div><div class="line">req.setCharacterEncoding(&quot;GBK&quot;); </div><div class="line">Map infoIn = new HashMap(); </div><div class="line">for (Enumeration e = req.getParameterNames(); e.hasMoreElements ();) </div><div class="line">&#123;//获取页面中所有元素名 </div><div class="line">String strName = (String)e.nextElement(); </div><div class="line">String[] values = (String[]) req.getParameterValues (strName); </div><div class="line">//根据名称获取对应的值 </div><div class="line">if (values == null) &#123;//假如没有值 </div><div class="line">infoIn.put(strName, &quot;&quot;); </div><div class="line">&#125; else if (values.length == 1) &#123;//假如只有一个值 </div><div class="line">infoIn.put(strName, values[0]); </div><div class="line">&#125; else &#123;//假如有多个值 </div><div class="line">infoIn.put(strName, values); </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">return infoIn; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：  </p>
+<ol>
+<li>req.setCharacterEncoding(“GBK”)，这里首先将从视图层传来的数据设定编码为GBK。  </li>
+<li>HashMap infoIn = new HashMap()，定义一个HashMap，用来存放从request中获取的数据。  </li>
+<li>req.getParameterNames()，用来获取从页面中传来的所有元素。  </li>
+<li>req.getParameterValues()，用来根据元素名称来获取元素对应的值，并将元素名称和值的对应关系存入HashMap中。如果元素的值为空，则在HashMap中将元素名称对应的值置为空；如果只有一个值，则将该值存入；如果有多个值，则存入数组<br>####### 处理请求到模型层<br>一个视图对应一个模型，也可能一个视图对应多个模型，但只有一个控制器，所以，为了实现一个控制器可以转发到多个模型中去，就需要使用接口，让所有模型都实现这个接口，然后在控制器里，仅仅是面对接口编程即可。这里定义一个接口Action.java.Action.java的示例代码如下:  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action &#123;</div><div class="line">	public Map doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>在控制器中只针对这个接口处理即可。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//调用相应的业务逻辑</div><div class="line">Class&lt;?&gt; clazz = Class.forName(getActionName(systemName,logicName));</div><div class="line">Action action = (Action)clazz.newInstance();</div><div class="line">Map infoOut = action.doAction(infoIn);</div><div class="line">代码说明：— getActionName()方法是获取实现接口Action的类的名称和所在的包。示例代码如下:</div><div class="line">private String getActionName(String systemName ,String actionName) </div><div class="line">throws IOException, Exception &#123; </div><div class="line">return &quot;com. &quot; + systemName + &quot;.action.&quot; + actionName; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="返回视图层"><a href="#返回视图层" class="headerlink" title="返回视图层"></a>返回视图层</h6><p>这里使用RequestDispatcher返回视图层。示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">req.setAttribute(&quot;infoOut&quot;, infoOut);</div><div class="line">req.setAttribute(&quot;infoOut&quot;, infoOut); </div><div class="line">RequestDispatcher rd = req.getRequestDispatcher(&quot;/&quot;+ systemName + </div><div class="line">&quot;/jsp/&quot; + forwardJsp+ &quot;.jsp&quot;); </div><div class="line">rd.forward(req, res);</div></pre></td></tr></table></figure></p>
+<h6 id="定义web-xml文件"><a href="#定义web-xml文件" class="headerlink" title="定义web.xml文件"></a>定义web.xml文件</h6><p>定义web.xml文件，是将所有以do为后缀的请求，都转入控制器进行分派。web.xml文件的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</div><div class="line">&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xmlns:web=&quot;http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; version=&quot;2.5&quot;&gt;</div><div class="line">  &lt;display-name&gt;&lt;/display-name&gt;</div><div class="line">  &lt;servlet&gt;</div><div class="line">    &lt;description&gt;控制器实例&lt;/description&gt;</div><div class="line">    &lt;display-name&gt;&gt;web.xml的示例&lt;/display-name&gt;</div><div class="line">    &lt;!-- 定义控制器 --&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;servlet-class&gt;com.yxm.mvc.ActionServlet&lt;/servlet-class&gt;</div><div class="line">  &lt;/servlet&gt;</div><div class="line">   &lt;!--拦截所有以do为后缀的请求--&gt;</div><div class="line">  &lt;servlet-mapping&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;</div><div class="line">  &lt;/servlet-mapping&gt;</div><div class="line">  &lt;welcome-file-list&gt;</div><div class="line">   &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;</div><div class="line"> &lt;/welcome-file-list&gt;</div><div class="line">&lt;/web-app&gt;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>com.gd.web.GdServlet，表示控制器为com.gd.web.GdServlet。   </li>
+<li>*.do，表示拦截所有以do为后缀的请求。  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/22/动手写一个MVC-三-控制层设计/" class="archive-article-date">
+  	<time datetime="2016-11-22T14:17:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2016/11/23/动手写一个MVC-四-模型层设计/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          动手写一个MVC(四)-模型层设计
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2016/11/20/动手写一个MVC-二-视图层设计/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">动手写一个MVC(二)-视图层设计</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="动手写一个MVC-三-控制层设计" data-title="动手写一个MVC(三)-控制层设计" data-url="https://github.com/startshineye/2016/11/22/动手写一个MVC-三-控制层设计/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/CTI/" style="font-size: 15px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 12.5px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 20px;">Oracle</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.5px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 12.5px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 12.5px;">java集合</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 10px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 15px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 17.5px;">动手写一个MVC</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
