@@ -4,39 +4,21 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Nginx错误 | Startshineye的博客</title>
+  <title>动手写一个MVC(四)-模型层设计 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="nginx常用命令
-启动 nginxStart nginx
-停止 Nginxnginx -s stopnginx -s quit-s都是采用向 Nginx 发送信号的方式。
-Nginx 重载配置nginx -s reload  
-
-
-错误nginx: [error] OpenEvent(“Global\ngx_reload_2072”) failed (2: The system cannot">
+  <meta name="description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
+实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Nginx错误">
-<meta property="og:url" content="https://github.com/startshineye/2016/10/28/Nginx错误/index.html">
+<meta property="og:title" content="动手写一个MVC(四)-模型层设计">
+<meta property="og:url" content="https://github.com/startshineye/2016/11/23/动手写一个MVC-四-模型层设计/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="nginx常用命令
-启动 nginxStart nginx
-停止 Nginxnginx -s stopnginx -s quit-s都是采用向 Nginx 发送信号的方式。
-Nginx 重载配置nginx -s reload  
-
-
-错误nginx: [error] OpenEvent(“Global\ngx_reload_2072”) failed (2: The system cannot">
-<meta property="og:image" content="http://i1.piimg.com/576993/5a70dd704c741470.jpg">
-<meta property="og:image" content="http://i1.piimg.com/576993/492bdd382b7a22f3.png">
-<meta property="og:updated_time" content="2016-10-28T15:56:47.288Z">
+<meta property="og:description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
+实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
+<meta property="og:updated_time" content="2016-11-22T16:25:55.886Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Nginx错误">
-<meta name="twitter:description" content="nginx常用命令
-启动 nginxStart nginx
-停止 Nginxnginx -s stopnginx -s quit-s都是采用向 Nginx 发送信号的方式。
-Nginx 重载配置nginx -s reload  
-
-
-错误nginx: [error] OpenEvent(“Global\ngx_reload_2072”) failed (2: The system cannot">
-<meta name="twitter:image" content="http://i1.piimg.com/576993/5a70dd704c741470.jpg">
+<meta name="twitter:title" content="动手写一个MVC(四)-模型层设计">
+<meta name="twitter:description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
+实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -172,7 +154,7 @@ Nginx 重载配置nginx -s reload
 </nav>
 
       <div class="body-wrap">
-        <article id="post-Nginx错误" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="w-动手写一个MVC-四-模型层设计" class="article article-type-w" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -182,7 +164,7 @@ Nginx 重载配置nginx -s reload
         
   
     <h1 class="article-title" itemprop="name">
-      Nginx错误
+      动手写一个MVC(四)-模型层设计
     </h1>
   
 
@@ -190,34 +172,37 @@ Nginx 重载配置nginx -s reload
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p><img src="http://i1.piimg.com/576993/5a70dd704c741470.jpg" alt="Markdown"></p>
-<h3 id="nginx常用命令"><a href="#nginx常用命令" class="headerlink" title="nginx常用命令"></a>nginx常用命令</h3><ol>
-<li>启动 nginx<br>Start nginx</li>
-<li>停止 Nginx<br>nginx -s stop<br>nginx -s quit<br>-s都是采用向 Nginx 发送信号的方式。</li>
-<li>Nginx 重载配置<br>nginx -s reload  </li>
+        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  </p>
+<h6 id="实现一个公用的接口Action-java"><a href="#实现一个公用的接口Action-java" class="headerlink" title="实现一个公用的接口Action.java"></a>实现一个公用的接口Action.java</h6><p>这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action&#123; </div><div class="line">public HashMap doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>这个接口的作用就是通过doAction方法来实现动作的转换，因此，所有的模型层类都要实现这个接口</li>
 </ol>
-<hr>
-<h3 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h3><h6 id="nginx-error-OpenEvent-“Global-ngx-reload-2072”-failed-2-The-system-cannot-find-the-file-specified"><a href="#nginx-error-OpenEvent-“Global-ngx-reload-2072”-failed-2-The-system-cannot-find-the-file-specified" class="headerlink" title="nginx: [error] OpenEvent(“Global\ngx_reload_2072”) failed (2: The system cannot find the file specified)"></a>nginx: [error] OpenEvent(“Global\ngx_reload_2072”) failed (2: The system cannot find the file specified)</h6><p>原因:nginx没有启动  </p>
-<p>具体操作如下:<br><img src="http://i1.piimg.com/576993/492bdd382b7a22f3.png" alt="nginx操作"> </p>
-<hr>
+<h6 id="所有的模型层类都实现这个接口"><a href="#所有的模型层类都实现这个接口" class="headerlink" title="所有的模型层类都实现这个接口"></a>所有的模型层类都实现这个接口</h6><p>假定有一个模型层类为WebExamAction.java，主要用来负责在线考试系统的业务处理，则这个类要实现Action接口。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public class WebExamAction implements Action&#123; </div><div class="line">//根据页面的请求，进行动作的转换 </div><div class="line">public HashMap doAction(HashMap infoIn) &#123; </div><div class="line">String action = (infoIn.get(&quot;action&quot;) == null) ? &quot;&quot; : </div><div class="line">(String)infoIn.get(&quot;action&quot;); </div><div class="line">HashMap infoOut = new HashMap(); </div><div class="line">if (action.equals(&quot;&quot;)) infoOut = this.doInit (infoIn); </div><div class="line">else if (action.equals(&quot;insert&quot;)) infoOut = this.doInsert (infoIn); </div><div class="line">return infoOut; </div><div class="line">&#125;</div><div class="line">/**该方法设置用户登录时页面的初始信息 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInit(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName); </div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125;</div><div class="line"></div><div class="line">/**该方法用来进行新增 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInsert(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName);</div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>这里，在doAction中根据从页面传来的action进行动作请求的转换。 </li>
+<li>通过一个名为infoIn的HashMap，来负责传入页面中元素的值。 </li>
+<li>通过一个名为infoOut的HashMap，来负责将处理后的数据传出。</li>
+</ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/10/28/Nginx错误/" class="archive-article-date">
-  	<time datetime="2016-10-28T15:53:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-28</time>
+      <a href="/2016/11/23/动手写一个MVC-四-模型层设计/" class="archive-article-date">
+  	<time datetime="2016-11-22T16:23:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nginx/">nginx</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
 	</div>
 
       
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/技术-Nginx/">技术 Nginx</a>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
 	</div>
 
 
@@ -229,18 +214,9 @@ Nginx 重载配置nginx -s reload
   
 <nav id="article-nav">
   
-    <a href="/2016/10/30/Oracle用户解锁/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          Oracle用户解锁
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/10/28/String-StringBuffer-StringBuilder技术选型/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">String-StringBuffer-StringBuilder技术选型</div>
+    <a href="/2016/11/22/动手写一个MVC-三-控制层/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">动手写一个MVC(三)-控制层</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -286,7 +262,7 @@ Nginx 重载配置nginx -s reload
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="Nginx错误" data-title="Nginx错误" data-url="https://github.com/startshineye/2016/10/28/Nginx错误/"></div>
+	<div class="ds-thread" data-thread-key="动手写一个MVC-四-模型层设计" data-title="动手写一个MVC(四)-模型层设计" data-url="https://github.com/startshineye/2016/11/23/动手写一个MVC-四-模型层设计/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
