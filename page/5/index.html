@@ -152,6 +152,172 @@
       <div class="body-wrap">
         
   
+    <article id="post-String-StringBuffer-StringBuilder技术选型" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/28/String-StringBuffer-StringBuilder技术选型/">String-StringBuffer-StringBuilder技术选型</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://i1.piimg.com/576993/7b0a0b17362eeb91.png" alt="Markdown"></p>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="内容分为四部分"><a href="#内容分为四部分" class="headerlink" title="内容分为四部分"></a>内容分为四部分</h4><h4 id="一-String-StringBuffer-StringBuilder之间的区别与联系"><a href="#一-String-StringBuffer-StringBuilder之间的区别与联系" class="headerlink" title="一:String,StringBuffer,StringBuilder之间的区别与联系"></a>一:String,StringBuffer,StringBuilder之间的区别与联系</h4><ol>
+<li>区别与联系</li>
+<li>源码  </li>
+</ol>
+<h4 id="二-线程安全问题"><a href="#二-线程安全问题" class="headerlink" title="二:线程安全问题"></a>二:线程安全问题</h4><ol>
+<li>发生条件</li>
+<li>解决方案  </li>
+</ol>
+<h4 id="三-总结"><a href="#三-总结" class="headerlink" title="三:总结"></a>三:总结</h4><ol>
+<li>字符串拼接速度及原因</li>
+</ol>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="一-String-StringBuffer-StringBuilder之间的区别与联系-1"><a href="#一-String-StringBuffer-StringBuilder之间的区别与联系-1" class="headerlink" title="一:String,StringBuffer,StringBuilder之间的区别与联系"></a>一:String,StringBuffer,StringBuilder之间的区别与联系</h3><h5 id="1-区别与联系"><a href="#1-区别与联系" class="headerlink" title="1. 区别与联系"></a>1. 区别与联系</h5><ul>
+<li>[相同点]String,StringBuffer,StringBuilder 底层都是采用char数组  </li>
+<li>[不同点]String是定长的字符串: 是存储在方法区中的常量池之中,任何对字符串的修改操作都会创建新的对象,不适合做字符串的拼接  </li>
+<li>[不同点]StringBuffer,StringBuilder是可变长的  <ol>
+<li>StringBuffer,StringBuilder 默认的数组初始化长度是16  </li>
+<li>StringBuffer,StringBuilder 如果长度不够的话,需要对数组进行扩容,底层使用的数组拷贝的方式对数组进行扩容 System.arraycopy()  </li>
+<li>该方法前面用native修饰,属于本地方法调用 (JNI Java Native Invoke),表示调用了其它语言编写的dll文件  </li>
+<li>关于优化:在做大数据量字符串拼接的时候,可以指定数组的初始化长度,减少扩容的次数,减少数组拷贝的次数</li>
+<li>StringBuilder是JDK1.5之后出现的（比较新）<br>StringBuffer是JDK1.0就出现了（比较老，并发性不行，每一个方法上都有synchronized，效率较低，因为有些情况下synchronized没必要编写，例如：局部变量就不存在线程安全问题。）</li>
+</ol>
+</li>
+</ul>
+<h5 id="2-源码"><a href="#2-源码" class="headerlink" title="2.源码"></a>2.源码</h5><ul>
+<li>String源码分析<br><img src="http://i1.piimg.com/576993/7433b02c0a79ea27.png" alt="string内存情况"> </li>
+<li>StringBuffer源码分析<br><img src="http://i1.piimg.com/576993/07fde10f8da364a1.png" alt="StringBuffer内存情况"> </li>
+<li>StringBuilder源码分析<br><img src="http://i1.piimg.com/576993/e54b63ddb9120ea1.png" alt="StringBuilder内存情况"> </li>
+<li>StringBuffer,StringBuilder父类源码分析<br><img src="http://p1.bpimg.com/576993/447bd778b92bbcb2.png" alt="abstractStringBuilder内存情况"></li>
+</ul>
+<hr>
+<h3 id="二-线程安全问题-1"><a href="#二-线程安全问题-1" class="headerlink" title="二:线程安全问题"></a>二:线程安全问题</h3><h5 id="1-发生条件"><a href="#1-发生条件" class="headerlink" title="1.发生条件"></a>1.发生条件</h5><ol>
+<li>多个线程</li>
+<li>共享资源</li>
+<li>对共享资源涉修改操作<br>以上三个条件都满足的情况下,才需要考虑线程安全的问题</li>
+</ol>
+<h5 id="2-解决方案"><a href="#2-解决方案" class="headerlink" title="2.解决方案"></a>2.解决方案</h5><ul>
+<li>多线程共享：堆内存、方法区内存(实例变量、静态变量会存在线程安全问题，实例变量在堆中，静态变量在方法区中)<br>栈内存独立，一个线程一个栈。(结论：局部变量不存在线程安全问题，因为局部变量不共享)  </li>
+<li>解决方法<br>方案1：尽量使用局部变量<br>方案2：如果是实例变量，我们可以让对象变成多例的也可以解决线程安全问题。<br>方案3：如果是实例变量，我们还可以添加synchronized进行控制保证线程安全<br>多例：耗费堆内存<br>添加synchronized影响并发  </li>
+</ul>
+<hr>
+<h4 id="三-总结-1"><a href="#三-总结-1" class="headerlink" title="三:总结"></a>三:总结</h4><h5 id="1-字符串拼接速度及原因"><a href="#1-字符串拼接速度及原因" class="headerlink" title="1. 字符串拼接速度及原因"></a>1. 字符串拼接速度及原因</h5><ul>
+<li>StringBuilder&gt;StringBuffer&gt;String  </li>
+<li>原因<br>基于以上分析可以总结出以下原因:<ol>
+<li>String是不可变的（final），每次改变其变量值，生成一个新的对象，然后将变量引用指向新对象；速度慢。     </li>
+<li>StringBuffer直接操作对象指向的引用，无需产生新对象，速度很快；它是线程安全的，在维护多线程的同步等也会消耗一点性能。     </li>
+<li>StringBuilder是jdk5之后新增的，用法与StringBuffer完全一致，但它是线程不安全，在单线程中最佳，因为其不需要维护线程的安全，因此是最快的  </li>
+</ol>
+</li>
+</ul>
+<hr>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/28/String-StringBuffer-StringBuilder技术选型/" class="archive-article-date">
+  	<time datetime="2016-10-28T15:30:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-28</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java-String/">java String</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术-Java/">技术 Java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-CTI嵌入坐席" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/26/CTI嵌入坐席/">CTI嵌入坐席</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-打开虚拟机（虚拟机已安装了CTI环境）"><a href="#1-打开虚拟机（虚拟机已安装了CTI环境）" class="headerlink" title="1.打开虚拟机（虚拟机已安装了CTI环境）"></a>1.打开虚拟机（虚拟机已安装了CTI环境）</h5><p>打开虚拟机，在自动弹出弹出的CTI华为智能呼叫中心，等到下面5个指示灯都亮了以后就说明启动成功。（此时winUAP自动启动）<br><img src="http://p1.bqimg.com/576993/05857100cfcde242.png" alt="Markdown"></p>
+<h5 id="2-打开管理系统应用服务器"><a href="#2-打开管理系统应用服务器" class="headerlink" title="2.打开管理系统应用服务器"></a>2.打开管理系统应用服务器</h5><p><img src="http://p1.bqimg.com/576993/fbe784ef72875c53.png" alt="Markdown"></p>
+<h5 id="3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"><a href="#3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）" class="headerlink" title="3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"></a>3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）</h5><p>打开此时”通用坐席程序”会提示工号和密码登录，登录后坐席就在虚拟机内启动，只需要嵌入即可。（一般在本机上也会装一个通用坐席程序，进行嵌入测试）<br><img src="http://p1.bqimg.com/576993/6d4388ac87aa2e6d.png" alt="Markdown"></p>
+<h5 id="4-打开CTI-Link协议服务器"><a href="#4-打开CTI-Link协议服务器" class="headerlink" title="4.打开CTI-Link协议服务器"></a>4.打开CTI-Link协议服务器</h5><p>CTI-Link协议服务器作用就是为了接入模拟电话 所开的通道连接<br><img src="http://p1.bqimg.com/576993/81f0e99118b74934.png" alt="Markdown"></p>
+<h5 id="5-打开web程序，在web端输入坐席名称密码和分机号码"><a href="#5-打开web程序，在web端输入坐席名称密码和分机号码" class="headerlink" title="5.打开web程序，在web端输入坐席名称密码和分机号码"></a>5.打开web程序，在web端输入坐席名称密码和分机号码</h5><p><img src="http://p1.bqimg.com/576993/67129d52342d2aab.png" alt="Markdown"></p>
+<h5 id="6-进入系统，准备嵌入"><a href="#6-进入系统，准备嵌入" class="headerlink" title="6.进入系统，准备嵌入"></a>6.进入系统，准备嵌入</h5><p><img src="http://p1.bqimg.com/576993/071bd5511c6e9ee1.png" alt="Markdown"></p>
+<h5 id="7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"><a href="#7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号" class="headerlink" title="7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"></a>7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号</h5><p><img src="http://p1.bqimg.com/576993/c376167dc1539149.png" alt="Markdown"></p>
+<h5 id="8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"><a href="#8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）" class="headerlink" title="8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"></a>8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）</h5>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/26/CTI嵌入坐席/" class="archive-article-date">
+  	<time datetime="2016-10-26T14:51:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-26</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTI/">CTI</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/CTI/">CTI</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-华为软电话简单调节" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -854,132 +1020,6 @@ org.hibernate.hql.ast.QuerySyntaxException: MessageEntity is not mapped [select 
 
 
   
-    <article id="post-org-hibernate-hql-ast-QuerySyntaxException-is-not-mapped" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/22/org-hibernate-hql-ast-QuerySyntaxException-is-not-mapped/">org.hibernate.hql.ast.QuerySyntaxException is not mapped</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>项目中遇到hibernate操作数据库，对hibernate也是初学阶段，我用Hibernate实现一个聊天信息查询过程<br><img src="http://p1.bpimg.com/576993/c48918e34e93cf1e.png" alt="Markdown"><br>当我在JSP的查询页面点击查询时候，在服务器里显示如下的错误信息:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div></pre></td><td class="code"><pre><div class="line">org.springframework.orm.hibernate3.HibernateQueryException: FOUSS_IM_THREAD is not mapped [select count(*) from </div><div class="line">FOUSS_IM_THREAD a  where 1=1 ]; nested exception is org.hibernate.hql.ast.QuerySyntaxException: FOUSS_IM_THREAD is not </div><div class="line">mapped [select count(*) from FOUSS_IM_THREAD a  where 1=1 ]</div><div class="line">Caused by: </div><div class="line">org.hibernate.hql.ast.QuerySyntaxException: FOUSS_IM_THREAD is not mapped [select count(*) from FOUSS_IM_THREAD a  where </div><div class="line">1=1 ]</div><div class="line">	at org.hibernate.hql.ast.util.SessionFactoryHelper.requireClassPersister(SessionFactoryHelper.java:158)</div><div class="line">	at org.hibernate.hql.ast.tree.FromElementFactory.addFromElement(FromElementFactory.java:87)</div><div class="line">	at org.hibernate.hql.ast.tree.FromClause.addFromElement(FromClause.java:70)</div><div class="line">	at org.hibernate.hql.ast.HqlSqlWalker.createFromElement(HqlSqlWalker.java:255)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.fromElement(HqlSqlBaseWalker.java:3056)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.fromElementList(HqlSqlBaseWalker.java:2945)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.fromClause(HqlSqlBaseWalker.java:688)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.query(HqlSqlBaseWalker.java:544)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.selectStatement(HqlSqlBaseWalker.java:281)</div><div class="line">	at org.hibernate.hql.antlr.HqlSqlBaseWalker.statement(HqlSqlBaseWalker.java:229)</div><div class="line">	at org.hibernate.hql.ast.QueryTranslatorImpl.analyze(QueryTranslatorImpl.java:228)</div><div class="line">	at org.hibernate.hql.ast.QueryTranslatorImpl.doCompile(QueryTranslatorImpl.java:160)</div><div class="line">	at org.hibernate.hql.ast.QueryTranslatorImpl.compile(QueryTranslatorImpl.java:111)</div><div class="line">	at org.hibernate.engine.query.HQLQueryPlan.&lt;init&gt;(HQLQueryPlan.java:77)</div><div class="line">	at org.hibernate.engine.query.HQLQueryPlan.&lt;init&gt;(HQLQueryPlan.java:56)</div><div class="line">	at org.hibernate.engine.query.QueryPlanCache.getHQLQueryPlan(QueryPlanCache.java:72)</div><div class="line">	at org.hibernate.impl.AbstractSessionImpl.getHQLQueryPlan(AbstractSessionImpl.java:133)</div><div class="line">	at org.hibernate.impl.AbstractSessionImpl.createQuery(AbstractSessionImpl.java:112)</div><div class="line">	at org.hibernate.impl.SessionImpl.createQuery(SessionImpl.java:1623)</div><div class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</div><div class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)</div><div class="line">	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:606)</div><div class="line">	at org.springframework.orm.hibernate3.HibernateTemplate$CloseSuppressingInvocationHandler.invoke</div><div class="line">(HibernateTemplate.java:1202)</div><div class="line">	at com.sun.proxy.$Proxy9.createQuery(Unknown Source)</div><div class="line">	at com.order.cc.sys.dao.FoHibernateDaoSupport$1.doInHibernate(FoHibernateDaoSupport.java:138)</div><div class="line">	at org.springframework.orm.hibernate3.HibernateTemplate.execute(HibernateTemplate.java:372)</div><div class="line">	at org.springframework.orm.hibernate3.HibernateTemplate.execute(HibernateTemplate.java:338)</div><div class="line">	at com.order.cc.sys.dao.FoHibernateDaoSupport.execFoPageHQLQuery(FoHibernateDaoSupport.java:112)</div><div class="line">	at com.order.cc.sys.dao.FoHibernateDaoSupport.execFoPageQuery(FoHibernateDaoSupport.java:33)</div><div class="line">	at com.order.cc.chats.chatRecord.dao.ChatRecordDao.findThreadList(ChatRecordDao.java:82)</div><div class="line">	at com.order.cc.chats.chatRecord.service.ChatRecordService.findThreadList(ChatRecordService.java:35)</div><div class="line">	at com.order.cc.chats.chatRecord.action.ChatRecordAction.queryThread(ChatRecordAction.java:143)</div><div class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke0(Native Method)</div><div class="line">	at sun.reflect.NativeMethodAccessorImpl.invoke(NativeMethodAccessorImpl.java:57)</div><div class="line">	at sun.reflect.DelegatingMethodAccessorImpl.invoke(DelegatingMethodAccessorImpl.java:43)</div><div class="line">	at java.lang.reflect.Method.invoke(Method.java:606)</div><div class="line">	at org.apache.struts.actions.DispatchAction.dispatchMethod(DispatchAction.java:269)</div><div class="line">	at org.apache.struts.actions.DispatchAction.execute(DispatchAction.java:170)</div><div class="line">	at org.springframework.web.struts.DelegatingActionProxy.execute(DelegatingActionProxy.java:110)</div><div class="line">	at org.apache.struts.chain.commands.servlet.ExecuteAction.execute(ExecuteAction.java:58)</div><div class="line">	at org.apache.struts.chain.commands.AbstractExecuteAction.execute(AbstractExecuteAction.java:67)</div><div class="line">	at org.apache.struts.chain.commands.ActionCommandBase.execute(ActionCommandBase.java:51)</div><div class="line">	at org.apache.commons.chain.impl.ChainBase.execute(ChainBase.java:190)</div><div class="line">	at org.apache.commons.chain.generic.LookupCommand.execute(LookupCommand.java:304)</div><div class="line">	at org.apache.commons.chain.impl.ChainBase.execute(ChainBase.java:190)</div><div class="line">	at org.apache.struts.chain.ComposableRequestProcessor.process(ComposableRequestProcessor.java:283)</div><div class="line">	at org.apache.struts.action.ActionServlet.process(ActionServlet.java:1913)</div><div class="line">	at org.apache.struts.action.ActionServlet.doPost(ActionServlet.java:462)</div><div class="line">	at javax.servlet.http.HttpServlet.service(HttpServlet.java:646)</div><div class="line">	at javax.servlet.http.HttpServlet.service(HttpServlet.java:727)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:303)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:208)</div><div class="line">	at com.order.cc.sys.filter.RequestSecurityCheckFilter.doFilter(RequestSecurityCheckFilter.java:132)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:241)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:208)</div><div class="line">	at org.apache.tomcat.websocket.server.WsFilter.doFilter(WsFilter.java:52)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:241)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:208)</div><div class="line">	at com.order.cc.sys.filter.SetCharacterEncodingFilter.doFilter(SetCharacterEncodingFilter.java:65)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.internalDoFilter(ApplicationFilterChain.java:241)</div><div class="line">	at org.apache.catalina.core.ApplicationFilterChain.doFilter(ApplicationFilterChain.java:208)</div><div class="line">	at org.apache.catalina.core.StandardWrapperValve.invoke(StandardWrapperValve.java:220)</div><div class="line">	at org.apache.catalina.core.StandardContextValve.invoke(StandardContextValve.java:122)</div><div class="line">	at org.apache.catalina.authenticator.AuthenticatorBase.invoke(AuthenticatorBase.java:503)</div><div class="line">	at org.apache.catalina.core.StandardHostValve.invoke(StandardHostValve.java:170)</div><div class="line">	at org.apache.catalina.valves.ErrorReportValve.invoke(ErrorReportValve.java:103)</div><div class="line">	at org.apache.catalina.valves.AccessLogValve.invoke(AccessLogValve.java:950)</div><div class="line">	at org.apache.catalina.core.StandardEngineValve.invoke(StandardEngineValve.java:116)</div><div class="line">	at org.apache.catalina.connector.CoyoteAdapter.service(CoyoteAdapter.java:421)</div><div class="line">	at org.apache.coyote.http11.AbstractHttp11Processor.process(AbstractHttp11Processor.java:1070)</div><div class="line">	at org.apache.coyote.AbstractProtocol$AbstractConnectionHandler.process(AbstractProtocol.java:611)</div><div class="line">	at org.apache.tomcat.util.net.JIoEndpoint$SocketProcessor.run(JIoEndpoint.java:316)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor.runWorker(ThreadPoolExecutor.java:1145)</div><div class="line">	at java.util.concurrent.ThreadPoolExecutor$Worker.run(ThreadPoolExecutor.java:615)</div><div class="line">	at org.apache.tomcat.util.threads.TaskThread$WrappingRunnable.run(TaskThread.java:61)</div><div class="line">	at java.lang.Thread.run(Thread.java:745)</div><div class="line">2016-10-22 17:30:29 ERROR FocusLog  - FOUSS_IM_THREAD is not mapped [select count(*) from FOUSS_IM_THREAD a  where 1=1 ]; </div><div class="line">nested exception is org.hibernate.hql.ast.QuerySyntaxException: FOUSS_IM_THREAD is not mapped [select count(*) from </div><div class="line">FOUSS_IM_THREAD a  where 1=1 ]</div></pre></td></tr></table></figure></p>
-<p>HQL错了<br>因为Hibernate是对类查询的<br>在String hql = “from FOUSS_IM_THREAD a  where 1=1 “;中,<br>FOUSS_IM_THREAD是数据库中的表,而FOUSS_IM_THREAD对应的类是ThreadEntity现在只需要将FOUSS_IM_THREAD 改为ThreadEntity就可以了,即<br>String hql = “from ThreadEntity a  where 1=1 “;</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/22/org-hibernate-hql-ast-QuerySyntaxException-is-not-mapped/" class="archive-article-date">
-  	<time datetime="2016-10-22T09:24:17.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-22</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/hibernate/">hibernate</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/SSH框架/">SSH框架</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Java网络编程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/21/Java网络编程/">Java网络编程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://i1.piimg.com/576993/af2c702611ca3c6c.jpg" alt="Markdown"> </p>
-<h3 id="Sock通信编程"><a href="#Sock通信编程" class="headerlink" title="Sock通信编程"></a>Sock通信编程</h3><h6 id="1-socket"><a href="#1-socket" class="headerlink" title="1.socket"></a>1.socket</h6><ol>
-<li>两个java应用程序可以通过一个双向的网络连接实现数据交换.这个双向链路的一端称为一个(socket相当于通信两端的插座)  </li>
-<li>socket通常用来实现client-server连接  </li>
-<li>java.net包中定义的两个类Socket和ServerSocket,分别用来实现双向连接的client和server端    </li>
-<li>建立连接时所需要的寻址信息为远程计算机的IP地址和端口号(Port number)<br>Socket socket = new Socket(“192.168.10.100”,55555);</li>
-<li>TCP端口UDP端口分开的<br>每一个机器端口号为两个字节,含有65536个(一个端口可以分配给一个应用程序:比如QQ).  </li>
-</ol>
-<hr>
-<h6 id="2-TCP-Socket通信模型"><a href="#2-TCP-Socket通信模型" class="headerlink" title="2.TCP Socket通信模型"></a>2.TCP Socket通信模型</h6><p>通信模型如下图:<br><img src="http://i1.piimg.com/576993/d34f14551a5b981a.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/b909b6ea817932c0.png" alt="Markdown"> </p>
-<hr>
-<h3 id="编程实例"><a href="#编程实例" class="headerlink" title="编程实例"></a>编程实例</h3><h6 id="1-C-S-socket编程基础-实现连接"><a href="#1-C-S-socket编程基础-实现连接" class="headerlink" title="1.C/S socket编程基础(实现连接)"></a>1.C/S socket编程基础(实现连接)</h6><p><img src="http://i1.piimg.com/576993/84571bcedc617bc9.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/9f4a23d248d3e459.png" alt="Markdown">  </p>
-<h6 id="2-从服务端返回信息给客户端"><a href="#2-从服务端返回信息给客户端" class="headerlink" title="2.从服务端返回信息给客户端"></a>2.从服务端返回信息给客户端</h6><p><img src="http://i1.piimg.com/576993/5ce594c4e7e8c896.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/44ff6bc770d3d401.png" alt="Markdown">   </p>
-<h6 id="3-互相访问-点对点通信"><a href="#3-互相访问-点对点通信" class="headerlink" title="3.互相访问(点对点通信)"></a>3.互相访问(点对点通信)</h6><p><img src="http://i1.piimg.com/576993/46f2d2335e3f3e2c.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/69aea17bd1c61403.png" alt="Markdown"> </p>
-<h6 id="4-多线程通信"><a href="#4-多线程通信" class="headerlink" title="4.多线程通信"></a>4.多线程通信</h6><p><img src="http://i1.piimg.com/576993/67b5ba9374c61d33.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/4c012112f5a89077.png" alt="Markdown"> </p>
-<hr>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/21/Java网络编程/" class="archive-article-date">
-  	<time datetime="2016-10-21T15:32:12.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/socket网络编程/">socket网络编程</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/技术/">技术</a><a class="article-category-link" href="/categories/技术/Java/">Java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
@@ -1045,7 +1085,7 @@ org.hibernate.hql.ast.QuerySyntaxException: MessageEntity is not mapped [select 
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 14px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 12px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Myeclipse/" style="font-size: 14px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 20px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 16px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 12px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 12px;">java集合</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 12px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 14px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 18px;">动手写一个MVC</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 12px;">自己写一个apache服务器</a>
+    				<a href="/tags/CTI/" style="font-size: 14px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 12px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Myeclipse/" style="font-size: 14px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 20px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 16px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 12px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 12px;">java集合</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 12px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 14px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 18px;">动手写一个MVC</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 14px;">自己写一个apache服务器</a>
     			</div>
     	</section>
     
