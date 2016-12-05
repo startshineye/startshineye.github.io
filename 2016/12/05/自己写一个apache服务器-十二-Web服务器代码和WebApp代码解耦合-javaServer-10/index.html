@@ -6,16 +6,22 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>自己写一个apache服务器(十二)-Web服务器代码和WebApp代码解耦合(javaServer-10) | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+  <meta name="description" content="Web服务器代码和WebApp代码解耦合(javaServer-10)  
+
+分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类">
 <meta property="og:type" content="article">
 <meta property="og:title" content="自己写一个apache服务器(十二)-Web服务器代码和WebApp代码解耦合(javaServer-10)">
 <meta property="og:url" content="https://github.com/startshineye/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:updated_time" content="2016-12-05T15:51:03.139Z">
+<meta property="og:description" content="Web服务器代码和WebApp代码解耦合(javaServer-10)  
+
+分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类">
+<meta property="og:updated_time" content="2016-12-05T16:04:08.830Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自己写一个apache服务器(十二)-Web服务器代码和WebApp代码解耦合(javaServer-10)">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:description" content="Web服务器代码和WebApp代码解耦合(javaServer-10)  
+
+分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -169,7 +175,12 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h4 id="Web服务器代码和WebApp代码解耦合-javaServer-10"><a href="#Web服务器代码和WebApp代码解耦合-javaServer-10" class="headerlink" title="Web服务器代码和WebApp代码解耦合(javaServer-10)"></a>Web服务器代码和WebApp代码解耦合(javaServer-10)</h4><p><img src="" alt="qq3">  </p>
+<ol>
+<li>分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类，上面的程序中还使用了“new LoginServlet();”，这显然是错误的。另外在上面的Web服务器程序中编写了具体的请求路径/oa/login，这显然是不合理的，对于Web服务器来说浏览器客户端发送的请求是未知的。但是我们知道浏览器发送的请求路径/oa/login是和底层WebApp中的LoginServlet存在映射关系/绑定关系的。而这种关系的指定必须由WebApp的开发人员来指定，我相信大家此时应该想到了“配置文件”，在配置文件中指定请求URI和对应要执行的Servlet。该配置文件的编写由WebApp程序员来完成，但是该文件由Web服务器开发人员读取并解析，所以该文件的名字、该文件的存放位置、该文件中所编写的配置元素都不能随意编写，必须提前制定好一个规范，那么这个规范由谁来制定呢？当然是由SUN公司来负责制定。  </li>
+<li>接下来我们的角色再次发生了转变，我们现在是规范的制定者SUN。制定规范如下所示，规范就是规定，没有为什么，以后服务器开发人员和WebApp的开发人员只要严格按照规范开发即可。下面这段规范是这样制定的：<br><img src="" alt="61"></li>
+</ol>
+
       
     </div>
     <div class="article-info article-info-index">
@@ -178,7 +189,17 @@
   	<time datetime="2016-12-05T15:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-05</time>
 </a>
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
       
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
 
       <div class="clearfix"></div>
     </div>
@@ -315,7 +336,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 14px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 12px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Myeclipse/" style="font-size: 14px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 20px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 16px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 12px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 12px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 12px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 14px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 18px;">动手写一个MVC</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a>
+    				<a href="/tags/CTI/" style="font-size: 13.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.67px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 15px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 13.33px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 16.67px;">动手写一个MVC</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a>
     			</div>
     	</section>
     
