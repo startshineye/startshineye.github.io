@@ -6,19 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>jQuery数据回显 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言 项目中需要用到编辑框，数据回显，用jquery实现
-内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletResponse response) &amp;">
+  <meta name="description" content="前言 项目中需要用到编辑框，数据回显，后台使用struts，前端使用jquery实现
+内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletRespon">
 <meta property="og:type" content="article">
 <meta property="og:title" content="jQuery数据回显">
 <meta property="og:url" content="https://github.com/startshineye/2016/12/10/jQuery数据回显/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="前言 项目中需要用到编辑框，数据回显，用jquery实现
-内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletResponse response) &amp;">
-<meta property="og:updated_time" content="2016-12-10T04:25:41.832Z">
+<meta property="og:description" content="前言 项目中需要用到编辑框，数据回显，后台使用struts，前端使用jquery实现
+内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletRespon">
+<meta property="og:updated_time" content="2016-12-10T04:29:02.343Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="jQuery数据回显">
-<meta name="twitter:description" content="前言 项目中需要用到编辑框，数据回显，用jquery实现
-内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletResponse response) &amp;">
+<meta name="twitter:description" content="前言 项目中需要用到编辑框，数据回显，后台使用struts，前端使用jquery实现
+内容java后台：12345678910111213141516171819public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletRespon">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -172,7 +172,7 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> 项目中需要用到编辑框，数据回显，用jquery实现</p>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> 项目中需要用到编辑框，数据回显，后台使用struts，前端使用jquery实现</p>
 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>java后台：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">public ActionForward queryReminder(ActionMapping mapping, ActionForm form, HttpServletRequest request,HttpServletResponse response) &#123;</div><div class="line">	try &#123;</div><div class="line">		List&lt;ReminderEntity&gt; reminderList = this.reminderService.findReminderList();</div><div class="line">		//转换为json数据</div><div class="line">		JSONArray jsonArray = JSONArray.fromObject(reminderList);</div><div class="line">		PrintWriter out = response.getWriter();</div><div class="line">		out.print(jsonArray);</div><div class="line">		out.flush();</div><div class="line">		out.close();</div><div class="line">		return null;</div><div class="line">	  &#125;catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">		logger.error(e.getMessage());</div><div class="line">		saveErrors(request, ExceptionUtils.dealError(&quot;加载信息错误！&quot;));</div><div class="line">		return mapping.findForward(&quot;global.error&quot;);</div><div class="line">	&#125;</div><div class="line">	finally &#123;</div><div class="line">	&#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
 <p>前端：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">function searchData()&#123;</div><div class="line">	   $.ajax(&#123;</div><div class="line">	       url:&apos;reminderAction.do?method=queryReminder&apos;,</div><div class="line">	       cache:false,</div><div class="line">	       type:&quot;post&quot;,</div><div class="line">	       success:function(jsonStr)&#123;</div><div class="line">	        var jsonObj =  $.parseJSON(jsonStr); //jQuery.parseJSON(jsonstr),可以将json字符串转换成json对象 </div><div class="line">	        for(var p in jsonObj)&#123;//遍历json数组时，这么写p为索引，0,1</div><div class="line">               if(jsonObj[p].key.trim()==&quot;xxx&quot;)&#123;</div><div class="line">                 $(&quot;#welcomeValue&quot;).attr(&quot;value&quot;,jsonObj[p].value);</div><div class="line">               &#125;else if(jsonObj[p].key.trim()==&quot;xxx&quot;)&#123;</div><div class="line">                  $(&quot;#queueValue&quot;).attr(&quot;value&quot;,jsonObj[p].value);</div><div class="line">               &#125;else if(jsonObj[p].key.trim()==&quot;xxx&quot;)&#123;</div><div class="line">                  $(&quot;#overtimeValue&quot;).attr(&quot;value&quot;,jsonObj[p].value);</div><div class="line">               &#125;else if(jsonObj[p].key.trim()==&quot;xxx&quot;)&#123;</div><div class="line">                  $(&quot;#blacklistValue&quot;).attr(&quot;value&quot;,jsonObj[p].value);</div><div class="line">               &#125;</div><div class="line">              &#125;</div><div class="line">	       &#125;</div><div class="line">	   &#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 
