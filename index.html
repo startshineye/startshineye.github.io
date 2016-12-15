@@ -152,6 +152,106 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十六-接收表单提交数据-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/">自己写一个apache服务器(十六)-接收表单提交数据-javaServer14</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="接收表单提交数据-javaServer14"><a href="#接收表单提交数据-javaServer14" class="headerlink" title="接收表单提交数据-javaServer14"></a>接收表单提交数据-javaServer14</h4><p>到目前为止，服务器端已经可以完成响应了。接下来我们解决什么问题呢？大家都知道当用户登录的时候会提交登录的用户名和密码，那么在服务器端的小Java程序中怎么去获取这些信息呢？显然需要Web服务器帮助我们将数据解析出来，放到某个对象中，然后WebApp的开发人员从该对象中直接获取数据使用。那么接下来我们的角色转变为Web服务器的开发人员，定义一个类专门完成数据的解析封装。提交的数据在哪里呢？看下图<br><img src="" alt="41"><br>其实我们有必要将请求协议的全部内容封装到某个对象当中，以便WebApp开发人员的使用，不过将请求协议全部内容封装到某个对象中，这将是一个非常繁琐的过程，我们这里就不再实现这个功能了，我们只将请求行上的URI部分的数据封装就行了。由于该对象中封装了请求协议，所以我们把这个对象叫做请求对象request。请求行上的URI部分提交的数据格式为uri?name=value&amp;name=value…，其中name是form表单控件的name属性，value是form表单控件的value属性，这个格式是W3C制定的HTTP协议的一部分。我们可以让表单提交的数据更复杂一些，来看一看提交了哪些数据？编写如下的html<br><img src="" alt="42"><br>启动httpserver，打开浏览器，访问Save.html，如下图所示<br><img src="" alt="43"><br>填写表单，点击保存按钮提交数据，查看浏览器地址栏的地址，如下图所示<br><img src="" alt="44"><br><img src="" alt="45"><br>以上出现404错误是很正常的，因为底层/oa/user/save请求URI对应要执行的Servlet类并没有编写，也没有在web.xml文件中进行相关配置，所以访问的资源不存在。后面我们再解决这个404的错误。我们看到浏览器地址栏上提交了这样的数据<a href="http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示" target="_blank" rel="external">http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示</a><br><img src="" alt="46"><br>接下来我们的角色转变为Web服务器的开发人员，开始进行数据的解析与封装，达到上图的效果，我们单独定义一个负责请求协议封装的类，起名为RequestObject，并在该类中定义parameterMap属性表示以上的Map<string,string[]>，代码如下图所示  </string,string[]></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/" class="archive-article-date">
+  	<time datetime="2016-12-14T11:27:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/">自己写一个apache服务器(十五)-ServletResponse接口引入-javaServer13</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="" alt="1"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="" alt="31"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="" alt="32"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="" alt="33"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="" alt="34"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="" alt="35"><br>控制台输出<br><img src="" alt="36"><br>我们应该解决下图中的问题了<br><img src="" alt="33"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="" alt="37"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="" alt="331"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="" alt="39"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="" alt="38"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="" alt="332"><br>控制台输出<br><img src="" alt="333">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/" class="archive-article-date">
+  	<time datetime="2016-12-14T10:39:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -695,125 +795,6 @@ alert(filterarray[key]);
       
       <a href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/" class="archive-article-date">
   	<time datetime="2016-12-04T13:49:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/">自己写一个apache服务器(十)-响应静态html资源到浏览器-javaServer08</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="响应静态html资源到浏览器-javaServer08"><a href="#响应静态html资源到浏览器-javaServer08" class="headerlink" title="响应静态html资源到浏览器-javaServer08"></a>响应静态html资源到浏览器-javaServer08</h4><ol>
-<li>截获到请求的URI之后，判断请求的是否为服务器中的html资源，如果是服务器中的某个webapp的html资源，服务器端程序应找到该文件，并且将该文件中的html代码读取到JVM内存中，然后再将内存中的html代码响应到浏览器页面上，如果客户端请求的资源在服务器端webapp中未找到，服务器应提示浏览器客户端“您访问的资源不存在”，这就是著名的404错误。404被称为HTTP状态码，属于HTTP协议的一部分。  </li>
-<li>webapp以及webapp中的html资源不是web服务器开发人员需要完成的，应该是webapp的开发人员负责开发的。web服务器只负责读取该html资源然后响应到浏览器页面上。所以此时我们的开发角色发生了改变，我们现在的角色变为webapp的开发人员。在javaServer的根目录下新建web应用起名oa（办公系统），在oa文件夹下新建index.html文件，并编写简单的html代码，如下图：<br><img src="http://p1.bqimg.com/576993/fc22be9e5296c6d3.png" alt="Markdown"><br>角色再次转回到服务器开发人员，在HandlerRequest中继续处理请求，目前已经截获到请求的URI，判断请求URI是否以html或htm结尾，如果是以html或htm结尾，服务器定位到该html文件，将其读取到JVM内存中，然后再将这些html代码响应到浏览器页面上，浏览器解释执行html代码展示效果：<br><img src="http://p1.bqimg.com/576993/9262992bab8f471f.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源存在的时候）<br><img src="http://p1.bqimg.com/576993/6869f6b883cac8d1.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源不存在的时候）<br><img src="http://p1.bqimg.com/576993/85446849d6d956bd.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:58:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-九-服务器拦截URI-javaServer07" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/">自己写一个apache服务器(九)-服务器拦截URI-javaServer07</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="服务器拦截URI-javaServer07"><a href="#服务器拦截URI-javaServer07" class="headerlink" title="服务器拦截URI-javaServer07"></a>服务器拦截URI-javaServer07</h4><ol>
-<li>开始处理客户端的请求，首先我们需要知道客户端访问的是哪一个资源，我们怎么才能知道客户端访问的哪个资源呢？答案当然是在服务器端获取客户端请求的URI，那么请求的URI在哪里呢？请求的URI在HTTP请求协议的请求行上。所以我们需要读取请求协议的第一行数据，然后从这些数据中解析出URI，从而得出客户要访问的是服务器端的哪个资源。  </li>
-<li>URL和URI是什么？它们之间是什么关系？URL是统一资源定位符，例如在浏览器地址栏上直接输入的请求路径:<a href="http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。</a>  </li>
-<li>HTTP协议请求协议的详细内容如下图所示，请求行由三部分组成：请求方式+URI+协议版本号，我们需要获取的就是请求行上的URI<br><img src="http://p1.bqimg.com/576993/53533ca077c5f0f2.png" alt="Markdown"><br>在HandlerRequest中编写程序读取请求行，并解析字符串，截获URI<br><img src="http://p1.bqimg.com/576993/6b22e093fda5080f.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL：<a href="http://127.0.0.1:8099/oa/index.html进行访问测试" target="_blank" rel="external">http://127.0.0.1:8099/oa/index.html进行访问测试</a><br><img src="http://p1.bqimg.com/576993/173dbe2952ffadd9.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:15:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
 </a>
       
 	<div class="article-tag tagcloud">
