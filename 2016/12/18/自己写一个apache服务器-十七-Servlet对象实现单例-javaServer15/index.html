@@ -18,7 +18,7 @@
 <meta property="og:image" content="http://p1.bqimg.com/576993/2aa425905a6764fe.png">
 <meta property="og:image" content="http://p1.bqimg.com/576993/0944d5fb03b81c17.png">
 <meta property="og:image" content="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png">
-<meta property="og:updated_time" content="2016-12-17T16:59:23.291Z">
+<meta property="og:updated_time" content="2016-12-17T17:01:45.415Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15">
 <meta name="twitter:description" content="Servlet对象实现单例-javaServer15从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行">
@@ -178,6 +178,7 @@
       
         <h4 id="Servlet对象实现单例-javaServer15"><a href="#Servlet对象实现单例-javaServer15" class="headerlink" title="Servlet对象实现单例-javaServer15"></a>Servlet对象实现单例-javaServer15</h4><p><img src="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png" alt="Markdown"><br>从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行效率呢？当然，此时你肯定想到了单实例的方式，也就是说当浏览器客户端第一次发送请求的时候创建Servlet对象，将Servlet对象和对应的请求URI存放到缓存当中，当浏览器客户端第2+次发送请求的时候直接从缓存当中获取请求URI对应的Servlet实例，直接调用Servlet对象的service方法。这样做我们就可以达到既节省了内存的开销，又提高了程序的执行速度。接下来我们做一个简单的设计，如下图所示：<br><img src="http://p1.bqimg.com/576993/4deb9f3067265d0c.png" alt="Markdown"><br>接下来就让我们一步一步实现吧，我们的角色转变为WEB服务器的开发人员，先来写一段伪代码（还不能马上执行的程序），如下图所示：<br><img src="http://p1.bqimg.com/576993/915022ed9e4702df.png" alt="Markdown"> </p>
 <p>目前，我们的角色还是WEB服务器的开发人员，让我们一起来实现ServletCache类，如下图所示：<br><img src="http://p1.bqimg.com/576993/2aa425905a6764fe.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送多次请求进行测试，测试结果如下：<br><img src="http://p1.bqimg.com/576993/0944d5fb03b81c17.png" alt="Markdown"><br>控制台<br><img src="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png" alt="Markdown"><br>通过以上的测试结果可以看到Servlet对象已达到了单实例，但是这里所谓的单实例，并不属于单例模式，真正的单例模式要求构造函数私有化的，这里之所以可以做到单实例，是因为Servlet对象的生命周期由服务器来管理，服务器只创建一次，所以可以达到单实例的效果，这种单实例可以被称为伪单例。<br>另外需要注意的是，Servlet对象是单实例的，这个时候就应该注意多线程并发带来的安全问题，尽量不要在Servlet类中使用实例变量。  </p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
 
       
     </div>
