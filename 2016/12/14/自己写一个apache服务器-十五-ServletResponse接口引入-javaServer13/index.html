@@ -12,10 +12,25 @@
 <meta property="og:url" content="https://github.com/startshineye/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="ServletResponse接口引入-javaServer13目前Servlet接口的service方法参数类型是PrintWriter，如图所示PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢">
-<meta property="og:updated_time" content="2016-12-14T11:22:39.974Z">
+<meta property="og:image" content="http://i1.piimg.com/576993/fd252e56b596b3b4.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/4ae601d053f04cc8.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/a05edcce5a794c03.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/134cdce82ee2dd6e.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/4912a1df660f538d.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/28a206aafd4c510a.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/134cdce82ee2dd6e.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/9cb5d9fed71587ec.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/1f3ddf002a46d64f.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/92a6f6e678207b88.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/8c415ac9c288a8ce.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/1f3ddf002a46d64f.png">
+<meta property="og:updated_time" content="2016-12-17T13:38:03.665Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自己写一个apache服务器(十五)-ServletResponse接口引入-javaServer13">
 <meta name="twitter:description" content="ServletResponse接口引入-javaServer13目前Servlet接口的service方法参数类型是PrintWriter，如图所示PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢">
+<meta name="twitter:image" content="http://i1.piimg.com/576993/fd252e56b596b3b4.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -169,7 +184,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="" alt="1"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="" alt="31"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="" alt="32"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="" alt="33"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="" alt="34"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="" alt="35"><br>控制台输出<br><img src="" alt="36"><br>我们应该解决下图中的问题了<br><img src="" alt="33"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="" alt="37"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="" alt="331"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="" alt="39"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="" alt="38"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="" alt="332"><br>控制台输出<br><img src="" alt="333">  </p>
+        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="http://i1.piimg.com/576993/fd252e56b596b3b4.png" alt="Markdown"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="http://i1.piimg.com/576993/4ae601d053f04cc8.png" alt="Markdown"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="http://i1.piimg.com/576993/a05edcce5a794c03.png" alt="Markdown"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="http://i1.piimg.com/576993/4912a1df660f538d.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="http://i1.piimg.com/576993/28a206aafd4c510a.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png" alt="Markdown"><br>我们应该解决下图中的问题了<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="http://i1.piimg.com/576993/9cb5d9fed71587ec.png" alt="Markdown"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="http://i1.piimg.com/576993/92a6f6e678207b88.png" alt="Markdown"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="http://i1.piimg.com/576993/8c415ac9c288a8ce.png" alt="Markdown"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
 
       
     </div>

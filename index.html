@@ -152,6 +152,50 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十六-ServletRequest接口引入-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/17/自己写一个apache服务器-十六-ServletRequest接口引入-javaServer14/">自己写一个apache服务器(十六)-ServletRequest接口引入-javaServer14</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/17/自己写一个apache服务器-十六-ServletRequest接口引入-javaServer14/" class="archive-article-date">
+  	<time datetime="2016-12-17T13:38:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-17</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十六-接收表单提交数据-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -215,7 +259,8 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="" alt="1"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="" alt="31"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="" alt="32"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="" alt="33"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="" alt="34"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="" alt="35"><br>控制台输出<br><img src="" alt="36"><br>我们应该解决下图中的问题了<br><img src="" alt="33"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="" alt="37"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="" alt="331"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="" alt="39"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="" alt="38"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="" alt="332"><br>控制台输出<br><img src="" alt="333">  </p>
+        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="http://i1.piimg.com/576993/fd252e56b596b3b4.png" alt="Markdown"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="http://i1.piimg.com/576993/4ae601d053f04cc8.png" alt="Markdown"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="http://i1.piimg.com/576993/a05edcce5a794c03.png" alt="Markdown"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="http://i1.piimg.com/576993/4912a1df660f538d.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="http://i1.piimg.com/576993/28a206aafd4c510a.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png" alt="Markdown"><br>我们应该解决下图中的问题了<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="http://i1.piimg.com/576993/9cb5d9fed71587ec.png" alt="Markdown"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="http://i1.piimg.com/576993/92a6f6e678207b88.png" alt="Markdown"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="http://i1.piimg.com/576993/8c415ac9c288a8ce.png" alt="Markdown"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
 
       
     </div>
@@ -734,67 +779,6 @@ alert(filterarray[key]);
       
       <a href="/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/" class="archive-article-date">
   	<time datetime="2016-12-05T15:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十一-客户端访问java程序-javaServer09" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/">自己写一个apache服务器(十一)-客户端访问java程序-javaServer09</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="客户端访问java程序-javaServer09"><a href="#客户端访问java程序-javaServer09" class="headerlink" title="客户端访问java程序-javaServer09"></a>客户端访问java程序-javaServer09</h4><ol>
-<li>在上一个版本中，浏览器客户端发送的请求是<a href="http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。</a>    </li>
-<li>处理登录的Java程序应该由谁来编写呢？编写完成之后，又应该由谁来管理调用呢？我们一起来分析一下，将来系统中会存在很多功能，例如：银行账户转账、查询员工信息、保存员工信息、银行账户开户等，这些功能中的每一个功能都需要执行对应的服务器端Java程序来完成的，都是和具体的业务逻辑紧密相关的，显然这种Java程序的编写不应该是服务器的开发人员，因为服务器的开发人员不知道具体的业务是什么，所以像以上列举的每一个功能的实现都需要WebApp的开发人员来完成开发。开发完成之后，将处理某个功能的Java程序放到Web服务器中，由Web服务器来负责管理调用。  </li>
-<li>大家需要注意的是，浏览器向服务器发送请求并且提交数据的格式是什么？这个提交数据的格式其实属于HTTP协议的一部分，这是W3C提前制定好的，格式是：<a href="http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。" target="_blank" rel="external">http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。</a>  </li>
-<li>那么，接下来让我们一起实现上面的功能，该功能的实现需要Web服务器开发人员、WebApp开发人员共同配合完成。我们现在的角色转变为WebApp的开发人员，开始编写Java程序处理用户的登录请求。服务器端的小java程序英文是：Server Applet，所以我们把服务器端的小java程序叫做：Servlet。新建软件包org.yxm.oa.servlet，然后在该软件包中新建LoginServlet.java，编写LoginServlet处理用户的登录请求<br><img src="http://p1.bpimg.com/576993/769bc03af18668c2.png" alt="Markdown"><br>接下来我们的开发角色再次转变为WEB服务器开发人员，开发服务器端程序调用LoginServlet的service方法。大家设想一下，将来WebApp中不仅有一个LoginServlet，还会有其它的小Java程序，每一个小Java程序都对应处理某一个业务，那么对于我们服务器的开发人员来说怎么确定调用哪个Servlet呢？就像上一个版本中/oa/index.html是服务器中的一个资源，像html这样的资源还有很多，服务器怎么知道浏览器客户端要访问的是哪个资源呢？当然是通过用户的请求路径了。其实LoginServlet也是服务器端的一种资源，只不过这种资源不是html，而是一段Java程序，所以服务器也可以先截获用户的请求路径，然后通过请求URI决定调用哪个Servlet。因此可以说，“请求URI”和对应要执行的“Servlet程序”之间有一种绑定关系。那么接下来就让我们编写Web服务器端的程序，截获请求URI，根据请求URI来对应调用Servlet。（HandlerRequest）<br><img src="http://p1.bpimg.com/576993/8ce4e66091fadfd2.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL，发送请求<br><img src="http://p1.bpimg.com/576993/c1e1ba4b59086228.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/a855af6f310a9e7a.png" alt="Markdown"><br>浏览器再输入<br><img src="http://p1.bpimg.com/576993/035ef0f2141fd367.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/990000ef11415100.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/" class="archive-article-date">
-  	<time datetime="2016-12-04T13:49:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
 </a>
       
 	<div class="article-tag tagcloud">
