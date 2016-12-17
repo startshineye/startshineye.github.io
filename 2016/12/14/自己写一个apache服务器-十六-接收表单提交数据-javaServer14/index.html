@@ -33,7 +33,7 @@
 <meta property="og:image" content="http://i1.piimg.com/576993/e69bee641b3307ea.png">
 <meta property="og:image" content="http://i1.piimg.com/576993/982e76dc1243c15b.png">
 <meta property="og:image" content="http://i1.piimg.com/576993/20f641bcb12f3b8f.png">
-<meta property="og:updated_time" content="2016-12-17T16:33:10.614Z">
+<meta property="og:updated_time" content="2016-12-17T16:38:30.688Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="自己写一个apache服务器(十六)-接收表单提交数据-javaServer14">
 <meta name="twitter:description" content="接收表单提交数据-javaServer14到目前为止，服务器端已经可以完成响应了。接下来我们解决什么问题呢？大家都知道当用户登录的时候会提交登录的用户名和密码，那么在服务器端的小Java程序中怎么去获取这些信息呢？显然需要Web服务器帮助我们将数据解析出来，放到某个对象中，然后WebApp的开发人员从该对象中直接获取数据使用。那么接下来我们的角色转变为Web服务器的开发人员，定义一个类专门完成数据">
@@ -193,6 +193,7 @@
       
         <h4 id="接收表单提交数据-javaServer14"><a href="#接收表单提交数据-javaServer14" class="headerlink" title="接收表单提交数据-javaServer14"></a>接收表单提交数据-javaServer14</h4><p>到目前为止，服务器端已经可以完成响应了。接下来我们解决什么问题呢？大家都知道当用户登录的时候会提交登录的用户名和密码，那么在服务器端的小Java程序中怎么去获取这些信息呢？显然需要Web服务器帮助我们将数据解析出来，放到某个对象中，然后WebApp的开发人员从该对象中直接获取数据使用。那么接下来我们的角色转变为Web服务器的开发人员，定义一个类专门完成数据的解析封装。提交的数据在哪里呢？看下图<br><img src="http://i1.piimg.com/576993/bdb78460774d2678.png" alt="Markdown"><br>其实我们有必要将请求协议的全部内容封装到某个对象当中，以便WebApp开发人员的使用，不过将请求协议全部内容封装到某个对象中，这将是一个非常繁琐的过程，我们这里就不再实现这个功能了，我们只将请求行上的URI部分的数据封装就行了。由于该对象中封装了请求协议，所以我们把这个对象叫做请求对象request。请求行上的URI部分提交的数据格式为uri?name=value&amp;name=value…，其中name是form表单控件的name属性，value是form表单控件的value属性，这个格式是W3C制定的HTTP协议的一部分。我们可以让表单提交的数据更复杂一些，来看一看提交了哪些数据？编写如下的html<br><img src="http://i1.piimg.com/576993/7a8ca244990558e7.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问Save.html，如下图所示<br><img src="http://i1.piimg.com/576993/3618b6d720385870.png" alt="Markdown"><br>填写表单，点击保存按钮提交数据，查看浏览器地址栏的地址，如下图所示<br><img src="http://p1.bqimg.com/576993/72b71c781db03306.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/ad47a100f0a01269.png" alt="Markdown"><br>以上出现404错误是很正常的，因为底层/oa/user/save请求URI对应要执行的Servlet类并没有编写，也没有在web.xml文件中进行相关配置，所以访问的资源不存在。后面我们再解决这个404的错误。我们看到浏览器地址栏上提交了这样的数据<a href="http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示" target="_blank" rel="external">http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示</a><br><img src="http://p1.bpimg.com/576993/a43f8b8f21c02753.png" alt="Markdown"><br>接下来我们的角色转变为Web服务器的开发人员，开始进行数据的解析与封装，达到上图的效果，我们单独定义一个负责请求协议封装的类，起名为RequestObject，并在该类中定义parameterMap属性表示以上的Map<string,string[]>，代码如下图所示<br><img src="http://p1.bpimg.com/576993/241ca1ff7a2d3b77.png" alt="Markdown"><br>对以上编写的RequestObject中的getParameter方法和getParameterValues方法进行单元测试，建立单元测试类，编写测试程序，测试结果如下图所示<br><img src="http://i1.piimg.com/576993/6581c3451ba19b50.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/5e02b2d72beec0c0.png" alt="Markdown"><br>测试通过之后，开始使用RequestObject，继续保持我们的角色Web服务器开发人员，在HandlerRequest中当截获到请求的URI之后，将请求的URI封装到RequestObject对象中，为了让WebApp的开发人员能够拿到表单的数据，将RequestObject传递给Servlet的service方法，代码如下所示<br><img src="http://i1.piimg.com/576993/3870a3fdbfe60f74.png" alt="Markdown"><br>角色转变为SUN公司，修改Servlet接口中的service方法，代码如下<br><img src="http://i1.piimg.com/576993/ff1cde55e5b889b0.png" alt="Markdown"><br>角色转变为WebApp开发人员，修改LoginServlet，解决编译错误，代码如下：<br><img src="http://i1.piimg.com/576993/d3fbc205bd2b13f6.png" alt="Markdown"><br>那么此时的问题又来了，Servlet是SUN公司的规范，但是为什么规范中出现了RequestObject类型，RequestObject类型是WEB服务器程序，看下图<br><img src="http://i1.piimg.com/576993/82cac017d60bf1d5.png" alt="Markdown"><br>怎么解决这个耦合呢？当然，和我们以前的解决思路是一样的，Servlet规范中service方法的第一个参数应该是一个接口，我们现在以SUN公司的角色制定接口，如下图所示：<br><img src="http://i1.piimg.com/576993/7c1af26c0cf82f62.png" alt="Markdown"><br>角色转变为Web服务器的开发人员，RequestObject类实现以上接口，如下图所示：<br><img src="http://i1.piimg.com/576993/c897bf4b920aaf6e.png" alt="Markdown"><br>角色转变为SUN公司，修改核心接口Servlet中的service方法，使之解耦合，如下图所示：<br><img src="http://i1.piimg.com/576993/dd66fa8e6e635502.png" alt="Markdown"><br>SUN将接口改动之后，该接口的实现类LoginServlet编译错误，角色转变为WebApp的开发人员，解决编译错误，如下图所示：<br><img src="http://i1.piimg.com/576993/81a77ee1e3dd2cf7.png" alt="Markdown"><br>那么接下来我们的角色转变为WebApp的开发人员，应该去解决如下图所示的404错误问题了：<br><img src="http://i1.piimg.com/576993/9245801d880ab4d5.png" alt="Markdown"><br>上图中显示的404错误表示访问的资源不存在，请求的URI是/oa/user/save，那么接下来整个的开发过程就交给WebApp的开发人员了，编写web.xml文件，然后编写对应的Servlet类，实现service方法，完成信息的保存，我们先来做第一步，编写web.xml，如下图所示：<br><img src="http://i1.piimg.com/576993/e69bee641b3307ea.png" alt="Markdown"></string,string[]></p>
 <p>第二步，编写SaveServlet，重写service方法，获取用户提交的信息，将用户提交的信息保存到数据库当中，保存成功或者失败，将最终的结果响应到浏览器，如下图所示：<br><img src="http://i1.piimg.com/576993/982e76dc1243c15b.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问save.html，在表单上填写数据然后提交，效果如下图所示：<br><img src="http://i1.piimg.com/576993/20f641bcb12f3b8f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
 
       
     </div>
@@ -211,6 +212,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15
+        
+      </div>
+    </a>
   
   
     <a href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/" id="article-nav-older" class="article-nav-link-wrap">
