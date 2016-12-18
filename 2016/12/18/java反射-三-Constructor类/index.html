@@ -4,21 +4,30 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>动手写一个MVC(四)-模型层设计 | Startshineye的博客</title>
+  <title>java反射(三)-Constructor类 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
-实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
+  <meta name="description" content="前言一个class代表一个字节码，一个Method代表一个字节码中的方法,一个Constructor代表代表字节码中的构造方法
+Constructor类
+Constructor类代表某个类中的一个构造方法
+得到某个类中所有构造方法：Constructor[] constructorArr = Class.forName(“类名”).getConstructors();
+创建实例对象通常方式：Str">
 <meta property="og:type" content="article">
-<meta property="og:title" content="动手写一个MVC(四)-模型层设计">
-<meta property="og:url" content="https://github.com/startshineye/2016/11/23/动手写一个MVC-四-模型层设计/index.html">
+<meta property="og:title" content="java反射(三)-Constructor类">
+<meta property="og:url" content="https://github.com/startshineye/2016/12/18/java反射-三-Constructor类/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
-实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
-<meta property="og:updated_time" content="2016-11-22T16:25:55.886Z">
+<meta property="og:description" content="前言一个class代表一个字节码，一个Method代表一个字节码中的方法,一个Constructor代表代表字节码中的构造方法
+Constructor类
+Constructor类代表某个类中的一个构造方法
+得到某个类中所有构造方法：Constructor[] constructorArr = Class.forName(“类名”).getConstructors();
+创建实例对象通常方式：Str">
+<meta property="og:updated_time" content="2016-12-18T15:26:33.970Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="动手写一个MVC(四)-模型层设计">
-<meta name="twitter:description" content="简介：前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  
-实现一个公用的接口Action.java这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：123">
+<meta name="twitter:title" content="java反射(三)-Constructor类">
+<meta name="twitter:description" content="前言一个class代表一个字节码，一个Method代表一个字节码中的方法,一个Constructor代表代表字节码中的构造方法
+Constructor类
+Constructor类代表某个类中的一个构造方法
+得到某个类中所有构造方法：Constructor[] constructorArr = Class.forName(“类名”).getConstructors();
+创建实例对象通常方式：Str">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -154,7 +163,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="w-动手写一个MVC-四-模型层设计" class="article article-type-w" itemscope itemprop="blogPost">
+        <article id="w-java反射-三-Constructor类" class="article article-type-w" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -164,7 +173,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      动手写一个MVC(四)-模型层设计
+      java反射(三)-Constructor类
     </h1>
   
 
@@ -172,37 +181,31 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  </p>
-<h6 id="实现一个公用的接口Action-java"><a href="#实现一个公用的接口Action-java" class="headerlink" title="实现一个公用的接口Action.java"></a>实现一个公用的接口Action.java</h6><p>这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action&#123; </div><div class="line">public HashMap doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>代码说明：   </p>
-<ol>
-<li>这个接口的作用就是通过doAction方法来实现动作的转换，因此，所有的模型层类都要实现这个接口</li>
-</ol>
-<h6 id="所有的模型层类都实现这个接口"><a href="#所有的模型层类都实现这个接口" class="headerlink" title="所有的模型层类都实现这个接口"></a>所有的模型层类都实现这个接口</h6><p>假定有一个模型层类为WebExamAction.java，主要用来负责在线考试系统的业务处理，则这个类要实现Action接口。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public class WebExamAction implements Action&#123; </div><div class="line">//根据页面的请求，进行动作的转换 </div><div class="line">public HashMap doAction(HashMap infoIn) &#123; </div><div class="line">String action = (infoIn.get(&quot;action&quot;) == null) ? &quot;&quot; : </div><div class="line">(String)infoIn.get(&quot;action&quot;); </div><div class="line">HashMap infoOut = new HashMap(); </div><div class="line">if (action.equals(&quot;&quot;)) infoOut = this.doInit (infoIn); </div><div class="line">else if (action.equals(&quot;insert&quot;)) infoOut = this.doInsert (infoIn); </div><div class="line">return infoOut; </div><div class="line">&#125;</div><div class="line">/**该方法设置用户登录时页面的初始信息 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInit(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName); </div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125;</div><div class="line"></div><div class="line">/**该方法用来进行新增 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInsert(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName);</div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>代码说明：   </p>
-<ol>
-<li>这里，在doAction中根据从页面传来的action进行动作请求的转换。 </li>
-<li>通过一个名为infoIn的HashMap，来负责传入页面中元素的值。 </li>
-<li>通过一个名为infoOut的HashMap，来负责将处理后的数据传出。</li>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>一个class代表一个字节码，一个Method代表一个字节码中的方法,一个Constructor代表代表字节码中的构造方法</p>
+<h4 id="Constructor类"><a href="#Constructor类" class="headerlink" title="Constructor类"></a>Constructor类</h4><ol>
+<li>Constructor类代表某个类中的一个构造方法</li>
+<li>得到某个类中所有构造方法：<br>Constructor[] constructorArr = Class.forName(“类名”).getConstructors();</li>
+<li>创建实例对象<br>通常方式：String str = new String(new StringBuffer(“abc”));<br>反射方式：1.获取StringBuffer类型的构造方法<br>Constructor constructor1=String.class.getConstructor(StringBuffer.class);//通过字节码获取StringBuffer类型的构造方法<br>2.创建对象<br>String str = constructor1.newInstance(new StringBuffer(“abc”));</li>
+<li>Class.newInstance()方法<br>1.Class身上也有个newInstance方法，他就是调用不带参数的构造方法，然后用那个构造方法去创建对象，假设我们恰好用不带参数构造方法，我们就可以直接用Class.newInstance()<br>2.例子：String obj= (String)Class.forName(“java.lang.String”).newInstance().<br>该方法内部先得到默认的构造方法，然后用该方法创建对象。<br>查看源码知道：该方法的内部使用到缓存机制来保存默认构造方法的实例对象。</li>
 </ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/11/23/动手写一个MVC-四-模型层设计/" class="archive-article-date">
-  	<time datetime="2016-11-22T16:23:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-23</time>
+      <a href="/2016/12/18/java反射-三-Constructor类/" class="archive-article-date">
+  	<time datetime="2016-12-18T14:32:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
 	</div>
 
       
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	<a class="article-category-link" href="/categories/java/">java</a>
 	</div>
 
 
@@ -214,18 +217,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/11/24/动手写一个MVC-五-HelloWorld示例来验证框架/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          动手写一个MVC(五)-HelloWorld示例来验证框架
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/11/22/动手写一个MVC-三-控制层设计/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">动手写一个MVC(三)-控制层设计</div>
+    <a href="/2016/12/18/java反射-二/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">java反射(二)</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -271,7 +265,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="动手写一个MVC-四-模型层设计" data-title="动手写一个MVC(四)-模型层设计" data-url="https://github.com/startshineye/2016/11/23/动手写一个MVC-四-模型层设计/"></div>
+	<div class="ds-thread" data-thread-key="java反射-三-Constructor类" data-title="java反射(三)-Constructor类" data-url="https://github.com/startshineye/2016/12/18/java反射-三-Constructor类/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
