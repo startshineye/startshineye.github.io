@@ -4,25 +4,28 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15 | Startshineye的博客</title>
+  <title>自己写一个apache服务器(十八)-实现资源转发-javaServer16 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="Servlet对象实现单例-javaServer15从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行">
+  <meta name="description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
 <meta property="og:type" content="article">
-<meta property="og:title" content="自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15">
-<meta property="og:url" content="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/index.html">
+<meta property="og:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
+<meta property="og:url" content="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="Servlet对象实现单例-javaServer15从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行">
-<meta property="og:image" content="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png">
-<meta property="og:image" content="http://p1.bqimg.com/576993/4deb9f3067265d0c.png">
-<meta property="og:image" content="http://p1.bqimg.com/576993/915022ed9e4702df.png">
-<meta property="og:image" content="http://p1.bqimg.com/576993/2aa425905a6764fe.png">
-<meta property="og:image" content="http://p1.bqimg.com/576993/0944d5fb03b81c17.png">
-<meta property="og:image" content="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png">
-<meta property="og:updated_time" content="2016-12-17T17:01:45.415Z">
+<meta property="og:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
+<meta property="og:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/e64f04f4c42322e7.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/253af750fc140865.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/da2996da681764ce.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/87b76fd935f16cff.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/dfb56fa0928cf282.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/72fe49dac1242242.png">
+<meta property="og:image" content="http://i1.piimg.com/576993/8aac1cefef8c7b03.png">
+<meta property="og:updated_time" content="2016-12-18T03:07:37.894Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15">
-<meta name="twitter:description" content="Servlet对象实现单例-javaServer15从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行">
-<meta name="twitter:image" content="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png">
+<meta name="twitter:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
+<meta name="twitter:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
+<meta name="twitter:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -158,7 +161,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-自己写一个apache服务器-十八-实现资源转发-javaServer16" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -168,7 +171,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15
+      自己写一个apache服务器(十八)-实现资源转发-javaServer16
     </h1>
   
 
@@ -176,16 +179,15 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="Servlet对象实现单例-javaServer15"><a href="#Servlet对象实现单例-javaServer15" class="headerlink" title="Servlet对象实现单例-javaServer15"></a>Servlet对象实现单例-javaServer15</h4><p><img src="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png" alt="Markdown"><br>从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行效率呢？当然，此时你肯定想到了单实例的方式，也就是说当浏览器客户端第一次发送请求的时候创建Servlet对象，将Servlet对象和对应的请求URI存放到缓存当中，当浏览器客户端第2+次发送请求的时候直接从缓存当中获取请求URI对应的Servlet实例，直接调用Servlet对象的service方法。这样做我们就可以达到既节省了内存的开销，又提高了程序的执行速度。接下来我们做一个简单的设计，如下图所示：<br><img src="http://p1.bqimg.com/576993/4deb9f3067265d0c.png" alt="Markdown"><br>接下来就让我们一步一步实现吧，我们的角色转变为WEB服务器的开发人员，先来写一段伪代码（还不能马上执行的程序），如下图所示：<br><img src="http://p1.bqimg.com/576993/915022ed9e4702df.png" alt="Markdown"> </p>
-<p>目前，我们的角色还是WEB服务器的开发人员，让我们一起来实现ServletCache类，如下图所示：<br><img src="http://p1.bqimg.com/576993/2aa425905a6764fe.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送多次请求进行测试，测试结果如下：<br><img src="http://p1.bqimg.com/576993/0944d5fb03b81c17.png" alt="Markdown"><br>控制台<br><img src="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png" alt="Markdown"><br>通过以上的测试结果可以看到Servlet对象已达到了单实例，但是这里所谓的单实例，并不属于单例模式，真正的单例模式要求构造函数私有化的，这里之所以可以做到单实例，是因为Servlet对象的生命周期由服务器来管理，服务器只创建一次，所以可以达到单实例的效果，这种单实例可以被称为伪单例。<br>另外需要注意的是，Servlet对象是单实例的，这个时候就应该注意多线程并发带来的安全问题，尽量不要在Servlet类中使用实例变量。  </p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+        <h4 id="实现资源转发-javaServer16"><a href="#实现资源转发-javaServer16" class="headerlink" title="实现资源转发-javaServer16"></a>实现资源转发-javaServer16</h4><p>我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了两个Servlet，先执行LoginServlet，然后再跳转到EmpListServlet继续执行，这个我们应该怎么做呢？<br>有人说，在LoginServlet中service方法执行结束的时候，由WebApp开发人员手动调用EmpListServlet中的service方法不就行了吗。这当然是不行的，因为Servlet对象的创建，包括Servlet对象上方法的调用，都是由Web服务器来管理的，WebApp开发人员无权干涉。那该怎么办呢？只好把这个Servlet对象上service方法的真正调用交给Web服务器来完成了。<br>那我们把这种机制定义为转发机制，转发过程中必须保证是在同一个请求当中，为了保证LoginServlet和EmpListServlet在同一个请求当中，必须保证LoginServlet和EmpListServlet共享同一个request对象和同一个response对象。<br>那就让我们的角色转变为Web服务器的开发人员，定义一个“请求转发器”类型，类名RequestDispatcherImpl，在转发器中定义转发方法，将request和response参数传递过去，如下图所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">public class RequestDispatcherImpl implements RequestDispatcher &#123;</div><div class="line">   private String uri;</div><div class="line">   </div><div class="line">   public RequestDispatcherImpl(String uri)&#123;</div><div class="line">	   this.uri=uri;</div><div class="line">   &#125;</div><div class="line">	@Override</div><div class="line">	public void forward(ServletRequest request, ServletResponse response) &#123;</div><div class="line">      if(uri.endsWith(&quot;.html&quot;) || uri.endsWith(&quot;.htm&quot;))&#123;</div><div class="line">    	  String htmlPath = uri.substring(1);</div><div class="line">    	  System.out.println(htmlPath);</div><div class="line">    	  BufferedReader br=null;</div><div class="line">    	  try &#123;</div><div class="line">    		  br=new BufferedReader(new FileReader(htmlPath));</div><div class="line">		      String temp = null;</div><div class="line">		      while((temp = br.readLine())!=null)&#123;</div><div class="line">		    	  response.getWriter().print(temp);</div><div class="line">		      &#125;</div><div class="line">    	  &#125; catch (Exception e) &#123;</div><div class="line">    		  e.printStackTrace();</div><div class="line">		  &#125;finally&#123;</div><div class="line">			  if(br!=null)&#123;//br关闭流</div><div class="line">				  try &#123;</div><div class="line">					br.close();</div><div class="line">				&#125; catch (IOException e) &#123;</div><div class="line">					e.printStackTrace();</div><div class="line">				&#125;</div><div class="line">			  &#125;</div><div class="line">		  &#125;</div><div class="line">      &#125;else&#123;</div><div class="line">    	  String s1 = uri.substring(1);</div><div class="line">    	  System.out.println(s1);</div><div class="line">    	  String webappname=&quot;&quot;;</div><div class="line">    	  if(s1.contains(&quot;/&quot;))&#123;</div><div class="line">    		  webappname=s1.split(&quot;/&quot;)[0];</div><div class="line">    	  &#125;else&#123;</div><div class="line">    		  webappname=s1;</div><div class="line">    	  &#125;</div><div class="line">    	  String servletPath = s1.substring(webappname.length());</div><div class="line">    	  if(servletPath.length()&gt;0)&#123;</div><div class="line">    		  String servletName = WebParse.servletMaps.get(webappname).get(servletPath);</div><div class="line">    	      Servlet servlet = ServletCache.get(servletName);</div><div class="line">    	      if(servlet == null)&#123;</div><div class="line">    	    	  try &#123;</div><div class="line">    	    		  servlet = (Servlet)Class.forName(servletName).newInstance();</div><div class="line">				 &#125;catch (Exception e) &#123;</div><div class="line">					 e.printStackTrace();</div><div class="line">				 &#125;</div><div class="line">    	      &#125;</div><div class="line">    	      servlet.service(request, response);</div><div class="line">    	  &#125; </div><div class="line">	  &#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上WEB服务器的开发人员将请求转发器开发之后，该请求转发器对象肯定要在WebApp中使用，所以SUN应该制定请求转发器接口，WebApp的开发人员应该面向该请求转发器接口编程，那么我们的角色转变为SUN公司，制定接口如下：<br><img src="http://i1.piimg.com/576993/7ee2a1666472a075.png" alt="Markdown"><br>角色转变为WEB服务器的开发人员，让请求转发器对象实现以上的请求转发器接口，代码如下所示：<br><img src="http://i1.piimg.com/576993/e64f04f4c42322e7.png" alt="Markdown"><br>请求转发器类型我们已经定义好了，但是这个对象对于WebApp的开发人员来说怎么能获取到呢？在Servlet类中采用new的方式吗？当然不行，因为对于WebApp的开发人员来说请求转发器类型是不可见的，也就是说WebApp的开发人员不知道有RequestDispatcherImpl这样一个类，他只知道RequestDispatcherImpl实现了SUN提供的RequestDispatcher接口。那怎么能获取到该转发器对象呢？对于WebApp的开发人员来说，一个Servlet类的service方法中有两个参数，一个是request，一个是response，WebApp的开发人员是可以调用request接口中的方法的，所以SUN可以在request接口中加入下面的方法：<br><img src="http://i1.piimg.com/576993/253af750fc140865.png" alt="Markdown"><br>SUN制定的request接口发生了变化，自然实现类需要进一步实现这个方法，开发角色转变为WEB服务器的开发人员，代码如下所示：<br><img src="http://i1.piimg.com/576993/da2996da681764ce.png" alt="Markdown"><br>转发器开发完毕，接下来我们测试一下是否可以正常使用，开发角色转变为WebApp的开发人员，分别开发AServlet、BServlet、testForward.html，AServlet执行然后转发到BServlet执行，BServlet执行再转发到testForward.html，代码和配置如下所示：<br><img src="http://i1.piimg.com/576993/87b76fd935f16cff.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/dfb56fa0928cf282.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/72fe49dac1242242.png" alt="Markdown"><br>启动httpserver，打开浏览器，输入以下访问地址，发送请求，测试结果如下所示：<br><img src="http://i1.piimg.com/576993/8aac1cefef8c7b03.png" alt="Markdown"></p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" class="archive-article-date">
-  	<time datetime="2016-12-17T16:37:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+      <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" class="archive-article-date">
+  	<time datetime="2016-12-18T02:06:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
@@ -208,18 +210,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          自己写一个apache服务器(十八)-实现资源转发-javaServer16
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">自己写一个apache服务器(十六)-接收表单提交数据-javaServer14</div>
+    <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -265,7 +258,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15" data-title="自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15" data-url="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/"></div>
+	<div class="ds-thread" data-thread-key="自己写一个apache服务器-十八-实现资源转发-javaServer16" data-title="自己写一个apache服务器(十八)-实现资源转发-javaServer16" data-url="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
