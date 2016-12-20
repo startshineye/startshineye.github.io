@@ -14,15 +14,15 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="用反射方式执行某个类中的main方法1.目标写一个程序，这个程序能够根据用户提供的类名，去执行该类中的main方法。用普通方式调用完后，为什么要用反射方式去调用呢？
 2.问题启动java程序的main方法的参数是一个字符串数组,即是public static void main(String[] args),通过反射方式来调用这个mian方法时，如何为invoke方法传递参数呢？jdk1.5的语法">
-<meta property="og:image" content="https://github.com/startshineye/38">
-<meta property="og:image" content="https://github.com/startshineye/39">
-<meta property="og:image" content="https://github.com/startshineye/40">
-<meta property="og:updated_time" content="2016-12-20T15:24:40.640Z">
+<meta property="og:image" content="http://p1.bqimg.com/576993/028f9ddffde1d23c.png">
+<meta property="og:image" content="http://p1.bqimg.com/576993/4b3a7084945694a9.png">
+<meta property="og:image" content="http://p1.bqimg.com/576993/49c0edbce6b836f8.png">
+<meta property="og:updated_time" content="2016-12-20T15:31:43.400Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java放射(六)-反射调用main方法">
 <meta name="twitter:description" content="用反射方式执行某个类中的main方法1.目标写一个程序，这个程序能够根据用户提供的类名，去执行该类中的main方法。用普通方式调用完后，为什么要用反射方式去调用呢？
 2.问题启动java程序的main方法的参数是一个字符串数组,即是public static void main(String[] args),通过反射方式来调用这个mian方法时，如何为invoke方法传递参数呢？jdk1.5的语法">
-<meta name="twitter:image" content="https://github.com/startshineye/38">
+<meta name="twitter:image" content="http://p1.bqimg.com/576993/028f9ddffde1d23c.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -184,8 +184,8 @@
 </ol>
 <h6 id="4-代码"><a href="#4-代码" class="headerlink" title="4.代码"></a>4.代码</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 一个文件中可以包含多个class但是只能有一个public class并且public class的类名和java文件名字相同</div><div class="line"> * @功能说明：用反射方式执行某个类中的main方法</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Reflect &#123;</div><div class="line">	public static void main(String[] args) throws Exception &#123;</div><div class="line">		//1.一般调用</div><div class="line">		TestArguments.main(new String[]&#123;&quot;1&quot;,&quot;2&quot;,&quot;3&quot;&#125;);</div><div class="line">		</div><div class="line">		//2.反射调用[原因：我根本就不知道这个类是TestArguments,这个类的名字是存在于args中，你要我执行哪个类只需要传递一个参数类名]</div><div class="line">		//源程序在写的时候根本不知道要执行哪个类中的main方法，是动态变化的。是根据传入的参数来确定的。</div><div class="line">		String className = args[0];//通过参数告知启动哪个类的类名,</div><div class="line">		//Exception in thread &quot;main&quot; java.lang.ArrayIndexOutOfBoundsException: 0,因为没有参数传过来args[0]不存在</div><div class="line">		Method mainMethod = Class.forName(className).getMethod(&quot;main&quot;,String[].class);</div><div class="line">	    mainMethod.invoke(null,new Object[]&#123;new String[]&#123;&quot;1&quot;,&quot;2&quot;,&quot;3&quot;&#125;&#125;);//wrong number of arguments,传的参数数组是三个，而我们需要一个</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">class TestArguments&#123;</div><div class="line">	public static void main(String[] args)&#123;</div><div class="line">		for(String arg:args)&#123;</div><div class="line">			System.out.println(arg);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <h6 id="5-传递参数"><a href="#5-传递参数" class="headerlink" title="5.传递参数"></a>5.传递参数</h6><ol>
-<li>myeclipse下给args绑定参数<br><img src="38" alt="jie"><br>绑定参数：<br><img src="39" alt="jie"></li>
-<li>类似于dos下传参数<br><img src="40" alt="jie"></li>
+<li>myeclipse下给args绑定参数<br><img src="http://p1.bqimg.com/576993/028f9ddffde1d23c.png" alt="Markdown"><br>绑定参数：<br><img src="http://p1.bqimg.com/576993/4b3a7084945694a9.png" alt="Markdown"></li>
+<li>类似于dos下传参数<br><img src="http://p1.bqimg.com/576993/49c0edbce6b836f8.png" alt="Markdown"></li>
 </ol>
 
       
