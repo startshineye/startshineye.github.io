@@ -152,6 +152,71 @@
       <div class="body-wrap">
         
   
+    <article id="post-java放射-六-反射调用main方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/20/java放射-六-反射调用main方法/">java放射(六)-反射调用main方法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="用反射方式执行某个类中的main方法"><a href="#用反射方式执行某个类中的main方法" class="headerlink" title="用反射方式执行某个类中的main方法"></a>用反射方式执行某个类中的main方法</h4><h6 id="1-目标"><a href="#1-目标" class="headerlink" title="1.目标"></a>1.目标</h6><p>写一个程序，这个程序能够根据用户提供的类名，去执行该类中的main方法。用普通方式调用完后，为什么要用反射方式去调用呢？</p>
+<h6 id="2-问题"><a href="#2-问题" class="headerlink" title="2.问题"></a>2.问题</h6><p>启动java程序的main方法的参数是一个字符串数组,即是public static void main(String[] args),通过反射方式来调用这个mian方法时，如何为invoke方法传递参数呢？jdk1.5的语法，整个数组是一个参数，jdk1.4语法，数组中的每一个元素对应一个参数,当把一个字符串数组作为参数传递给invoke方法时候，javac底层会按照哪种语法进行处理呢？jdk1.5肯定要兼容jdk1.4的语法，会按照jdk1.4的语法进行处理，即把数组打散成为若干个单独的参数。所以，在给main方法传递参数时候，不能使用代码mainMethod.invoke(null,new String[]{“xxx”}),javac只把他当做jdk1.4的语法进行理解,而不把它当做jdk1.5的语法理解，因此会出现类型不匹配的问题。</p>
+<h6 id="3-解决办法"><a href="#3-解决办法" class="headerlink" title="3.解决办法"></a>3.解决办法</h6><ol>
+<li>mainMethod.invoke(null,new Object[]{new String[]{“xxx”});</li>
+<li>mainMethod.invoke(null,(Object)new String[]{“xxx”});编译器会做特殊处理，编译时不把参数看做数组对待，也就不会数组打散成若干个参数。</li>
+</ol>
+<h6 id="4-代码"><a href="#4-代码" class="headerlink" title="4.代码"></a>4.代码</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 一个文件中可以包含多个class但是只能有一个public class并且public class的类名和java文件名字相同</div><div class="line"> * @功能说明：用反射方式执行某个类中的main方法</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Reflect &#123;</div><div class="line">	public static void main(String[] args) throws Exception &#123;</div><div class="line">		//1.一般调用</div><div class="line">		TestArguments.main(new String[]&#123;&quot;1&quot;,&quot;2&quot;,&quot;3&quot;&#125;);</div><div class="line">		</div><div class="line">		//2.反射调用[原因：我根本就不知道这个类是TestArguments,这个类的名字是存在于args中，你要我执行哪个类只需要传递一个参数类名]</div><div class="line">		//源程序在写的时候根本不知道要执行哪个类中的main方法，是动态变化的。是根据传入的参数来确定的。</div><div class="line">		String className = args[0];//通过参数告知启动哪个类的类名,</div><div class="line">		//Exception in thread &quot;main&quot; java.lang.ArrayIndexOutOfBoundsException: 0,因为没有参数传过来args[0]不存在</div><div class="line">		Method mainMethod = Class.forName(className).getMethod(&quot;main&quot;,String[].class);</div><div class="line">	    mainMethod.invoke(null,new Object[]&#123;new String[]&#123;&quot;1&quot;,&quot;2&quot;,&quot;3&quot;&#125;&#125;);//wrong number of arguments,传的参数数组是三个，而我们需要一个</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">class TestArguments&#123;</div><div class="line">	public static void main(String[] args)&#123;</div><div class="line">		for(String arg:args)&#123;</div><div class="line">			System.out.println(arg);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="5-传递参数"><a href="#5-传递参数" class="headerlink" title="5.传递参数"></a>5.传递参数</h6><ol>
+<li>myeclipse下给args绑定参数<br><img src="38" alt="jie"><br>绑定参数：<br><img src="39" alt="jie"></li>
+<li>类似于dos下传参数<br><img src="40" alt="jie"></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/20/java放射-六-反射调用main方法/" class="archive-article-date">
+  	<time datetime="2016-12-20T14:29:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-20</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java反射-五-成员方法的反射" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -687,62 +752,6 @@
 
 
   
-    <article id="post-自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12/">自己写一个apache服务器(十四)-小java输出html到浏览器-javaServer12</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="小java输出html到浏览器-javaServer12"><a href="#小java输出html到浏览器-javaServer12" class="headerlink" title="小java输出html到浏览器-javaServer12"></a>小java输出html到浏览器-javaServer12</h4><p>输出html的内容是由WebApp开发者决定的，所以对于Web服务器来说只需要将负责响应的标准输出流传递给Servlet即可<br><img src="http://p1.bqimg.com/576993/64b1a49128efe6fd.png" alt="Markdown"><br>以上程序编译失败，SUN提供的Servlet接口需要改进，改进Servlet接口中的service方法<br><img src="http://p1.bqimg.com/576993/267fa30f09c0a9c9.png" alt="Markdown"><br>此时LoginServlet（WebApp开发人员开发的）编译错误，因为LoginServlet实现了Servlet接口，所以对LoginServlet进行修改，并响应消息到浏览器<br><img src="http://p1.bqimg.com/576993/9e59dd71693c7acf.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求，运行结果<br><img src="http://p1.bqimg.com/576993/0ba830d5eb5621b2.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/14/自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12/" class="archive-article-date">
-  	<time datetime="2016-12-14T04:58:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -808,7 +817,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 13.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.67px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 15px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 13.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 13.33px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 16.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a>
+    				<a href="/tags/CTI/" style="font-size: 12.86px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.43px;">Cookie</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.14px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 12.86px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.57px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 14.29px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.86px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.43px;">hibernate</a> <a href="/tags/im/" style="font-size: 10px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.43px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.43px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.86px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/动手写一个MVC/" style="font-size: 15.71px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a>
     			</div>
     	</section>
     
