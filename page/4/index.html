@@ -152,6 +152,72 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-四-对日志工具进行单元测试-javaServer02" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/03/自己写一个apache服务器-四-对日志工具进行单元测试-javaServer02/">自己写一个apache服务器(四)-对日志工具进行单元测试-javaServer02</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-软件测试技术"><a href="#1-软件测试技术" class="headerlink" title="1.软件测试技术"></a>1.软件测试技术</h4><p>软件测试技术是软件开发过程中的一个重要组成部分，是贯穿整个软件开发生命周期、对软件产品（包括阶段性产品）进行验证和确认的活动过程，其目的是尽快尽早地发现在软件产品中所存在的各种问题-与用户需求、预先定义的不一致性。检查软件产品的bug。写成测试报告，交于开发人员修改。</p>
+<h4 id="2-软件测试技术包括哪些"><a href="#2-软件测试技术包括哪些" class="headerlink" title="2.软件测试技术包括哪些"></a>2.软件测试技术包括哪些</h4><h6 id="2-1-黑盒测试"><a href="#2-1-黑盒测试" class="headerlink" title="2.1 黑盒测试"></a>2.1 黑盒测试</h6><p>黑盒测试也称功能测试，它是通过测试来检测每个功能是否都能正常使用。在测试中，把程序看作一个不能打开的黑盒子，在完全不考虑程序内部结构和内部特性的情况下，在程序接口进行测试，它只检查程序功能是否按照需求规格说明书的规定正常使用，程序是否能适当地接收输入数据而产生正确的输出信息。黑盒测试着眼于程序外部结构，不考虑内部逻辑结构，主要针对软件界面和软件功能进行测试。黑盒测试是以用户的角度，从输入数据与输出数据的对应关系出发进行测试的。</p>
+<h6 id="2-2-白盒测试"><a href="#2-2-白盒测试" class="headerlink" title="2.2 白盒测试"></a>2.2 白盒测试</h6><p>软件的白盒测试是对软件的过程性细节做细致的检查。这种方法是把测试对象看做一个打开的盒子，它允许测试人员利用程序内部的逻辑结构及有关信息，设计或选择测试用例，对程序所有逻辑路径进行测试。通过在不同点检查程序状态，确定实际状态是否与预期的状态一致。因此白盒测试又称为结构测试或逻辑驱动测试。白盒测试一般有专门的白盒测试人员测试。</p>
+<h6 id="2-3-压力测试"><a href="#2-3-压力测试" class="headerlink" title="2.3 压力测试"></a>2.3 压力测试</h6><p>压力测试属于性能测试的一部分，测试系统的最大负载情况。</p>
+<h6 id="2-4-其它测试"><a href="#2-4-其它测试" class="headerlink" title="2.4 其它测试"></a>2.4 其它测试</h6><p>易用性测试<br>安全性测试<br>……  </p>
+<h4 id="3-常见软件测试相关工具"><a href="#3-常见软件测试相关工具" class="headerlink" title="3.常见软件测试相关工具"></a>3.常见软件测试相关工具</h4><p>软件错误管理工具Bugzilla<br>功能测试工具WinRunner<br>负载测试工具LoadRunner<br>测试管理工具TestDirector  </p>
+<h4 id="4-怎么做单元测试"><a href="#4-怎么做单元测试" class="headerlink" title="4.怎么做单元测试"></a>4.怎么做单元测试</h4><p>Java的单元测试有专门的开源项目，例如：JUnit，首先需要到JUnit官网下载JUnit相关jar包，我们这里使用JUnit4-4.12，JUnit官网地址：<a href="http://junit.org/junit4/，JUnit下载地址：https://github.com/junit-team/junit4/releases" target="_blank" rel="external">http://junit.org/junit4/，JUnit下载地址：https://github.com/junit-team/junit4/releases</a><br><img src="http://p1.bqimg.com/576993/c3ab1d55d34c5896.png" alt="Markdown"><br>JUnit-4.12下载完成后存放到本地硬盘中<br><img src="http://p1.bqimg.com/576993/a1163cb3f4dda2b7.png" alt="Markdown"><br>将junit4-r4.12.zip文件解压缩，将junit4-r4.12/lib/hamcrest-core-1.3.jar拷贝到junit4-r4.12目录外，如图所示<br><img src="http://p1.bqimg.com/576993/3db1439a5246ee95.png" alt="Markdown"><br>在集成开发环境MyEclipse中创建Java Project，起名junit-001，将以上下载的junit-4.12.jar、hamcrest-core-1.3.jar包添加到classpath中<br><img src="http://p1.bqimg.com/576993/fd5af378d427711e.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/e1556d84d3d0282f.png" alt="Markdown">  </p>
+<p>编写一个普通的java类，随意定义一个方法，实现两个int类型数字的和，再编写一个方法，实现两个int类型数字的商<br><img src="http://p1.bqimg.com/576993/924ca989d1d5899d.png" alt="Markdown"><br>单元测试的代码一般有规范的存放方式，在junit-001工程中新建“source folder”文件夹，并起名test，新建软件包，软件包的路径一般和被测试类所在路径相同，单元测试代码一般存放到该目录下，新建单元测试类，类一般都是被测试类的类名后添加Test，如图<br><img src="http://p1.bqimg.com/576993/0c622108b40a5821.png" alt="Markdown"><br>在单元测试类MathTest中编写两个方法，都是public的方法，返回值类型void，分别是testSum和testDivide，单元测试类中的测试方法的名字一般都是test加被测试方法名，并且单元测试的方法需要使用@Test注解标注<br><img src="http://p1.bqimg.com/576993/8510de85050acf4b.png" alt="Markdown"><br>在单元测试方法中编写单元测试程序<br><img src="http://p1.bqimg.com/576993/f394aa3a964bbff6.png" alt="Markdown"><br>运行单元测试中的方法<br><img src="http://p1.bqimg.com/576993/8f12a1c684adda30.png" alt="Markdown"><br>运行结果，下图显示结果表示被测试的方法通过测试<br><img src="http://p1.bqimg.com/576993/7e5fbd81260422e5.png" alt="Markdown"><br>修改测试程序，将Math.java中的sum方法修改为如下代码<br><img src="http://p1.bqimg.com/576993/76d938fbf1e3012b.png" alt="Markdown"><br>再次运行测试程序，运行结果如下所示，表示被测试的方法存在错误<br><img src="http://p1.bqimg.com/576993/a968d5778eff3bd9.png" alt="Markdown">  </p>
+<h4 id="5-使用MyEclipse工具辅助单元测试"><a href="#5-使用MyEclipse工具辅助单元测试" class="headerlink" title="5.使用MyEclipse工具辅助单元测试"></a>5.使用MyEclipse工具辅助单元测试</h4><p>创建Java Project，起名junit-002，定义SystemService类，编写login方法<br><img src="http://p1.bqimg.com/576993/cfd9cf8e51e7dd99.png" alt="Markdown"><br>对SystemService的login方法进行单元测试，直接通过MyEclipse的JUnit辅助插件创建单元测试类<br><img src="http://p1.bqimg.com/576993/694ef66f97d6a71e.png" alt="Markdown"><br>生成单元测试类SystemServiceTest<br><img src="http://i1.piimg.com/576993/f67d919a11f4c5e0.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/09a2707e76435d46.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/223b74d2ea3e8766.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/223b74d2ea3e8766.png" alt="Markdown"><br>编写单元测试方法<br><img src="http://i1.piimg.com/576993/5b6458f878ebc150.png" alt="Markdown"><br>运行单元测试方法，结果如下所示，表示被测试的方法通过测试<br><img src="http://i1.piimg.com/576993/2e09ac48fa350455.png" alt="Markdown"></p>
+<h4 id="6-对日志工具类进行单元测试"><a href="#6-对日志工具类进行单元测试" class="headerlink" title="6.对日志工具类进行单元测试"></a>6.对日志工具类进行单元测试</h4><p>复制javaServer-01,粘贴为：javaServer-02新建“source folder”命名为test，在test目录下新建软件包com.yxm.javaserver.util，使用MyEclipse的JUnit辅助插件新建单元测试类LoggerTest，编写单元测试方法testLog<br><img src="http://i1.piimg.com/576993/5446d4aa869d7ade.png" alt="Markdown"></p>
+<p>注：这里我们就不再使用断言了，我们这里就把单元测试方法当做main方法使用了运行单元测试，结果如下所示，表示该记录日志方法可用<br><img src="http://i1.piimg.com/576993/9cc5a92d32feb220.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/03/自己写一个apache服务器-四-对日志工具进行单元测试-javaServer02/" class="archive-article-date">
+  	<time datetime="2016-12-03T13:54:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-03</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/junit测试/">junit测试</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-三-web服务器工具类" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -790,73 +856,6 @@ out.flush();
       
       <a href="/2016/11/24/动手写一个MVC-五-HelloWorld示例来验证框架/" class="archive-article-date">
   	<time datetime="2016-11-23T16:11:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/mvc/">mvc</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="w-动手写一个MVC-四-模型层设计" class="article article-type-w" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/23/动手写一个MVC-四-模型层设计/">动手写一个MVC(四)-模型层设计</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  </p>
-<h6 id="实现一个公用的接口Action-java"><a href="#实现一个公用的接口Action-java" class="headerlink" title="实现一个公用的接口Action.java"></a>实现一个公用的接口Action.java</h6><p>这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action&#123; </div><div class="line">public HashMap doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>代码说明：   </p>
-<ol>
-<li>这个接口的作用就是通过doAction方法来实现动作的转换，因此，所有的模型层类都要实现这个接口</li>
-</ol>
-<h6 id="所有的模型层类都实现这个接口"><a href="#所有的模型层类都实现这个接口" class="headerlink" title="所有的模型层类都实现这个接口"></a>所有的模型层类都实现这个接口</h6><p>假定有一个模型层类为WebExamAction.java，主要用来负责在线考试系统的业务处理，则这个类要实现Action接口。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public class WebExamAction implements Action&#123; </div><div class="line">//根据页面的请求，进行动作的转换 </div><div class="line">public HashMap doAction(HashMap infoIn) &#123; </div><div class="line">String action = (infoIn.get(&quot;action&quot;) == null) ? &quot;&quot; : </div><div class="line">(String)infoIn.get(&quot;action&quot;); </div><div class="line">HashMap infoOut = new HashMap(); </div><div class="line">if (action.equals(&quot;&quot;)) infoOut = this.doInit (infoIn); </div><div class="line">else if (action.equals(&quot;insert&quot;)) infoOut = this.doInsert (infoIn); </div><div class="line">return infoOut; </div><div class="line">&#125;</div><div class="line">/**该方法设置用户登录时页面的初始信息 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInit(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName); </div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125;</div><div class="line"></div><div class="line">/**该方法用来进行新增 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInsert(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName);</div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>代码说明：   </p>
-<ol>
-<li>这里，在doAction中根据从页面传来的action进行动作请求的转换。 </li>
-<li>通过一个名为infoIn的HashMap，来负责传入页面中元素的值。 </li>
-<li>通过一个名为infoOut的HashMap，来负责将处理后的数据传出。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/23/动手写一个MVC-四-模型层设计/" class="archive-article-date">
-  	<time datetime="2016-11-22T16:23:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
