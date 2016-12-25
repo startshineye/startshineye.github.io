@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>java反射(十一)-类加载器管理资源和配置文件 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言我们写框架一般都是用类加载器去加载配置文件，而不是用new File(“filePath”)加载配置文件
+内容1.资源文件存放路径
+放在工程下的文件经过编译以后不会在classpath下，所以当我们部署项目时候的.class文件是在classspath下，这样部署时候就不会有此配置文件，因为，项目部署基本都只给.class文件。我们不会把源文件给别人，只是把.class文件打包给别人。
+在实际">
+<meta property="og:type" content="article">
+<meta property="og:title" content="java反射(十一)-类加载器管理资源和配置文件">
+<meta property="og:url" content="https://github.com/startshineye/2016/12/25/java反射-十一-类加载器管理资源和配置文件/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="前言我们写框架一般都是用类加载器去加载配置文件，而不是用new File(“filePath”)加载配置文件
+内容1.资源文件存放路径
+放在工程下的文件经过编译以后不会在classpath下，所以当我们部署项目时候的.class文件是在classspath下，这样部署时候就不会有此配置文件，因为，项目部署基本都只给.class文件。我们不会把源文件给别人，只是把.class文件打包给别人。
+在实际">
+<meta property="og:image" content="https://github.com/startshineye/46">
+<meta property="og:image" content="https://github.com/startshineye/47">
+<meta property="og:image" content="https://github.com/startshineye/48">
+<meta property="og:image" content="https://github.com/startshineye/50">
+<meta property="og:updated_time" content="2016-12-25T04:06:38.662Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="java反射(十一)-类加载器管理资源和配置文件">
+<meta name="twitter:description" content="前言我们写框架一般都是用类加载器去加载配置文件，而不是用new File(“filePath”)加载配置文件
+内容1.资源文件存放路径
+放在工程下的文件经过编译以后不会在classpath下，所以当我们部署项目时候的.class文件是在classspath下，这样部署时候就不会有此配置文件，因为，项目部署基本都只给.class文件。我们不会把源文件给别人，只是把.class文件打包给别人。
+在实际">
+<meta name="twitter:image" content="https://github.com/startshineye/46">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-java反射-十一-类加载器管理资源和配置文件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      java反射(十一)-类加载器管理资源和配置文件
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们写框架一般都是用类加载器去加载配置文件，而不是用new File(“filePath”)加载配置文件</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-资源文件存放路径"><a href="#1-资源文件存放路径" class="headerlink" title="1.资源文件存放路径"></a>1.资源文件存放路径</h6><ol>
+<li>放在工程下的文件经过编译以后不会在classpath下，所以当我们部署项目时候的.class文件是在classspath下，这样部署时候就不会有此配置文件，因为，项目部署基本都只给.class文件。我们不会把源文件给别人，只是把.class文件打包给别人。</li>
+<li>在实际开发中几乎没有用相对工程路径这么写的<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">InputStream in = new FileInputStream(&quot;config.properties&quot;);//面向接口编程读取文件,相对于工程路径，config.properties在工程目录下</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><img src="46" alt=""><br><img src="47" alt=""><br>以上只是相对于”F:\webcc\reflect”  </p>
+<ol>
+<li>解决方法<br>方法一：我们一般要用就用绝对路径,在D盘下就如下:<br>InputStream in = new FileInputStream(“d:\config.properties”);//面向接口编程读取文件<br>但是电脑只有d盘，只有c盘将会怎样呢？<br>方法二：绝对路径的路径是通过某种方式get出来的。<br>config的位置是写到一个文件中，然后我们根据那个文件读取出来，就像数据源的配置<br>方法三：硬盘上的一个.class文件加载到内存中来用的是类加载器，类加载器既然能够加载.class文件，肯定也可以加载一般文件</li>
+</ol>
+<h6 id="2-myeclipse操作src文件到classpath下"><a href="#2-myeclipse操作src文件到classpath下" class="headerlink" title="2.myeclipse操作src文件到classpath下"></a>2.myeclipse操作src文件到classpath下</h6><ol>
+<li>myeclipse或者eclipse会自动把src下的.java文件编译成.class文件放到classpath路径下面，同样把其他非java文件原封不动放到classpath路径下  <h6 id="3-getClassLoader-及classpath下文件分析"><a href="#3-getClassLoader-及classpath下文件分析" class="headerlink" title="3.getClassLoader()及classpath下文件分析"></a>3.getClassLoader()及classpath下文件分析</h6></li>
+<li>ReflectPoint.class.getClassLoader().getResourceAsStream(“config.properties”);只会在classpath根路径下去找文件找不到存在于classpath下带包的文件。  </li>
+<li>如图下的配置文件路径如下：<br><img src="48" alt=""><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">InputStream in = ReflectPoint.class.getClassLoader().getResourceAsStream(&quot;com/yxm/reflect/config.properties&quot;);</div><div class="line">		Properties pros = new Properties();</div><div class="line">		pros.load(in);//一次性全部加载到内存中去</div><div class="line">		in.close();//关闭流</div><div class="line">		String className = pros.getProperty(&quot;className&quot;);//基于key获取value</div><div class="line">		Collection collection = (Collection)Class.forName(className).newInstance();</div><div class="line">		/***************反射创建类********************/</div><div class="line">		collection.add(p1);</div><div class="line">		collection.add(p2);</div><div class="line">		collection.add(p3);</div><div class="line">	    collection.add(p1);	</div><div class="line">	</div><div class="line">		System.out.println(collection.size());// 2</div><div class="line">	</div><div class="line">```  </div><div class="line">###### 4.ReflectPoint.class.getResourceAsStream</div><div class="line">用ReflectPoint.class.getResourceAsStream直接加文件</div><div class="line">InputStream in = ReflectPoint.class.getResourceAsStream(&quot;config.properties&quot;);</div><div class="line">1. 以上查找路径方法是按照相对路径，相对于ReflectPoint类下所在包的路径找到同包下的config.properties文件</div><div class="line">2. 也可以用其他方式</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>//类加载器加载class文件时候是在classpath路径下加载文件，我们把config.properties放在classpath路径下<br>        //InputStream in = ReflectPoint.class.getClassLoader().getResourceAsStream(“com/yxm/reflect/config.properties”);//classpath下查找<br>        //InputStream in = ReflectPoint.class.getResourceAsStream(“config.properties”);//相对于ReflectPoint下同包下查找<br>        //InputStream in = ReflectPoint.class.getResourceAsStream(“resource/config.properties”);//相对于ReflectPoint下同包的resource下查找<br>        InputStream in = ReflectPoint.class.getResourceAsStream(“/com/yxm/reflect/resource/config.properties”);//相对于工程下查找</p>
+<p>```<br><img src="50" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/25/java反射-十一-类加载器管理资源和配置文件/" class="archive-article-date">
+  	<time datetime="2016-12-25T02:33:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2016/12/23/java反射-十-ArrayLis与hashSet比较及hashcode分析/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">java反射-十-ArrayLis与hashSet比较及hashcode分析</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="java反射-十一-类加载器管理资源和配置文件" data-title="java反射(十一)-类加载器管理资源和配置文件" data-url="https://github.com/startshineye/2016/12/25/java反射-十一-类加载器管理资源和配置文件/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2016 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/CTI/" style="font-size: 13.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.67px;">Cookie</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 18.33px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 15px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 13.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 13.33px;">im</a> <a href="/tags/jQuery/" style="font-size: 15px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 13.33px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/动手写一个MVC/" style="font-size: 16.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.33px;">反射</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
