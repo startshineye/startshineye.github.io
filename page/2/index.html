@@ -152,6 +152,67 @@
       <div class="body-wrap">
         
   
+    <article id="post-java反射-七-数组反射应用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/21/java反射-七-数组反射应用/">java反射(七)-数组反射应用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="数组反射应用"><a href="#数组反射应用" class="headerlink" title="数组反射应用"></a>数组反射应用</h4><h6 id="1-代码"><a href="#1-代码" class="headerlink" title="1.代码"></a>1.代码</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">import java.util.Arrays;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 一个文件中可以包含多个class但是只能有一个public class并且public class的类名和java文件名字相同</div><div class="line"> * @功能说明：用反射方式执行某个类中的main方法</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Reflect &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	int[] a1 = new int[3];</div><div class="line">	int[] a2 = new int[4];</div><div class="line">	int[][] a3 = new int[2][3];//可以看做是每一个元素为数组的以为数组</div><div class="line">	</div><div class="line">	String[] a4 = new String[]&#123;&quot;a&quot;,&quot;b&quot;,&quot;c&quot;&#125;;</div><div class="line">	</div><div class="line">	System.out.println(a1.getClass()==a2.getClass());</div><div class="line">	//System.out.println(a1.getClass()==a3.getClass());//报错，说明不符合</div><div class="line">   // System.out.println(a1.getClass()==a4.getClass());//报错，说明不符合</div><div class="line">    </div><div class="line">	System.out.println(a1.getClass().getName());//[I     &quot;[&quot;代表数组    “I”代表整形</div><div class="line">    System.out.println(a1.getClass().getSuperclass().getName());  //java.lang.Object</div><div class="line">    System.out.println(a4.getClass().getSuperclass().getName());   //java.lang.Object</div><div class="line">    </div><div class="line">    Object obj1=a1;</div><div class="line">    Object obj2=a4;</div><div class="line">    </div><div class="line">    //Object[] obj3 = a1;//错误 而基本类型一维数组中的元素是基本类型，不是引用)</div><div class="line">    Object[] obj5 = a3;</div><div class="line">    Object[] obj6 = a4;</div><div class="line">    </div><div class="line">    //转化为数组</div><div class="line">    System.out.println(a1);//  [I@16cc8a48   &quot;[I&quot;表示整形数组 hashcode值为：@16cc8a48</div><div class="line">    System.out.println(a4);//  [Ljava.lang.String;@4e8a88a9   &quot;[Ljava.lang.String;[I&quot;表示字符数组 hashcode值为：@4e8a88a9</div><div class="line">    System.out.println(Arrays.asList(a1));// [[I@41aff40f]</div><div class="line">    System.out.println(Arrays.asList(a4));//[a, b, c]</div><div class="line">    </div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="2-总结"><a href="#2-总结" class="headerlink" title="2.总结"></a>2.总结</h6><ol>
+<li>具有相同维数和元素类型的数组属于同一个类型,即具有相同的Class实例对象。<br><img src="41" alt="jie"></li>
+<li>代表数组的Class实例对象的getSuperClass()方法返回的父类为Object类对应的Class</li>
+<li>基本类型的一维数组可以被当做Object类型使用（基本类型属于引用类型，其父类是Object类）,不能当做Object[]类型使用(因为Object[]中的元素是Object类型，而基本类型一维数组中的元素是基本类型，不是引用)；非基本类型的一维数组,既可以当做Object类型使用,又可以当做Object[]类型使用。</li>
+<li>Arrays.asList()方法处理int[]和String[]时的差异。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/21/java反射-七-数组反射应用/" class="archive-article-date">
+  	<time datetime="2016-12-21T12:24:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-21</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java放射-六-反射调用main方法" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -680,62 +741,6 @@
 </a>
       
       
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/">自己写一个apache服务器(十五)-ServletResponse接口引入-javaServer13</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="http://i1.piimg.com/576993/fd252e56b596b3b4.png" alt="Markdown"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="http://i1.piimg.com/576993/4ae601d053f04cc8.png" alt="Markdown"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="http://i1.piimg.com/576993/a05edcce5a794c03.png" alt="Markdown"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="http://i1.piimg.com/576993/4912a1df660f538d.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="http://i1.piimg.com/576993/28a206aafd4c510a.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png" alt="Markdown"><br>我们应该解决下图中的问题了<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="http://i1.piimg.com/576993/9cb5d9fed71587ec.png" alt="Markdown"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="http://i1.piimg.com/576993/92a6f6e678207b88.png" alt="Markdown"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="http://i1.piimg.com/576993/8c415ac9c288a8ce.png" alt="Markdown"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/" class="archive-article-date">
-  	<time datetime="2016-12-14T10:39:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
 
       <div class="clearfix"></div>
     </div>
