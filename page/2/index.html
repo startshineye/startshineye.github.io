@@ -591,7 +591,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/18/java反射-一-java反射(一)-Class类/">java反射(一)-Class类</a>
+      <a class="article-title" href="/2016/12/18/java反射-一-java反射(一)-Class类/">java反射-Class类</a>
     </h1>
   
 
@@ -653,6 +653,78 @@
 
 
   
+    <article id="post-java反射-一-java反射-Class类" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/18/java反射-一-java反射-Class类/">java反射-Class类</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="反射的基石-Class类"><a href="#反射的基石-Class类" class="headerlink" title="反射的基石-Class类"></a>反射的基石-Class类</h4><h6 id="1-java类："><a href="#1-java类：" class="headerlink" title="1.java类："></a>1.java类：</h6><p>用于描述一类事物共性，该事物有什么属性和没什么属性，是由这个类实例对象确定</p>
+<h6 id="2-Class类："><a href="#2-Class类：" class="headerlink" title="2.Class类："></a>2.Class类：</h6><p>java程序中各个java类，他们是否属于同一类事物，是不是可以用一个类描述这类事物呢？描述这类java类的类就是Class类</p>
+<h6 id="3-Class类描述了哪些方面的信息呢？"><a href="#3-Class类描述了哪些方面的信息呢？" class="headerlink" title="3.Class类描述了哪些方面的信息呢？"></a>3.Class类描述了哪些方面的信息呢？</h6><p>类的名字，类的访问属性，类属性的包名，字段，方法</p>
+<h6 id="4-区别："><a href="#4-区别：" class="headerlink" title="4.区别："></a>4.区别：</h6><ol>
+<li>众多的人用一个什么类表示？众多的java类用什么类表示？<br>人：Person<br>java类：Class</li>
+<li>Person类代表人，实例对象就是张三，李四这样一个个具体的人。Class类代表的java类，他的各个实例对象又是什么呢？<br>对象各个类在内存中的字节码，例如：Person类的字节码，ArrayList类的字节码，等等。  </li>
+<li>创建对象<br>Person p1 = new Person();<br>Person p2 = new Person();  </li>
+</ol>
+<p>Class c1 = new Class()//错误的做法，没有这个构造方法，或者这个构造方法私有的<br>Class c2 = 字节码1<br>Class c2 =  字节码2<br>java对象的创建是首先将java类编译成字节码。class文件放到硬盘上，然后将硬盘上的二进制代码加载到内存中，用这个字节码复制出一个个对象。比如代码中运用到了date，math，person类，那么内存中就有三份字节码，三份字节码就是三个Class的实例对象。Class c1 = Person.class//字节码<br>Person.class代表Person类的字节码，类型是Class<br>p1.getClass()也可以得到Person的字节码<br>Class.forName(“全类名”);也是得到类的字节码</p>
+<h6 id="5-怎样生成字节码"><a href="#5-怎样生成字节码" class="headerlink" title="5.怎样生成字节码"></a>5.怎样生成字节码</h6><ol>
+<li>类名.class 例如：Person.class  </li>
+<li>对象.getClass(),例如：new Date().getClass()  </li>
+<li>Class.forName(“类名”),例如：Class.forName(“java.util.Date”)  <h6 id="6-怎样得到字节码"><a href="#6-怎样得到字节码" class="headerlink" title="6.怎样得到字节码"></a>6.怎样得到字节码</h6></li>
+<li>这个类的字节码已经加载到内存中，不需要再加载，直接找到返回</li>
+<li>字节码已经生成，但是虚拟机中还没有字节码，用类加载器加载字节码，并用Class.forName(“类名”)返回字节码  <h6 id="7-面试题：Class-forName-“类名”-作用"><a href="#7-面试题：Class-forName-“类名”-作用" class="headerlink" title="7.面试题：Class.forName(“类名”)作用"></a>7.面试题：Class.forName(“类名”)作用</h6>Class.forName(“类名”)作用是返回字节码：两种方式</li>
+<li>字节码已经在虚拟机里面，直接返回</li>
+<li>虚拟机没有字节码，用类加载器加载字节码，缓存此字节码以后就不用再加载了，并用Class.forName(“类名”)返回字节码<h6 id="8-代码："><a href="#8-代码：" class="headerlink" title="8.代码："></a>8.代码：</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public class Reflect &#123;</div><div class="line">   public static void main(String[] args) throws Exception&#123;</div><div class="line">	//得到字节码的三种方式</div><div class="line">	 String str1 = &quot;abc&quot;;</div><div class="line">	</div><div class="line">	 Class c1 = str1.getClass();//1.</div><div class="line">	 Class c2 = String.class;</div><div class="line">	 Class c3 = Class.forName(&quot;java.lang.String&quot;);</div><div class="line">	 </div><div class="line">	 System.out.println(c1==c2);//true</div><div class="line">     System.out.println(c1==c3);//true</div><div class="line">     </div><div class="line">     //输出都是true，说明三种方式得到的是同一个字节码</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/18/java反射-一-java反射-Class类/" class="archive-article-date">
+  	<time datetime="2016-12-18T09:35:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十八-实现资源转发-javaServer16" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -681,63 +753,6 @@
       
       <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" class="archive-article-date">
   	<time datetime="2016-12-18T02:06:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="Servlet对象实现单例-javaServer15"><a href="#Servlet对象实现单例-javaServer15" class="headerlink" title="Servlet对象实现单例-javaServer15"></a>Servlet对象实现单例-javaServer15</h4><p><img src="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png" alt="Markdown"><br>从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行效率呢？当然，此时你肯定想到了单实例的方式，也就是说当浏览器客户端第一次发送请求的时候创建Servlet对象，将Servlet对象和对应的请求URI存放到缓存当中，当浏览器客户端第2+次发送请求的时候直接从缓存当中获取请求URI对应的Servlet实例，直接调用Servlet对象的service方法。这样做我们就可以达到既节省了内存的开销，又提高了程序的执行速度。接下来我们做一个简单的设计，如下图所示：<br><img src="http://p1.bqimg.com/576993/4deb9f3067265d0c.png" alt="Markdown"><br>接下来就让我们一步一步实现吧，我们的角色转变为WEB服务器的开发人员，先来写一段伪代码（还不能马上执行的程序），如下图所示：<br><img src="http://p1.bqimg.com/576993/915022ed9e4702df.png" alt="Markdown"> </p>
-<p>目前，我们的角色还是WEB服务器的开发人员，让我们一起来实现ServletCache类，如下图所示：<br><img src="http://p1.bqimg.com/576993/2aa425905a6764fe.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送多次请求进行测试，测试结果如下：<br><img src="http://p1.bqimg.com/576993/0944d5fb03b81c17.png" alt="Markdown"><br>控制台<br><img src="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png" alt="Markdown"><br>通过以上的测试结果可以看到Servlet对象已达到了单实例，但是这里所谓的单实例，并不属于单例模式，真正的单例模式要求构造函数私有化的，这里之所以可以做到单实例，是因为Servlet对象的生命周期由服务器来管理，服务器只创建一次，所以可以达到单实例的效果，这种单实例可以被称为伪单例。<br>另外需要注意的是，Servlet对象是单实例的，这个时候就应该注意多线程并发带来的安全问题，尽量不要在Servlet类中使用实例变量。  </p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" class="archive-article-date">
-  	<time datetime="2016-12-17T16:37:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
