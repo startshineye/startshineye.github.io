@@ -1,0 +1,457 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>类加载器(一)-类加载器及委托机制 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="类加载器1.简要介绍类加载器及作用
+类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。
+类加载器作用：加载类到内存中2.类加载器其他介绍
+java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassL">
+<meta property="og:type" content="article">
+<meta property="og:title" content="类加载器(一)-类加载器及委托机制">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/08/类加载器-一-类加载器及委托机制/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="类加载器1.简要介绍类加载器及作用
+类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。
+类加载器作用：加载类到内存中2.类加载器其他介绍
+java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassL">
+<meta property="og:image" content="https://github.com/startshineye/61">
+<meta property="og:updated_time" content="2017-01-08T13:08:23.255Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="类加载器(一)-类加载器及委托机制">
+<meta name="twitter:description" content="类加载器1.简要介绍类加载器及作用
+类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。
+类加载器作用：加载类到内存中2.类加载器其他介绍
+java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassL">
+<meta name="twitter:image" content="https://github.com/startshineye/61">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-类加载器-一-类加载器及委托机制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      类加载器(一)-类加载器及委托机制
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h4><h6 id="1-简要介绍类加载器及作用"><a href="#1-简要介绍类加载器及作用" class="headerlink" title="1.简要介绍类加载器及作用"></a>1.简要介绍类加载器及作用</h6><ol>
+<li>类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。</li>
+<li>类加载器作用：加载类到内存中<h6 id="2-类加载器其他介绍"><a href="#2-类加载器其他介绍" class="headerlink" title="2.类加载器其他介绍"></a>2.类加载器其他介绍</h6></li>
+<li>java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassLoader</li>
+<li><p>类加载器也是java类，由于类加载器的类本身也要被加载,显然必须有第一个类加载器不是java类,这正是BootStrap(用c++写的二进制代码).</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//1.获得ClassLoaderTest类的类加载器(反射)</div><div class="line">	  String name = ClassLoaderTest.class.getClassLoader().getClass().getName();</div><div class="line">	  System.out.println(name);//输出：sun.misc.Launcher$AppClassLoader</div><div class="line">	  </div><div class="line">	//2.获取System类的类加载器</div><div class="line">	 ClassLoader sysClassLoader = System.class.getClassLoader();</div><div class="line">	  System.out.println(sysClassLoader);//输出：null,说明System类没有类加载器，它由BootStrap加载</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织,在实例化每个类加载器对象的时候,需要为其指定一个父级类加载器对象或者默认采用系统类装载器为其父级类加载。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//3.java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织</div><div class="line">	  ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();</div><div class="line">	  while(classLoader != null)&#123;//循环获取父类</div><div class="line">		  System.out.println(classLoader.getClass().getName());</div><div class="line">		  classLoader = classLoader.getParent();</div><div class="line">	  &#125;</div><div class="line">	  System.out.println(classLoader);//最后输出的是最上层根</div><div class="line">	  /**</div><div class="line">	   * 输出结果为:</div><div class="line">	   * sun.misc.Launcher$AppClassLoader</div><div class="line">         sun.misc.Launcher$ExtClassLoader</div><div class="line">         null</div><div class="line">	   */</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="3-类加载器之间的父子关系和管辖范围图"><a href="#3-类加载器之间的父子关系和管辖范围图" class="headerlink" title="3.类加载器之间的父子关系和管辖范围图"></a>3.类加载器之间的父子关系和管辖范围图</h6><ol>
+<li>图<br><img src="61" alt=""></li>
+<li>总结：<br>BootStrap加载rt.jar里面的类,System类就是rt.jar里面的<br>我们一般写的类是用AppClassLoader.</li>
+</ol>
+<h4 id="类加载器的委托机制"><a href="#类加载器的委托机制" class="headerlink" title="类加载器的委托机制"></a>类加载器的委托机制</h4><h6 id="1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？"><a href="#1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？" class="headerlink" title="1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？"></a>1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？</h6><ol>
+<li>首先当前线程的类加载器去加载线程中的第一个类</li>
+<li>如果类A中引用了类B，java虚拟机将使用加载类A的类装载器来加载类B</li>
+<li>还可以直接调用ClassLoader.loadClass()方法来指定某个类加载器去加载某个类</li>
+<li>每个类加载器加载类时，又先委托给其上级类加载器</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/08/类加载器-一-类加载器及委托机制/" class="archive-article-date">
+  	<time datetime="2017-01-08T04:05:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-类加载器/">javaSE,类加载器</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/01/07/泛型-九-通过反射获取泛型实际类型/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">泛型(九)-通过反射获取泛型实际类型</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="类加载器-一-类加载器及委托机制" data-title="类加载器(一)-类加载器及委托机制" data-url="https://github.com/startshineye/2017/01/08/类加载器-一-类加载器及委托机制/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 12.22px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 10px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
