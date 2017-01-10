@@ -4,30 +4,24 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>java反射(十三)-内省 | Startshineye的博客</title>
+  <title>类加载器(二)-自定义类加载器的原理分析 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1.内省内省是什么？: 通过反射的方式访问javabean的技术Jdk中的api ： PropertyDescriptor类操作Bean的属性内省的作用：我们可以去实现一种通用性  
-2.示例获取属性的值x(javaBean中的属性未知，我们知道的只是他的值是”x”)
-
-内省方式  
-123456789101112131415161718public static void main(String">
+  <meta name="description" content="原理
+自定义的类加载器必须继承ClassLoader自己写的类加载器必须继承一个抽象类ClassLoader,
+loadClass方法和findClass方法ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用fi">
 <meta property="og:type" content="article">
-<meta property="og:title" content="java反射(十三)-内省">
-<meta property="og:url" content="https://github.com/startshineye/2016/12/25/java反射-十三-内省/index.html">
+<meta property="og:title" content="类加载器(二)-自定义类加载器的原理分析">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/10/类加载器-二-自定义类加载器的原理分析/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="1.内省内省是什么？: 通过反射的方式访问javabean的技术Jdk中的api ： PropertyDescriptor类操作Bean的属性内省的作用：我们可以去实现一种通用性  
-2.示例获取属性的值x(javaBean中的属性未知，我们知道的只是他的值是”x”)
-
-内省方式  
-123456789101112131415161718public static void main(String">
-<meta property="og:updated_time" content="2016-12-25T12:23:33.481Z">
+<meta property="og:description" content="原理
+自定义的类加载器必须继承ClassLoader自己写的类加载器必须继承一个抽象类ClassLoader,
+loadClass方法和findClass方法ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用fi">
+<meta property="og:updated_time" content="2017-01-10T14:16:44.766Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="java反射(十三)-内省">
-<meta name="twitter:description" content="1.内省内省是什么？: 通过反射的方式访问javabean的技术Jdk中的api ： PropertyDescriptor类操作Bean的属性内省的作用：我们可以去实现一种通用性  
-2.示例获取属性的值x(javaBean中的属性未知，我们知道的只是他的值是”x”)
-
-内省方式  
-123456789101112131415161718public static void main(String">
+<meta name="twitter:title" content="类加载器(二)-自定义类加载器的原理分析">
+<meta name="twitter:description" content="原理
+自定义的类加载器必须继承ClassLoader自己写的类加载器必须继承一个抽象类ClassLoader,
+loadClass方法和findClass方法ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用fi">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -163,7 +157,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-java反射-十三-内省" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-类加载器-二-自定义类加载器的原理分析" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -173,7 +167,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      java反射(十三)-内省
+      类加载器(二)-自定义类加载器的原理分析
     </h1>
   
 
@@ -181,33 +175,30 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h6 id="1-内省"><a href="#1-内省" class="headerlink" title="1.内省"></a>1.内省</h6><p>内省是什么？: 通过反射的方式访问javabean的技术<br>Jdk中的api ： PropertyDescriptor类操作Bean的属性<br>内省的作用：我们可以去实现一种通用性  </p>
-<h6 id="2-示例"><a href="#2-示例" class="headerlink" title="2.示例"></a>2.示例</h6><p>获取属性的值x(javaBean中的属性未知，我们知道的只是他的值是”x”)</p>
-<ol>
-<li><p>内省方式  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) throws Exception&#123;</div><div class="line">		 String propertyName = &quot;name&quot;;</div><div class="line">		 Person person = new Person();</div><div class="line">		 /**</div><div class="line">		  * 内省方式思路：x--&gt;X--&gt;getX--&gt;MethodGetX--&gt;</div><div class="line">		  */</div><div class="line">		//得到javaBean的属性,</div><div class="line">		 PropertyDescriptor pd = new PropertyDescriptor(propertyName, person.getClass());</div><div class="line">		 //获得属性上的setter方法并设置值</div><div class="line">		 Method writeMethod = pd.getWriteMethod();</div><div class="line">		 writeMethod.invoke(person, &quot;yxm&quot;);</div><div class="line">		 </div><div class="line">		 //获得属性上的getter方法，在person对象上调用get方法获得值（get方法没有参数）</div><div class="line">		 Method readMethod = pd.getReadMethod();</div><div class="line">		 Object retVal= readMethod.invoke(person);</div><div class="line">		 System.out.println(retVal);</div><div class="line">		 </div><div class="line">	&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>一般方式  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) throws Exception&#123;</div><div class="line">		 Person person = new Person();</div><div class="line">		  person.setName(&quot;yxm&quot;);</div><div class="line">		  String value = person.getName();</div><div class="line">		  System.out.println(value);</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+        <h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><ol>
+<li>自定义的类加载器必须继承ClassLoader<br>自己写的类加载器必须继承一个抽象类ClassLoader,</li>
+<li>loadClass方法和findClass方法<br>ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用findClass。也就是说loaderClass首先找爸爸,找到后调用findClass。如果直接覆盖loaderClass就会直接自己干,不会去找爸爸。或者找爸爸还要自己写代码去找没比较难以实现。<br>父类–&gt;loaderClass/findClass/得到class文件的转换成字节码–&gt;defineClass()</li>
+<li>defineClass方法<br>defineClass方法将二进制变成字节码</li>
+<li>例子<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">class NetworkClassLoader extends ClassLoader &#123;</div><div class="line">        String host;</div><div class="line">        int port;</div><div class="line">        public Class findClass(String name) &#123;</div><div class="line">            byte[] b = loadClassData(name);</div><div class="line">            return defineClass(name, b, 0, b.length);</div><div class="line">        &#125;</div><div class="line">        private byte[] loadClassData(String name) &#123;</div><div class="line">            // load the class data from the connection</div><div class="line">             . . .</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></li>
 </ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/12/25/java反射-十三-内省/" class="archive-article-date">
-  	<time datetime="2016-12-25T11:46:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-25</time>
+      <a href="/2017/01/10/类加载器-二-自定义类加载器的原理分析/" class="archive-article-date">
+  	<time datetime="2017-01-10T13:26:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-10</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
 	</div>
 
       
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
 	</div>
 
 
@@ -219,18 +210,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/26/BeanUtils操作javaBean/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          BeanUtils操作javaBean
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/25/java反射-十二-内省引出javaBean/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">java反射(十二)-内省引出javaBean</div>
+    <a href="/2017/01/08/类加载器-一-类加载器及委托机制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">类加载器(一)-类加载器及委托机制</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -276,7 +258,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="java反射-十三-内省" data-title="java反射(十三)-内省" data-url="https://github.com/startshineye/2016/12/25/java反射-十三-内省/"></div>
+	<div class="ds-thread" data-thread-key="类加载器-二-自定义类加载器的原理分析" data-title="类加载器(二)-自定义类加载器的原理分析" data-url="https://github.com/startshineye/2017/01/10/类加载器-二-自定义类加载器的原理分析/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
