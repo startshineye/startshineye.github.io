@@ -4,20 +4,32 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>异常:Class path contains multiple SLF4J bindings | Startshineye的博客</title>
+  <title>类加载器(四)-测试编写自己的解密类加载器 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="异常SLF4J: Class path contains multiple SLF4J bindings.SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]SLF4J:">
+  <meta name="description" content="前言
+在前面的类加载器(三)知道,经过加密后的类通过通过系统的类加载器加载后会出现错误(把自己的加密类放到系统加载类的class路径下)覆盖原来的,这时候会出现错误.
+所以我们自己定义自己的类加载器进行加载定义自己的类加载器
+让自己的类加载器继承ClassLoader
+覆盖父类的findClass方法(只有覆盖才不会让父类去找)在findClass里去调用父类的findClass方法根据class">
 <meta property="og:type" content="article">
-<meta property="og:title" content="异常:Class path contains multiple SLF4J bindings">
-<meta property="og:url" content="https://github.com/startshineye/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/index.html">
+<meta property="og:title" content="类加载器(四)-测试编写自己的解密类加载器">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/11/类加载器-四-测试编写自己的解密类加载器/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="异常SLF4J: Class path contains multiple SLF4J bindings.SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]SLF4J:">
-<meta property="og:image" content="http://p1.bpimg.com/576993/2ebcd66aa2ec8a42.png">
-<meta property="og:updated_time" content="2017-01-10T16:31:39.960Z">
+<meta property="og:description" content="前言
+在前面的类加载器(三)知道,经过加密后的类通过通过系统的类加载器加载后会出现错误(把自己的加密类放到系统加载类的class路径下)覆盖原来的,这时候会出现错误.
+所以我们自己定义自己的类加载器进行加载定义自己的类加载器
+让自己的类加载器继承ClassLoader
+覆盖父类的findClass方法(只有覆盖才不会让父类去找)在findClass里去调用父类的findClass方法根据class">
+<meta property="og:image" content="https://github.com/startshineye/69">
+<meta property="og:updated_time" content="2017-01-11T16:14:20.495Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="异常:Class path contains multiple SLF4J bindings">
-<meta name="twitter:description" content="异常SLF4J: Class path contains multiple SLF4J bindings.SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]SLF4J:">
-<meta name="twitter:image" content="http://p1.bpimg.com/576993/2ebcd66aa2ec8a42.png">
+<meta name="twitter:title" content="类加载器(四)-测试编写自己的解密类加载器">
+<meta name="twitter:description" content="前言
+在前面的类加载器(三)知道,经过加密后的类通过通过系统的类加载器加载后会出现错误(把自己的加密类放到系统加载类的class路径下)覆盖原来的,这时候会出现错误.
+所以我们自己定义自己的类加载器进行加载定义自己的类加载器
+让自己的类加载器继承ClassLoader
+覆盖父类的findClass方法(只有覆盖才不会让父类去找)在findClass里去调用父类的findClass方法根据class">
+<meta name="twitter:image" content="https://github.com/startshineye/69">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -153,7 +165,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-异常-Class-path-contains-multiple-SLF4J-bindings" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-类加载器-四-测试编写自己的解密类加载器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -163,7 +175,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      异常:Class path contains multiple SLF4J bindings
+      类加载器(四)-测试编写自己的解密类加载器
     </h1>
   
 
@@ -171,28 +183,28 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><p>SLF4J: Class path contains multiple SLF4J bindings.<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.7.12.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: See <a href="http://www.slf4j.org/codes.html#multiple_bindings" target="_blank" rel="external">http://www.slf4j.org/codes.html#multiple_bindings</a> for an explanation.<br>log4j:WARN No appenders could be found for logger (org.apache.http.client.protocol.RequestAddCookies).<br>log4j:WARN Please initialize the log4j system properly.</p>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>jar包冲突<br><img src="http://p1.bpimg.com/576993/2ebcd66aa2ec8a42.png" alt="Markdown"></p>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>在前面的类加载器(三)知道,经过加密后的类通过通过系统的类加载器加载后会出现错误(把自己的加密类放到系统加载类的class路径下)<br>覆盖原来的,这时候会出现错误.</li>
+<li>所以我们自己定义自己的类加载器进行加载<h4 id="定义自己的类加载器"><a href="#定义自己的类加载器" class="headerlink" title="定义自己的类加载器"></a>定义自己的类加载器</h4></li>
+<li>让自己的类加载器继承ClassLoader</li>
+<li><p>覆盖父类的findClass方法(只有覆盖才不会让父类去找)<br>在findClass里去调用父类的findClass方法根据classFileName，和FileInputStream读取到classFileName里面的数据，通过读出流到bytes[] 字节数组，然后根据字节数组，调用defineClass得到Class，则类加载器写好了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException &#123;</div><div class="line">	//加载类之前进行解密</div><div class="line">    //得到文件全名</div><div class="line">    String classFileName = classDir+&quot;\\&quot;+name+&quot;.class&quot;;</div><div class="line">    </div><div class="line">    //得到输入流,输出流进行解密</div><div class="line">    try &#123;</div><div class="line">		FileInputStream fis = new FileInputStream(classFileName);</div><div class="line">		ByteArrayOutputStream bos = new ByteArrayOutputStream();</div><div class="line">	    secret(fis, bos);</div><div class="line">	    fis.close();</div><div class="line">	    byte[] bytes = bos.toByteArray();</div><div class="line">	    return defineClass(bytes,0, bytes.length);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">	return super.findClass(name);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>在主方法中调用类加载器，</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) throws Exception&#123;</div><div class="line">	   //加载ClassLoaderAttachment得到一个字节码</div><div class="line">	   Class clazz = new MyClassLoader(&quot;classlib&quot;).loadClass(&quot;ClassLoaderAttachment&quot;);</div><div class="line">	   //ClassLoaderAttachment newInstance = (ClassLoaderAttachment)clazz.newInstance();//编译器通不过，因为这个类是加密后乱七八糟的类</div><div class="line">       //所以用到父类Date</div><div class="line">	  Date d1= (Date) clazz.newInstance();</div><div class="line">	  System.out.println(d1);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>以上会出现错误，因为是其父类到对应的目录下找，我们删除父类对应的ClassLoaderAttachment的class文件,就会出现<br><img src="69" alt=""><br>虽然我们已经把那个.class文件给删掉了，但是还会报错因为jre已经记录住了加载的内，已经到内存中了，此时重启动myeclipse.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * MyClassLoader既作为类加载器也作为加密工具</div><div class="line"> */</div><div class="line">public class MyClassLoader extends ClassLoader&#123;</div><div class="line">	private String classDir;</div><div class="line">	/**</div><div class="line">	 * 目标：找到ClassLoaderAttachment对其进行加密,然后放入到classlib下</div><div class="line">	 * @param args</div><div class="line">	 * @throws Exception</div><div class="line">	 */</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	  System.out.println(&quot;begin&quot;);</div><div class="line">	   //加载ClassLoaderAttachment得到一个字节码</div><div class="line">	   Class clazz = new MyClassLoader(&quot;classlib&quot;).loadClass(&quot;ClassLoaderAttachment&quot;);</div><div class="line">	   //ClassLoaderAttachment newInstance = (ClassLoaderAttachment)clazz.newInstance();//编译器通不过，因为这个类是加密后乱七八糟的类</div><div class="line">       //所以用到父类Date</div><div class="line">	  Date d1= (Date) clazz.newInstance();</div><div class="line">	  System.out.println(d1);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  /**</div><div class="line">   * 加密类，对输入流进行加密，然后输出到输出流中</div><div class="line">   * 输入：是一个二进制流</div><div class="line">   * 输出：是一个流</div><div class="line">   */</div><div class="line">  private static void secret(InputStream in,OutputStream out) throws Exception&#123;</div><div class="line">	  //读入输入流并输出(读到末尾是-1)</div><div class="line">	  int b=-1;</div><div class="line">	  while((b=in.read())!=-1)&#123;</div><div class="line">		 out.write(b ^ 0xff);//加密进行异或运算 </div><div class="line">	  &#125;</div><div class="line">  &#125;</div><div class="line">   @Override</div><div class="line">	protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException &#123;</div><div class="line">		//加载类之前进行解密</div><div class="line">	    //得到文件全名</div><div class="line">	    String classFileName = classDir+&quot;\\&quot;+name+&quot;.class&quot;;</div><div class="line">	    </div><div class="line">	    //得到输入流,输出流进行解密</div><div class="line">	    try &#123;</div><div class="line">			FileInputStream fis = new FileInputStream(classFileName);</div><div class="line">			ByteArrayOutputStream bos = new ByteArrayOutputStream();</div><div class="line">		    secret(fis, bos);</div><div class="line">		    fis.close();</div><div class="line">		    System.out.println(&quot;aaa&quot;);</div><div class="line">		    byte[] bytes = bos.toByteArray();</div><div class="line">		    return defineClass(bytes,0, bytes.length);</div><div class="line">	    &#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">		return null;</div><div class="line">	&#125;</div><div class="line">   public MyClassLoader()&#123;</div><div class="line">	   </div><div class="line">   &#125;</div><div class="line">   public MyClassLoader(String classDir)&#123;</div><div class="line">	   this.classDir = classDir;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/" class="archive-article-date">
-  	<time datetime="2017-01-10T16:27:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-11</time>
+      <a href="/2017/01/11/类加载器-四-测试编写自己的解密类加载器/" class="archive-article-date">
+  	<time datetime="2017-01-11T15:11:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-11</time>
 </a>
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异常/">异常</a></li></ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-异常/">javaSE,异常</a>
-	</div>
-
 
       <div class="clearfix"></div>
     </div>
@@ -202,18 +214,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2017/01/11/类加载器-四-测试编写自己的解密类加载器/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          类加载器(四)-测试编写自己的解密类加载器
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/01/10/类加载器-三-编写对class文件进行加密的工具类/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">类加载器(三)-编写对class文件进行加密的工具类</div>
+    <a href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">异常:Class path contains multiple SLF4J bindings</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -259,7 +262,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="异常-Class-path-contains-multiple-SLF4J-bindings" data-title="异常:Class path contains multiple SLF4J bindings" data-url="https://github.com/startshineye/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/"></div>
+	<div class="ds-thread" data-thread-key="类加载器-四-测试编写自己的解密类加载器" data-title="类加载器(四)-测试编写自己的解密类加载器" data-url="https://github.com/startshineye/2017/01/11/类加载器-四-测试编写自己的解密类加载器/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
