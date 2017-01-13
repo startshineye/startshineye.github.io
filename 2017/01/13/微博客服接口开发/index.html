@@ -1,0 +1,443 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>微博客服接口开发 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言
+由于项目需要对接新浪微博,所以自己就尝试了新浪微博开发，前期都挺顺利,而且能够把用户发送的消息经过开放平台推送到自己服务器后台，并且被动回复消息，但是项目需要主动回复消息，则需要调用新浪的客服接口，虽然后来看一下这是一个多么简单的问题，但是经过的道路确实布满荆棘，也是因为自己开发经验欠缺。所以在此记录一下自己遇到的坑，方便以后学习，也是对自己的一个总结。内容1.注意
+类似于微信公众平台的开发">
+<meta property="og:type" content="article">
+<meta property="og:title" content="微博客服接口开发">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/13/微博客服接口开发/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="前言
+由于项目需要对接新浪微博,所以自己就尝试了新浪微博开发，前期都挺顺利,而且能够把用户发送的消息经过开放平台推送到自己服务器后台，并且被动回复消息，但是项目需要主动回复消息，则需要调用新浪的客服接口，虽然后来看一下这是一个多么简单的问题，但是经过的道路确实布满荆棘，也是因为自己开发经验欠缺。所以在此记录一下自己遇到的坑，方便以后学习，也是对自己的一个总结。内容1.注意
+类似于微信公众平台的开发">
+<meta property="og:image" content="https://github.com/startshineye/71">
+<meta property="og:image" content="https://github.com/startshineye/73">
+<meta property="og:updated_time" content="2017-01-13T09:34:25.695Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="微博客服接口开发">
+<meta name="twitter:description" content="前言
+由于项目需要对接新浪微博,所以自己就尝试了新浪微博开发，前期都挺顺利,而且能够把用户发送的消息经过开放平台推送到自己服务器后台，并且被动回复消息，但是项目需要主动回复消息，则需要调用新浪的客服接口，虽然后来看一下这是一个多么简单的问题，但是经过的道路确实布满荆棘，也是因为自己开发经验欠缺。所以在此记录一下自己遇到的坑，方便以后学习，也是对自己的一个总结。内容1.注意
+类似于微信公众平台的开发">
+<meta name="twitter:image" content="https://github.com/startshineye/71">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-微博客服接口开发" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      微博客服接口开发
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>由于项目需要对接新浪微博,所以自己就尝试了新浪微博开发，前期都挺顺利,而且能够把用户发送的消息经过开放平台推送到自己服务器后台，并且被动回复消息，但是项目需要主动回复消息，则需要调用新浪的客服接口，虽然后来看一下这是一个多么简单的问题，但是经过的道路确实布满荆棘，也是因为自己开发经验欠缺。所以在此记录一下自己遇到的坑，方便以后学习，也是对自己的一个总结。<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-注意"><a href="#1-注意" class="headerlink" title="1.注意"></a>1.注意</h6></li>
+<li>类似于微信公众平台的开发，新浪微博开发也是有开放平台<a href="http://open.weibo.com" target="_blank" rel="external">新浪微博开放平台</a>，在开发之前需要创建自己的应用注册 自己的微博账号</li>
+<li>新浪微博的基本开发已经有了标准的SDK,并且有各种语言的<a href="http://open.weibo.com/wiki/SDK" target="_blank" rel="external">微博开发SDK</a>直接在github上下载就行，但是本人觉得这个SDK对于新手来说确实不怎么好，而且方法之间耦合度很大，我这个开发就是运用了微博客服接口，但是SDK中貌似没有这个demo,我又想使用自带的weibo4j[我是使用java语言开发]的http post请求方法来推送消息给新浪用户,我只用一个方法，但是却要导入很多类,无奈只好放弃，也许是新浪想考虑周全的缘故,所以各种情况及异常都考虑到了</li>
+<li>微博开放平台客户接口需要有蓝V认证的微博账号,一般是企业认证,我就是用的本公司的企业蓝V认证</li>
+<li>类似于微信公众平台开发中配置url，token的基本配置,微博也需要配置如下：<br>进入首页-&gt;管理中心-&gt;粉丝服务-&gt;开发者中心-&gt;开启开发者-&gt;填写URL-&gt;APPKEY进行验证<br><img src="71" alt="jietu"> </li>
+<li>微博粉丝服务平台与微信公众平台开发对等，区别<a href="http://open.weibo.com/wiki/%E5%BE%AE%E4%BF%A1%E5%BC%80%E5%8F%91%E8%80%85%E8%BF%81%E7%A7%BB%E6%8C%87%E5%8D%97" target="_blank" rel="external"></a></li>
+<li>调用的api<a href="http://open.weibo.com/wiki/%E5%BE%AE%E5%8D%9AAPI#.E7.B2.89.E4.B8.9D.E6.9C.8D.E5.8A.A1.E6.8E.A5.E5.8F.A3" target="_blank" rel="external">微博API</a></li>
+<li>客服接口系统图<br><img src="73" alt=""><h6 id="2-遇到错误"><a href="#2-遇到错误" class="headerlink" title="2.遇到错误"></a>2.遇到错误</h6></li>
+<li>刚开始使用的是com.uikoo9.util.core.http.QHttpClientUtil这个工具类是非常好用的,使用微信开发时候是非常事半功倍的，而且个人觉得是目前我遇到的很好用的一个开源的JFianl jar包,可以去官网找找，有详细文档说明<br>我是按照以下方式调用：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) &#123;</div><div class="line">		 //Content-Type: application/x-www-form-urlencoded </div><div class="line">		  Map&lt;String, String&gt; headers = new HashMap&lt;String,String&gt;();</div><div class="line">		  Map&lt;String, String&gt; params = new HashMap&lt;String,String&gt;();</div><div class="line">		  String accessToken = TokenUtil.access_token;</div><div class="line">		  String url = &quot;https://m.api.weibo.com/2/messages/reply.json?access_token&quot;+accessToken+&quot;&quot;;</div><div class="line">		  String type = &quot;text&quot;;</div><div class="line">		  String textMsg = MessageUtil.textMsg(&quot;纯文本响应&quot;);</div><div class="line">		  String data = MessageUtil.textCustomerMsg(textMsg);</div><div class="line">		  System.out.println(data);</div><div class="line">		  String reciverId= &quot;xxxx&quot;;//接收方id</div><div class="line">		  </div><div class="line">		  headers.put(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded&quot;);</div><div class="line">		  params.put(&quot;type&quot;, type);</div><div class="line">		  params.put(&quot;data&quot;, data);</div><div class="line">		  params.put(reciverId, reciverId);</div><div class="line">		  params.put(&quot;receiver_id&quot;, reciverId);</div><div class="line">		  System.out.println(params.toString());</div><div class="line">		  String postAll = QHttpClientUtil.postAll(url, headers, params);</div><div class="line">		  System.out.println(postAll);	 </div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>会输出以下内容:null调试后发现是400错误<br>刚开始是把access_token当做参数发送出去,是文档看的不仔细</p>
+<ol>
+<li>发现第一种情况行不通,就尝试了自己写的http Post请求<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line">	 * 发送https请求</div><div class="line">	 * @param requestUrl 请求地址</div><div class="line">	 * @param requestMethod 请求方式（GET、POST）</div><div class="line">	 * @param outputStr 提交的数据</div><div class="line">	 * @return JSONObject(通过JSONObject.get(key)的方式获取json对象的属性值)</div><div class="line">	 */</div><div class="line">	public static JSONObject httpsRequest(String requestUrl, String requestMethod, String outputStr) &#123;</div><div class="line">		JSONObject jsonObject = null;</div><div class="line">		try &#123;</div><div class="line">			// 创建SSLContext对象，并使用我们指定的信任管理器初始化</div><div class="line">			TrustManager[] tm = &#123; new MyX509TrustManager() &#125;;</div><div class="line">			SSLContext sslContext = SSLContext.getInstance(&quot;SSL&quot;, &quot;SunJSSE&quot;);</div><div class="line">			sslContext.init(null, tm, new java.security.SecureRandom());</div><div class="line">			// 从上述SSLContext对象中得到SSLSocketFactory对象</div><div class="line">			SSLSocketFactory ssf = sslContext.getSocketFactory();</div><div class="line">			URL url = new URL(requestUrl);</div><div class="line">			HttpsURLConnection conn = (HttpsURLConnection) url.openConnection();</div><div class="line">			conn.setSSLSocketFactory(ssf);</div><div class="line">			conn.setDoOutput(true);</div><div class="line">			conn.setDoInput(true);</div><div class="line">			conn.setUseCaches(false);</div><div class="line">			//设置请求头</div><div class="line">			conn.setRequestProperty(&quot;Content-Type&quot;,&quot;application/x-www-form-urlencoded&quot;);</div><div class="line">			// 设置请求方式（GET/POST）</div><div class="line">			conn.setRequestMethod(requestMethod);</div><div class="line">			conn.connect();</div><div class="line">			</div><div class="line">			// 当outputStr不为null时向输出流写数据</div><div class="line">			if (null != outputStr) &#123;</div><div class="line">				OutputStream outputStream = conn.getOutputStream();</div><div class="line">				// 注意编码格式</div><div class="line">				outputStream.write(outputStr.getBytes(&quot;UTF-8&quot;));</div><div class="line">				</div><div class="line">				System.out.println(&quot;outputStr[&quot;+outputStr+&quot;]&quot;);</div><div class="line">				System.out.println(&quot;conn[&quot;+conn.toString()+&quot;]&quot;);</div><div class="line">				outputStream.close();</div><div class="line">			&#125;</div><div class="line"></div><div class="line">			// 从输入流读取返回内容</div><div class="line">			InputStream inputStream = conn.getInputStream();</div><div class="line">			InputStreamReader inputStreamReader = new InputStreamReader(inputStream, &quot;utf-8&quot;);</div><div class="line">			BufferedReader bufferedReader = new BufferedReader(inputStreamReader);</div><div class="line">			String str = null;</div><div class="line">			StringBuffer buffer = new StringBuffer();</div><div class="line">			while ((str = bufferedReader.readLine()) != null) &#123;</div><div class="line">				buffer.append(str);</div><div class="line">			&#125;</div><div class="line">			// 释放资源</div><div class="line">			bufferedReader.close();</div><div class="line">			inputStreamReader.close();</div><div class="line">			inputStream.close();</div><div class="line">			inputStream = null;</div><div class="line">			conn.disconnect();</div><div class="line">			jsonObject = JSONObject.fromObject(buffer.toString());</div><div class="line">		&#125; catch (ConnectException ce) &#123;</div><div class="line">			System.out.println(&quot;连接超时：&#123;&quot;+ce+&quot;&#125;&quot;);</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			System.out.println(&quot;https请求异常：&#123;&quot;+e+&quot;&#125;&quot;);</div><div class="line">		&#125;</div><div class="line">		return jsonObject;</div><div class="line">	&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>但是传递参数是用json字符串格式:      String json = “{\”access_token\”:”+accessToken+”,\”type\”:”+type+”,\”data\”:”+data+”,\”receiver_id\”:”+reciverId+”}”;<br>错误:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&#123;&quot;access_token&quot;:2.00QVn5TGBRF3HB873df99d307BvUEB,&quot;type&quot;:text,&quot;data&quot;:%7B%22text%22%3A%22%E7%BA%AF%E6%96%87%E6%9C%AC%E5%9B%9E%E5%A4%8D%22%7D,&quot;receiver_id&quot;:2038770943&#125;</div><div class="line">Exception in thread &quot;main&quot; java.io.IOException: Server returned HTTP response code: 403 for URL: https://m.api.weibo.com/2/messages/reply.json</div><div class="line">	at sun.net.www.protocol.http.HttpURLConnection.getInputStream(Unknown Source)</div><div class="line">	at sun.net.www.protocol.https.HttpsURLConnectionImpl.getInputStream(Unknown Source)</div><div class="line">	at com.yxm.test.TestHttpPost.readContentFromPost(TestHttpPost.java:128)</div><div class="line">	at com.yxm.test.TestHttpPost.main(TestHttpPost.java:48)</div></pre></td></tr></table></figure></p>
+<h6 id="3-解决问题"><a href="#3-解决问题" class="headerlink" title="3.解决问题"></a>3.解决问题</h6><p>首先开发客户接口必须要看清楚接口API文档  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/13/微博客服接口开发/" class="archive-article-date">
+  	<time datetime="2017-01-13T08:00:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-13</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/01/12/类加载器-五-类加载器的高级问题/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">类加载器(五)-类加载器的高级问题</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="微博客服接口开发" data-title="微博客服接口开发" data-url="https://github.com/startshineye/2017/01/13/微博客服接口开发/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.44px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
