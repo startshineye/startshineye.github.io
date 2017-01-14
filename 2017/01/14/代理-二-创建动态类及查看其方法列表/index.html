@@ -4,30 +4,27 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>java反射-Class类 | Startshineye的博客</title>
+  <title>代理(二)-创建动态类及查看其方法列表 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="反射的基石-Class类1.java类：用于描述一类事物共性，该事物有什么属性和没什么属性，是由这个类实例对象确定
-2.Class类：java程序中各个java类，他们是否属于同一类事物，是不是可以用一个类描述这类事物呢？描述这类java类的类就是Class类
-3.Class类描述了哪些方面的信息呢？类的名字，类的访问属性，类属性的包名，字段，方法
-4.区别：
-众多的人用一个什么类表示？众多的ja">
+  <meta name="description" content="目标
+利用java提供的API来生成动态的类
+用JVM生成的动态类一定要给出他一个接口内容1.原理分析
+运动java提供的Proxy  API其有一个getProxyClass()从而造出一个字节码,但是造出字节码的时候需要告诉这个字节码实现了哪些接口12getProxyClass(ClassLoader loader, Class&amp;lt;?&amp;gt;... interfaces) //返回代理类的">
 <meta property="og:type" content="article">
-<meta property="og:title" content="java反射-Class类">
-<meta property="og:url" content="https://github.com/startshineye/2016/12/18/java反射-一-java反射-Class类/index.html">
+<meta property="og:title" content="代理(二)-创建动态类及查看其方法列表">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/14/代理-二-创建动态类及查看其方法列表/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="反射的基石-Class类1.java类：用于描述一类事物共性，该事物有什么属性和没什么属性，是由这个类实例对象确定
-2.Class类：java程序中各个java类，他们是否属于同一类事物，是不是可以用一个类描述这类事物呢？描述这类java类的类就是Class类
-3.Class类描述了哪些方面的信息呢？类的名字，类的访问属性，类属性的包名，字段，方法
-4.区别：
-众多的人用一个什么类表示？众多的ja">
-<meta property="og:updated_time" content="2016-12-28T14:48:19.561Z">
+<meta property="og:description" content="目标
+利用java提供的API来生成动态的类
+用JVM生成的动态类一定要给出他一个接口内容1.原理分析
+运动java提供的Proxy  API其有一个getProxyClass()从而造出一个字节码,但是造出字节码的时候需要告诉这个字节码实现了哪些接口12getProxyClass(ClassLoader loader, Class&amp;lt;?&amp;gt;... interfaces) //返回代理类的">
+<meta property="og:updated_time" content="2017-01-14T14:34:04.979Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="java反射-Class类">
-<meta name="twitter:description" content="反射的基石-Class类1.java类：用于描述一类事物共性，该事物有什么属性和没什么属性，是由这个类实例对象确定
-2.Class类：java程序中各个java类，他们是否属于同一类事物，是不是可以用一个类描述这类事物呢？描述这类java类的类就是Class类
-3.Class类描述了哪些方面的信息呢？类的名字，类的访问属性，类属性的包名，字段，方法
-4.区别：
-众多的人用一个什么类表示？众多的ja">
+<meta name="twitter:title" content="代理(二)-创建动态类及查看其方法列表">
+<meta name="twitter:description" content="目标
+利用java提供的API来生成动态的类
+用JVM生成的动态类一定要给出他一个接口内容1.原理分析
+运动java提供的Proxy  API其有一个getProxyClass()从而造出一个字节码,但是造出字节码的时候需要告诉这个字节码实现了哪些接口12getProxyClass(ClassLoader loader, Class&amp;lt;?&amp;gt;... interfaces) //返回代理类的">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -163,7 +160,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-java反射-一-java反射-Class类" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-代理-二-创建动态类及查看其方法列表" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -173,7 +170,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      java反射-Class类
+      代理(二)-创建动态类及查看其方法列表
     </h1>
   
 
@@ -181,42 +178,34 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="反射的基石-Class类"><a href="#反射的基石-Class类" class="headerlink" title="反射的基石-Class类"></a>反射的基石-Class类</h4><h6 id="1-java类："><a href="#1-java类：" class="headerlink" title="1.java类："></a>1.java类：</h6><p>用于描述一类事物共性，该事物有什么属性和没什么属性，是由这个类实例对象确定</p>
-<h6 id="2-Class类："><a href="#2-Class类：" class="headerlink" title="2.Class类："></a>2.Class类：</h6><p>java程序中各个java类，他们是否属于同一类事物，是不是可以用一个类描述这类事物呢？描述这类java类的类就是Class类</p>
-<h6 id="3-Class类描述了哪些方面的信息呢？"><a href="#3-Class类描述了哪些方面的信息呢？" class="headerlink" title="3.Class类描述了哪些方面的信息呢？"></a>3.Class类描述了哪些方面的信息呢？</h6><p>类的名字，类的访问属性，类属性的包名，字段，方法</p>
-<h6 id="4-区别："><a href="#4-区别：" class="headerlink" title="4.区别："></a>4.区别：</h6><ol>
-<li>众多的人用一个什么类表示？众多的java类用什么类表示？<br>人：Person<br>java类：Class</li>
-<li>Person类代表人，实例对象就是张三，李四这样一个个具体的人。Class类代表的java类，他的各个实例对象又是什么呢？<br>对象各个类在内存中的字节码，例如：Person类的字节码，ArrayList类的字节码，等等。  </li>
-<li>创建对象<br>Person p1 = new Person();<br>Person p2 = new Person();  </li>
+        <h5 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h5><ol>
+<li>利用java提供的API来生成动态的类</li>
+<li>用JVM生成的动态类一定要给出他一个接口<h5 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h5><h6 id="1-原理分析"><a href="#1-原理分析" class="headerlink" title="1.原理分析"></a>1.原理分析</h6></li>
+<li>运动java提供的Proxy  API其有一个getProxyClass()从而造出一个字节码,但是造出字节码的时候需要告诉这个字节码实现了哪些接口<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">getProxyClass(ClassLoader loader, Class&lt;?&gt;... interfaces) </div><div class="line">//返回代理类的 java.lang.Class 对象，并向其提供类加载器和接口数组。</div></pre></td></tr></table></figure>
+</li>
 </ol>
-<p>Class c1 = new Class()//错误的做法，没有这个构造方法，或者这个构造方法私有的<br>Class c2 = 字节码1<br>Class c2 =  字节码2<br>java对象的创建是首先将java类编译成字节码。class文件放到硬盘上，然后将硬盘上的二进制代码加载到内存中，用这个字节码复制出一个个对象。比如代码中运用到了date，math，person类，那么内存中就有三份字节码，三份字节码就是三个Class的实例对象。Class c1 = Person.class//字节码<br>Person.class代表Person类的字节码，类型是Class<br>p1.getClass()也可以得到Person的字节码<br>Class.forName(“全类名”);也是得到类的字节码</p>
-<h6 id="5-怎样生成字节码"><a href="#5-怎样生成字节码" class="headerlink" title="5.怎样生成字节码"></a>5.怎样生成字节码</h6><ol>
-<li>类名.class 例如：Person.class  </li>
-<li>对象.getClass(),例如：new Date().getClass()  </li>
-<li>Class.forName(“类名”),例如：Class.forName(“java.util.Date”)  <h6 id="6-怎样得到字节码"><a href="#6-怎样得到字节码" class="headerlink" title="6.怎样得到字节码"></a>6.怎样得到字节码</h6></li>
-<li>这个类的字节码已经加载到内存中，不需要再加载，直接找到返回</li>
-<li>字节码已经生成，但是虚拟机中还没有字节码，用类加载器加载字节码，并用Class.forName(“类名”)返回字节码  <h6 id="7-面试题：Class-forName-“类名”-作用"><a href="#7-面试题：Class-forName-“类名”-作用" class="headerlink" title="7.面试题：Class.forName(“类名”)作用"></a>7.面试题：Class.forName(“类名”)作用</h6>Class.forName(“类名”)作用是返回字节码：两种方式</li>
-<li>字节码已经在虚拟机里面，直接返回</li>
-<li>虚拟机没有字节码，用类加载器加载字节码，缓存此字节码以后就不用再加载了，并用Class.forName(“类名”)返回字节码<h6 id="8-代码："><a href="#8-代码：" class="headerlink" title="8.代码："></a>8.代码：</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public class Reflect &#123;</div><div class="line">   public static void main(String[] args) throws Exception&#123;</div><div class="line">	//得到字节码的三种方式</div><div class="line">	 String str1 = &quot;abc&quot;;</div><div class="line">	</div><div class="line">	 Class c1 = str1.getClass();//1.</div><div class="line">	 Class c2 = String.class;</div><div class="line">	 Class c3 = Class.forName(&quot;java.lang.String&quot;);</div><div class="line">	 </div><div class="line">	 System.out.println(c1==c2);//true</div><div class="line">     System.out.println(c1==c3);//true</div><div class="line">     </div><div class="line">     //输出都是true，说明三种方式得到的是同一个字节码</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+<p>此方法是得到一个类的类加载器,某一个类都是通过类加载器把它从硬盘加入到内存的。就像某一个人都是有一个妈妈。而getProxyClass(ClassLoader loader, Class&lt;?&gt;… interfaces) 在JVM内存中操作的字节码是没有classLoder,虽然是内存中出来的但是还是需要给他指定一个类加载器,不然以后别人说一个类竟然没有类加载器,这是说不过去的,就像没有妈妈一样。</p>
+<h6 id="2-创建动态类"><a href="#2-创建动态类" class="headerlink" title="2.创建动态类"></a>2.创建动态类</h6><ol>
+<li>实例代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public class ProxyTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//调用Proxy得到一个类的类加载器，类加载器通常用接口参数相同的类加载器参数</div><div class="line">	Class proxyClass = Proxy.getProxyClass(Collection.class.getClassLoader(), Collection.class);</div><div class="line">	System.out.println(proxyClass.getName());//com.sun.proxy.$Proxy0</div><div class="line">	</div><div class="line">	System.out.println(&quot;----------begin constructor------------------------&quot;);</div><div class="line">	//找出这个类上的所有构造方法</div><div class="line">	Constructor[] constructors = proxyClass.getConstructors();</div><div class="line">	for(Constructor constructor:constructors)&#123;</div><div class="line">		String name = constructor.getName();</div><div class="line">		StringBuilder sb = new StringBuilder();//当线程条件下使用</div><div class="line">		sb.append(&quot;&#123;&quot;);</div><div class="line">		Class[] params = constructor.getParameterTypes();</div><div class="line">		for(Class param:params)&#123;</div><div class="line">			sb.append(param.getName()).append(&quot;,&quot;);</div><div class="line">			System.out.println();</div><div class="line">		&#125;</div><div class="line">		//如果没有参数就不用去掉最后一个&quot;,&quot;</div><div class="line">		if(params!=null &amp;&amp; params.length!=0)&#123;</div><div class="line">			sb.deleteCharAt(sb.length()-1);</div><div class="line">		&#125;</div><div class="line">		sb.append(&quot;&#125;&quot;);</div><div class="line">		System.out.println(sb);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
 </ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/12/18/java反射-一-java反射-Class类/" class="archive-article-date">
-  	<time datetime="2016-12-18T09:35:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+      <a href="/2017/01/14/代理-二-创建动态类及查看其方法列表/" class="archive-article-date">
+  	<time datetime="2017-01-14T13:20:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
 	</div>
 
       
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
 	</div>
 
 
@@ -228,18 +217,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/18/java反射-一-java反射(一)-Class类/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          java反射-Class类
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">自己写一个apache服务器(十八)-实现资源转发-javaServer16</div>
+    <a href="/2017/01/14/代理-一-代理及AOP/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">代理(一)-代理及AOP</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -285,7 +265,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="java反射-一-java反射-Class类" data-title="java反射-Class类" data-url="https://github.com/startshineye/2016/12/18/java反射-一-java反射-Class类/"></div>
+	<div class="ds-thread" data-thread-key="代理-二-创建动态类及查看其方法列表" data-title="代理(二)-创建动态类及查看其方法列表" data-url="https://github.com/startshineye/2017/01/14/代理-二-创建动态类及查看其方法列表/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
