@@ -1,0 +1,470 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>代理(一)-代理及AOP | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="代理概念及作用1.生活中的代理
+长沙人从长沙代理商手中买联想电脑和直接从联想总部买电脑，觉得最终主体业务目标有什么区别吗？基本上一样吧,都解决了核心问题,但是,一点区别都没有吗？从代理那里买难道就没有好处吗？代理可以节约一些成本吧
+由上面分析知道:代理其实就是做了和目标对象相同的事情，所以程序中代理类中的方法也是和被代理类的方法相同。2.程序中的代理
+要为已存在的多个具有相同接口的目标类的各个方法">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理(一)-代理及AOP">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/14/代理-一-代理及AOP/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="代理概念及作用1.生活中的代理
+长沙人从长沙代理商手中买联想电脑和直接从联想总部买电脑，觉得最终主体业务目标有什么区别吗？基本上一样吧,都解决了核心问题,但是,一点区别都没有吗？从代理那里买难道就没有好处吗？代理可以节约一些成本吧
+由上面分析知道:代理其实就是做了和目标对象相同的事情，所以程序中代理类中的方法也是和被代理类的方法相同。2.程序中的代理
+要为已存在的多个具有相同接口的目标类的各个方法">
+<meta property="og:image" content="https://github.com/startshineye/img/raw/master/2017/79.png">
+<meta property="og:updated_time" content="2017-01-14T09:04:48.835Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="代理(一)-代理及AOP">
+<meta name="twitter:description" content="代理概念及作用1.生活中的代理
+长沙人从长沙代理商手中买联想电脑和直接从联想总部买电脑，觉得最终主体业务目标有什么区别吗？基本上一样吧,都解决了核心问题,但是,一点区别都没有吗？从代理那里买难道就没有好处吗？代理可以节约一些成本吧
+由上面分析知道:代理其实就是做了和目标对象相同的事情，所以程序中代理类中的方法也是和被代理类的方法相同。2.程序中的代理
+要为已存在的多个具有相同接口的目标类的各个方法">
+<meta name="twitter:image" content="https://github.com/startshineye/img/raw/master/2017/79.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-代理-一-代理及AOP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      代理(一)-代理及AOP
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="代理概念及作用"><a href="#代理概念及作用" class="headerlink" title="代理概念及作用"></a>代理概念及作用</h4><h6 id="1-生活中的代理"><a href="#1-生活中的代理" class="headerlink" title="1.生活中的代理"></a>1.生活中的代理</h6><ol>
+<li>长沙人从长沙代理商手中买联想电脑和直接从联想总部买电脑，觉得最终主体业务目标有什么区别吗？基本上一样吧,都解决了核心问题,但是,一点区别都没有吗？从代理那里买难道就没有好处吗？代理可以节约一些成本吧</li>
+<li>由上面分析知道:代理其实就是做了和目标对象相同的事情，所以程序中代理类中的方法也是和被代理类的方法相同。<h6 id="2-程序中的代理"><a href="#2-程序中的代理" class="headerlink" title="2.程序中的代理"></a>2.程序中的代理</h6></li>
+<li><p>要为已存在的多个具有相同接口的目标类的各个方法增加一些系统功能,例如:异常处理,日志,计算方法的运行时间,事物管理,等等.你该怎么做?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">class X</div><div class="line">&#123;</div><div class="line">  void sayHello()&#123;</div><div class="line">   System.out.println(&quot;Hello world&quot;);</div><div class="line"> &#125;</div><div class="line">&#125;</div><div class="line">//X类如果想要再加入执行方法所需要时间该怎么办呢？这个类的源代码没有给你，你又要往里面加入其他功能，我们定义一个代理XProxy,既然是代理则和X具有相同的方法声明,只是在代理方法中添加额外的功能</div><div class="line">XProxy</div><div class="line">&#123;</div><div class="line">  void sayHello()&#123;</div><div class="line">  startTime();</div><div class="line">   X.sayHello();</div><div class="line">   endTime();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>编写一个与目标类具有相同接口的代理类,代理类的每个方法调用目标类的相同方法,并在调用方法时候加上系统功能的代码,原理框图如下:<br><img src="https://github.com/startshineye/img/raw/master/2017/79.png" alt=""><br>分析:<br>1.Client原来直接调用Target，现在不让其直接调用Target,而是调用Proxy代理类来代理Target<br>2.代理类和目标类实现相同的接口,就是说对外提供相同的方法<br>3.Client去引用目标不是直接去引用目标也不是直接去引用代理,而是通过引用相同的那个接口<br>4.代理类中一定要调用目标类的方法,但是在其目标类方法的前面后面可以加上系统功能代理</p>
+</li>
+<li>如果采用工厂模式和配置文件的方式进行管理,则不需要修改客户端程序,只需要在配置文件中配置是使用目标类,还是代理类,这样以后很容易切换,譬如,想要日志功能时候就配置代理类,否则配置目标类,这样,增加系统功能很容易,以后运行一段时间后,又想去掉系统功能也是很容易。</li>
+</ol>
+<h4 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h4><ol>
+<li>系统中存在交叉业务,一个交叉业务就是要切入到系统中的一个方面,如下所示:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">                    安全      事物    日志</div><div class="line">StudentService-------l---------l-------l----</div><div class="line">CourseService--------l---------l-------l-----</div><div class="line">MiscService----------l---------l-------l------</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>安全,事务,日志等功能要贯穿到好多个模块中,所以他就是交叉业务</p>
+<ol>
+<li>用具体的程序代码描述交叉业务:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">method1      method2     method3</div><div class="line">&#123;</div><div class="line">================================切面</div><div class="line">---          ---         ---</div><div class="line">================================切面</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>我们不可能深入到目标的方法内部修改，我们使用代理</p>
+<ol>
+<li><p>交叉业务的编程问题即为面向方面的编程(Aspect oriented program,简称AOP),AOP的目标就是使交叉业务模块化。可以采用将面向切面代码移动到原始方法的周围,这与直接在方法中编写切面代码的运行效果是一样的。我们不可能深入到目标的方法内部修改，而上面是使用了方内部,我们可以在方法前后进行操作，让用户感觉我们是在方法内部前后做了修改  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">================================切面</div><div class="line">method1      method2     method3</div><div class="line">&#123;</div><div class="line">---          ---         ---</div><div class="line">&#125;</div><div class="line">================================切面</div></pre></td></tr></table></figure>
+</li>
+<li><p>将切面方法转移到方法的周围来，让运行效果放到方法内部的头尾一样，使用代理技术正好解决这种问题,代理实现AOP功能的核心和关键技术。</p>
+</li>
+</ol>
+<h4 id="动态代理技术"><a href="#动态代理技术" class="headerlink" title="动态代理技术"></a>动态代理技术</h4><ol>
+<li>要为系统中的各个接口的类增加代理功能,那将需要太多的代理类,全部采用静态代理方式,将是一件非常麻烦的事情!写成百上千个代理类,是不是太累!</li>
+<li>JVM可以在运行期动态生成出类的字节码(你不需要自己写那个类,只需要将那个方法调用即可),这种动态生成的类往往被用作代理类,即动态代理类。</li>
+<li>委托JVM要动态生成一个类，肯定JVM要问你生成的类有什么方法？生成的类连方法都没有基本上是没有意义的，如果告诉那些方法比较麻烦，直接告诉一个直接，实现这个接口就会实现里面的全部方法。JVM生成的动态类必须实现一个或者多个接口,所以,JVM生成的动态类只能用作具有相同接口的目标类的代理  </li>
+<li>假如一个类没有接口,你告诉JVM动态生成这个类是不现实的。JVM也干不了，则出现CGLIB库可以动态生成一个类的子类,一个类的子类也可以用作该类的代理,所以,如果要为一个没有实现接口的类生成动态代理类,那么可以使用CGLIB库.</li>
+<li>代理类的各个方法中通常除了要调用目标类的相应方法和对外返回目标返回的结果外，还可以在代理方法中的如下四个位置加上系统功能代码:<br>1.在调用目标方法之前<br>2.在调用目标方法之后<br>3.在调用目标方法前后<br>4.在处理目标方法异常的catch块中  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/14/代理-一-代理及AOP/" class="archive-article-date">
+  	<time datetime="2017-01-14T07:31:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/01/14/代理及AOP/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">代理及AOP</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="代理-一-代理及AOP" data-title="代理(一)-代理及AOP" data-url="https://github.com/startshineye/2017/01/14/代理-一-代理及AOP/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.44px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

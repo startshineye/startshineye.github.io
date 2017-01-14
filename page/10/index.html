@@ -152,6 +152,373 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring验证的错误-BindingResult" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/31/Spring验证的错误-BindingResult/">Spring验证的错误-BindingResult</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://p1.bqimg.com/576993/5c03b9a9e3abd3f1.png" alt="Markdown">  </p>
+<h3 id="SpingjavaBindingResultvalid验证"><a href="#SpingjavaBindingResultvalid验证" class="headerlink" title="SpingjavaBindingResultvalid验证"></a>SpingjavaBindingResultvalid验证</h3><p>本文引用<br>“<a href="http://zyjustin9.iteye.com/blog/2002606" target="_blank" rel="external">http://zyjustin9.iteye.com/blog/2002606</a>“;<br>最近做的一个项目使用了 Spring MVC3， 其中验证也是使用Spring的 validate 框架， 但不是全部。<br>我们 只是使用了org.springframework.validation.Errors， org.springframework.validation.BindingResult 来将验证错误信息返回到JSP页面。因为Spring提供了<form:errors>标签来显示BindingResult对象里的错误信 息， 并且这个验证框架还支持国际化， errorCode对应的语言文字放到工程的message资源文件就好了。  </form:errors></p>
+<p>下面是一个简单的注册账户的例子：包括三个文件：JSP， AccountValidator和AccountValidator。  </p>
+<h5 id="1-首先是JSP页面：addAccount-jsp的表单"><a href="#1-首先是JSP页面：addAccount-jsp的表单" class="headerlink" title="1.首先是JSP页面：addAccount,jsp的表单"></a>1.首先是JSP页面：addAccount,jsp的表单</h5><pre><code>   &lt;form:form modelAttribute=&quot;accountVo&quot; action=&quot;${actionUrl}&quot; method=&quot;post&quot;&gt;
+        &lt;form:hidden path=&quot;id&quot;  readonly=“readonly”/&gt;
+
+       &lt;form:input path=&quot;email&quot; size=&quot;30&quot; onblur=&quot;checkEmail();&quot;/&gt; //path的值必须和accountVo这个对象的属性一致
+
+       &lt;form:errors path=&quot;email&quot; cssClass=&quot;errorMsg&quot;&gt;&lt;/form:errors&gt;  
+
+               //这里省略了表单的其他元素， 直接来提交按钮   
+
+       &lt;input type=&quot;button&quot;  id=&quot;saveAccount&quot;  value=&apos;&lt;fmt:message key=&quot;button.next&quot; /&gt;&apos; onclick=&quot;submitAccount (&apos;accountVo&apos;)&quot;/&gt;
+
+               //这里完全可以使用type=“submit”， 这里使用button可以截获提交事件， 并在提交之前先做JS层面的验证
+
+&lt;/form:form&gt;
+</code></pre><p>Note: 使用上面这些标签， 必须引入Spring 的 form标签库：&lt;%@ taglib prefix=”form” uri=”<a href="http://www.springframework.org/tags/form" target="_blank" rel="external">http://www.springframework.org/tags/form</a>“ %&gt;   </p>
+<p>大家还看到我们使用了JSTL的fmt标签库（国际化）， 这个也要引入&lt;%@ taglib uri=”<a href="http://java.sun.com/jsp/jstl/fmt" target="_blank" rel="external">http://java.sun.com/jsp/jstl/fmt</a>“ prefix=”fmt” %&gt;， 其实我们也完全可以用<form message="">标签来做国际化的。这里我还想说一个东西：readonly这个属性根本起不到只读的作用， 完全可以被修改，但是使用disable属性后，这个表单元素就无法放到accountVo这个对象并提交了   </form></p>
+<hr>
+<h5 id="2-这里是个不完整的验证类AccountValidator，-注意，我们没有实现Validator接口"><a href="#2-这里是个不完整的验证类AccountValidator，-注意，我们没有实现Validator接口" class="headerlink" title="2.这里是个不完整的验证类AccountValidator， 注意，我们没有实现Validator接口"></a>2.这里是个不完整的验证类AccountValidator， 注意，我们没有实现Validator接口</h5><pre><code>public class AccountValidator {
+ public void validate(AccountVo accountVo, Errors errors) {
+    String email = accountVo.getEmail();
+    if (!StringUtils.hasLength(email)) {
+        errors.rejectValue(&quot;email&quot;, &quot;validate.email.empty&quot;, &quot;邮箱不能为空&quot;);//这个函数有好几个重载的变体
+    }
+ }
+}
+</code></pre><p>Note: Errors这个接口有好几个rejectValue()函数， 它们是可以支持国际化的。 比如， 上面这个例子表示， 错误的字段(filed)是“email”， errorCode是“validate.email.empty”， 与资源文件对应， 第三个是defaultMessage。很多国际化当中会带有参数， rejectValue其中的一个重载函数就是rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage)。  </p>
+<hr>
+<h5 id="3-最后是AccountController"><a href="#3-最后是AccountController" class="headerlink" title="3.最后是AccountController"></a>3.最后是AccountController</h5><p>@Controller//基于注解， 声明这是一个controller<br>@RequestMapping(value=”/account”) //表示总的路径<br>@SessionAttributes(“account”) //表示account对象将会存入  session当中， //默认情况下model.addAttribute(account)将会把account对象放入request当中， 并且属性名为“account”    </p>
+<pre><code>public class AccountFormController {
+@RequestMapping(value = &quot;/add&quot;, method = RequestMethod.POST)
+public String addAccount(@ModelAttribute(&quot;accountVo&quot;) AccountVo accountVo,
+        BindingResult result, //这里面，BindResult result必须紧跟着前面的@ModelAttribute， 否则会出错
+
+        HttpServletResponse response,
+        HttpSession session, Model model) {
+    log.debug(accountVo.toString());
+
+    if(isExist(accountVo)){
+        log.debug(&quot;Opps, 这个email已经注册过了！&quot;);
+        result.rejectValue(&quot;email&quot;, &quot;misFormat&quot;, &quot;这个email已经注册过了！&quot;);
+        return &quot;account/addAccount&quot;;
+    }else{
+        new AccountValidator().validate(accountVo, result);
+        if(result.hasErrors()){
+            log.debug(&quot;表单数据有误， 重新填写&quot;+accountVo);
+            model.addAttribute(&quot;accountVo&quot;,accountVo);//把accountVo对象返回到页面， 这样不至于表单被清空了
+            return &quot;account/addAccount&quot;;//返回到注册页面，同时，这里会自动将验证错误信息返回到JSP页面， 怎么返回呢？看后面！
+        }
+        //这里会做很多数据库的操作， 省略
+   }
+
+ } //end of login()
+
+}//end of controller
+</code></pre><p>Note: 这里需要特别注意几个问题：1.函 数形参 BindResult result 必须紧跟着前面的@ModelAttribute， 否则会出异常； 2. @ModelAttribute(“accountVo”) AccountVo accountVo, 这个参数与JSP页面的<form:form modelattribute="accountVo" action="${actionUrl}" method="post">对应</form:form></p>
+<hr>
+<h5 id="4-进阶一下，-看看验证错误信息对象是怎么传递到页面的"><a href="#4-进阶一下，-看看验证错误信息对象是怎么传递到页面的" class="headerlink" title="4.进阶一下， 看看验证错误信息对象是怎么传递到页面的"></a>4.进阶一下， 看看验证错误信息对象是怎么传递到页面的</h5><p>这 一切看起来都很完美， 但是有时候出于设计的原因， 我们不得不使用redirect， 对， 就是重定向！ 就是这个东西让我对Spring MVC有了一点不好的印象， 特别是结合了sitemesh之后。这个先打住， 咱们还是说验证错误怎么传给重定向之后的JSP页面吧。  </p>
+<p>其实也简单， 咱们可以先把错误对象放入session当中， 然后在另一个Controller里把它取出来， 然后再返回到相应的JSP页面就行了！</p>
+<p>对！但是，这里要注意了， BindingResult这个对象是自动传入JSP的， 我们不知道应该把它放在request里面呢还是session里面， 或者其他的地方， 以及属性名叫什么。这个就是我昨天晚上纠结的问题， 最后看了一下Spring 的源代码， 终于稍微清楚了一点儿。下面直接上代码，然后解释。</p>
+<pre><code> if(session.getAttribute(&quot;BindingResult.accountVo&quot;) != null){
+       //放到session和request里面， 不论attr name设置成什么都不行
+       //只有这样才能把bindingresult的错误信息传到JSP页面
+       String errorAttrName = &quot;org.springframework.validation.BindingResult.accountenterpriseVo&quot;;
+       model.addAttribute(errorAttrName, session.getAttribute(&quot;BindingResult.accountVo&quot;));
+       session.removeAttribute(&quot;BindingResult.enterpriseVo&quot;);
+}
+</code></pre><p>首先， 验证错误对象 BindingResult 必须放入 org.springframework.ui.Model 当中返回给JSP页面。放到request和session当中都没用。  </p>
+<p>第二，这个属性名是BindingResult.getClass().getName + “.” + targetName, 也就是上面那一长串， 其中targerName对应着JSP页面的表单的modelAttribute， 即<form:form modelattribute="accountVo" action="${actionUrl}" method="post">中的accountVo。 对了， 顺便说一下， accountVo同时还是表单的id， 大家可以用firefox的firebug查看页面元素。<form:error>标签也会被翻译成</form:error></form:form></p>
+<p><span class="errorMsg" id="email.errors">邮箱格式不正确!</span> //如果是英文浏览器， “邮箱格式不正确!”就会使英文版本的。</p>
+<p>好的， 就先写到这里了。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/31/Spring验证的错误-BindingResult/" class="archive-article-date">
+  	<time datetime="2016-10-31T15:36:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/">Spring</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术-Spring/">技术 Spring</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Oracle" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/31/Oracle/">Oracle</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://p1.bqimg.com/576993/436c361c169a74bc.jpg" alt="Markdown"></p>
+<h3 id="Oracle重要知识点"><a href="#Oracle重要知识点" class="headerlink" title="Oracle重要知识点"></a>Oracle重要知识点</h3><hr>
+<h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><h4 id="内容分为四部分"><a href="#内容分为四部分" class="headerlink" title="内容分为四部分"></a>内容分为四部分</h4><h4 id="一-Oracle注意语法"><a href="#一-Oracle注意语法" class="headerlink" title="一: Oracle注意语法"></a>一: Oracle注意语法</h4><ol>
+<li>条件查询相关</li>
+<li>单行函数相关</li>
+<li>分组函数相关</li>
+<li>查询相关<h4 id="二-Oracle数据类型"><a href="#二-Oracle数据类型" class="headerlink" title="二: Oracle数据类型"></a>二: Oracle数据类型</h4></li>
+<li>数字类型</li>
+<li>字符类型</li>
+<li>日期类型</li>
+<li>扩充类型<h4 id="三-Oracle中to-date-to-char-to-number解析"><a href="#三-Oracle中to-date-to-char-to-number解析" class="headerlink" title="三: Oracle中to  date,to  char,to_number解析"></a>三: Oracle中to <em> date,to </em> char,to_number解析</h4></li>
+<li>to_date解析</li>
+<li>to_char解析</li>
+<li>to_number解析<h4 id="四-Oracle与分页相关的rownum解析"><a href="#四-Oracle与分页相关的rownum解析" class="headerlink" title="四: Oracle与分页相关的rownum解析"></a>四: Oracle与分页相关的rownum解析</h4></li>
+</ol>
+<hr>
+<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="二-Oracle数据类型-1"><a href="#二-Oracle数据类型-1" class="headerlink" title="二:Oracle数据类型"></a>二:Oracle数据类型</h3><h5 id="1-数字类型"><a href="#1-数字类型" class="headerlink" title="1.数字类型"></a>1.数字类型</h5><p>   number(数字类型)[包括整数类型和浮点数类型]:<br>   number(3):表示该字段是整数类型,位数最大为三位,最大值是999<br>   number(3,2):该字段可以出现小数，3表示有效数字的位数，2表示小数位数  </p>
+<h6 id="案例"><a href="#案例" class="headerlink" title="案例"></a>案例</h6><pre><code>创建一张测试表,向其中插入数据 :t_test(id number(3,1))  
+ create table t_test(id number(3,2));
+</code></pre><p><img src="http://i1.piimg.com/576993/aa8301564a01b658.png" alt="Markdown"></p>
+<pre><code>1. 向表中插入数据9
+ insert into t_test values(9);
+</code></pre><p><img src="http://i1.piimg.com/576993/15a8194d5104f997.png" alt="Markdown"></p>
+<pre><code>2. 向表中插入数据10  
+ insert into t_test values(10);
+</code></pre><p><img src="http://i1.piimg.com/576993/c6adb1312063bfaf.png" alt="Markdown"><br>     出现以上错误原是因为我们定义的id有效数字是3位,且保留两位小数,对于10会变成10.00此时有效数字位数是4位,超出了指定位数.</p>
+<hr>
+<h5 id="2-字符类型"><a href="#2-字符类型" class="headerlink" title="2.字符类型"></a>2.字符类型</h5><ul>
+<li>char 字符类型：定长字符串，不可变长度字符串。 在Oracle数据库中：char(10)，假如传递的数据是’jack’，底层实际存储的是’jack+6个空格’</li>
+<li>varchar 字符类型：可变长度字符串。<br>varchar是SQL语句规范中的标准。 通用的。 Varchar默认采用一个字节编码，汉字、全角等采用两个。</li>
+<li><p>varchar2 字符类型：可变长度字符串<br>varchar2只有Oracle数据库采用， 不是通用的，但是varchar2采用默认采用两个字节编码，可以容纳更多种类的语言。 兼容性更好一些。和数据库的字符集有关系</p>
+<pre><code>字符类型有两种char与varchar(varchar2)有什么区别?
+CHAR存储定长字符串。
+varchar,VARCHAR2存储可变长字符串
+</code></pre></li>
+</ul>
+<hr>
+<h4 id="3-日期类型"><a href="#3-日期类型" class="headerlink" title="3.日期类型"></a>3.日期类型</h4><ul>
+<li>date 日期类型 </li>
+</ul>
+<hr>
+<h4 id="4扩充类型"><a href="#4扩充类型" class="headerlink" title="4扩充类型"></a>4扩充类型</h4><ul>
+<li>blob Binary Large OBject(二进制大对象)<br>  通常存储：图片、声音、视频等二进制数据。 </li>
+<li>clob Character Large OBject(字符大对象)<br>通常存储：大文本</li>
+</ul>
+<hr>
+<h6 id="案例-1"><a href="#案例-1" class="headerlink" title="案例"></a>案例</h6><pre><code>思考:设计一张电影表 t_movie
+id(number)    name(varchar2)    上映日期(date)    海报(BLOB)
+__________________________________________________________
+</code></pre><hr>
+<h4 id="三-Oracle中to-date-to-char-to-number解析-1"><a href="#三-Oracle中to-date-to-char-to-number解析-1" class="headerlink" title="三: Oracle中to  date,to  char,to_number解析"></a>三: Oracle中to <em> date,to </em> char,to_number解析</h4><h5 id="1-to-date解析"><a href="#1-to-date解析" class="headerlink" title="1 to_date解析"></a>1 to_date解析</h5><p>to_date   </p>
+<ol>
+<li><p>to_date函数的作用:将”字符类型数据”转换为”日期类型”</p>
+</li>
+<li><p>to_date函数的运算结果类型:date</p>
+</li>
+<li><p>to_date函数的语法格式:to_date(“字符类型数据”,”日期格式”)</p>
+</li>
+<li><p>关于日期格式<br><img src="http://i1.piimg.com/576993/a020bfac89ab7174.png" alt="Markdown"></p>
+</li>
+<li><p>to_date函数的使用场景  </p>
+<pre><code>案例:创建一张表  t_person(name varchar2(32),birthday date)
+create tale t_person(name varchar2(32),birthday date);
+
+--向表中插入数据1
+insert into t_person values(&apos;zs&apos;,&apos;1987-10月-13&apos;);--ORA-01861: 文字与格式字符串不匹配
+
+修改SQL语句
+insert into t_person values(&apos;zs&apos;,to_date(&apos;1987-10月-13&apos;,&apos;YYYY-MON-DD&apos;));
+
+--向表中插入数据2
+insert into t_person values(&apos;LS&apos;,&apos;11月-15-1988&apos;);--ORA-01861: 文字与格式字符串不匹配
+修改SQL语句
+insert into t_person values(&apos;LS&apos;,to_date(&apos;11月-15-1988&apos;,&apos;MON-DD-YYYY&apos;));
+
+--向表中插入数据3
+insert into t_person values(&apos;ww&apos;,&apos;22-12月-86&apos;);//可以插入
+底层会自动调用to_date函数进行转换
+</code></pre></li>
+<li><p>结论<br> 大多使用在插入操作,如果数据库字段定义的是date类型,但是传递的数据是字符类型<br> 那么需要手动调用to_date函数进行转换;除非插入的字符串的格式和oracle数据库默认的日期格式<br> 相同,会自动进行类型转换</p>
+<h5 id="2-to-char解析"><a href="#2-to-char解析" class="headerlink" title="2 to_char解析"></a>2 to_char解析</h5><p>to_char  </p>
+</li>
+<li><p>to_char函数的作用:将”日期类型”数据转换为字符类型</p>
+</li>
+<li><p>to_char函数的运算结果类型:char</p>
+</li>
+<li><p>to_char函数的语法格式:to_char(“日期数据”,”日期格式”)</p>
+</li>
+<li><p>常用的数字格式<br><img src="http://i1.piimg.com/576993/05d9dce459c4dfe4.png" alt="Markdown"></p>
+</li>
+<li><p>to_char函数的使用场景  </p>
+<pre><code>案例:查询员工的编号,姓名,雇用日期
+select empno,ename,hiredate from emp;
+
+要求:雇佣日期按照年-月-日 时:分:秒的格式进行展示
+select empno,ename,to_char(hiredate,&apos;YYYY-MON-DD HH24:MI:SS&apos;) from emp;
+</code></pre></li>
+<li><p>结论   </p>
+<pre><code>大多使用在select操作中,如果默认的日期转
+换格式不符合用户的要求,可以手动调用to_char函数进行转换
+</code></pre></li>
+</ol>
+<hr>
+<h5 id="3-to-number解析"><a href="#3-to-number解析" class="headerlink" title="3 to_number解析"></a>3 to_number解析</h5><p>to_number(了解)  </p>
+<ol>
+<li><p>to_number函数的作用:将”字符类型”数据转换为”数字类型”</p>
+</li>
+<li><p>to_number函数的运算结果类型:number</p>
+</li>
+<li><p>to_number函数的语法格式:to_number(“字符类型数据”,”数字格式”)</p>
+</li>
+<li><p>to_number函数的使用场景  </p>
+<pre><code>大多使用插入操作中,如果数据库字段定义的是number类型,
+但是传递的是一个字符类型数据
+那么需要手动调用to_number进行转换
+</code></pre></li>
+</ol>
+<hr>
+<h4 id="四-Oracle与分页相关的rownum解析-1"><a href="#四-Oracle与分页相关的rownum解析-1" class="headerlink" title="四: Oracle与分页相关的rownum解析"></a>四: Oracle与分页相关的rownum解析</h4><ol>
+<li><p>rownum<br>是oracle数据库特有的内容,是一个隐含字段,为每一个查询的结果集维护了一个自增的行号行号从1开始,以1递增</p>
+</li>
+<li><p>不同的数据库,分页的SQL不同<br> mysql–&gt;limit<br> oracle–&gt;三层嵌套select+rownum</p>
+</li>
+<li><p>rownum都支持哪些操作?<br> 在进行查询的时候,行号一定要包含1<br> &lt;,&lt;=,&gt;0,&gt;=1</p>
+</li>
+<li><p>rownum和表中的记录是否存在绑定关系?<br>不存在</p>
+</li>
+</ol>
+<hr>
+<p>#####——-oracle分页实例(重点)——</p>
+<h6 id="5-案例-查询出员工表的前5条记录"><a href="#5-案例-查询出员工表的前5条记录" class="headerlink" title="5.案例: 查询出员工表的前5条记录"></a>5.案例: 查询出员工表的前5条记录</h6><pre><code>select empno,ename from emp where rownum&lt;=5;
+</code></pre><p>######6.案例: 查询出员工工资排名在前5条记录<br>错误的写法:  </p>
+<pre><code>select empno,ename,sal 
+from emp 
+where rownum&lt;=5 order by sal desc;
+</code></pre><p>正确的写法:  </p>
+<pre><code>    第一步:先按照工资降序排序
+select empno,ename,sal,rownum from emp order by sal desc;
+
+    第二步:将上面查询的结果作为一张临时表t,取出前5条
+    select 
+        empno,ename,sal
+    from
+    (select empno,ename,sal from emp order by sal desc)t
+    where
+        rownum&lt;=5;
+</code></pre><h6 id="7案例-查询出员工工资排名在前-3-9-条记录"><a href="#7案例-查询出员工工资排名在前-3-9-条记录" class="headerlink" title="7案例:查询出员工工资排名在前[3-9]条记录"></a>7案例:查询出员工工资排名在前[3-9]条记录</h6><pre><code>第一步:将工资排名在前9的员工查询出来
+select 
+    empno,ename,sal,rownum
+from
+(select empno,ename,sal from emp order by sal desc)t
+where
+    rownum&lt;=9;
+第二步:将上面的查询结果作为一个临时表 tt
+select 
+    empno,ename,sal
+from
+    (select 
+empno,ename,sal,rownum linenum
+    from
+(select empno,ename,sal from emp order by sal desc)t
+    where
+    rownum&lt;=9)
+where 
+    linenum &gt;=3;
+</code></pre><hr>
+<h6 id="8-通用的分页sql"><a href="#8-通用的分页sql" class="headerlink" title="8.通用的分页sql"></a>8.通用的分页sql</h6><pre><code>每页显示3条
+第1页 (0-3]
+第2页 (3-6]
+第3页 (6-9]
+...
+
+每页显示pageSize条
+第pageNo页 ( (pageNo-1)*pageSize-pageNo*pageSize]
+
+    select 
+        tt.*
+    from
+        (select 
+            t.*,rownum linenum
+        from
+            (业务SQL)t
+        where
+        rownum&lt;=pageNo*pageSize)tt
+    where 
+        linenum &gt;(pageNo-1)*pageSize;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/31/Oracle/" class="archive-article-date">
+  	<time datetime="2016-10-31T15:27:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/数据库-Oracle/">数据库 Oracle</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-im开发参考网址" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -669,128 +1036,6 @@
 
 
   
-    <article id="post-CTI嵌入坐席" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/26/CTI嵌入坐席/">CTI嵌入坐席</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-打开虚拟机（虚拟机已安装了CTI环境）"><a href="#1-打开虚拟机（虚拟机已安装了CTI环境）" class="headerlink" title="1.打开虚拟机（虚拟机已安装了CTI环境）"></a>1.打开虚拟机（虚拟机已安装了CTI环境）</h5><p>打开虚拟机，在自动弹出弹出的CTI华为智能呼叫中心，等到下面5个指示灯都亮了以后就说明启动成功。（此时winUAP自动启动）<br><img src="http://p1.bqimg.com/576993/05857100cfcde242.png" alt="Markdown"></p>
-<h5 id="2-打开管理系统应用服务器"><a href="#2-打开管理系统应用服务器" class="headerlink" title="2.打开管理系统应用服务器"></a>2.打开管理系统应用服务器</h5><p><img src="http://p1.bqimg.com/576993/fbe784ef72875c53.png" alt="Markdown"></p>
-<h5 id="3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"><a href="#3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）" class="headerlink" title="3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"></a>3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）</h5><p>打开此时”通用坐席程序”会提示工号和密码登录，登录后坐席就在虚拟机内启动，只需要嵌入即可。（一般在本机上也会装一个通用坐席程序，进行嵌入测试）<br><img src="http://p1.bqimg.com/576993/6d4388ac87aa2e6d.png" alt="Markdown"></p>
-<h5 id="4-打开CTI-Link协议服务器"><a href="#4-打开CTI-Link协议服务器" class="headerlink" title="4.打开CTI-Link协议服务器"></a>4.打开CTI-Link协议服务器</h5><p>CTI-Link协议服务器作用就是为了接入模拟电话 所开的通道连接<br><img src="http://p1.bqimg.com/576993/81f0e99118b74934.png" alt="Markdown"></p>
-<h5 id="5-打开web程序，在web端输入坐席名称密码和分机号码"><a href="#5-打开web程序，在web端输入坐席名称密码和分机号码" class="headerlink" title="5.打开web程序，在web端输入坐席名称密码和分机号码"></a>5.打开web程序，在web端输入坐席名称密码和分机号码</h5><p><img src="http://p1.bqimg.com/576993/67129d52342d2aab.png" alt="Markdown"></p>
-<h5 id="6-进入系统，准备嵌入"><a href="#6-进入系统，准备嵌入" class="headerlink" title="6.进入系统，准备嵌入"></a>6.进入系统，准备嵌入</h5><p><img src="http://p1.bqimg.com/576993/071bd5511c6e9ee1.png" alt="Markdown"></p>
-<h5 id="7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"><a href="#7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号" class="headerlink" title="7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"></a>7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号</h5><p><img src="http://p1.bqimg.com/576993/c376167dc1539149.png" alt="Markdown"></p>
-<h5 id="8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"><a href="#8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）" class="headerlink" title="8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"></a>8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）</h5>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/26/CTI嵌入坐席/" class="archive-article-date">
-  	<time datetime="2016-10-26T14:51:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTI/">CTI</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/CTI/">CTI</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-华为软电话简单调节" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/25/华为软电话简单调节/">华为软电话简单调节</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-安装虚拟机"><a href="#1-安装虚拟机" class="headerlink" title="1.安装虚拟机"></a>1.安装虚拟机</h4><h4 id="2-将华为CTI软电话装入到虚拟机中"><a href="#2-将华为CTI软电话装入到虚拟机中" class="headerlink" title="2.将华为CTI软电话装入到虚拟机中"></a>2.将华为CTI软电话装入到虚拟机中</h4><p>打开华为软电话：<br><img src="http://i1.piimg.com/576993/823d3a461aa8b9ae.png" alt="Markdown"></p>
-<h4 id="3-华为智能呼叫中心会自动启动"><a href="#3-华为智能呼叫中心会自动启动" class="headerlink" title="3.华为智能呼叫中心会自动启动"></a>3.华为智能呼叫中心会自动启动</h4><p>如果下面一排5个指示灯都变绿表示启动成功<br><img src="http://i1.piimg.com/576993/31dc86f3aae71516.png" alt="Markdown"></p>
-<h4 id="4-打开CTI-Link协议服务器"><a href="#4-打开CTI-Link协议服务器" class="headerlink" title="4.打开CTI-Link协议服务器"></a>4.打开CTI-Link协议服务器</h4><p><img src="http://i1.piimg.com/576993/25f426416b7ab2b8.png" alt="Markdown"></p>
-<h4 id="5-点击开始接入坐席"><a href="#5-点击开始接入坐席" class="headerlink" title="5.点击开始接入坐席"></a>5.点击开始接入坐席</h4><p><img src="http://i1.piimg.com/576993/de2cdfe810634e62.png" alt="Markdown"></p>
-<h4 id="6-输入密码登录打开一个电话（坐席）"><a href="#6-输入密码登录打开一个电话（坐席）" class="headerlink" title="6.输入密码登录打开一个电话（坐席）"></a>6.输入密码登录打开一个电话（坐席）</h4><p><img src="http://i1.piimg.com/576993/3ba3ae955b051967.png" alt="Markdown"></p>
-<h4 id="7-打开一个电话（客户）"><a href="#7-打开一个电话（客户）" class="headerlink" title="7.打开一个电话（客户）"></a>7.打开一个电话（客户）</h4><p><img src="http://i1.piimg.com/576993/3149507956459cfd.png" alt="Markdown"></p>
-<h4 id="8-打10086对话"><a href="#8-打10086对话" class="headerlink" title="8.打10086对话"></a>8.打10086对话</h4><p><img src="http://i1.piimg.com/576993/7401a9abe1f0cd92.png" alt="Markdown"></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/25/华为软电话简单调节/" class="archive-article-date">
-  	<time datetime="2016-10-25T15:07:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTI/">CTI</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/智能呼叫中心/">智能呼叫中心</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
@@ -856,7 +1101,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.44px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 10px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.44px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     
