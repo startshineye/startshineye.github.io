@@ -152,6 +152,77 @@
       <div class="body-wrap">
         
   
+    <article id="post-类加载器-三-编写对class文件进行加密的工具类" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/10/类加载器-三-编写对class文件进行加密的工具类/">类加载器(三)-编写对class文件进行加密的工具类</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="编写一个对文件内容进行简单加密的程序"><a href="#编写一个对文件内容进行简单加密的程序" class="headerlink" title="编写一个对文件内容进行简单加密的程序"></a>编写一个对文件内容进行简单加密的程序</h4><ol>
+<li>写一个加密程序,用于对类的class文件进行加密(加密算法就是^oxfff)</li>
+<li>myeclipse下找到ClassLoaderAttachment的class文件<br><img src="http://i1.piimg.com/576993/606c8025bfca8584.png" alt="Markdown"></li>
+<li>找到class文件下某个文件所对应的具体路径<br><img src="http://i1.piimg.com/576993/606c8025bfca8584.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/c64e4474a5e520e0.png" alt="Markdown"></li>
+<li>myeclipse下传递参数配置<br><img src="http://i1.piimg.com/576993/f386c3561ad6d425.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/26e86ca5f1cfa7ce.png" alt="Markdown"></li>
+<li>用加密的(classlib下)覆盖(bin目录下)<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">Exception in thread &quot;main&quot; java.lang.ClassFormatError: Incompatible magic value 889275713 in class file com/yxm/ClassLoaderAttachment</div><div class="line">	at java.lang.ClassLoader.defineClass1(Native Method)</div><div class="line">	at java.lang.ClassLoader.defineClass(ClassLoader.java:621)</div><div class="line">	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:124)</div><div class="line">	at java.net.URLClassLoader.defineClass(URLClassLoader.java:260)</div><div class="line">	at java.net.URLClassLoader.access$000(URLClassLoader.java:56)</div><div class="line">	at java.net.URLClassLoader$1.run(URLClassLoader.java:195)</div><div class="line">	at java.security.AccessController.doPrivileged(Native Method)</div><div class="line">	at java.net.URLClassLoader.findClass(URLClassLoader.java:188)</div><div class="line">	at java.lang.ClassLoader.loadClass(ClassLoader.java:307)</div><div class="line">	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:301)</div><div class="line">	at java.lang.ClassLoader.loadClass(ClassLoader.java:252)</div><div class="line">	at java.lang.ClassLoader.loadClassInternal(ClassLoader.java:320)</div><div class="line">	at com.yxm.classloader.MyClassLoader.main(MyClassLoader.java:41)</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>以上说明加密成功</p>
+<h4 id="代码过程及实例"><a href="#代码过程及实例" class="headerlink" title="代码过程及实例"></a>代码过程及实例</h4><h6 id="1-：找到ClassLoaderAttachment对其进行加密-然后放入将-class文件放到classlib下"><a href="#1-：找到ClassLoaderAttachment对其进行加密-然后放入将-class文件放到classlib下" class="headerlink" title="1.：找到ClassLoaderAttachment对其进行加密,然后放入将.class文件放到classlib下"></a>1.：找到ClassLoaderAttachment对其进行加密,然后放入将.class文件放到classlib下</h6><ol>
+<li>工程布局<br><img src="http://i1.piimg.com/576993/4ac914d9ad9c3a1b.png" alt="Markdown"><h6 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h6></li>
+<li><p>ClassLoaderAttachment代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderAttachment extends Date&#123;</div><div class="line">    public String toString()&#123;</div><div class="line">    	return &quot;hello yxm&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>MyClassLoader代码</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * MyClassLoader既作为类加载器也作为加密工具</div><div class="line"> */</div><div class="line">public class MyClassLoader &#123;</div><div class="line">	/**</div><div class="line">	 * 目标：找到ClassLoaderAttachment对其进行加密,然后放入到classlib下</div><div class="line">	 * @param args</div><div class="line">	 * @throws Exception</div><div class="line">	 */</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	/**</div><div class="line">	 * 对文件进行加密：</div><div class="line">	 * 1.把目标文件读到内存（InputStream就是一个管道,吸入）</div><div class="line">	 * 2.内存中把文件读到硬盘(OutputStram就是一个输出管道，呼出)</div><div class="line">	 */</div><div class="line">	  //F:\MVC\webserver\loaderclass\bin\com\yxm\ClassLoaderAttachment.class </div><div class="line">	  String srcPath = args[0];</div><div class="line">	  String destDir = args[1];</div><div class="line">	  </div><div class="line">	  //目标.class文件</div><div class="line">	  int lastIndexOf = srcPath.lastIndexOf(&quot;\\&quot;);</div><div class="line">	  String destFileName = srcPath.substring(lastIndexOf+1);</div><div class="line">	  String destPath = destDir+&quot;\\&quot;+destFileName;</div><div class="line">	  </div><div class="line">	  FileInputStream fis = new FileInputStream(srcPath);</div><div class="line">	  FileOutputStream fos = new FileOutputStream(destPath);</div><div class="line">	  secret(fis, fos);</div><div class="line">	  fis.close();</div><div class="line">	  fos.close();</div><div class="line">	 </div><div class="line">	  //再正常输出那个类</div><div class="line">	  System.out.println((new ClassLoaderAttachment()).toString());</div><div class="line">  &#125;</div><div class="line">  /**</div><div class="line">   * 加密类，对输入流进行加密，然后输出到输出流中</div><div class="line">   * 输入：是一个二进制流</div><div class="line">   * 输出：是一个流</div><div class="line">   */</div><div class="line">  private static void secret(InputStream in,OutputStream out) throws Exception&#123;</div><div class="line">	  //读入输入流并输出(读到末尾是-1)</div><div class="line">	  int b=-1;</div><div class="line">	  while((b=in.read())!=-1)&#123;</div><div class="line">		 out.write(b ^ 0xff);//加密进行异或运算 </div><div class="line">	  &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/10/类加载器-三-编写对class文件进行加密的工具类/" class="archive-article-date">
+  	<time datetime="2017-01-10T14:20:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-类加载器-二-自定义类加载器的原理分析" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -765,78 +836,6 @@
 
 
   
-    <article id="post-泛型-一-泛型的入门" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/03/泛型-一-泛型的入门/">泛型(一)-泛型的入门</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="jdk1-5之前集合类中存在的问题"><a href="#jdk1-5之前集合类中存在的问题" class="headerlink" title="jdk1.5之前集合类中存在的问题"></a>jdk1.5之前集合类中存在的问题</h4><p>给一个需求：开发者获取容器(集合)中的整形数据,但是容器中的数据放入是第三方放入  </p>
-<ol>
-<li><p>看以下代码：  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static List container()&#123;</div><div class="line">	   List list = new ArrayList();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2L);</div><div class="line">	   list.add(&quot;3&quot;);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	   //开发人员在主方法中获取容器中数据</div><div class="line">	   List container = container();</div><div class="line">	  int i = (Integer)container.get(1);//java.lang.ClassCastException: java.lang.Long cannot be cast to java.lang.Integer</div><div class="line">	   </div><div class="line">	   //取出数据</div><div class="line">	   Integer j = newcontainer().get(1);</div><div class="line">	   System.out.println(j);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>假如以上代表往list中添加数据时候是别人写的,而你只是从里面拿出一个整形数据，以上有两个不方便:<br>1.需要对取出来的数据进行强制类型转换<br>2.取出来的数据类型不确定</p>
-</li>
-<li><p>对以上代码进行修改  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static List&lt;Integer&gt; newcontainer()&#123;</div><div class="line">	   List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2);</div><div class="line">	   list.add(3);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	   //取出数据</div><div class="line">	   Integer j = newcontainer().get(1);</div><div class="line">	   System.out.println(j);//2</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>以上代码就运用了泛型，弥补了以上两个缺陷，可以将一个集合中的元素限定为一个特定类型</p>
-<h4 id="泛型基本概念"><a href="#泛型基本概念" class="headerlink" title="泛型基本概念"></a>泛型基本概念</h4><ol>
-<li>泛型的本质是参数化类型，也就是说所操作的数据类型被指定为一个参数。</li>
-<li>泛型是jdk1.5的所有新特性中最难深入掌握的部分,不过,在实际应用中不能掌握的那么深入，只需要掌握一些基本内容就可以。</li>
-<li>没有使用泛型时，只要是对象,不管是什么类型的对象，都可以存储进同一个集合当中。使用泛型集合，可以将一个集合中的元素限定为一个特定类型。集合中只能存储同一个类型的对象,这样更安全，并且当从集合获取一个对象时,编译器也可以知道这个对象的类型,不需要对对象进行强制类型转换。</li>
-<li>Java 泛型（generics）是 JDK 5 中引入的一个新特性, 泛型提供了编译时类型安全检测机制，该机制允许程序员在编译时检测到非法的类型。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/03/泛型-一-泛型的入门/" class="archive-article-date">
-  	<time datetime="2017-01-03T12:36:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -902,7 +901,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.22px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     

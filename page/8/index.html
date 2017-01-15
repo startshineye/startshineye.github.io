@@ -152,6 +152,65 @@
       <div class="body-wrap">
         
   
+    <article id="post-动手写一个MVC-五-HelloWorld示例来验证框架" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/24/动手写一个MVC-五-HelloWorld示例来验证框架/">动手写一个MVC(五)-HelloWorld示例来验证框架</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>通过实现HelloWorld示例来验证这个框架。实现思路是：首先编写实现输出的页面index.jsp，然后编写业务逻辑HelloWorldAction.java，最后配置web.xml文件，并启动Tomcat运行示例：  </p>
+<h6 id="编写实现输出的页面index-jsp"><a href="#编写实现输出的页面index-jsp" class="headerlink" title="编写实现输出的页面index.jsp"></a>编写实现输出的页面index.jsp</h6><p>此页面是跳转后的页面<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">&lt;%@ page language=&quot;java&quot; import=&quot;java.util.*&quot; pageEncoding=&quot;utf-8&quot;%&gt;</div><div class="line">&lt;%</div><div class="line">  //获取从页面传来的值</div><div class="line">  HashMap infoOut = (request.getAttribute(&quot;infoOut&quot;)==null)?new HashMap():(HashMap)request.getAttribute(&quot;infoOut&quot;);</div><div class="line">  //获取从逻辑传来的值</div><div class="line">  String msg = infoOut.get(&quot;msg&quot;)==null?&quot;&quot;:(String)infoOut.get(&quot;msg&quot;);</div><div class="line"> %&gt;</div><div class="line"></div><div class="line">&lt;!DOCTYPE HTML PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot;&gt;</div><div class="line">&lt;html&gt;</div><div class="line">  &lt;head&gt;</div><div class="line">    &lt;title&gt;采用框架实现输出HelloWorld&lt;/title&gt;</div><div class="line">    &lt;style type=&quot;text/css&quot;&gt;</div><div class="line">    &lt;!--设定BODY的css属性--&gt;</div><div class="line">    body&#123;</div><div class="line">      background-color: #FFFFFD;</div><div class="line">      font-family: Verdana,&quot;宋体&quot;;</div><div class="line">      font-size: 12px;</div><div class="line">      font-style: normal;</div><div class="line">    &#125;</div><div class="line">    &lt;/style&gt;</div><div class="line">    &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">    //--表单提交--</div><div class="line">    function submit(target,action)&#123;</div><div class="line">      form1.target = target;</div><div class="line">      form1.action.value = action;</div><div class="line">      form1.submit();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //--打开窗口--</div><div class="line">    function openWin(name,url,width,height)&#123;</div><div class="line">      var screenWidth = screen.width;</div><div class="line">      var screenHeight = screen.height;</div><div class="line">      var w;</div><div class="line">      //设定窗口属性</div><div class="line">      w.window.open(url,name,&quot;width=&quot;+width+&quot;,height=&quot;+height+&quot;,menubar=no,resizable=yes,toolbar=no,directories=no,location=no,scrollbars=yes,status=yes,copyhistory=0&quot;);</div><div class="line">      w.moveTo((screenWidth-width)/2, (screenHeight-height)/2);</div><div class="line">      w.focus();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //--退出页面--</div><div class="line">    function goExit()&#123;</div><div class="line">       window.close();</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //--表单的提交动作--</div><div class="line">    function insert()&#123;</div><div class="line">     form1.forwardJsp.value = &quot;index&quot;;</div><div class="line">     form1.logicName.value = &quot;HelloWorldAction&quot;;</div><div class="line">     submit(&apos;&lt;%=&quot;index_&quot;+session.getId()%&gt;&apos;,&apos;insert&apos;);</div><div class="line">    &#125;</div><div class="line">    &lt;/script&gt;</div><div class="line">  &lt;/head&gt;</div><div class="line">  &lt;body leftmargin=&quot;0&quot; topmargin=&quot;0&quot;&gt;</div><div class="line">   &lt;form name= &quot;form1&quot; action=&quot;/mvc/do&quot; method=&quot;post&quot;&gt;</div><div class="line">      &lt;h1&gt;&lt;%=msg%&gt;&lt;/h1&gt;</div><div class="line">     &lt;!-- 页面中的隐藏元素 --&gt;</div><div class="line">       &lt;input type=&quot;hidden&quot; name=&quot;action&quot; value=&quot;&quot;&gt;</div><div class="line">       &lt;input type=&quot;hidden&quot; name=&quot;forwardJsp&quot; value=&quot;&quot;&gt;</div><div class="line">       &lt;input type=&quot;hidden&quot; name=&quot;logicName&quot; value=&quot;&quot;&gt;</div><div class="line">   &lt;/form&gt;</div><div class="line">   &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">     window.name=&quot;&lt;%=&quot;index_&quot;+session.getId()%&gt;&quot;;</div><div class="line">   &lt;/script&gt;</div><div class="line">  &lt;/body&gt;</div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure></p>
+<h6 id="编写业务逻辑HelloWorldAction-java"><a href="#编写业务逻辑HelloWorldAction-java" class="headerlink" title="编写业务逻辑HelloWorldAction.java"></a>编写业务逻辑HelloWorldAction.java</h6><p>在com.yxm.action下，新建一个类HelloWorldAction.java，实现Action接口。HelloWorldAction.java的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div></pre></td><td class="code"><pre><div class="line">public class HelloWorldAction implements Action &#123;</div><div class="line">   /**</div><div class="line">    * 该方法用来实现分动作处理</div><div class="line">    */</div><div class="line">	@Override</div><div class="line">	public HashMap doAction(HashMap infoIn) &#123;</div><div class="line">		String action = (infoIn.get(&quot;action&quot;)==null)?&quot;&quot;:(String)infoIn.get(&quot;action&quot;);</div><div class="line">		HashMap infoOut = new HashMap();</div><div class="line">		if(action.equals(&quot;&quot;)) infoOut = this.doInit(infoIn);</div><div class="line">		else if(action.equals(&quot;show&quot;)) infoOut = this.doShow(infoIn);</div><div class="line">		return infoOut;</div><div class="line">	&#125;</div><div class="line">	/**</div><div class="line">	 * 该方法用来实现没有传入动作时要处理的内容</div><div class="line">	 * @param infoIn</div><div class="line">	 * @return</div><div class="line">	 */</div><div class="line">	private HashMap doInit(HashMap infoIn)&#123;</div><div class="line">		HashMap infoOut = infoIn;</div><div class="line">		try &#123;</div><div class="line">			 infoOut.put(&quot;msg&quot;,&quot;HelloWorld&quot;);</div><div class="line">			&#125; catch(Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">			&#125; finally &#123;</div><div class="line">			return infoOut;</div><div class="line">			&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	/**该方法用来输出HelloWorld</div><div class="line">	* @param infoIn</div><div class="line">	* @return HashMap</div><div class="line">	*/</div><div class="line">	private HashMap doShow(HashMap infoIn) &#123;</div><div class="line">	HashMap infoOut = infoIn;</div><div class="line">	try &#123;</div><div class="line">		infoOut.put(&quot;msg&quot;,&quot;HelloWorld&quot;);</div><div class="line">	&#125; catch(Exception e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">	&#125; finally &#123;</div><div class="line">	return infoOut;</div><div class="line">	&#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="配置web-xml文件"><a href="#配置web-xml文件" class="headerlink" title="配置web.xml文件"></a>配置web.xml文件</h6><p>web.xml文件的示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</div><div class="line">&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xmlns:web=&quot;http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; version=&quot;2.5&quot;&gt;</div><div class="line">  &lt;display-name&gt;&lt;/display-name&gt;</div><div class="line">  &lt;servlet&gt;</div><div class="line">    &lt;description&gt;控制器实例&lt;/description&gt;</div><div class="line">    &lt;display-name&gt;&gt;web.xml的示例&lt;/display-name&gt;</div><div class="line">    &lt;!-- 定义控制器 --&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;servlet-class&gt;com.yxm.mvc.ActionServlet&lt;/servlet-class&gt;</div><div class="line">  &lt;/servlet&gt;</div><div class="line">   &lt;!--拦截所有以do为后缀的请求--&gt;</div><div class="line">  &lt;servlet-mapping&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;</div><div class="line">  &lt;/servlet-mapping&gt;</div><div class="line">  &lt;welcome-file-list&gt;</div><div class="line">    &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;</div><div class="line">  &lt;/welcome-file-list&gt;</div><div class="line">&lt;/web-app&gt;</div></pre></td></tr></table></figure></p>
+<h6 id="运行并验证示例"><a href="#运行并验证示例" class="headerlink" title="运行并验证示例"></a>运行并验证示例</h6><p>重新启动Tomcat，我端口是80然后在浏览器地址栏中输入<a href="http://localhost/mvc/yxm.do?logicName=HelloWorldAction&amp;forwardJsp=index，即可看到页面中输出了HelloWorld，如下图所示。" target="_blank" rel="external">http://localhost/mvc/yxm.do?logicName=HelloWorldAction&amp;forwardJsp=index，即可看到页面中输出了HelloWorld，如下图所示。</a><br><img src="http://p1.bqimg.com/576993/b6e876d889558364.png" alt="Markdown"></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/24/动手写一个MVC-五-HelloWorld示例来验证框架/" class="archive-article-date">
+  	<time datetime="2016-11-23T16:11:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="w-动手写一个MVC-四-模型层设计" class="article article-type-w" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -768,137 +827,6 @@ public class SystemInit extends HttpServlet {
 
 
   
-    <article id="post-SpringMVC入门" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/06/SpringMVC入门/">SpringMVC入门</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://p1.bpimg.com/576993/7c487613bb3029e2.jpg" alt="Markdown"> </p>
-<h1 id="SpringMVC-入门"><a href="#SpringMVC-入门" class="headerlink" title="SpringMVC-入门"></a>SpringMVC-入门</h1><h2 id="前言"><a href="#前言" class="headerlink" title="前言:"></a>前言:</h2><h3 id="本模块分为三部分"><a href="#本模块分为三部分" class="headerlink" title="本模块分为三部分:"></a>本模块分为三部分:</h3><h4 id="一-SpringMVC介绍"><a href="#一-SpringMVC介绍" class="headerlink" title="一:SpringMVC介绍"></a>一:SpringMVC介绍</h4><p>1.1.  SpringMVC简介<br>1.2 SpringMVC请求处理流程<br>1.3 SpringMVC程序执行流程  </p>
-<h4 id="二-面世程序-HelloWorld"><a href="#二-面世程序-HelloWorld" class="headerlink" title="二:面世程序-HelloWorld"></a>二:面世程序-HelloWorld</h4><p>2.1 导入Jar包<br>2.2 中央调度器(DispatcherServlet)的配置<br>2.3 创建SpringMVC配置文件<br>2.4 定义处理器<br>2.5 注册处理器<br>2.6 定义前台页面  </p>
-<h4 id="三-总结"><a href="#三-总结" class="headerlink" title="三:总结"></a>三:总结</h4><hr>
-<h2 id="正文"><a href="#正文" class="headerlink" title="正文"></a>正文</h2><h3 id="一-SpringMVC介绍-1"><a href="#一-SpringMVC介绍-1" class="headerlink" title="一:SpringMVC介绍"></a>一:SpringMVC介绍</h3><h4 id="1-1-SpringMVC简介"><a href="#1-1-SpringMVC简介" class="headerlink" title="1.1. SpringMVC简介"></a>1.1. SpringMVC简介</h4><ul>
-<li>SpringMVC也叫Spring web mvc,是一种基于Java的实现了MVC架构模式的思想的请求驱动类型(请求-响应模型)的轻量级Web框架,将web层进行职责解耦.</li>
-<li>SpringWebMVC是服务到工作者模式的优化实现。前端控制器DispatcherServlet；应用控制器其实拆为处理器映射器(Handler Mapping)进行处理器管理和视图解析器(View Resolver)进行视图管理；页面控制器/动作/处理器为Controller接口（仅包含ModelAndView handleRequest(request, response) 方法）的实现； </li>
-<li>SpringMVC是在Spring3.0后发布的<br><img src="http://p1.bpimg.com/576993/263b0e19c24d047e.png" alt="Markdown"><br>由以上Spring的结构图可以知道,Spring由四部分组成:Dao部分(DAO与ORM),AOP部分,Web部分(JEE与Web),及IoC容器(Core).</li>
-</ul>
-<hr>
-<h4 id="1-2-SpringMVC请求处理流程"><a href="#1-2-SpringMVC请求处理流程" class="headerlink" title="1.2 SpringMVC请求处理流程"></a>1.2 SpringMVC请求处理流程</h4><p>SpringMVC请求处理流程如下图所示:区别于SpringMVC执行流程<br><img src="http://p1.bpimg.com/576993/109f349d5c611b03.png" alt="Markdown">  </p>
-<h6 id="具体执行步骤如下："><a href="#具体执行步骤如下：" class="headerlink" title="具体执行步骤如下："></a>具体执行步骤如下：</h6><ol>
-<li>用户发送请求到前端控制器:前端控制器根据请求信息（如URL）来决定选择页面控制器/处理器进行处理如图上的1、2步骤；</li>
-<li>页面控制器接/处理器收到请求后，进行功能处理，首先需要收集和绑定请求参数到一个对象，这个对象在Spring Web MVC中叫命令对象，并进行验证，然后将命令对象委托给业务对象进行处理；处理完毕后返回一个ModelAndView（模型数据和逻辑视图名）；上图中的3、4、5步骤；</li>
-<li>前端控制器根据返回的逻辑视图名选择相应的视图进行渲染，并把模型数据传入以便视图渲染图上的6、7；</li>
-<li>前端控制器再次将响应返回给用户图上的8；至此整个结束。</li>
-</ol>
-<hr>
-<h4 id="1-3-SpringMVC程序执行流程"><a href="#1-3-SpringMVC程序执行流程" class="headerlink" title="1.3 SpringMVC程序执行流程"></a>1.3 SpringMVC程序执行流程</h4><p>想要学好Spingmvc,第一必须要知道Springmvc执行流程:<br><img src="http://p1.bpimg.com/576993/a191ea49bc1153cf.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/15d4d75cc32091c3.png" alt="Markdown"></p>
-<h6 id="核心架构的具体流程步骤如下："><a href="#核心架构的具体流程步骤如下：" class="headerlink" title="核心架构的具体流程步骤如下："></a>核心架构的具体流程步骤如下：</h6><ol>
-<li>浏览器/用户发送请求到DispatcherServlet(中央调度器/前端控制器)，</li>
-<li>DispatcherServlet(中央调度器/前端控制器)直接把请求转给解析器进行处理(不做任何处理)</li>
-<li>处理器映射器会根据请求,找到处理该请求的处理器,并将其封装为处理器执行链(HandlerExecutionChain)对象（包含一个Handler处理器（页面控制器）对象、多个 HandlerInterceptor拦截器）对象，并返回给中央调度器；</li>
-<li>DispatcherServlet——&gt;HandlerAdapter中央调度器根据处理器执行链链中的处理器，找到能执行该处理器的适配器(HandlerAdapter)，从而支持多种类型的处理器.</li>
-<li>HandlerAdapter——&gt;处理器功能处理方法的调用，HandlerAdapter将会根据适配的结果调用真正的处理器的功能处理方法，完成功能处理；</li>
-<li>处理器将处理结果封装成ModelAndView对象（包含模型数据、逻辑视图名）[处理器业务是在适配器里面执行的]；</li>
-<li>处理器适配器(HandlerAdapter)直接将结果返回给中央调度器(DispatcherServlet).</li>
-<li>中央调度器(DispatcherServlet)调用视图解析器(ViewResolver),将ModelAndView中的视图名称封装成视图对象.</li>
-<li>视图解析器(ViewResolver)将封装了的视图对象返回给中央调度器(DispatcherServlet).</li>
-<li>中央调度器(DispatcherServlet)调用视图对象,将其进行渲染,即进行数据填充,形成响应对象.</li>
-<li>中央调度器(DispatcherServlet)响应浏览器.  </li>
-</ol>
-<h6 id="由以上具体流程开发步骤我们可以具体的核心开发配置步骤："><a href="#由以上具体流程开发步骤我们可以具体的核心开发配置步骤：" class="headerlink" title="由以上具体流程开发步骤我们可以具体的核心开发配置步骤："></a>由以上具体流程开发步骤我们可以具体的核心开发配置步骤：</h6><ul>
-<li>DispatcherServlet在web.xml中的部署描述，从而拦截请求到Spring Web MVC</li>
-<li>HandlerMapping的配置，从而将请求映射到处理器</li>
-<li>HandlerAdapter的配置，实现处理器和适配器的映射从而支持多种类型的处理器</li>
-<li>处理器（页面控制器）的配置，从而进行功能处理</li>
-<li>ViewResolver的配置，从而将逻辑视图名解析为具体视图技术</li>
-</ul>
-<h3 id="二-面世程序-HelloWorld-1"><a href="#二-面世程序-HelloWorld-1" class="headerlink" title="二:面世程序-HelloWorld"></a>二:面世程序-HelloWorld</h3><p>完成功能:用户提交一个请求,服务器端处理器在接收到这个请求后,给出一条欢迎信息,在响应页面中显示该信息.   </p>
-<h4 id="2-1-导入Jar包"><a href="#2-1-导入Jar包" class="headerlink" title="2.1 导入Jar包"></a>2.1 导入Jar包</h4><p>创建web项目后,首先导入Jar包.SpringMVC需要的基本jar包,是在原Spring的Jar包基础上增加两个Jar包.<br>Spring-context-support:包含支持UI模板,邮件服务,缓存Cache等方面的类.Spring-webmvc:对SpringMVC的实现.<br><img src="http://p1.bpimg.com/576993/46e4d63262bfa426.png" alt="Markdown"></p>
-<hr>
-<h4 id="2-2-中央调度器-DispatcherServlet-的配置"><a href="#2-2-中央调度器-DispatcherServlet-的配置" class="headerlink" title="2.2 中央调度器(DispatcherServlet)的配置"></a>2.2 中央调度器(DispatcherServlet)的配置</h4><p>当用户发送请求给中央处理器,服务器解析web.xml根据请求找到中央处理器,所以我们必须配置web.xml如下:<br><img src="http://p1.bpimg.com/576993/72f1df22b1683806.png" alt="Markdown"></p>
-<ul>
-<li>全限定性类名: 该中央调度器为一个Servlet，名称为DispatcherServlet。中央调度器的全限定性类名在导入的Jar 文件spring-webmvc-4.2.1.RELEASE.jar 的第一个包org.springframework.web.servlet下可找到。</li>
-<li>load-on-startup: 在<servlet>中添加<load-on-startup>的作用是，标记是否在Web服务器(这里是Tomcat）启动时会创建这个Servlet 实例，即是否在Web 服务器启动时调用执行该Servlet 的init()方<br>法，而不是在真正访问时才创建。它的值必须是一个整数。  <ol>
-<li>当值大于等于0 时，表示容器在启动时就加载并初始化这个servlet，数值越小，该Servlet的优先级就越高，其被创建的也就越早；</li>
-<li>当值小于0 或者没有指定时，则表示该Servlet 在真正被使用时才会去创建。</li>
-<li>当值相同时，容器会自己选择创建顺序。</li>
-</ol>
-</load-on-startup></servlet></li>
-<li>url-pattern:不能写为/*，最好也不要写为/，建议写为*.action 的形式</li>
-<li>配置文件位置与名称:<br>注册完毕后，可直接在服务器上发布运行. MyEclipse 控制<br>台均会抛出FileNotFoundException 异常。即默认要从项目根下的WEB-INF 目录下找名称为<br>Servlet 名称-servlet.xml 的配置文件。这里的“Servlet 名称”指的是注册中央调度器时<br><servlet-name>标签中指定的Servlet 的name 值。本例配置文件名为springmvc-servlet.xml<br><img src="http://p1.bpimg.com/576993/73fe3560c5c5746e.png" alt="Markdown"> </servlet-name></li>
-</ul>
-<p>一般情况下我们是把配置文件放在在类路径下，即src 目录下.我们做如下配置:<br><img src="http://p1.bpimg.com/576993/f1c670f9dd3207f6.png" alt="Markdown"> </p>
-<hr>
-<h4 id="2-3-创建SpringMVC配置文件"><a href="#2-3-创建SpringMVC配置文件" class="headerlink" title="2.3 创建SpringMVC配置文件"></a>2.3 创建SpringMVC配置文件</h4><p>在工程的类路径即src 目录下创建SpringMVC 的配置文件springmvc.xml。该文件名可以任意命名.但是为了避免在xml文件中随意书写内容,需要有一定的约束.<br><img src="http://p1.bpimg.com/576993/65860b41704797e7.png" alt="Markdown"></p>
-<hr>
-<h4 id="2-4-定义处理器"><a href="#2-4-定义处理器" class="headerlink" title="2.4 定义处理器"></a>2.4 定义处理器</h4><p><img src="http://p1.bpimg.com/576993/750982ddfee8ebd2.png" alt="Markdown"><br>ModelAndView 类中的addObject()方法用于向其Model 中添加数据。Model 的底层为一<br>个Map。另外需要注意的是，addObject()方法的返回值为ModelAndView，则说明可向该Model中连续添加多个数据<br> 处理器类名随便定义,但是处理器必须实现Controller接口,由于我们的处理器名字是随便定义的,所以我们必须在配置文件中进行注册.如下</p>
-<hr>
-<h4 id="2-5-注册处理器"><a href="#2-5-注册处理器" class="headerlink" title="2.5 注册处理器"></a>2.5 注册处理器</h4><p>在springmvc.xml 中注册处理器。注意处理器的id 属性值为一个请求URI(因为处理器映射器使用默认的BeanNameUrlHandlerMapping 处理器映射器，会根据请求的url 与spring 容器中定义的处理器bean 的name 属性值进行匹配)表示当客户端提交该请求时，会访问class 指定的这个处理器</p>
-<p><img src="http://p1.bpimg.com/576993/f3790e5b484c0228.png" alt="Markdown"></p>
-<hr>
-<h4 id="2-6-定义前台页面"><a href="#2-6-定义前台页面" class="headerlink" title="2.6 定义前台页面"></a>2.6 定义前台页面</h4><p>在WEB-INF目录下新建一个子目录jsp,在其中新建一个welcome.jsp.如下.注意:我们接收ModelAndView的数据时候,使用以下EL表达式:<br><img src="http://p1.bpimg.com/576993/ac04adc45a599837.png" alt="Markdown"><br>以上就是一个完整例子;  </p>
-<hr>
-<h3 id="三-总结-1"><a href="#三-总结-1" class="headerlink" title="三:总结"></a>三:总结</h3><ul>
-<li>SpringMVC流程是怎样的?SpringMVC入门主要把握其执行流程,整个SpringMVC基本就是按照流程展开的</li>
-<li>理清流程中五大器是怎么布置的?( DispatcherServlet,HandlerMapping, HandlerAdapter,Hander, ViewResolver)</li>
-</ul>
-<h6 id="但发现一个问题：在流程介绍中所述的"><a href="#但发现一个问题：在流程介绍中所述的" class="headerlink" title="但发现一个问题：在流程介绍中所述的"></a>但发现一个问题：在流程介绍中所述的</h6><p>重要的处理器映射器、处理器适配器、视图解析器都在哪里，不用做配置吗？这些内容均在DispatcherServlet 的默认配置DispatcherServlet.properties<br>文件中被定义。这个文件与DispatcherServlet 类在一个包下，而且是当Spring 配置文件中<br>没有指定配置时使用的默认情况。<br><img src="http://p1.bpimg.com/576993/42415c57ae2803b3.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/4485dd37e68654a4.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/90bf9d78f5dcca01.png" alt="Markdown"></p>
-<h6 id="至此我们可以总结出-五大器部署情况"><a href="#至此我们可以总结出-五大器部署情况" class="headerlink" title="至此我们可以总结出:五大器部署情况"></a>至此我们可以总结出:五大器部署情况</h6><ul>
-<li>DispatcherServlet就是一个Servlet所以在web.xml文件中配置</li>
-<li>HandlerMapping默认情况下在DispatcherServlet 的默认配置DispatcherServlet.properties<br>文件中被定义。,</li>
-<li>HandlerAdapter, 默认情况下在DispatcherServlet 的默认配置DispatcherServlet.properties<br>文件中被定义。,</li>
-<li>Hander,在配置文件中定义(默认情况下id与路径关联)</li>
-<li>ViewResolver 默认情况下在DispatcherServlet 的默认配置DispatcherServlet.properties<br>文件中被定义。,</li>
-</ul>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/06/SpringMVC入门/" class="archive-article-date">
-  	<time datetime="2016-11-06T14:31:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-06</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringMVC/">SpringMVC</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/SSM-SpringMVC/">SSM SpringMVC</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -964,7 +892,7 @@ public class SystemInit extends HttpServlet {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.22px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    				<a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 12.22px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 10px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     

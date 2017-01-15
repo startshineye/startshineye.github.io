@@ -4,17 +4,21 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Tag: Node.js | Startshineye的博客</title>
+  <title>代理(四)-动态代理类的设计原理与结构 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/tags/Node-js/index.html">
+  <meta name="description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
+<meta property="og:type" content="article">
+<meta property="og:title" content="代理(四)-动态代理类的设计原理与结构">
+<meta property="og:url" content="https://github.com/startshineye/2017/01/15/代理-四-动态代理类的设计原理与结构/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/83.png">
+<meta property="og:updated_time" content="2017-01-15T05:11:02.939Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="代理(四)-动态代理类的设计原理与结构">
+<meta name="twitter:description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,59 +154,127 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-代理-四-动态代理类的设计原理与结构" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
-  
-    
-    
-      
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2016" class="archive-year">2016</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2016/11/13/hexo的安装/" class="archive-article-date">
-  	<time datetime="2016-11-13T04:43:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-13</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2016/11/13/hexo的安装/">hexo的安装</a>
+    <h1 class="article-title" itemprop="name">
+      代理(四)-动态代理类的设计原理与结构
     </h1>
   
 
-        <div class="article-info info-on-right">
-          
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="动态生成的类成为目标类的代理"><a href="#动态生成的类成为目标类的代理" class="headerlink" title="动态生成的类成为目标类的代理"></a>动态生成的类成为目标类的代理</h4><h6 id="1-动态代理类的工作原理图"><a href="#1-动态代理类的工作原理图" class="headerlink" title="1.动态代理类的工作原理图"></a>1.动态代理类的工作原理图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png" alt=""><br>分析:<br>1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。<br>2.图中log()被硬编码，我们把代理代码直接写在代理类中,以后别人想要修改代码将会不方便<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/83.png" alt=""><br>3.我们应该将那个代码作为参数传递进去,而不是硬编码(系统功能代码以参数形式传递过去)<br>4.在javascript中传递代码是用eval()函数解析,但是java中没有这样的用法，所以我们不能直接传递字符串进去,而是传递一个对象，我们到时候就调用对象的方法log(),以上“圈”就是一个对象,这就是现象切面编程(把切面的代码用对象进行封装,然后以对象的方式传递给你,你执行对象就相当于执行了切面的代码)</p>
+<h6 id="2-怎样将目标类传进去"><a href="#2-怎样将目标类传进去" class="headerlink" title="2.怎样将目标类传进去?"></a>2.怎样将目标类传进去?</h6><ol>
+<li>直接在InvocationHandler实现类中创建目标类的实例对象,可以看运行效果和加入日志代理,但是没有实际意义.</li>
+<li>为InvocationHandler实现类注入目标类的实例对象,不能采用匿名内部类的形式了.</li>
+<li>让匿名的InvocationHandler实现类访问外面方法中的目标类实例对象的final类型的引用变量<h6 id="3-将创建代理的过程改为一种更优雅的方式"><a href="#3-将创建代理的过程改为一种更优雅的方式" class="headerlink" title="3.将创建代理的过程改为一种更优雅的方式"></a>3.将创建代理的过程改为一种更优雅的方式</h6></li>
+<li>myeclipse重构出一个getProxy方法绑定接收目标同时返回代理对象,让调用者更懒惰,更方便,调用者甚至不用接触任何代理的API</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/15/代理-四-动态代理类的设计原理与结构/" class="archive-article-date">
+  	<time datetime="2017-01-15T03:34:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-15</time>
+</a>
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Node-js/">Node.js</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li></ul>
 	</div>
 
-          
+      
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/博客-npm/">博客 npm</a>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
 	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-  
-    </div></section>
-  
 
-    
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/01/14/代理-三-InvocationHander对象内部功能/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">代理(三)-InvocationHander对象内部功能</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="代理-四-动态代理类的设计原理与结构" data-title="代理(四)-动态代理类的设计原理与结构" data-url="https://github.com/startshineye/2017/01/15/代理-四-动态代理类的设计原理与结构/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
 
 
       </div>
@@ -225,9 +297,9 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
+		isPost: true,
 		isArchive: false,
-		isTag: true,
+		isTag: false,
 		isCategory: false,
 		open_in_new: false,
 		root: "/",
