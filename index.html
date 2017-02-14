@@ -152,6 +152,103 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring框架下SockJs实现跨域-403错误" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/14/Spring框架下SockJs实现跨域-403错误/">Spring框架下SockJs实现跨域-403错误</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> 由于自己开发的im项目和别的项目对接需要运用到跨域(因为本项目的部分配置是在另一个项目中)，一般来说用websocket可以实现跨域,但是又由于apache2.2代理不支持websocket，所以硬把websocket去除掉，去除以下判断只留下 ws = new SockJS(sockJsTarget);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">        if(&apos;WebSocket&apos; in window) &#123;</div><div class="line">	        ws = new WebSocket(webSocketTarget);</div><div class="line">            &#125; else if (&apos;MozWebSocket&apos; in window) &#123;</div><div class="line">                ws = new MozWebSocket(webSocketTarget);</div><div class="line">            &#125; else &#123;</div><div class="line">               ws = new SockJS(sockJsTarget);</div><div class="line">           &#125; </div><div class="line">```  </div><div class="line">但是在另一个TOMCAT服务器下的项目访问不同TOMCAT目录下,会出现以下403问题</div><div class="line">#### 内容</div><div class="line">###### 错误</div><div class="line">出现的403错误如下：  </div><div class="line">请求：  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2017/2/134.png)</div><div class="line">响应:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2017/2/135.png)</div><div class="line">###### 解决</div><div class="line">html页面访问限制的问题的：403 Forbidden  </div><div class="line">错误之前配置:</div></pre></td></tr></table></figure></p>
+<p><websocket:handlers><br>    <websocket:mapping handler="systemWebSocketHandler" path="/springwsxml/myhandler.do"><br>    <websocket:handshake-interceptors><br>       <bean class="com.founder.focuss.webcc.websocket.WebSocketHandshakeInterceptor"><br>    </bean></websocket:handshake-interceptors><br>    </websocket:mapping></websocket:handlers><br>    <websocket:handlers><br>         <websocket:mapping handler="systemWebSocketHandler" path="/xml_sockjs"><br>         <websocket:handshake-interceptors><br>           <bean class="com.founder.focuss.webcc.websocket.WebSocketHandshakeInterceptor"></bean><br>         </websocket:handshake-interceptors><br>         <websocket:sockjs><br>    </websocket:sockjs></websocket:mapping></websocket:handlers><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">因为spring有个拦截器,会拦截请求的访问域,所以我们需要设置setAllowedOrigins(&quot;*&quot;)全部域都可以访问</div><div class="line">1. 一般配置后台</div></pre></td></tr></table></figure></p>
+<p>registry.addHandler(systemWebSocketHandler(),”/webSocketServer/sockjs”).setAllowedOrigins(“*”).withSockJS();<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">2. 配置spring-mvc</div></pre></td></tr></table></figure></p>
+<p>&lt;!– <websocket:handlers allowed-origins="*"><br>    <websocket:mapping handler="systemWebSocketHandler" path="/springwsxml/myhandler.do"><br>    <websocket:handshake-interceptors><br>       <bean class="com.founder.focuss.webcc.websocket.WebSocketHandshakeInterceptor"><br>    </bean></websocket:handshake-interceptors><br>    </websocket:mapping></websocket:handlers><br>    <websocket:handlers allowed-origins="*"><br>         <websocket:mapping handler="systemWebSocketHandler" path="/xml_sockjs"><br>         <websocket:handshake-interceptors><br>           <bean class="com.founder.focuss.webcc.websocket.WebSocketHandshakeInterceptor"></bean><br>         </websocket:handshake-interceptors><br>         <websocket:sockjs><br>    </websocket:sockjs></websocket:mapping></websocket:handlers><br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/14/Spring框架下SockJs实现跨域-403错误/" class="archive-article-date">
+  	<time datetime="2017-02-14T15:19:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/im/">im</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sockJs/">sockJs</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Spring框架下SockJs" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/14/Spring框架下SockJs/">Spring框架下SockJs</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/14/Spring框架下SockJs/" class="archive-article-date">
+  	<time datetime="2017-02-14T15:17:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-14</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-weblogic支持websocket的版本" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -656,131 +753,6 @@ public class Echo extends WebSocketAdapter{
 
 
   
-    <article id="post-Android-二-Android操作系统" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/19/Android-二-Android操作系统/">Android(二)-Android操作系统</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="Andoid系统介绍"><a href="#Andoid系统介绍" class="headerlink" title="Andoid系统介绍"></a>Andoid系统介绍</h4><ol>
-<li>Andoid系统最初由安迪.鲁宾等人开发研制,最初开发这个系统目的是创建一个数码相机的先进系统；后来发现市场需求不够大，加上智能手机市场快速成长,于是Android被改造为一款面向智能手机的 操作系统,于2005年8月被Google收购。</li>
-<li>名字由来于一款游戏中的大飘虫</li>
-<li>很块Google的Android操作系统就将迎来6周年纪念,自从Andoid在T-Mobile G1上首发的这六年里,改动令人称奇</li>
-<li>手机系统占用比例额度<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/50.jpg" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/19/Android-二-Android操作系统/" class="archive-article-date">
-  	<time datetime="2017-01-19T02:07:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/Android/">Android</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-一-1-4G介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/19/Android-一-1-4G介绍/">Android(一)-1-4G介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-4G介绍"><a href="#1-4G介绍" class="headerlink" title="1-4G介绍"></a>1-4G介绍</h4><h6 id="1G"><a href="#1G" class="headerlink" title="1G"></a>1G</h6><ol>
-<li>第一代模拟测试手机(1G):1G 就是大哥大，手机类似于简单的无线电双工电台,通话是锁定在一定频率,所以使用可调频电台就可以窃听通话,只能进行语音通话<h6 id="2G"><a href="#2G" class="headerlink" title="2G"></a>2G</h6></li>
-<li>2G代表手机：小灵通:运用美国的军方标准gsm,后面被民用化了,可以发短信  <h6 id="3G"><a href="#3G" class="headerlink" title="3G"></a>3G</h6></li>
-<li>3G 沃,以前2G访问百度：wap.baidu.com。3G访问百度:www.baidu.com,能达到每秒7.2M/S<h6 id="4G"><a href="#4G" class="headerlink" title="4G"></a>4G</h6></li>
-<li>4G：显著特点就是LTE:LTE（Long Term Evolution，长期演进)是由3GPP（The 3rd Generation Partnership Project，第三代合作伙伴计划）组织制定的UMTS（Universal Mobile Telecommunications System，通用移动通信系统）技术标准的长期演进，于2004年12月在3GPP多伦多会议上正式立项并启动。最高速度最高100M/S<h6 id="5G"><a href="#5G" class="headerlink" title="5G"></a>5G</h6></li>
-<li>5G,投资6亿美金目前华为在研发,最高速度可以达到10G/S<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4></li>
-<li>1G：主要提供语音通话,代表性通讯手段是大哥大</li>
-<li>2G：语音+低速数据业务,基本是电话和短信</li>
-<li>3G：具备更快的网速,可以提供网页浏览,音乐等基本数据业务</li>
-<li>4G：具备100Mb以上下载速度,能流畅承载视频,电话会议等业务</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/19/Android-一-1-4G介绍/" class="archive-article-date">
-  	<time datetime="2017-01-19T01:31:43.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/Android/">Android</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -846,7 +818,7 @@ public class Echo extends WebSocketAdapter{
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 16px;">Android</a> <a href="/tags/CTI/" style="font-size: 12px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 18px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 13px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 13px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/socket网络编程/" style="font-size: 11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 12px;">websocket</a> <a href="/tags/代理/" style="font-size: 13px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 19px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 16px;">泛型</a> <a href="/tags/注解/" style="font-size: 12px;">注解</a> <a href="/tags/类加载器/" style="font-size: 16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.56px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
     			</div>
     	</section>
     
