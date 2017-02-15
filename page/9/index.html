@@ -152,6 +152,50 @@
       <div class="body-wrap">
         
   
+    <article id="post-web服务器开发准备" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/03/web服务器开发准备/">web服务器开发准备</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/03/web服务器开发准备/" class="archive-article-date">
+  	<time datetime="2016-12-03T02:50:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-03</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Http详解" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -862,80 +906,6 @@ out.flush();
 
 
   
-    <article id="post-动手写一个MVC-二-视图层设计" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/20/动手写一个MVC-二-视图层设计/">动手写一个MVC(二)-视图层设计</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><ol>
-<li>视图层用来显示用户所需要的数据，一般由JSP、JavaScript、JavaBean和自定义标签组成的</li>
-<li>视图层和控制层在MVC的概念上是分离的，但其实它们之间还是需要有很大的联系的，因为控制层需要从视图层获取用户提交的数据，然后把数据进行转换，并传递给模型层；等模型层处理完数据后，控制层还需要把数据返回到视图层，以供用户查看</li>
-</ol>
-<h4 id="jsp视图层使用"><a href="#jsp视图层使用" class="headerlink" title="jsp视图层使用"></a>jsp视图层使用</h4><ol>
-<li>视图层采用JSP技术，是展现用户数据的一种较好的方式。因为在JSP中，可以使用JavaScript、JavaBean和自定义标签等，这些技术结合在一起，就能获得一个灵活的数据组合方式。</li>
-<li>使用JSP的过程中，有以下几点需要注意<br>a.为了防止乱码的发生，在本框架中，所有的JSP页面都采用GBK的编码方式，即在JSP页面的顶部添加如下代码：  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;%@ page contentType=&quot;text/html; charset=GBK&quot; language=&quot;java&quot; import= </div><div class="line">&quot;java.sql.*&quot; errorPage=&quot;&quot; %&gt;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>b．为了便于统一管理，需要在所有的JSP页面的顶部都添加如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;%! public static final String appId = 页面名称; %&gt;</div></pre></td></tr></table></figure></p>
-<p>C. 为了防止提交时页面的跳转混乱，在JSP页面的底端都添加以下代码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt; </div><div class="line">window.name=&quot;&lt;%=页面名称+&quot;_&quot;+session.getId()%&gt;&quot;; </div><div class="line">&lt;/script&gt;</div><div class="line">```  </div><div class="line">#### 数据提交和获取</div><div class="line">1. 一般在web.xml中定义Servlet的请求方式. 可以将所有的JSP页面的请求都转入Servlet进行处理，这样就很容易通过request、response实现JSP和Servlet之间的数据转换.</div><div class="line">2. 在Servlet中通过request获取从JSP页面传来的数据，然后将模型层处理过的数据通过response传递到JSP页面，在JSP页面用request来获取从控制层传来的数据  </div><div class="line">(1). （1）	在提交数据时，因为在控制层需要判断客户端提交的动作、要调用的模型层和要返回的页面，所以需要在JSP的表单中隐藏3个元素：action（动作）、logicName（要调用的模型层）和forwardJsp（要返回的页面）。示例代码如下：</div></pre></td></tr></table></figure></p>
-<p><form name="form1" action="/myApp/do" method="post"> </form></p>
-<p><input type="hidden" name="action" value=""> </p>
-<p><input type="hidden" name="logicName" value=""> </p>
-<p><input type="hidden" name="forwardJsp" value=" "><br><br>提交数据时，就可以通过submit方法来提交数据。示例代码如下：<br>function submit() {<br>form1.forwardJsp.value = “index”;<br>form1.logicName.value = “Logic”;<br>form1.target = “&lt;%=”index _”+session.getId()%&gt;”;<br>form1.action.value = “insert”;<br>form1.submit();<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">3. 代码说明：  </div><div class="line">1.	客户端的数据要提交到Logic类里的insert方法，在insert方法处理完毕后，要返回到index页面，这个页面返回时仍放在index中</div><div class="line">2.	通过这种隐藏的方法，还可以把一些不需要客户看到的数据传递到Servlet  </div><div class="line">(1) 在获取数据时，因为在Servlet中是通过response来把数据传递到JSP页面中的，所以，在JSP页面通过request来获取时，如果要获取的数据比较多，则会比较烦琐。因此，要在Servlet中把所有要传递到JSP页面中的数据存放在一个Map中，这样，在JSP页面只需要使用一次request把Map取出，然后剩余的数据就可以直接从Map中获取了。示例代码如下:</div></pre></td></tr></table></figure></p>
-<p>&lt;%<br>HashMap infoOut=(request.getAttribute(“infoOut”)==null)?new HashMap():<br>(HashMap)request.getAttribute(“infoOut”);<br>//定义消息<br>String msg=infoOut.get(“msg”)==null ? “” :(String)infoOut.get(“msg”);<br>String clerkId = null == request.getParameter(“clerkId”) ? “” :<br>request.getParameter(“clerkId”);<br>String clerkName = infoOut.get(“clerkName”) == null ? “” :<br>(String) infoOut.get(“clerkName”);<br>%&gt;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#### 通用的JavaScript函数</div><div class="line">两个JavaScript方法可以通用：一个是表单提交的方法；另一个是打开窗口的方法，下面来分别进行介绍 </div><div class="line">1. 从上面数据提交的方法submit里可以看出，表单提交时的target和action属性与submit方法其实是通用的，而经常改变的可能是forwardJsp和logicName。所以，可以把通用的抽取出来，则上面提交数据的方法可以改为</div></pre></td></tr></table></figure></p>
-<p>function submit(target, action) {<br>form1.target = target;<br>form1.action.value = action;<br>form1.submit();<br>}<br>function insert() {<br>form1.forwardJsp.value = “index”;<br>form1.logicName.value = “Logic”;<br>submit(‘&lt;%=index +”_”+session.getId()%&gt;’,’insert’);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">2. （2）	对于窗口的打开方法，为了在整个应用中统一风格，通常在系统中将其抽取出来，成为公用方法。一般来说，会对要打开的url、窗口名称、窗口宽度和高度进行设定，而其他属性保持一致,代码如下: </div><div class="line">``` </div><div class="line">function openWin(name, url, width, height) &#123; </div><div class="line">var screenWidth = screen.width;</div><div class="line">var screenHeight = screen.height;</div><div class="line">var w; </div><div class="line">&lt;!--定义窗口属性--&gt; </div><div class="line">w=window.open(url,name, &quot;width=&quot;+width+&quot;,height=&quot;+height+&quot;, </div><div class="line">menubar= no,resizable=yes,toolbar=no,directories=no, </div><div class="line">location=no,scrollbars =yes,status=yes,copyhistory=0&quot;); </div><div class="line">w.moveTo((screenWidth-width)/2, (screenHeight-height)/2); </div><div class="line">w.focus(); </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<ol>
-<li>代码说明:<br>A．传入的参数有4个，分别是：窗口名称、要打开的url、窗口宽度和高度<br>B．w.moveTo((screenWidth-width)/2, (screenHeight-height)/2)的意思是：使打开的窗口在屏幕的中间。<br>C．w.focus()的意思是：使焦点在打开的窗口上。  </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/20/动手写一个MVC-二-视图层设计/" class="archive-article-date">
-  	<time datetime="2016-11-20T13:27:44.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/mvc/">mvc</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
@@ -1001,7 +971,7 @@ out.flush();
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 10px;">Weblogic</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.56px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 10px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 13.33px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 10px;">Weblogic</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.56px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
     			</div>
     	</section>
     
