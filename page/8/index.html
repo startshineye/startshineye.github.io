@@ -152,6 +152,63 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="Servlet对象实现单例-javaServer15"><a href="#Servlet对象实现单例-javaServer15" class="headerlink" title="Servlet对象实现单例-javaServer15"></a>Servlet对象实现单例-javaServer15</h4><p><img src="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png" alt="Markdown"><br>从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行效率呢？当然，此时你肯定想到了单实例的方式，也就是说当浏览器客户端第一次发送请求的时候创建Servlet对象，将Servlet对象和对应的请求URI存放到缓存当中，当浏览器客户端第2+次发送请求的时候直接从缓存当中获取请求URI对应的Servlet实例，直接调用Servlet对象的service方法。这样做我们就可以达到既节省了内存的开销，又提高了程序的执行速度。接下来我们做一个简单的设计，如下图所示：<br><img src="http://p1.bqimg.com/576993/4deb9f3067265d0c.png" alt="Markdown"><br>接下来就让我们一步一步实现吧，我们的角色转变为WEB服务器的开发人员，先来写一段伪代码（还不能马上执行的程序），如下图所示：<br><img src="http://p1.bqimg.com/576993/915022ed9e4702df.png" alt="Markdown"> </p>
+<p>目前，我们的角色还是WEB服务器的开发人员，让我们一起来实现ServletCache类，如下图所示：<br><img src="http://p1.bqimg.com/576993/2aa425905a6764fe.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送多次请求进行测试，测试结果如下：<br><img src="http://p1.bqimg.com/576993/0944d5fb03b81c17.png" alt="Markdown"><br>控制台<br><img src="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png" alt="Markdown"><br>通过以上的测试结果可以看到Servlet对象已达到了单实例，但是这里所谓的单实例，并不属于单例模式，真正的单例模式要求构造函数私有化的，这里之所以可以做到单实例，是因为Servlet对象的生命周期由服务器来管理，服务器只创建一次，所以可以达到单实例的效果，这种单实例可以被称为伪单例。<br>另外需要注意的是，Servlet对象是单实例的，这个时候就应该注意多线程并发带来的安全问题，尽量不要在Servlet类中使用实例变量。  </p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" class="archive-article-date">
+  	<time datetime="2016-12-17T16:37:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十六-接收表单提交数据-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -766,67 +823,6 @@ alert(filterarray[key]);
 
 
   
-    <article id="post-自己写一个apache服务器-十一-客户端访问java程序-javaServer09" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/">自己写一个apache服务器(十一)-客户端访问java程序-javaServer09</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="客户端访问java程序-javaServer09"><a href="#客户端访问java程序-javaServer09" class="headerlink" title="客户端访问java程序-javaServer09"></a>客户端访问java程序-javaServer09</h4><ol>
-<li>在上一个版本中，浏览器客户端发送的请求是<a href="http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。</a>    </li>
-<li>处理登录的Java程序应该由谁来编写呢？编写完成之后，又应该由谁来管理调用呢？我们一起来分析一下，将来系统中会存在很多功能，例如：银行账户转账、查询员工信息、保存员工信息、银行账户开户等，这些功能中的每一个功能都需要执行对应的服务器端Java程序来完成的，都是和具体的业务逻辑紧密相关的，显然这种Java程序的编写不应该是服务器的开发人员，因为服务器的开发人员不知道具体的业务是什么，所以像以上列举的每一个功能的实现都需要WebApp的开发人员来完成开发。开发完成之后，将处理某个功能的Java程序放到Web服务器中，由Web服务器来负责管理调用。  </li>
-<li>大家需要注意的是，浏览器向服务器发送请求并且提交数据的格式是什么？这个提交数据的格式其实属于HTTP协议的一部分，这是W3C提前制定好的，格式是：<a href="http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。" target="_blank" rel="external">http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。</a>  </li>
-<li>那么，接下来让我们一起实现上面的功能，该功能的实现需要Web服务器开发人员、WebApp开发人员共同配合完成。我们现在的角色转变为WebApp的开发人员，开始编写Java程序处理用户的登录请求。服务器端的小java程序英文是：Server Applet，所以我们把服务器端的小java程序叫做：Servlet。新建软件包org.yxm.oa.servlet，然后在该软件包中新建LoginServlet.java，编写LoginServlet处理用户的登录请求<br><img src="http://p1.bpimg.com/576993/769bc03af18668c2.png" alt="Markdown"><br>接下来我们的开发角色再次转变为WEB服务器开发人员，开发服务器端程序调用LoginServlet的service方法。大家设想一下，将来WebApp中不仅有一个LoginServlet，还会有其它的小Java程序，每一个小Java程序都对应处理某一个业务，那么对于我们服务器的开发人员来说怎么确定调用哪个Servlet呢？就像上一个版本中/oa/index.html是服务器中的一个资源，像html这样的资源还有很多，服务器怎么知道浏览器客户端要访问的是哪个资源呢？当然是通过用户的请求路径了。其实LoginServlet也是服务器端的一种资源，只不过这种资源不是html，而是一段Java程序，所以服务器也可以先截获用户的请求路径，然后通过请求URI决定调用哪个Servlet。因此可以说，“请求URI”和对应要执行的“Servlet程序”之间有一种绑定关系。那么接下来就让我们编写Web服务器端的程序，截获请求URI，根据请求URI来对应调用Servlet。（HandlerRequest）<br><img src="http://p1.bpimg.com/576993/8ce4e66091fadfd2.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL，发送请求<br><img src="http://p1.bpimg.com/576993/c1e1ba4b59086228.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/a855af6f310a9e7a.png" alt="Markdown"><br>浏览器再输入<br><img src="http://p1.bpimg.com/576993/035ef0f2141fd367.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/990000ef11415100.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/" class="archive-article-date">
-  	<time datetime="2016-12-04T13:49:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -892,7 +888,7 @@ alert(filterarray[key]);
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.56px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11.11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 11.11px;">Weblogic</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.56px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12.22px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.56px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11.11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.56px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12.22px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
     			</div>
     	</section>
     
