@@ -152,6 +152,79 @@
       <div class="body-wrap">
         
   
+    <article id="post-javascript-表单验证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/27/javascript-表单验证/">javascript-表单验证</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h4><ol>
+<li>用户名不能为空</li>
+<li>用户名长度必须在[6-14]位之间</li>
+<li>密码和确认密码必须一致</li>
+<li>用户填写一个验证一个（不要全部填写完之后再验证），验证失败时候，一定要在后面提示错误消息</li>
+<li>用户表单信息验证失败，阻止表单的提交</li>
+</ol>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><ol>
+<li>设置span标签，将来错误信息显示在span标签中，用户名后面有span，确认密码后面有span</li>
+<li>填写一个验证一个，这里需要使用到失去焦点事件：blur，句柄：onblur，谁失去焦点?文本框/密码框</li>
+<li>编写验证用户名的函数：checkUsername(username)，给该函数使用this.value的方式传参</li>
+<li>获取焦点之后，清除错误消息，需要使用一个事件focus，句柄：onfocus</li>
+<li>验证密码和确认密码是否一致</li>
+<li>清除密码错误提示信息</li>
+<li><p>表单验证全部通过再提交表单，只要有一项不合法，阻止表单提交</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>&lt;!DOCTYPE HTML PUBLIC “-//W3C//DTD HTML 4.01 Transitional//EN” “<a href="http://www.w3.org/TR/html4/loose.dtd&quot;&gt;" target="_blank" rel="external">http://www.w3.org/TR/html4/loose.dtd&quot;&gt;</a><br><html><br><head><br><title>表单验证</title><br><meta charset="UTF-8"><br></head><br><body><br><form id="form"><br>用户名：<input type="text" id="userName" onblur="checkUserName(this.value)" onfocus="clearUserNameErr();"><span id="userNameError"></span><br>密码：<input type="text" id="pwd"><br>确认密码：<input type="text" id="confirmPwd" onblur="checkPwd();" onfocus="clearPwdErr();"><span id="confirmPwdError"></span><br><br><input type="button" value="注册" onclick="save();"><br></form><br><script type="text/javascript"><br>//给String类动态扩展一个trim函数<br>String.prototype.trim = function(){<br>return this.replace(/^\s+/,””).replace(/\s+$/,””)<br>}<br>/<strong><em><br>1、用户名不能为空<br>2、用户名长度必须在[6-14]位之间<br>*</em></strong>/<br>function checkUserName(userName){<br>var flag = true;//记录验证是否通过返回值<br>//去除前后空白<br>username = userName.trim();</p>
+<p>var userNameError = document.getElementById(“userNameError”);<br>if(username==””){//为空<br>userNameError.innerHTML=”<font color='red'>用户名不能为空</font>“;<br>flag=false;<br>}else if(username.length<6 || username.lenth>14){<br>userNameError.innerHTML=”<font color = ‘red’ >用户名长度必须在6-14位之间</font>“;<br>flag = false;<br>}else{<br>flag=true;<br>}<br>return flag;<br>}</p>
+</li>
+</ol>
+<p>//获取焦点之后清除错误提示信息<br>function clearUserNameErr(){<br>   var userNameError = document.getElementById(“userNameError”);<br>   userNameError.innerHTML=””;<br>}<br>//密码和确认密码必须一致<br>function checkPwd(){<br>var flag = true;<br>var pwd = document.getElementById(“pwd”).value.trim();<br>var confirmPwd = document.getElementById(“confirmPwd”).value.trim();<br>var confirmPwdError = document.getElementById(“confirmPwdError”);</p>
+<p>if(pwd==confirmPwd){<br>   confirmPwdError.innerHTML=””;<br>   return true;<br>}else{<br>   confirmPwdError.innerHTML=”<font color='red'>密码不一致</font>“;<br>   return false;<br>}<br>return flag;<br>}</p>
+<p> //获取焦点之后清除错误提示信息<br>function clearPwdErr(){<br>   var userNameError = document.getElementById(“confirmPwdError”);<br>   userNameError.innerHTML=””;<br>}</p>
+<p>//注册<br>function save(){<br> //1.验证用户名<br> var userName = document.getElementById(“userName”).value;<br> var userNameOk = checkUserName(userName);<br> //2.验证密码<br> var pwdOk = checkPwd();<br> //3.提交表单<br> if(pwdOk &amp;&amp; userNameOk){<br>//获取表单对象<br>var userForm = document.getElementById(“userForm”);<br>//设置form的action<br>userForm.action = “<a href="http://localhost:8080/oa/register">http://localhost:8080/oa/register</a>“;<br>//设置form的提交方式<br>userForm.method = “GET”;<br>//调用方法提交<br>userForm.submit();<br> }<br>}<br></script><br></body></html><br></p>
+<h4 id="效果"><a href="#效果" class="headerlink" title="效果"></a>效果</h4><p>测试效果如下：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/%E6%88%AA%E5%9B%BE118.png" alt="效果"></p>
+</li></ol>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/27/javascript-表单验证/" class="archive-article-date">
+  	<time datetime="2017-02-27T13:34:08.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-27</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javascript/">javascript</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Websocket-初识websocket" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -618,61 +691,6 @@
 
 
   
-    <article id="post-Myeclipse-A-full-JDK-must-be-specified" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/">Myeclipse-A full JDK must be specified</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在weblogic下部署项目的时候老是报错:a full jdk must be specified,特别是当用自己的jdk时候<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/143.png" alt=""></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-问题来源"><a href="#1-问题来源" class="headerlink" title="1.问题来源"></a>1.问题来源</h6><p>网上百度了下,发现是Myeclipse下jdk配置问题,本人配置的jre不小心配置成如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/144.png" alt=""></p>
-<h6 id="2-解决"><a href="#2-解决" class="headerlink" title="2.解决"></a>2.解决</h6><ol>
-<li>配置JRE HOME如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/145.png" alt=""></li>
-<li>weblogic下配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/146.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/" class="archive-article-date">
-  	<time datetime="2017-02-16T15:38:30.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -738,7 +756,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16.67px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.89px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11.11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 11.11px;">Websocket</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 16.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12.22px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 10px;">转载</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 15.56px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16.67px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.89px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11.11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 11.11px;">Websocket</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 16.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10px;">javascript</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12.22px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 10px;">转载</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
     			</div>
     	</section>
     
