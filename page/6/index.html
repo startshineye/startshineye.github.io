@@ -152,6 +152,50 @@
       <div class="body-wrap">
         
   
+    <article id="post-代理及AOP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/14/代理及AOP/">代理及AOP</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/14/代理及AOP/" class="archive-article-date">
+  	<time datetime="2017-01-14T07:30:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-github上-md添加图片" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -748,73 +792,6 @@
 
 
   
-    <article id="post-泛型-八-泛型类型" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/07/泛型-八-泛型类型/">泛型(八)-泛型类型</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="持久层的CRUD"><a href="#持久层的CRUD" class="headerlink" title="持久层的CRUD"></a>持久层的CRUD</h4><ol>
-<li>CRUD是指在做计算处理时的增加(Create)、读取查询(Retrieve)、更新(Update)和删除(Delete)几个单词的首字母简写。主要被用在描述软件系统中数据库或者持久层的基本操作功能。<h4 id="自定义泛型类型"><a href="#自定义泛型类型" class="headerlink" title="自定义泛型类型"></a>自定义泛型类型</h4><h6 id="1-引出自定义泛型类型"><a href="#1-引出自定义泛型类型" class="headerlink" title="1.引出自定义泛型类型"></a>1.引出自定义泛型类型</h6></li>
-<li>实例代码<br>写一个dao层的dao用于对数据库的crud操作，但是这个dao中的crud方法具有统一性,也就是说crud既可以对人操作，也可以对产品等等其他事物进行操作。<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	  Dao dao = new Dao();</div><div class="line">	  dao.add(new Person(&quot;zs&quot;,23));</div><div class="line">	  String s = dao.findById(1);</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line"> </div><div class="line">/**</div><div class="line"> * 数据库操作dao</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">class Dao &#123;</div><div class="line">	   //dao中的c操作,方法泛型来具备通用型</div><div class="line">	   public &lt;T&gt;void add(T obj)&#123;</div><div class="line">	   &#125;</div><div class="line">	   //dao的r操作</div><div class="line">	   public &lt;T&gt; T findById(int id)&#123;</div><div class="line">		   return null;</div><div class="line">	   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">class Person&#123;</div><div class="line">	private String name;</div><div class="line">	private int age;</div><div class="line">	public Person(String name,int age)&#123;</div><div class="line">		this.name = name;</div><div class="line">		this.age = age;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>分析以上代码结论：</p>
-<ol>
-<li>虽然让dao有了通用性操作，但是与实际情况相互矛盾，加入我们c的是一个人，但是我们取出来的findById也许就是一个其他事物</li>
-<li>对于以上情况我们该怎么解决呢？引出泛型类<h4 id="泛型类"><a href="#泛型类" class="headerlink" title="泛型类"></a>泛型类</h4>对于以上的 情况我们可以把参数类型加到类上，得出泛型类</li>
-<li>如果类的实例对象中的多处都要用到同一个类型参数,即这些地方引用的泛型参数要保持同一个实际类型时候,这时候就要采用泛型类型的方式进行定义,也就是类级别的泛型,语法格式如下：<br>public class Dao<t>{<br>private T field1;<br>public void add(T obj){};<br>public void findById(int id){};<br>}</t></li>
-<li>类级别的泛型是根据引用该类名时指定的类型信息来参数化实例变量的,例如，如下两种方式都可以<br>1.Dao<string> dao = null;<br>2.new Dao<string>();</string></string></li>
-<li>注意：<br>1.在对泛型类型进行参数化时,类型参数的实例必须是引用类型,不能是基本类型。<br>2.当一个变量被声明为泛型时,只能被实例变量和方法调用(还有内嵌类型),而不能被静态变量调用<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 数据库操作dao</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">class Dao&lt;T&gt; &#123;</div><div class="line">	   //dao中的c操作,方法泛型来具备通用型</div><div class="line">	   public &lt;T&gt;void add(T obj)&#123;</div><div class="line">	   &#125;</div><div class="line">	   //dao的r操作</div><div class="line">	   public &lt;T&gt; T findById(int id)&#123;</div><div class="line">		   return null;</div><div class="line">	   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/07/泛型-八-泛型类型/" class="archive-article-date">
-  	<time datetime="2017-01-07T10:50:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -880,7 +857,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 17px;">Android</a> <a href="/tags/CTI/" style="font-size: 12px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 18px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 19px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 14px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 11px;">Websocket</a> <a href="/tags/hibernate/" style="font-size: 11px;">hibernate</a> <a href="/tags/im/" style="font-size: 16px;">im</a> <a href="/tags/jQuery/" style="font-size: 13px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11px;">javascript</a> <a href="/tags/java集合/" style="font-size: 11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 13px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12px;">websocket</a> <a href="/tags/代理/" style="font-size: 13px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 19px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15px;">泛型</a> <a href="/tags/注解/" style="font-size: 12px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 14px;">转载</a> <a href="/tags/集合/" style="font-size: 14px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 17.78px;">Android</a> <a href="/tags/CTI/" style="font-size: 12.22px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 11.11px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.78px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16.67px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.89px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 13.33px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 11.11px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 12.22px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 14.44px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 11.11px;">Websocket</a> <a href="/tags/hibernate/" style="font-size: 11.11px;">hibernate</a> <a href="/tags/im/" style="font-size: 16.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 13.33px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java集合/" style="font-size: 11.11px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 13.33px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 11.11px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 12.22px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 12.22px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.22px;">websocket</a> <a href="/tags/代理/" style="font-size: 13.33px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 14.44px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.89px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15.56px;">泛型</a> <a href="/tags/注解/" style="font-size: 12.22px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15.56px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 20px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 14.44px;">转载</a> <a href="/tags/集合/" style="font-size: 14.44px;">集合</a>
     			</div>
     	</section>
     
