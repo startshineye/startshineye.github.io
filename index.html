@@ -152,6 +152,121 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-24-Android下数据库" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-24-Android下数据库/">Android(24)-Android下数据库</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="Android数据库介绍"><a href="#Android数据库介绍" class="headerlink" title="Android数据库介绍"></a>Android数据库介绍</h4><ol>
+<li>1.Android的数据库是用sqlite</li>
+<li>2.sqlite是一个轻量级的数据库,是嵌入到手机里面的</li>
+<li>3.什么情况下用数据库?有大量相似结构的数据需要存储的时候  </li>
+<li>4.在java中,当我们书写File file = new File(“info.txt”);并不会生成info.txt文件,只有当我们使用流的时候才会生成,FileOutPutStream fos = new FileOutPutStream(file);</li>
+<li>5.在Android中创建一个数据库,用SQLiteOpenHelper<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/77.png" alt="">  <h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4>创建数据库步骤:<br>1.创建一个类继承SQLiteOpenHelper<br>2.实例化此类的对象,并且创建一个数据库</li>
+</ol>
+<h6 id="1-创建一个类继承SQLiteOpenHelper"><a href="#1-创建一个类继承SQLiteOpenHelper" class="headerlink" title="1.创建一个类继承SQLiteOpenHelper"></a>1.创建一个类继承SQLiteOpenHelper</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">   public class MyOpenHelper extends SQLiteOpenHelper &#123;</div><div class="line">   </div><div class="line">/***</div><div class="line"> * </div><div class="line"> * @param context 上下文</div><div class="line"> * @param name 数据库名字</div><div class="line"> * @param factory 目的为了创建cursor对象</div><div class="line"> * @param version 数据库版本 从1开始</div><div class="line"> */</div><div class="line">public MyOpenHelper(Context context) &#123;</div><div class="line">	super(context,&quot;yxm.db&quot;,null,1);</div><div class="line"> &#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void onCreate(SQLiteDatabase arg0) &#123;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) &#123;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-实例化此类的对象-并且创建一个数据库"><a href="#2-实例化此类的对象-并且创建一个数据库" class="headerlink" title="2.实例化此类的对象,并且创建一个数据库"></a>2.实例化此类的对象,并且创建一个数据库</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line">@Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line">    </div><div class="line">    //创建一个数据库</div><div class="line">    MyOpenHelper helper = new MyOpenHelper(getApplicationContext());</div><div class="line">    //打开或者创建数据库 如果第一次就是创建 反其实打开</div><div class="line">    SQLiteDatabase writableDatabase = helper.getWritableDatabase();</div><div class="line">    //打开或者创建数据库 如果第一次就创建 如果磁盘满了 返回只读</div><div class="line">    SQLiteDatabase readableDatabase = helper.getReadableDatabase();</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>注意:1.MyOpenHelper helper = new MyOpenHelper(getApplicationContext());这一句不代表就已经创建了数据库，就比如java中,当我们书写File file = new File(“info.txt”);并不会生成info.txt文件,只有当我们使用流的时候才会生成,FileOutPutStream fos = new FileOutPutStream(file);需要加上  SQLiteDatabase readableDatabase = helper.getReadableDatabase();<br>2.cusor类似于java中的ResultSet，就是一个游标，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/78.png" alt=""> </p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/79.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-24-Android下数据库/" class="archive-article-date">
+  	<time datetime="2017-03-12T14:29:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Android-23-xml解析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-23-xml解析/">Android(23)-xml解析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Android里面数据传递一般是两种方式:一种是json,一种是xml  </p>
+<h4 id="xml解析"><a href="#xml解析" class="headerlink" title="xml解析"></a>xml解析</h4><ol>
+<li>1.xml的数据来源 来源于服务器 服务器的开发人员通过服务器技术把数据准备成xml返回给客户端  </li>
+<li>2.对应Andriod开发人员 需要做解析的操作 把我们关心的数据取出来</li>
+<li>3.服务器是以流的形式返回数据  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-23-xml解析/" class="archive-article-date">
+  	<time datetime="2017-03-12T13:38:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-22-生成xml第二种方式" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -596,128 +711,6 @@
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-14-日志猫的使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/07/Android-14-日志猫的使用/">Android(14)-日志猫的使用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>日志是所有开发中不可或缺的一部分,Android开发也是如此。</p>
-<h4 id="日志猫的分类"><a href="#日志猫的分类" class="headerlink" title="日志猫的分类"></a>日志猫的分类</h4><p>Logcat(日志猫)有5个级别,分别如下:  </p>
-<ol>
-<li>1.Log.v()–&gt;VERBOSE<br>颜色为黑色,表示任何消息都会输出,是Android日志里面级别最低的一种,使用方法:Log.v();  </li>
-<li>2.Log.d()–&gt;DEBUG<br>颜色为蓝色,输出debug调试信息和它的上层信息,级别比verbose高一级  </li>
-<li>3.Log.i()–&gt;INFO<br>颜色为绿色,提示性的消息information,不会输出Log.v和Log.d信息,但会i,w,e信息</li>
-<li>4.Log.w()–&gt;WARN<br>颜色为橙色,可以看作为warning警告,这些警告可能会存在一定风险,因此需要我们优化代码,选择他会输出log.e信息</li>
-<li>5.Log.e()–&gt;EROOR<br>颜色为红色,表示error错误；这里仅表示红色的错误信息。此时错误需要进行修改才能使你的程序正常运行  </li>
-</ol>
-<h4 id="日志猫的使用"><a href="#日志猫的使用" class="headerlink" title="日志猫的使用"></a>日志猫的使用</h4><ol>
-<li>1.Android给我们提供了一个Log类,这个类有一些方法,比如<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/51.png" alt="">  </li>
-<li><p>2.测试  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line">private static final String tag = &quot;MainActivity&quot;;</div><div class="line">@Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line">    //打印日志</div><div class="line">    Log.v(tag, &quot;这是v信息&quot;);</div><div class="line">    Log.d(tag,&quot;这是d信息&quot;);</div><div class="line">    Log.i(tag, &quot;这是i信息&quot;);</div><div class="line">    Log.w(tag, &quot;这是w信息&quot;);</div><div class="line">    Log.e(tag, &quot;这是e信息&quot;);</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>3.信息获取<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/52.png" alt="">  </p>
-</li>
-<li><ol>
-<li>我们可以通过日志的级别来查看错误信息，一般查看error级别或warn级别基本上就可以知道错误出现在哪里了，其实也可以通过创建一个日志过滤器来测试错误。也就是上面绿色的小加号，当点击的时候，弹出一个对话框，如下图<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/53.png" alt="">  </li>
-</ol>
-</li>
-<li>5.我们查看错误信息的时候，可以点击下图红色框框，框住选选进行查看<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/54.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/07/Android-14-日志猫的使用/" class="archive-article-date">
-  	<time datetime="2017-03-07T13:46:18.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Myeclipse-The-type-java-util-Map-cannot-be-resolved" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/06/Myeclipse-The-type-java-util-Map-cannot-be-resolved/">Myeclipse-The type java.util.Map cannot be resolved</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h6 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h6><p>在使用weblogic12.2.1.2版本时候需要安装jdk1.8。由于本人使用的是Myeclipse10，在配置好环境之后一直出现如下错误:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/50.png" alt=""></p>
-<h6 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h6><p>查询之后原来是myeclipse10下不支持jdk1.8。换成Myeclipse2014就行</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/06/Myeclipse-The-type-java-util-Map-cannot-be-resolved/" class="archive-article-date">
-  	<time datetime="2017-03-06T02:40:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-06</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
 	</div>
 
       
