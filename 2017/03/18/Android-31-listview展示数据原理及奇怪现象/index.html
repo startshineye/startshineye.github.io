@@ -4,17 +4,27 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives | Startshineye的博客</title>
+  <title>Android(31)-listview展示数据原理及奇怪现象 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/page/5/index.html">
+  <meta name="description" content="listview展示数据源里listview展示数据源里就是mvc模式和java web中mvc类似  
+java web中的mvcm:model 数据v:view 视图c:controller 控制  
+android中mvcm:mode 数据(javabean)v:view listviewc:adapteradapter负责把数据显示到listview中  
+ListView的奇怪现象值优化">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Android(31)-listview展示数据原理及奇怪现象">
+<meta property="og:url" content="https://github.com/startshineye/2017/03/18/Android-31-listview展示数据原理及奇怪现象/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="listview展示数据源里listview展示数据源里就是mvc模式和java web中mvc类似  
+java web中的mvcm:model 数据v:view 视图c:controller 控制  
+android中mvcm:mode 数据(javabean)v:view listviewc:adapteradapter负责把数据显示到listview中  
+ListView的奇怪现象值优化">
+<meta property="og:updated_time" content="2017-03-18T11:05:51.433Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="Android(31)-listview展示数据原理及奇怪现象">
+<meta name="twitter:description" content="listview展示数据源里listview展示数据源里就是mvc模式和java web中mvc类似  
+java web中的mvcm:model 数据v:view 视图c:controller 控制  
+android中mvcm:mode 数据(javabean)v:view listviewc:adapteradapter负责把数据显示到listview中  
+ListView的奇怪现象值优化">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,341 +160,122 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-Android-31-listview展示数据原理及奇怪现象" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
+    <h1 class="article-title" itemprop="name">
+      Android(31)-listview展示数据原理及奇怪现象
+    </h1>
   
+
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
+        <h4 id="listview展示数据源里"><a href="#listview展示数据源里" class="headerlink" title="listview展示数据源里"></a>listview展示数据源里</h4><p>listview展示数据源里就是mvc模式和java web中mvc类似  </p>
+<p>java web中的mvc<br>m:model 数据<br>v:view 视图<br>c:controller 控制  </p>
+<p>android中mvc<br>m:mode 数据(javabean)<br>v:view listview<br>c:adapter<br>adapter负责把数据显示到listview中  </p>
+<h4 id="ListView的奇怪现象值优化"><a href="#ListView的奇怪现象值优化" class="headerlink" title="ListView的奇怪现象值优化"></a>ListView的奇怪现象值优化</h4><h6 id="1-listview-高使用match-parent"><a href="#1-listview-高使用match-parent" class="headerlink" title="1.listview 高使用match_parent"></a>1.listview 高使用match_parent</h6><p>假如我们屏幕宽为480，每一个listview为60，此时会生成480/60=8个这样系统就能够确定的算出展示的个数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;ListView </div><div class="line">        android:id=&quot;@+id/lv&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;</div><div class="line">        android:fastScrollEnabled=&quot;true&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        &gt;   </div><div class="line">    &lt;/ListView&gt;</div></pre></td></tr></table></figure></p>
+<h6 id="2-listview-高使用wrap-content"><a href="#2-listview-高使用wrap-content" class="headerlink" title="2.listview 高使用wrap_content"></a>2.listview 高使用wrap_content</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;ListView </div><div class="line">        android:id=&quot;@+id/lv&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;</div><div class="line">        android:fastScrollEnabled=&quot;true&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        &gt;   </div><div class="line">    &lt;/ListView&gt;</div></pre></td></tr></table></figure>
+<p>假如我们屏幕宽为480，每一个listview为60，此时会生成480/60=8个这样系统就能够确定的不能够算出展示的个数,就会进行多次的校验.</p>
+<h6 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h6><p>以后我们用listview都是用match_parent</p>
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-w">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/20/oracle创建表空间-用户-授权并导入dmp文件/" class="archive-article-date">
-  	<time datetime="2017-02-20T13:07:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-20</time>
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/18/Android-31-listview展示数据原理及奇怪现象/" class="archive-article-date">
+  	<time datetime="2017-03-18T10:20:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-18</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/20/oracle创建表空间-用户-授权并导入dmp文件/">oracle创建表空间,用户,授权并导入dmp文件</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/18/weblogic-application-ModuleException/" class="archive-article-date">
-  	<time datetime="2017-02-18T14:09:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/18/weblogic-application-ModuleException/">weblogic.application.ModuleException</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Weblogic/">Weblogic</a></li></ul>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/03/18/Android-30-listview的优化/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Android(30)-listview的优化</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/17/Error-configuring-application-listener-of-class-org-springframework-web-util-Log4jConfigListen/" class="archive-article-date">
-  	<time datetime="2017-02-17T03:32:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/17/Error-configuring-application-listener-of-class-org-springframework-web-util-Log4jConfigListen/">Error configuring application listener of class org.springframework.web.util.Log4jConfigListen</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/">Spring</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/17/Weblogic在Myeclipse下-weblogic-Could-not-get-the-server-file-lock/" class="archive-article-date">
-  	<time datetime="2017-02-17T01:48:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/17/Weblogic在Myeclipse下-weblogic-Could-not-get-the-server-file-lock/">Weblogic在Myeclipse下-weblogic Could not get the server file lock</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-          
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Android-31-listview展示数据原理及奇怪现象" data-title="Android(31)-listview展示数据原理及奇怪现象" data-url="https://github.com/startshineye/2017/03/18/Android-31-listview展示数据原理及奇怪现象/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/" class="archive-article-date">
-  	<time datetime="2017-02-16T15:38:30.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/">Myeclipse-A full JDK must be specified</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
 
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/Myeclipse下部署Tomcat中finish按键无效/" class="archive-article-date">
-  	<time datetime="2017-02-16T03:13:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/Myeclipse下部署Tomcat中finish按键无效/">Myeclipse下部署Tomcat中finish按键无效</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/JAVA环境变量找不到/" class="archive-article-date">
-  	<time datetime="2017-02-16T02:16:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/JAVA环境变量找不到/">JAVA环境变量找不到</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JDK/">JDK</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Weblogic/">Weblogic</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/15/myeclipse-The-type-java-lang-CharSequence-cannot-be-resolved/" class="archive-article-date">
-  	<time datetime="2017-02-15T15:52:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/15/myeclipse-The-type-java-lang-CharSequence-cannot-be-resolved/">myeclipse-The type java.lang.CharSequence cannot be resolved</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-w">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/15/Oracle实现主键自增-二-不用触发器/" class="archive-article-date">
-  	<time datetime="2017-02-15T15:14:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/15/Oracle实现主键自增-二-不用触发器/">Oracle实现主键自增(二)-不用触发器</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/15/Weblogic-Unable-to-access-jarfile/" class="archive-article-date">
-  	<time datetime="2017-02-15T10:12:15.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/15/Weblogic-Unable-to-access-jarfile/">Weblogic- Unable to access jarfile</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/weblogic/">weblogic</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/4/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/3/">3</a><a class="page-number" href="/archives/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/archives/page/6/">6</a><a class="page-number" href="/archives/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/19/">19</a><a class="extend next" rel="next" href="/archives/page/6/">Next &raquo;</a>
-    </nav>
-  
 
 
       </div>
@@ -507,8 +298,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
