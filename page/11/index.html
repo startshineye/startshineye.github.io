@@ -152,6 +152,72 @@
       <div class="body-wrap">
         
   
+    <article id="post-java反射-九-反射实现框架功能" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/23/java反射-九-反射实现框架功能/">java反射-九-反射实现框架功能</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="反射实现框架功能"><a href="#反射实现框架功能" class="headerlink" title="反射实现框架功能"></a>反射实现框架功能</h4><p>学了那么多反射，究竟反射有什么作用了?<br>反射一般用在框架的实现方面<br>在一个类还没有写好之前就已经有可以实现功能了，比如struts框架，在我们还没有写完源程序时候，struts框架就可以运行了。</p>
+<h6 id="1-框架与够工具类的区别"><a href="#1-框架与够工具类的区别" class="headerlink" title="1.框架与够工具类的区别"></a>1.框架与够工具类的区别</h6><ol>
+<li>都是别人写的，但是用法不一样，一个是人家调用你，一个是你调用人家。以程序员为主题，你去调用别人的东西就是工具类（你用工具类调用其他），别人调用你的东西叫做框架<h6 id="2-框架与框架要解决的核心问题"><a href="#2-框架与框架要解决的核心问题" class="headerlink" title="2.框架与框架要解决的核心问题"></a>2.框架与框架要解决的核心问题</h6></li>
+<li>开发商做房子卖给客户，客户自己安装门窗和空调。开发商的空房子就是框架，客户做成一个漂亮的房子（一个产品）就需要使用开发商提供的空房子(框架)</li>
+<li>现实开发过程中做的sturs的一个个项目,每个人做的项目都不一样，但是每个人都做的很快，原因就是开始大家就在一个框架下开始干，效率高。</li>
+<li>框架和工具类区别：工具类被用户类调用,而框架则是调用用户提供的类.<h6 id="3-框架要解决的核心问题"><a href="#3-框架要解决的核心问题" class="headerlink" title="3.框架要解决的核心问题"></a>3.框架要解决的核心问题</h6></li>
+<li>我在写框架(房子)时,你这个用户可能还在上小学,还不会写程序？我写的框架程序怎样调用到你以后写的类(门窗)呢？</li>
+<li>因为在写程序时候无法知道要被调用的类名,所以，在程序中无法直接new某个类的实例对象了，用反射解决。<h6 id="4-综合实例"><a href="#4-综合实例" class="headerlink" title="4.综合实例"></a>4.综合实例</h6></li>
+<li>运用java反射，将配置文件中的java对象创建，把我们程序要调用的类放在配置文件中配，在源程程序里不要出现类的名字。</li>
+<li>在配置文件config.properties中配置一个类在程序中调用来操作。<br>文件布局：<br>在工程下建立一个config.properties文件<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">	private int x;</div><div class="line">	private int y;</div><div class="line">	</div><div class="line">	public ReflectPoint(int x,int y)&#123;</div><div class="line">		this.x = x;</div><div class="line">		this.y = y;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public int hashCode() &#123;</div><div class="line">		final int prime = 31;</div><div class="line">		int result = 1;</div><div class="line">		result = prime * result + x;</div><div class="line">		result = prime * result + y;</div><div class="line">		return result;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public boolean equals(Object obj) &#123;</div><div class="line">		if (this == obj)</div><div class="line">			return true;</div><div class="line">		if (obj == null)</div><div class="line">			return false;</div><div class="line">		if (getClass() != obj.getClass())</div><div class="line">			return false;</div><div class="line">		ReflectPoint other = (ReflectPoint) obj;</div><div class="line">		if (x != other.x)</div><div class="line">			return false;</div><div class="line">		if (y != other.y)</div><div class="line">			return false;</div><div class="line">		return true;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public static void main(String[] args) throws Exception&#123;</div><div class="line">		//定义3个对象</div><div class="line">		ReflectPoint p1 = new ReflectPoint(3,3);</div><div class="line">		ReflectPoint p2 = new ReflectPoint(5, 5);</div><div class="line">		ReflectPoint p3 = new ReflectPoint(3, 3);</div><div class="line">		</div><div class="line">		//Collection collection =  new HashSet();</div><div class="line">		</div><div class="line">		//修改此处代码用配置文件的方式读取配置文件来创建对象</div><div class="line">		/***************反射创建类********************/</div><div class="line">		/**</div><div class="line">		 * 思路：读取文件到内存中存储对象，然后在内存对象中操作数据</div><div class="line">		 * 1.读取文件到内存</div><div class="line">		 * 2.创建对象</div><div class="line">		 */</div><div class="line">		//1.读取文件</div><div class="line">		InputStream in = new FileInputStream(&quot;config.properties&quot;);//面向接口编程读取文件</div><div class="line">		//创建properties对象此对象和hashmap基于key-value类似，但是加载文件是一次性将文件key-value加载到没存，不是一个个存放</div><div class="line">		Properties pros = new Properties();</div><div class="line">		pros.load(in);//一次性全部加载到内存中去</div><div class="line">		in.close();//关闭流</div><div class="line">		String className = pros.getProperty(&quot;className&quot;);//基于key获取value</div><div class="line">		Collection collection = (Collection)Class.forName(className).newInstance();</div><div class="line">		/***************反射创建类********************/</div><div class="line">		</div><div class="line">		</div><div class="line">		collection.add(p1);</div><div class="line">		collection.add(p2);</div><div class="line">		collection.add(p3);</div><div class="line">	    collection.add(p1);	</div><div class="line">	</div><div class="line">		System.out.println(collection.size());// 2</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/23/java反射-九-反射实现框架功能/" class="archive-article-date">
+  	<time datetime="2016-12-23T14:48:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java反射-八-数组反射应用二" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -681,70 +747,9 @@
 
 
   
-    <article id="w-java反射-三-Constructor类" class="article article-type-w" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/18/java反射-三-Constructor类/">java反射(三)-Constructor类</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>一个class代表一个字节码，一个Method代表一个字节码中的方法,一个Constructor代表代表字节码中的构造方法</p>
-<h4 id="Constructor类"><a href="#Constructor类" class="headerlink" title="Constructor类"></a>Constructor类</h4><ol>
-<li>Constructor类代表某个类中的一个构造方法</li>
-<li>得到某个类中所有构造方法：<br>Constructor[] constructorArr = Class.forName(“类名”).getConstructors();</li>
-<li>创建实例对象<br>通常方式：String str = new String(new StringBuffer(“abc”));<br>反射方式：1.获取StringBuffer类型的构造方法<br>Constructor constructor1=String.class.getConstructor(StringBuffer.class);//通过字节码获取StringBuffer类型的构造方法<br>2.创建对象<br>String str = constructor1.newInstance(new StringBuffer(“abc”));</li>
-<li>Class.newInstance()方法<br>1.Class身上也有个newInstance方法，他就是调用不带参数的构造方法，然后用那个构造方法去创建对象，假设我们恰好用不带参数构造方法，我们就可以直接用Class.newInstance()<br>2.例子：String obj= (String)Class.forName(“java.lang.String”).newInstance().<br>该方法内部先得到默认的构造方法，然后用该方法创建对象。<br>查看源码知道：该方法的内部使用到缓存机制来保存默认构造方法的实例对象。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/18/java反射-三-Constructor类/" class="archive-article-date">
-  	<time datetime="2016-12-18T14:32:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/10/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/page/19/">19</a><a class="extend next" rel="next" href="/page/12/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/10/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="extend next" rel="next" href="/page/12/">Next &raquo;</a>
     </nav>
   
 
