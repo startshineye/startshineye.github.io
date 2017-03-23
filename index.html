@@ -152,6 +152,126 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-38-源码查看器-一" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/23/Android-38-源码查看器-一/">Android(38)-源码查看器(一)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="需求"><a href="#需求" class="headerlink" title="需求"></a>需求</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/94.png" alt=""><br>1.输入网址<br>2.点击查看按钮<br>3.显示源码  </p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><h6 id="1-ui"><a href="#1-ui" class="headerlink" title="1.ui"></a>1.ui</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;vertical&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line"></div><div class="line">&lt;EditText </div><div class="line">android:id=&quot;@+id/et_path&quot;</div><div class="line">android:layout_height=&quot;wrap_content&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:hint=&quot;请输入网址&quot;</div><div class="line">/&gt;</div><div class="line"> </div><div class="line">&lt;Button </div><div class="line">android:onClick=&quot;click&quot;</div><div class="line">android:layout_height=&quot;wrap_content&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:text=&quot;查看&quot;</div><div class="line">/&gt;</div><div class="line"></div><div class="line">&lt;EditText </div><div class="line"> android:id=&quot;@+id/et_content&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line"> /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-逻辑"><a href="#2-逻辑" class="headerlink" title="2.逻辑"></a>2.逻辑</h6><p>获取EditText里面的内容,然后点击EditText,发送Http请求,然后将得到的结果返回给EditText  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">    public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">    private EditText et;</div><div class="line">	private TextView content;</div><div class="line"></div><div class="line">	@Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">        //拿到控件</div><div class="line">        et = (EditText)findViewById(R.id.et_path);</div><div class="line">        content = (TextView)findViewById(R.id.et_content);</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //点击事件</div><div class="line">    public void click()&#123;</div><div class="line">      try &#123;</div><div class="line">		   //【2.1】获取路径</div><div class="line">			String path = et.getText().toString().trim();</div><div class="line">			//【2.2】创建 URL 对象指定我们要访问的网址</div><div class="line">			URL url = new URL(path);</div><div class="line">			//【2.3】获取HttpUrlConnection对象 用于发送或者接受数据</div><div class="line">			HttpURLConnection conn = (HttpURLConnection) url.openConnection();</div><div class="line">			//【2.4】设置发送Get请求</div><div class="line">			conn.setRequestMethod(&quot;GET&quot;);</div><div class="line">			//【2.5】设置请求超时时间</div><div class="line">			conn.setReadTimeout(5000);</div><div class="line">			//【2.6】获取服务器返回的状态码</div><div class="line">			int code = conn.getResponseCode();</div><div class="line">			//【2.7】code == 200说明请求成功</div><div class="line">			if(code == 200)&#123;</div><div class="line">				//【2.8】获取服务器返回的数据（以流的形式）</div><div class="line">				InputStream in = conn.getInputStream();</div><div class="line">				//【2.9】把流里面数据返回到页面</div><div class="line">			&#125;</div><div class="line">			</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125; </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/23/Android-38-源码查看器-一/" class="archive-article-date">
+  	<time datetime="2017-03-23T15:24:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="w-Android-37-httpUrlConnection类的使用" class="article article-type-w" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/23/Android-37-httpUrlConnection类的使用/">Android(37)-httpUrlConnection类的使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在一些接口开发,或者对接接口的时候我们都需要使用HttpUrlConnection来发送请求  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-看一下概述知道"><a href="#1-看一下概述知道" class="headerlink" title="1.看一下概述知道:"></a>1.看一下概述知道:</h6><ol>
+<li>An URLConnection for HTTP (RFC 2616) used to send and receive data over the web. Data may be of any type and length. This class may be used to send and receive streaming data whose length is not known in advance. </li>
+<li>2.使用这个类的步骤:<br>1.Obtain a new HttpURLConnection by calling URL.openConnection() and casting the result to HttpURLConnection.<br>2.Prepare the request. The primary property of a request is its URI. Request headers may also include metadata such as credentials, preferred content types, and session cookies.<br>3.Optionally upload a request body. Instances must be configured with setDoOutput(true) if they include a request body. Transmit data by writing to the stream returned by getOutputStream().<br>4.Read the response. Response headers typically include metadata such as the response body’s content type and length, modified dates and session cookies. The response body may be read from the stream returned by getInputStream(). If the response has no body, that method returns an empty stream.<br>5.Disconnect. Once the response body has been read, the HttpURLConnection should be closed by calling disconnect(). Disconnecting releases the resources held by a connection so they may be closed or reused. <h6 id="2-例子"><a href="#2-例子" class="headerlink" title="2.例子"></a>2.例子</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">//建立与服务器的URL对像</div><div class="line">URL url = new URL(&quot;http://localhost:9999/day05/servlet/Servlet1&quot;);</div><div class="line">//打开连接</div><div class="line">HttpURLConnection con = (HttpURLConnection)url.openConnection();</div><div class="line">//获取服务器的输入流</div><div class="line">InputStream in = con.getInputStream();</div><div class="line">BufferedReader br = new BufferedReader(new InputStreamReader(in));</div><div class="line">String str = &quot;&quot;;</div><div class="line">while((str=br.readLine())!=null)&#123;</div><div class="line">System.err.println(str);</div><div class="line">&#125;</div><div class="line">//关闭连接</div><div class="line">con.disconnect();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="3-说明"><a href="#3-说明" class="headerlink" title="3.说明"></a>3.说明</h6><ol>
+<li><p>1.HttpURLConnection类的作用是通过HTTP协议向服务器发送请求，并可以获取服务器发回的数据。 HttpURLConnection来自于jdk，它的完整名称为:java.net.HttpURLConnection HttpURLConnection类，没有公开的构造方法，但我们可以通过java.net.URL的openConnection方法获取一个URLConnection的实例,而HttpURLConnection是它的子类</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">URL url = new URL(“http://www.baidu.com”); HttpURLConnection connection = (HttpURLConnection) url.openConnection();</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.conn.getResponseCode()：获取响应码 conn.getResponseMessage()：获取响应码描述 conn.getHeaderField(“Server”)：获取响应头 conn.getInputStream()：获取正文输入流</p>
+</li>
+<li><p>3.向服务器发消息默认请求到doGet方式</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">URL url = new URL(&quot;http://localhost:9999/day05/index.jsp&quot;);</div><div class="line">HttpURLConnection con = (HttpURLConnection)url.openConnection();</div><div class="line">//1、打开可以向服务器发消息</div><div class="line">con.setDoOutput(true);</div><div class="line">conn.setRequestProperty(&quot;xxx&quot;, &quot;yyy&quot;);//发送请求头</div><div class="line">OutputStream out = con.getOutputStream();</div><div class="line">out.write(“name=wzhting”.getBytes());//发送正文数据</div><div class="line">//2、获取状态码，以表示完成请求</div><div class="line">int code = con.getResponseCode();</div><div class="line">System.err.println(code);</div></pre></td></tr></table></figure>
+</li>
+<li><p>4.使用doPost方式</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">URL url = new URL(&quot;http://localhost:9999/day05/servlet/TestConnection&quot;);</div><div class="line">HttpURLConnection con = (HttpURLConnection)url.openConnection();</div><div class="line">//1、设置请求方式为post</div><div class="line">con.setRequestMethod(&quot;POST&quot;);</div><div class="line">//可以向服务器发消息</div><div class="line">con.setDoOutput(true);</div><div class="line">OutputStream out = con.getOutputStream();</div><div class="line">out.write(&quot;name=wzhting&quot;.getBytes));</div><div class="line">//获取状态码，以表示完成请求</div><div class="line">int code = con.getResponseCode();</div><div class="line">System.err.println(code);</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/23/Android-37-httpUrlConnection类的使用/" class="archive-article-date">
+  	<time datetime="2017-03-23T14:46:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Http/">Http</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-36-simpleadapte" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -676,116 +796,6 @@ public class MyListAdapter extends BaseAdapter{
 
 
   
-    <article id="post-Android-28-使用google封装好的API进行增删查改" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/15/Android-28-使用google封装好的API进行增删查改/">Android(28)-使用google封装好的API进行增删查改</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-画ui"><a href="#1-画ui" class="headerlink" title="1.画ui"></a>1.画ui</h6><p>使用线性布局,画四个button按钮,并绑定四个方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    android:orientation=&quot;vertical&quot;</div><div class="line">    tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line"></div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;add&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;add&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;delete&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;delete&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;select&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;select&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;update&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;update&quot;</div><div class="line">        /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure></p>
-<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><p>1.创建类继承SQLiteOpenHelper(在onCreate)<br>2.实例化此类的对象<br>3.书写增删查改方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">   private MySQLite mySQLite;</div><div class="line"></div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       super.onCreate(savedInstanceState);</div><div class="line">       setContentView(R.layout.activity_main);</div><div class="line">       </div><div class="line">       mySQLite = new MySQLite(getApplicationContext());</div><div class="line">   &#125;</div><div class="line"></div><div class="line">//增</div><div class="line">public void add(View v)&#123;</div><div class="line">	//1.获取数据库对象</div><div class="line">	SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">	//2.执行一条sql语句</div><div class="line">	/***</div><div class="line">	 * table 表名</div><div class="line">	 * ContentValues 内部封装了一个map  key:对应列名字   value:对应的值</div><div class="line">	 */</div><div class="line">	ContentValues values = new ContentValues();</div><div class="line">	values.put(&quot;name&quot;,&quot;王五&quot;);</div><div class="line">	values.put(&quot;phone&quot;,&quot;110&quot;);</div><div class="line">	//返回代表插入新行的id</div><div class="line">	long insert = db.insert(&quot;info&quot;, null, values);</div><div class="line">	</div><div class="line">    //3.数据库用完关闭</div><div class="line">	db.close();</div><div class="line">	//4.用户友好提示</div><div class="line">	if(insert&gt;0)&#123;</div><div class="line">		Toast.makeText(getApplicationContext(),&quot;添加成功&quot;,1).show();</div><div class="line">	&#125;else&#123;</div><div class="line">		Toast.makeText(getApplicationContext(), &quot;添加失败&quot;, 1).show();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//删</div><div class="line">   public void delete(View v)&#123;</div><div class="line">   	SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">   	//db.execSQL(&quot;delete from info where name = ?&quot;,new Object[]&#123;&quot;zs&quot;&#125;);</div><div class="line">   	//返回值代表删除了多少行</div><div class="line">   	int delete = db.delete(&quot;info&quot;, &quot;name=?&quot;,new String[]&#123;&quot;王五&quot;&#125;);</div><div class="line">   	db.close();</div><div class="line">   	Toast.makeText(getApplicationContext(), &quot;删除了&quot;+delete+&quot;行&quot;, 1).show();</div><div class="line">&#125;</div><div class="line">   </div><div class="line">   //查</div><div class="line">   public void select(View v)&#123;</div><div class="line">   	//获取可读数据库连接</div><div class="line">   	SQLiteDatabase db = mySQLite.getReadableDatabase();</div><div class="line">   	//执行有返回值的方法</div><div class="line">   	Cursor result = db.query(&quot;info&quot;, new String[]&#123;&quot;phone&quot;&#125;, &quot;name=?&quot;,new String[]&#123;&quot;王五&quot;&#125;, null, null, null);</div><div class="line">   	//输出</div><div class="line">   	if(result!=null &amp;&amp; result.getCount()&gt;0)&#123;</div><div class="line">   		while (result.moveToNext()) &#123;</div><div class="line">			 String phone = result.getString(0);</div><div class="line">			 System.out.println(&quot;phone&quot;+phone);</div><div class="line">		&#125;</div><div class="line">   	&#125;</div><div class="line">   	</div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   //改</div><div class="line">  public void update(View v)&#123;</div><div class="line">   SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">  // db.execSQL(&quot;update info set phone = ? where name = ?&quot;,new Object[]&#123;&quot;110&quot;,&quot;zs&quot;&#125;);</div><div class="line">   ContentValues values = new ContentValues();</div><div class="line">   values.put(&quot;phone&quot;, &quot;120&quot;);</div><div class="line">   //update 代表更新了多少行</div><div class="line">   int update = db.update(&quot;info&quot;, values,&quot;name=?&quot;,new String[]&#123;&quot;王五&quot;&#125;);</div><div class="line">   db.close();</div><div class="line">   Toast.makeText(getApplicationContext(),&quot;更新了&quot;+update+&quot;行&quot;, 1).show();</div><div class="line">    &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
-<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/82.png" alt=""></p>
-<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>Google封装好的API其实底层就是一个sql语句的拼接<br>使用google提供的API存在以下优点和缺点  </p>
-<h6 id="优点"><a href="#优点" class="headerlink" title="优点"></a>优点</h6><p>1.写法简单,不需要写复杂的sql语句，不容易写错<br>2.有返回值方便开发者进行开发(容易人性化地提示)  </p>
-<h6 id="缺点"><a href="#缺点" class="headerlink" title="缺点"></a>缺点</h6><p>1.如果有多张表,使用google封装的api不容易进行查询(传统的sql语句直接写多张表就行了)</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/15/Android-28-使用google封装好的API进行增删查改/" class="archive-article-date">
-  	<time datetime="2017-03-15T13:29:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-15</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-27-使用命令行方式打开数据库" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/15/Android-27-使用命令行方式打开数据库/">Android(27)-使用命令行方式打开数据库</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>在mysql或者oracle下我们是可以使用命令行工具来操作数据库,其实在android下也可以使用命令行来打开数据库。  </p>
-<h4 id="使用命令行工具sqlite3可以打开数据库"><a href="#使用命令行工具sqlite3可以打开数据库" class="headerlink" title="使用命令行工具sqlite3可以打开数据库"></a>使用命令行工具sqlite3可以打开数据库</h4><p>来到手机终端:cmd -&gt;adb shell<br>data/data下:cd data/data……….直到databases再使用sqlite3 数据库名称<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/81.png" alt=""></p>
-<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>我们在dos黑窗口下可能会乱码<br>原因：android数据库存储一般是utf-8,然而很多人的dos的编码方式是GBK  </p>
-<ol>
-<li>改变dos编码方式 chcp(change code page)<br>gbk:chcp 936  utf-8 chcp 65001</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/15/Android-27-使用命令行方式打开数据库/" class="archive-article-date">
-  	<time datetime="2017-03-14T16:06:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-15</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -851,7 +861,7 @@ public class MyListAdapter extends BaseAdapter{
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.27px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16.36px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.18px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 17.27px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16.36px;">Myeclipse</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 18.18px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
     			</div>
     	</section>
     
