@@ -29,7 +29,8 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/4/2.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/4/6.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/4/5.png">
-<meta property="og:updated_time" content="2017-04-02T16:37:08.602Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/4/7.png">
+<meta property="og:updated_time" content="2017-04-03T12:39:35.748Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Android(39)-Android下主线程">
 <meta name="twitter:description" content="前言当我们在Android(38)源码查看器下输入http://www.google.com会报以下错误此时后台会打印出ANR异常:  
@@ -198,13 +199,18 @@
 <li>2.原因:造成上面的原因是因为:由于在主线程中进行了耗时操作</li>
 <li>3.耗时操作包括:比如连接网络,拷贝大数据,所以主线程不能阻塞。</li>
 <li>4.避免anr 可以把耗时的操作 放到子线程中 自己在创建一个线程 </li>
-<li>5，在4.0之后谷歌强制要求连接网络不能在主线程进行访问 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-在主线程中耗时5秒以上实例"><a href="#1-在主线程中耗时5秒以上实例" class="headerlink" title="1.在主线程中耗时5秒以上实例"></a>1.在主线程中耗时5秒以上实例</h6></li>
+<li>5，在4.0之后谷歌强制要求连接网络不能在主线程进行访问<br>规则:不管你是什么版本的手机,只要做耗时的操作(比如:连接网络 拷贝大的数据 等等)就自己开一个子线程。获取数据后想要更新ui,就使用Handler就可以了 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在主线程中耗时5秒以上实例"><a href="#1-在主线程中耗时5秒以上实例" class="headerlink" title="1.在主线程中耗时5秒以上实例"></a>1.在主线程中耗时5秒以上实例</h5></li>
 <li>1.ui<br>略(参照Android(38))</li>
 <li>2.逻辑<br>点击按钮是一个联网操作,我们应该开启资格子线程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/4.png" alt=""></li>
-<li>3.测试<br>重新部署项目:输入<a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a><br>报以下异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/2.png" alt=""><br>以上总结:只有主线程(UI线程才可以更新ui)<br>但是我们怎样去主线程更改ui呢?也就是怎样把数据从子线程传递到主线程中去,引出handler消息机制。<h6 id="消息机制-handler"><a href="#消息机制-handler" class="headerlink" title="消息机制(handler)"></a>消息机制(handler)</h6></li>
+<li>3.测试<br>重新部署项目:输入<a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a><br>报以下异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/2.png" alt=""><br>以上总结:只有主线程(UI线程才可以更新ui)<br>但是我们怎样去主线程更改ui呢?也就是怎样把数据从子线程传递到主线程中去,引出handler消息机制。<h5 id="2-消息机制-handler"><a href="#2-消息机制-handler" class="headerlink" title="2.消息机制(handler)"></a>2.消息机制(handler)</h5><h6 id="1-消息机制使用"><a href="#1-消息机制使用" class="headerlink" title="1.消息机制使用"></a>1.消息机制使用</h6></li>
 <li>1.使用步骤<br>【1】在主线程中定义一个Handler<br>private Handler handler = new Handler();<br>【2】使用handler会重写handler的里面的handlemessage方法<br>public void handemessage(Message msg){};<br>【3】拿着我们在主线程创建的handler去子线程发消息<br>handler.sendMessage(msg);<br>【4】handlermessage方法就会执行 在这个方法里面去更新ui</li>
-<li>2.使用<br>在主线程中定义一个handler,并写一个大括号(表示重写此类里面的方法)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/6.png" alt=""><br>在子线程中发消息,我们先定义一个message<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/5.png" alt=""><br>当一执行完sendMessage则会在主线程中的handleMessage中获取消息,更新ui</li>
+<li>2.使用<br>在主线程中定义一个handler,并写一个大括号(表示重写此类里面的方法)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/6.png" alt=""><br>在子线程中发消息,我们先定义一个message<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/5.png" alt=""><br>当一执行完sendMessage则会在主线程中的handleMessage中获取消息,更新ui<h6 id="2-消息机制原理"><a href="#2-消息机制原理" class="headerlink" title="2.消息机制原理"></a>2.消息机制原理</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/7.png" alt=""><br>当我们想要更改ui时候,我们的耗时操作是在子线程的,但是子线程手机不能更改ui的,所以交给了主线程</li>
+<li>1.在子线程中发送消息（比如更改ui），消息是存放在messagequeue</li>
+<li>2.Looper的作用是从messagequeue中取消息,</li>
+<li>3.handler作用是发消息,处理消息</li>
+<li>4.只要不在代码里面创建子线程,任何地方都属于主线程</li>
 </ol>
+<h6 id="3-替代handler"><a href="#3-替代handler" class="headerlink" title="3.替代handler"></a>3.替代handler</h6><p>在主线程中更改ui时候,我们用到了handler.发送消息给主线程,在主线程中获取消息,然后更改Ui,但是我们也有另一种方法就是不用再主线程更改ui，直接调用runOnUiThread()来替代handler来更改ui.</p>
 
       
     </div>
