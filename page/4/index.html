@@ -152,6 +152,57 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-22-生成xml第二种方式" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-22-生成xml第二种方式/">Android(22)-生成xml第二种方式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>通过Xml工具类我们可以获得XmlSerializer,生成XML第二种方式<br>1.通过Xml工具类获取XmlSerializer<br>2.获取开头声明,startDocument()及结束;<br>3.获取开始节点startTag()及结束;<br>4.写内容text();<br>5.通过流存储到sd卡:setOutput();  </p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">    public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">    private List&lt;Sms&gt; dataList;</div><div class="line">	@Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">       dataList = new ArrayList&lt;Sms&gt;();	</div><div class="line">        for (int i = 0; i &lt; 2; i++) &#123;</div><div class="line">       	 Sms sms = new Sms();</div><div class="line"> 		   sms.setAddress(&quot;110&quot;);</div><div class="line"> 		   sms.setBody(&quot;nihaoa&quot;);</div><div class="line"> 		   sms.setDate(&quot;2015&quot;);</div><div class="line"> 		   dataList.add(sms);</div><div class="line">		 &#125;</div><div class="line">        </div><div class="line">    &#125;</div><div class="line">    //通过XmlSerializer生成xml</div><div class="line">    public void click(View v)&#123;</div><div class="line">    	try &#123;</div><div class="line">			//1.获取XmlSerializer实例</div><div class="line">    		XmlSerializer serializer = Xml.newSerializer();</div><div class="line">    		//2.设置XmlSerializer的序列化参数  </div><div class="line">    		File file = new File(Environment.getExternalStorageDirectory().getPath(),&quot;sms.xml&quot;);</div><div class="line">    		FileOutputStream fos = new FileOutputStream(file);</div><div class="line">    		serializer.setOutput(fos,&quot;utf-8&quot;);</div><div class="line">            </div><div class="line">    		//3.开始xml开头 无命名空间null</div><div class="line">    		serializer.startDocument(null,true);</div><div class="line">    		</div><div class="line">    		//4.写根节点</div><div class="line">    		serializer.startTag(null, &quot;smss&quot;);</div><div class="line">    		</div><div class="line">    		//5.循环节点</div><div class="line">    		for (Sms sms : dataList) &#123;</div><div class="line">				//</div><div class="line">    			serializer.startTag(null,&quot;address&quot;);</div><div class="line">    			serializer.text(sms.getAddress());</div><div class="line">    			serializer.endTag(null,&quot;address&quot;);</div><div class="line">    			</div><div class="line">    			serializer.startTag(null,&quot;body&quot;);</div><div class="line">    			serializer.text(sms.getBody());</div><div class="line">    			serializer.endTag(null,&quot;body&quot;);</div><div class="line">    			</div><div class="line">    			serializer.startTag(null,&quot;date&quot;);</div><div class="line">    			serializer.text(sms.getDate());</div><div class="line">    			serializer.endTag(null,&quot;date&quot;);</div><div class="line">    			</div><div class="line">			&#125;</div><div class="line">    		serializer.endTag(null, &quot;smss&quot;);</div><div class="line">    		serializer.endDocument();</div><div class="line">    		fos.flush();</div><div class="line">    		fos.close();</div><div class="line">    	&#125; catch (Exception e) &#123;</div><div class="line">			// TODO: handle exception</div><div class="line">		&#125;</div><div class="line">    	 </div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-22-生成xml第二种方式/" class="archive-article-date">
+  	<time datetime="2017-03-12T08:06:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-21-生成xml第一种方式" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -686,77 +737,6 @@
 
 
   
-    <article id="post-Android-13-Android下单元测试" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/05/Android-13-Android下单元测试/">Android(13)-Android下单元测试</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>新建一个单元测试工程,新建一个类,里面含有add求和方法,我们再建立一个类Test进行测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/41.png" alt=""></p>
-<p>Android工程是运行到手机里面的,Android要进行单元测试,google工程师已经给了一个jar。这个类是AndroidTestCase</p>
-<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>1.定义一个类继承AndroidTestCase(java是需要额外导入一个jar，而这里不用了)  </li>
-<li>2.代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class CalcTest extends AndroidTestCase &#123;</div><div class="line">	 //写测试方法</div><div class="line">	 public void testAdd()&#123;</div><div class="line">		 Calc calc = new Calc();</div><div class="line">		 int result = calc.add(5,3);</div><div class="line">		 //断言[实际值,期望值]</div><div class="line">		 assertEquals(8,result);</div><div class="line">	 &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>报错:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">单元测试 does not specify a android.test.InstrumentationTestRunner instrumentation or does not declare uses-library android.test.runner in its AndroidManifest.xml</div></pre></td></tr></table></figure></p>
-<p>说明我们需要添加uses-library和InstrumentationTestRunner</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="第一步：-在AndroidManifest-xml中加入如下两段代码"><a href="#第一步：-在AndroidManifest-xml中加入如下两段代码" class="headerlink" title="第一步：.在AndroidManifest.xml中加入如下两段代码"></a>第一步：.在AndroidManifest.xml中加入如下两段代码</h6><p>&lt;!—添加代码1–&gt;<br> <uses-library android:name="android.test.runner"><br> &lt;!—添加代码2–&gt;<br> <instrumentation android:name="android.test.InstrumentationTestRunner" android:targetpackage="com.pccw" android:label="aaa"><br>注意添加的位置:</instrumentation></uses-library></p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">package=&quot;com.yxm.unit&quot;</div><div class="line">android:versionCode=&quot;1&quot;</div><div class="line">android:versionName=&quot;1.0&quot; &gt;</div><div class="line">&lt;uses-sdk</div><div class="line">    android:minSdkVersion=&quot;8&quot;</div><div class="line">    android:targetSdkVersion=&quot;18&quot; /&gt;</div><div class="line">&lt;application</div><div class="line">    android:allowBackup=&quot;true&quot;</div><div class="line">    android:icon=&quot;@drawable/ic_launcher&quot;</div><div class="line">    android:label=&quot;@string/app_name&quot;</div><div class="line">    android:theme=&quot;@style/AppTheme&quot; &gt;</div><div class="line">    &lt;activity</div><div class="line">        android:name=&quot;com.yxm.unit.MainActivity&quot;</div><div class="line">        android:label=&quot;@string/app_name&quot; &gt;</div><div class="line">        &lt;intent-filter&gt;</div><div class="line">            &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;</div><div class="line">            &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;</div><div class="line">        &lt;/intent-filter&gt;</div><div class="line">    &lt;/activity&gt;</div><div class="line">    &lt;!-- 添加 代码1 --&gt;</div><div class="line">    &lt;uses-library android:name=&quot;android.test.runner&quot;/&gt; </div><div class="line">&lt;/application&gt;</div><div class="line">&lt;!-- 添加 代码2 --&gt;</div><div class="line">&lt;instrumentation android:name=&quot;android.test.InstrumentationTestRunner&quot;  </div><div class="line">        android:targetPackage=&quot;com.yxm.unit&quot; android:label=&quot;aaa&quot;/&gt; </div><div class="line">&lt;/manifest&gt;</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li><p><uses-library android:name="android.test.runner">代表把单元测试框架中的一些依赖库引入进来</uses-library></p>
-</li>
-<li><p><instrumentation android:name="android.test.InstrumentationTestRunner" android:targetpackage="com.pccw" android:label="aaa">代表配置单元测试框架的启动装置，启动装置有好几个类，可以选择，一般情况下我们使用上面这个。</instrumentation></p>
-</li>
-<li><p>targetPackage与上面的package相同，代表单元测试框架和当前应用是处于同一个进程中</p>
-</li>
-</ol>
-<h6 id="第二步：编写业务逻辑，即需要被测试的模块"><a href="#第二步：编写业务逻辑，即需要被测试的模块" class="headerlink" title="第二步：编写业务逻辑，即需要被测试的模块"></a>第二步：编写业务逻辑，即需要被测试的模块</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public class Calc &#123;</div><div class="line">  //计算两个数相加</div><div class="line">	public int add(int x,int y)&#123;</div><div class="line">		return x+y;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h6 id="第三步：编写单元测试代码"><a href="#第三步：编写单元测试代码" class="headerlink" title="第三步：编写单元测试代码"></a>第三步：编写单元测试代码</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public class CalcTest extends AndroidTestCase &#123;</div><div class="line">	 //写测试方法</div><div class="line">	 public void testAdd()&#123;</div><div class="line">		 Calc calc = new Calc();</div><div class="line">		 int result = calc.add(5,3);</div><div class="line">		 //断言[实际值,期望值]</div><div class="line">		 assertEquals(8,result);</div><div class="line">	 &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h6 id="结果"><a href="#结果" class="headerlink" title="结果"></a>结果</h6><p>正确结果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/42.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/05/Android-13-Android下单元测试/" class="archive-article-date">
-  	<time datetime="2017-03-05T14:17:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -822,7 +802,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.83px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.17px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.83px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.5px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.17px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.55px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
     			</div>
     	</section>
     
