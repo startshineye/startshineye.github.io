@@ -25,7 +25,7 @@ java里面线程是继承Thread类或者实现Runnable接口
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/2.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE08.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE09.png">
-<meta property="og:updated_time" content="2017-06-04T03:40:38.585Z">
+<meta property="og:updated_time" content="2017-06-04T04:17:33.887Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java并发编程(一)-线程基础">
 <meta name="twitter:description" content="线程安全1.概念
@@ -206,6 +206,34 @@ java里面线程是继承Thread类或者实现Runnable接口
 <li>如果想要让一个线程执行printNum方法时候,其他线程不执行此方法,这个时候加“static”给这方法,方法加上static后被修改的成员变量也得加上static</li>
 <li>static表示在静态的方法上去加上synchronized修饰的话,这个锁就是这个类级别的锁</li>
 <li>关键字synchronized获得的锁都是对象锁,而不是把一段代码(方法)当做锁,所以示例代码中那个线程先执行synchronized关键字的方法,那个线程就持有该方法所属对象的锁(Lock),两个对象,线程获得的就是两个不通的锁,他们互不影响。有一种情况则是相同的锁,即在静态方法上加synchronized关键字,表示锁定class类,类一级别的锁(独占.class类)</li>
+</ol>
+<h4 id="对象锁的同步和异步"><a href="#对象锁的同步和异步" class="headerlink" title="对象锁的同步和异步"></a>对象锁的同步和异步</h4><h5 id="1-概念-2"><a href="#1-概念-2" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>同步：同步的概念就是共享,牢牢记住”共享”,如果不是共享资源,就没有必要进行同步。同步的目的是为了线程安全，满足两个特性:1.原子性 2.可见性</li>
+<li><p>异步:异步的概念就是独立,相互之间不受到任何限制,就好像我们学习http时候,在页面发起的ajax请求,我们还可以继续浏览或操作页面内容,二者之间没有任何关系.</p>
+<h5 id="2-代码-2"><a href="#2-代码-2" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">    public class MyObject &#123;</div><div class="line">    public synchronized void method1()&#123;</div><div class="line">	   try &#123;</div><div class="line">		System.out.println(Thread.currentThread().getName());</div><div class="line">		Thread.sleep(4000);</div><div class="line">	&#125; catch (InterruptedException e) &#123;</div><div class="line">		// TODO Auto-generated catch block</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">    &#125;;</div><div class="line">    public void method2()&#123;</div><div class="line">	   System.out.println(Thread.currentThread().getName());</div><div class="line">    &#125;;</div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">	final MyObject my= new MyObject();</div><div class="line">	Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			my.method1();			</div><div class="line">		&#125;</div><div class="line">	&#125;,&quot;t1&quot;);</div><div class="line">	Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			my.method2();			</div><div class="line">		&#125;</div><div class="line">	&#125;,&quot;t2&quot;);</div><div class="line">	t1.start();</div><div class="line">	t2.start();</div><div class="line">    &#125;</div><div class="line">    &#125;</div><div class="line">    ``` </div><div class="line">结果:t1 t2几乎同时打印</div></pre></td></tr></table></figure>
+<p> public class MyObject {<br> public synchronized void method1(){</p>
+<pre><code>try {
+ System.out.println(Thread.currentThread().getName());
+ Thread.sleep(4000);
+</code></pre><p> } catch (InterruptedException e) {</p>
+<pre><code>// TODO Auto-generated catch block
+e.printStackTrace();
+</code></pre><p> }<br> };<br> public synchronized void method2(){</p>
+<pre><code>System.out.println(Thread.currentThread().getName());
+</code></pre><p> };<br> public static void main(String[] args) {<br> final MyObject my= new MyObject();<br> Thread t1 = new Thread(new Runnable() {</p>
+<pre><code>@Override
+public void run() {
+    my.method1();            
+}
+</code></pre><p> },”t1”);<br> Thread t2 = new Thread(new Runnable() {</p>
+<pre><code>@Override
+public void run() {
+    my.method2();            
+}
+</code></pre><p> },”t2”);<br> t1.start();<br> t2.start();<br> }<br> }<br> ```<br>结果:t1打印后4s打印t2</p>
+<h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5></li>
+<li>A线程先持有object对象的Lock锁,B线程如果在这个时候调用对象中的同步(synchronizes)方法则需要等待,也就是同步（正如:上面都枷锁情况）</li>
+<li>A线程先持有object对象的Lock锁,,B线程如果在这个时候调用对象中的非同步(synchronizes)方法则不需要等待（如上：method1加锁,method2不加锁）</li>
 </ol>
 
       
