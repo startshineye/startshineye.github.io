@@ -152,6 +152,68 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-36-simpleadapte" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/20/Android-36-simpleadapte/">Android(36)-simpleadapte</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>1.SimpleAdapter是扩展性最好的适配器，可以定义各种你想要的布局，而且使用很方便</li>
+<li>2.SimpleAdapter(Context context, List&lt;? extends Map<string, ?="">&gt; data, int resource, String[] from, int[] to)<br>参数context：上下文，比如this。关联SimpleAdapter运行的视图上下文<br>参数data：Map列表，列表要显示的数据，这部分需要自己实现，如例子中的getData()，类型要与上面的一致，每条项目要与from中指定条目一致<br>参数resource：ListView单项布局文件的Id,这个布局就是你自定义的布局了，你想显示什么样子的布局都在这个布局中。这个布局中必须包括了to中定义的控件id<br>参数 from：一个被添加到Map上关联每一个项目列名称的列表，数组里面是列名称<br>参数 to：是一个int数组，数组里面的id是自定义布局中各个控件的id，需要与上面的from对应  <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4>下面讲解SimpleAdapter的具体代码实现如下效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/93.png" alt="">  <h6 id="1-ui"><a href="#1-ui" class="headerlink" title="1.ui"></a>1.ui</h6></string,></li>
+<li><p>1.activity_main.xml  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;RelativeLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line">&lt;ListView </div><div class="line">    android:id=&quot;@+id/lv&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    &gt;&lt;/ListView&gt;</div><div class="line">&lt;/RelativeLayout&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.data.xml</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;horizontal&quot; &gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_name&quot;</div><div class="line">    android:layout_width=&quot;wrap_content&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_weight=&quot;1&quot;</div><div class="line">    android:textSize=&quot;20sp&quot;</div><div class="line">    /&gt;</div><div class="line"> &lt;EditText </div><div class="line">     android:id=&quot;@+id/et_phone&quot;</div><div class="line">    android:layout_width=&quot;wrap_content&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_weight=&quot;1&quot;</div><div class="line">    android:textSize=&quot;20sp&quot;</div><div class="line">    android:textColor=&quot;#ff0000&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="2-逻辑"><a href="#2-逻辑" class="headerlink" title="2.逻辑"></a>2.逻辑</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line">@Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line">    ArrayList&lt;Map&lt;String,String&gt;&gt; data = new ArrayList&lt;Map&lt;String,String&gt;&gt;();</div><div class="line">    </div><div class="line">    Map&lt;String, String&gt; map1 = new HashMap&lt;String, String&gt;();</div><div class="line">    Map&lt;String, String&gt; map2 = new HashMap&lt;String, String&gt;();</div><div class="line">    Map&lt;String, String&gt; map3 = new HashMap&lt;String, String&gt;();</div><div class="line">    Map&lt;String, String&gt; map4 = new HashMap&lt;String, String&gt;();</div><div class="line">    map1.put(&quot;name&quot;,&quot;张飞&quot;);</div><div class="line">    map1.put(&quot;phone&quot;,&quot;1388888&quot;);</div><div class="line">    map2.put(&quot;name&quot;,&quot;赵云&quot;);</div><div class="line">    map2.put(&quot;phone&quot;,&quot;110&quot;);</div><div class="line">    map3.put(&quot;name&quot;,&quot;貂蝉&quot;);</div><div class="line">    map3.put(&quot;phone&quot;,&quot;13882223&quot;);</div><div class="line">    map4.put(&quot;name&quot;,&quot;关于&quot;);</div><div class="line">    map4.put(&quot;phone&quot;,&quot;119&quot;);</div><div class="line">    data.add(map1);</div><div class="line">    data.add(map2);</div><div class="line">    data.add(map3);</div><div class="line">    data.add(map4);</div><div class="line">    //1.找到视图</div><div class="line">    ListView lv = (ListView)findViewById(R.id.lv);</div><div class="line">    //2.视图渲染</div><div class="line">    SimpleAdapter simpleAdapter = new SimpleAdapter(getApplicationContext(), data,R.layout.data,new String[]&#123;&quot;name&quot;,&quot;phone&quot;&#125;,new int[]&#123;R.id.et_name,R.id.et_phone&#125;);</div><div class="line">    lv.setAdapter(simpleAdapter);</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>测试结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/93.png" alt=""> </p>
+<p>##前面36节讲的就是”数据存储与展示”   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/20/Android-36-simpleadapte/" class="archive-article-date">
+  	<time datetime="2017-03-20T14:21:12.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-20</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-34-Layout-weight-权重" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -724,67 +786,9 @@ public class MyListAdapter extends BaseAdapter{
 
 
   
-    <article id="post-Android-26-sql语句增删查改实现" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/14/Android-26-sql语句增删查改实现/">Android(26)-sql语句增删查改实现</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1：ui线性布局4个按钮点击实现增删查改</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-画ui"><a href="#1-画ui" class="headerlink" title="1.画ui"></a>1.画ui</h6><p>使用线性布局,画四个button按钮,并绑定四个方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    android:orientation=&quot;vertical&quot;</div><div class="line">    tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line"></div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;add&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;add&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;delete&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;delete&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;select&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;select&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;update&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;update&quot;</div><div class="line">        /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure></p>
-<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><p>1.创建类继承SQLiteOpenHelper(在onCreate)<br>2.实例化此类的对象<br>3.书写增删查改方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">    public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">    private MySQLite mySQLite;</div><div class="line"></div><div class="line">	@Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">        </div><div class="line">        mySQLite = new MySQLite(getApplicationContext());</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	//增</div><div class="line">	public void add(View v)&#123;</div><div class="line">		SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">		db.execSQL(&quot;insert into info(name,phone) values(?,?)&quot;,new Object[]&#123;&quot;zs&quot;,&quot;123&quot;&#125;);</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//删</div><div class="line">    public void delete(View v)&#123;</div><div class="line">    	SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">    	db.execSQL(&quot;delete from info where name = ?&quot;,new Object[]&#123;&quot;zs&quot;&#125;);</div><div class="line">	&#125;</div><div class="line">    </div><div class="line">    //查</div><div class="line">    public void select(View v)&#123;</div><div class="line">    	//获取可读数据库连接</div><div class="line">    	SQLiteDatabase db = mySQLite.getReadableDatabase();</div><div class="line">    	//执行有返回值的方法</div><div class="line">    	Cursor result = db.rawQuery(&quot;selete * from info&quot;,null);</div><div class="line">    	//输出</div><div class="line">    	if(result!=null &amp;&amp; result.getCount()&gt;0)&#123;</div><div class="line">    		while (result.moveToNext()) &#123;</div><div class="line">				 String name = result.getString(1);</div><div class="line">				 String phone = result.getString(2);</div><div class="line">				System.out.println(&quot;name&quot;+name+&quot;  &quot;+&quot;phone&quot;+phone);</div><div class="line">			&#125;</div><div class="line">    	&#125;</div><div class="line">    	</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //改</div><div class="line">   public void update(View v)&#123;</div><div class="line">	   SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">	   db.execSQL(&quot;update info set phone = ? where name = ?&quot;,new Object[]&#123;&quot;110&quot;,&quot;zs&quot;&#125;);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/80.png" alt=""></p>
-<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>缺陷:  </p>
-<ol>
-<li>1.sql语句容易写错(比如：将半角写成全角)  </li>
-<li>2.执行sql语句没有返回值,不容易进行判断<br>优点:<br>容易进行多表查询     </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/14/Android-26-sql语句增删查改实现/" class="archive-article-date">
-  	<time datetime="2017-03-14T13:16:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
   
 
@@ -847,7 +851,7 @@ public class MyListAdapter extends BaseAdapter{
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 10px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 10.91px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
     			</div>
     	</section>
     
