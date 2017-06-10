@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>JVM(一)-初始JVM | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="###前言本节主要介绍JVM以下内容1.JVM概念2.JVM发展历史3.JVM种类4.Java语言规范5.JVM规范  
+内容JVM概念
+JVM是Java Virtual Machine的简称。意为Java虚拟机  
+虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  
+虚拟机分类:VMWare,Visual Box,JVM  
+VMWare或者Visual">
+<meta property="og:type" content="article">
+<meta property="og:title" content="JVM(一)-初始JVM">
+<meta property="og:url" content="https://github.com/startshineye/2017/06/10/JVM-一-初始JVM/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="###前言本节主要介绍JVM以下内容1.JVM概念2.JVM发展历史3.JVM种类4.Java语言规范5.JVM规范  
+内容JVM概念
+JVM是Java Virtual Machine的简称。意为Java虚拟机  
+虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  
+虚拟机分类:VMWare,Visual Box,JVM  
+VMWare或者Visual">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/12.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/13.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/14.png">
+<meta property="og:updated_time" content="2017-06-10T14:08:40.525Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="JVM(一)-初始JVM">
+<meta name="twitter:description" content="###前言本节主要介绍JVM以下内容1.JVM概念2.JVM发展历史3.JVM种类4.Java语言规范5.JVM规范  
+内容JVM概念
+JVM是Java Virtual Machine的简称。意为Java虚拟机  
+虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  
+虚拟机分类:VMWare,Visual Box,JVM  
+VMWare或者Visual">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/12.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="http://p1.bqimg.com/576993/9a0cd30edaefd7c1.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-JVM-一-初始JVM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      JVM(一)-初始JVM
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>###前言<br>本节主要介绍JVM以下内容<br>1.JVM概念<br>2.JVM发展历史<br>3.JVM种类<br>4.Java语言规范<br>5.JVM规范  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="JVM概念"><a href="#JVM概念" class="headerlink" title="JVM概念"></a>JVM概念</h4><ol>
+<li>JVM是Java Virtual Machine的简称。意为Java虚拟机  </li>
+<li>虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  </li>
+<li>虚拟机分类:VMWare,Visual Box,JVM  </li>
+<li>VMWare或者Visual Box都是使用软件模拟物理CPU的指令集  </li>
+<li>JVM使用软件模拟Java字节码的指令集  <h4 id="JVM发展历史"><a href="#JVM发展历史" class="headerlink" title="JVM发展历史"></a>JVM发展历史</h4><h5 id="Java历史"><a href="#Java历史" class="headerlink" title="Java历史"></a>Java历史</h5></li>
+<li>1996年 SUN JDK 1.0 Classic VM–纯解释运行，使用外挂进行JIT</li>
+<li>1997年 JDK1.1 发布–AWT、内部类、JDBC、RMI、反射</li>
+<li>1998年 JDK1.2 Solaris Exact VM–JIT 解释器混合,Accurate Memory Management 精确内存管理，数据类型敏感,提升的GC性能</li>
+<li>2000年 JDK 1.3 Hotspot 作为默认虚拟机发布 加入JavaSound</li>
+<li>2002年 JDK 1.4 Classic VM退出历史舞台  Assert正则表达式 NIO IPV6 日志API 加密类库  </li>
+<li>2004年发布 JDK1.5 即 JDK5 、J2SE 5 、Java 5：泛型,注解,装箱,枚举,可变长参数,Foreach循环  </li>
+<li>JDK1.6 JDK6：脚本语言支持,JDBC 4.0，Java编译器 API</li>
+<li>2011年 JDK7发布：延误项目推出到JDK8，G1，动态语言增强,64位系统中的压缩指针,NIO 2.0</li>
+<li>2014年 JDK8发布:Lambda表达式，语法增强  Java类型注解</li>
+<li>2016年JDK9:模块化 <h5 id="JVM历史"><a href="#JVM历史" class="headerlink" title="JVM历史"></a>JVM历史</h5></li>
+<li>使用最为广泛的JVM为HotSpot</li>
+<li>HotSpot 为Longview Technologies开发 被SUN收购</li>
+<li>2006年 Java开源 并建立OpenJDK：HotSpot  成为Sun JDK和OpenJDK中所带的虚拟机</li>
+<li>2008 年 Oracle收购BEA：得到JRockit VM</li>
+<li>2010年Oracle 收购 Sun：得到Hotspot</li>
+<li>Oracle宣布在JDK8时整合JRockit和Hotspot，优势互补：在Hotspot基础上，移植JRockit优秀特性<h5 id="各种JVM"><a href="#各种JVM" class="headerlink" title="各种JVM"></a>各种JVM</h5></li>
+<li>KVM:SUN发布，IOS Android前，广泛用于手机系统</li>
+<li>CDC/CLDC HotSpot：手机、电子书、PDA等设备上建立统一的Java编程接口,J2ME的重要组成部分</li>
+<li>JRockit:BEA </li>
+<li>IBM J9 VM:IBM内部</li>
+<li>Apache Harmony:1.兼容于JDK 1.5和JDK 1.6的Java程序运行平台，2.与Oracle关系恶劣 退出JCP ，Java社区的分裂，3.OpenJDK出现后，受到挑战 2011年 退役。4.没有大规模商用经历。5.对Android的发展有积极作用<h4 id="Java语言规范"><a href="#Java语言规范" class="headerlink" title="Java语言规范"></a>Java语言规范</h4>Java语言规范定义了java语言,主要包括:语言,变量,类型,文法<br>Java语言规范可参考J2SE  <h4 id="JVM规范"><a href="#JVM规范" class="headerlink" title="JVM规范"></a>JVM规范</h4>JVM规范定义了JVM，主要包括:Class文件格式,数字的内部表示和存储Byte  -128 to 127 (-27 to 27 - 1)，returnAddress 数据类型定义【指向操作码的指针。不对应Java数据类型，不能在运行时修改。Finally实现需要】，定义PC,堆，栈，方法区<h5 id="1-整数的表示"><a href="#1-整数的表示" class="headerlink" title="1.整数的表示"></a>1.整数的表示</h5></li>
+</ol>
+<h5 id="2-为什么用补码"><a href="#2-为什么用补码" class="headerlink" title="2.为什么用补码"></a>2.为什么用补码</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/12.png" alt=""><br>1.0造成歧义:，虽然原码非常的简单直观，但是当用原码表示0的时候就会出问题。0用原码表示分为+0和-0，当机器字长为8时，[+0]原=00000000，[-0]原=10000000。这就有问题了，同一个数却有两种表示，产生了二义性，从而给机器判断0带来了麻烦.<br>2.运算规则复杂:二是用原码运算时，符号位需要单独处理，而且运算规则很复杂。例如加法运算，若两个数异号，则先要让绝对值大的数减去绝对值小的数，然后把绝对值大的数的符号付给结果。还有就是，借位操作如果用计算机硬件实现起来是很困难的。正是因为原码有这些不足之处，才促使人们研究其他的编码方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/13.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/14.png" alt=""></p>
+<h5 id="3-VM指令集"><a href="#3-VM指令集" class="headerlink" title="3.VM指令集"></a>3.VM指令集</h5><p>1.类型转化：l2i<br>2.出栈入栈操作：aload  astore<br>3.运算：iadd  isub<br>4.流程控制：ifeq ifne<br>5.函数调用：invokevirtual invokeinterface  invokespecial  invokestatic  </p>
+<h5 id="4-JVM需要对Java-Library-提供以下支持："><a href="#4-JVM需要对Java-Library-提供以下支持：" class="headerlink" title="4.JVM需要对Java Library 提供以下支持："></a>4.JVM需要对Java Library 提供以下支持：</h5><p>1.反射 java.lang.reflect<br>2.ClassLoader<br>3.初始化class和interface<br>4.安全相关 java.security<br>5.多线程<br>6.弱引用  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/10/JVM-一-初始JVM/" class="archive-article-date">
+  	<time datetime="2017-06-10T12:19:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/06/07/java并发编程-四-volatile关键字/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">java并发编程(四)-volatile关键字</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="JVM-一-初始JVM" data-title="JVM(一)-初始JVM" data-url="https://github.com/startshineye/2017/06/10/JVM-一-初始JVM/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 10px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
