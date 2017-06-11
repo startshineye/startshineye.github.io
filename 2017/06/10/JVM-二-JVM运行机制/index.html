@@ -8,20 +8,24 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="前言本篇主要介绍以下内容：
 1.JVM启动流程2.JVM基本结构3.内存模型4.编译和解释运行的概念内容JVM启动流程
-JVM基本结构1.图
+JVM基本结构1.图例子：
 2.PC寄存器1.每个线程拥有一个PC寄存器2.在线程创建时 创建3.指向下一条指令的地址4.执行本地方法时，PC的值为undefined  
-3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关联在一">
+3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关">
 <meta property="og:type" content="article">
 <meta property="og:title" content="JVM(二)-JVM运行机制">
 <meta property="og:url" content="https://github.com/startshineye/2017/06/10/JVM-二-JVM运行机制/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="前言本篇主要介绍以下内容：
 1.JVM启动流程2.JVM基本结构3.内存模型4.编译和解释运行的概念内容JVM启动流程
-JVM基本结构1.图
+JVM基本结构1.图例子：
 2.PC寄存器1.每个线程拥有一个PC寄存器2.在线程创建时 创建3.指向下一条指令的地址4.执行本地方法时，PC的值为undefined  
-3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关联在一">
+3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/04.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/21.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/22.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/01.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/02.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/03.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/23.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/15.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/16.png">
@@ -29,15 +33,15 @@ JVM基本结构1.图
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/18.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/19.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/20.png">
-<meta property="og:updated_time" content="2017-06-10T17:27:48.530Z">
+<meta property="og:updated_time" content="2017-06-11T10:16:19.362Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM(二)-JVM运行机制">
 <meta name="twitter:description" content="前言本篇主要介绍以下内容：
 1.JVM启动流程2.JVM基本结构3.内存模型4.编译和解释运行的概念内容JVM启动流程
-JVM基本结构1.图
+JVM基本结构1.图例子：
 2.PC寄存器1.每个线程拥有一个PC寄存器2.在线程创建时 创建3.指向下一条指令的地址4.执行本地方法时，PC的值为undefined  
-3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关联在一">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/21.png">
+3.方法区1.保存装载的类信息2.类型的常量池3.字段，方法信息4.方法字节码5.通常和永久区(Perm)关">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/04.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -192,8 +196,8 @@ JVM基本结构1.图
     <div class="article-entry" itemprop="articleBody">
       
         <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本篇主要介绍以下内容：</p>
-<h5 id="1-JVM启动流程"><a href="#1-JVM启动流程" class="headerlink" title="1.JVM启动流程"></a>1.JVM启动流程</h5><h5 id="2-JVM基本结构"><a href="#2-JVM基本结构" class="headerlink" title="2.JVM基本结构"></a>2.JVM基本结构</h5><h5 id="3-内存模型"><a href="#3-内存模型" class="headerlink" title="3.内存模型"></a>3.内存模型</h5><h5 id="4-编译和解释运行的概念"><a href="#4-编译和解释运行的概念" class="headerlink" title="4.编译和解释运行的概念"></a>4.编译和解释运行的概念</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="JVM启动流程"><a href="#JVM启动流程" class="headerlink" title="JVM启动流程"></a>JVM启动流程</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/21.png" alt=""></p>
-<h5 id="JVM基本结构"><a href="#JVM基本结构" class="headerlink" title="JVM基本结构"></a>JVM基本结构</h5><h6 id="1-图"><a href="#1-图" class="headerlink" title="1.图"></a>1.图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/22.png" alt=""></p>
+<h5 id="1-JVM启动流程"><a href="#1-JVM启动流程" class="headerlink" title="1.JVM启动流程"></a>1.JVM启动流程</h5><h5 id="2-JVM基本结构"><a href="#2-JVM基本结构" class="headerlink" title="2.JVM基本结构"></a>2.JVM基本结构</h5><h5 id="3-内存模型"><a href="#3-内存模型" class="headerlink" title="3.内存模型"></a>3.内存模型</h5><h5 id="4-编译和解释运行的概念"><a href="#4-编译和解释运行的概念" class="headerlink" title="4.编译和解释运行的概念"></a>4.编译和解释运行的概念</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="JVM启动流程"><a href="#JVM启动流程" class="headerlink" title="JVM启动流程"></a>JVM启动流程</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/04.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/21.png" alt=""></p>
+<h5 id="JVM基本结构"><a href="#JVM基本结构" class="headerlink" title="JVM基本结构"></a>JVM基本结构</h5><h6 id="1-图"><a href="#1-图" class="headerlink" title="1.图"></a>1.图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/22.png" alt=""><br>例子：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/01.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/02.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/03.png" alt=""></p>
 <h6 id="2-PC寄存器"><a href="#2-PC寄存器" class="headerlink" title="2.PC寄存器"></a>2.PC寄存器</h6><p>1.每个线程拥有一个PC寄存器<br>2.在线程创建时 创建<br>3.指向下一条指令的地址<br>4.执行本地方法时，PC的值为undefined  </p>
 <h6 id="3-方法区"><a href="#3-方法区" class="headerlink" title="3.方法区"></a>3.方法区</h6><p>1.保存装载的类信息<br>2.类型的常量池<br>3.字段，方法信息<br>4.方法字节码<br>5.通常和永久区(Perm)关联在一起  </p>
 <h6 id="4-Java堆"><a href="#4-Java堆" class="headerlink" title="4.Java堆"></a>4.Java堆</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/23.png" alt=""></p>
