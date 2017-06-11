@@ -152,6 +152,69 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-55-Android的GET和POST方式提交数据" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/29/Android-55-Android的GET和POST方式提交数据/">Android(55)-Android的GET和POST方式提交数据</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>1.Android中以GET和POST中去服务器取数据是一个常用的操作  </li>
+<li>2.服务器一般不是我们所关心的,android只是从别人已经搭建好的服务器取数据</li>
+<li>3.get方式和post方式区别<br>get:组拼url地址把数据拼接到url上 有大小限制1kb 4kb<br>post:以请求体的形式把数据提交到服务器<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/98.png" alt=""></li>
+<li>4.耗时的(如：联网等)操作一定要放到子线程中间  </li>
+<li>5.展示数据更改ui不能在子线程中操作,需要在主线程中操作,可以使用runOnUiThread中进行,runOnUiThread是执行在主线程的,是被google封装了的方法。  </li>
+<li>6.本例子需要用土司提示,所以展示数据可以封装一下：showToast(String content)</li>
+<li>7.联网操作一定要加入联网权限permission</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>总体设计成四个控件：用户名,密码,get提交,post提交</p>
+<h6 id="1-ui"><a href="#1-ui" class="headerlink" title="1.ui"></a>1.ui</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;vertical&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_name&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:hint=&quot;用户名&quot;</div><div class="line">    /&gt;</div><div class="line"></div><div class="line">  &lt;EditText </div><div class="line">    android:id=&quot;@+id/et_password&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">   android:hint=&quot;密码&quot;</div><div class="line">    /&gt;</div><div class="line">  </div><div class="line">  &lt;Button </div><div class="line">      android:onClick=&quot;get&quot;</div><div class="line">      android:layout_width=&quot;match_parent&quot;</div><div class="line">      android:layout_height=&quot;wrap_content&quot;</div><div class="line">      android:text=&quot;get&quot;</div><div class="line">      /&gt;</div><div class="line">  </div><div class="line">  &lt;Button </div><div class="line">      android:onClick=&quot;post&quot;</div><div class="line">      android:layout_width=&quot;match_parent&quot;</div><div class="line">      android:layout_height=&quot;wrap_content&quot;</div><div class="line">      android:text=&quot;post&quot;</div><div class="line">      /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-逻辑"><a href="#2-逻辑" class="headerlink" title="2.逻辑"></a>2.逻辑</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div></pre></td><td class="code"><pre><div class="line">   package com.yxm.request;</div><div class="line"></div><div class="line">   import java.io.InputStream;</div><div class="line">   import java.net.HttpURLConnection;</div><div class="line">   import java.net.MalformedURLException;</div><div class="line">   import java.net.URL;</div><div class="line">   import java.net.URLConnection;</div><div class="line"></div><div class="line">   import android.os.Bundle;</div><div class="line">   import android.view.View;</div><div class="line">   import android.widget.EditText;</div><div class="line">   import android.widget.Toast;</div><div class="line">   import android.app.Activity;</div><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">private EditText et_name;</div><div class="line">private EditText et_password;</div><div class="line">   @Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       super.onCreate(savedInstanceState);</div><div class="line">       setContentView(R.layout.activity_main);</div><div class="line">       </div><div class="line">       //1.获取控件</div><div class="line">       et_name = (EditText)findViewById(R.id.et_name);</div><div class="line">       et_password = (EditText)findViewById(R.id.et_password);</div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   //get提价方式</div><div class="line">   public void get(View view)&#123;</div><div class="line">   	</div><div class="line">   	//耗时操作:开子线程并且覆盖其run方法</div><div class="line">   	new Thread()&#123;</div><div class="line">   		public void run() &#123;</div><div class="line">   			try &#123;</div><div class="line">   				//获取控件值</div><div class="line">   				String name = et_name.getText().toString().trim();</div><div class="line">   			    String password = et_password.getText().toString().trim();</div><div class="line">   				//1.服务器路径(此处用自己搭建的java servet作为服务器)</div><div class="line">   				String path = &quot;http://192.168.1.108/login/servlet/LoginServlet?name=&quot;+name+&quot;&amp;password=&quot;+password;</div><div class="line">   				</div><div class="line">   				//2.获取连接</div><div class="line">   				URL url = new URL(path);</div><div class="line">   				HttpURLConnection conn = (HttpURLConnection)url.openConnection();</div><div class="line">   				</div><div class="line">   				//3.设置请求方式</div><div class="line">   				conn.setRequestMethod(&quot;GET&quot;);//默认 条件下是get方式</div><div class="line">   				</div><div class="line">   				//4.设置超时时间</div><div class="line">   				conn.setReadTimeout(5000);//设置超时设置为5秒,因为系统一般5秒</div><div class="line">   				</div><div class="line">   				int code = conn.getResponseCode();</div><div class="line">   				</div><div class="line">   				if(code==200)&#123;</div><div class="line">   					//5.获取流</div><div class="line">   					InputStream in = conn.getInputStream();</div><div class="line">   					</div><div class="line">   					//6.把流转换成字符串</div><div class="line">   					String content = StreamTools.readStream(in);</div><div class="line">   					</div><div class="line">   					//7.展示数据（不能在子线程中数据）toast</div><div class="line">   					showToast(content);</div><div class="line">   				&#125;</div><div class="line">   			&#125; catch (Exception e) &#123;</div><div class="line">   				e.printStackTrace();</div><div class="line">   			&#125;</div><div class="line">   		&#125;;</div><div class="line">   	&#125;.start();</div><div class="line">   &#125;</div><div class="line">    * post方式与get方式请求时候区别:</div><div class="line">    * 1.请求路径不同</div><div class="line">    * 2.请求方式不同</div><div class="line">    * 3.请求的两个头信息不同</div><div class="line">    * 4.设置以流的形式传递数据</div><div class="line">    * @param view</div><div class="line">   public void post(View view)&#123;</div><div class="line">   	</div><div class="line">   	//耗时操作:开子线程并且覆盖其run方法</div><div class="line">   	new Thread()&#123;</div><div class="line">   		public void run() &#123;</div><div class="line">   			try &#123;</div><div class="line">   				//获取控件值</div><div class="line">   				String name = et_name.getText().toString().trim();</div><div class="line">   			    String password = et_password.getText().toString().trim();</div><div class="line">   				//区别一：☆☆☆☆☆☆☆☆☆☆☆☆1.服务器路径(此处用自己搭建的java servet作为服务器)</div><div class="line">   				String path = &quot;http://192.168.1.108/login/servlet/LoginServlet&quot;;</div><div class="line">   				</div><div class="line">   				String data = &quot;name=&quot;+name+&quot;&amp;password=&quot;+password;</div><div class="line">   				//2.获取连接</div><div class="line">   				URL url = new URL(path);</div><div class="line">   				HttpURLConnection conn = (HttpURLConnection)url.openConnection();</div><div class="line">   				</div><div class="line">   				//区别二：☆☆☆☆☆☆☆☆☆☆☆☆3.设置请求方式</div><div class="line">   				conn.setRequestMethod(&quot;POST&quot;);//默认 条件下是get方式</div><div class="line">   				</div><div class="line">   				//4.设置超时时间</div><div class="line">   				conn.setReadTimeout(5000);//设置超时设置为5秒,因为系统一般5秒</div><div class="line">   				</div><div class="line">   				//区别三：☆☆☆☆☆☆☆☆☆☆☆☆设置请求头</div><div class="line">   				conn.setRequestProperty(&quot;Content-Type&quot;, &quot;application/x-www-form-urlencoded&quot;);</div><div class="line">   				conn.setRequestProperty(&quot;Content-Length&quot;,data.length()+&quot;&quot;);</div><div class="line">   				</div><div class="line">   				//区别四：☆☆☆☆☆☆☆☆☆☆☆☆输入流形式传递参数</div><div class="line">   				conn.setDoOutput(true);</div><div class="line">   				conn.getOutputStream().write(data.getBytes());</div><div class="line">   				</div><div class="line">   				int code = conn.getResponseCode();</div><div class="line">   				</div><div class="line">   				if(code==200)&#123;</div><div class="line">   					//5.获取流</div><div class="line">   					InputStream in = conn.getInputStream();</div><div class="line">   					</div><div class="line">   					//6.把流转换成字符串</div><div class="line">   					String content = StreamTools.readStream(in);</div><div class="line">   					</div><div class="line">   					//7.展示数据（不能在子线程中数据）toast</div><div class="line">   					showToast(content);</div><div class="line">   				&#125;</div><div class="line">   			&#125; catch (Exception e) &#123;</div><div class="line">   				e.printStackTrace();</div><div class="line">   			&#125;</div><div class="line">   		&#125;;</div><div class="line">   	&#125;.start();</div><div class="line">   &#125;</div><div class="line">   //封装一个展示在主线程中数据的方法</div><div class="line">   public void showToast(final String content)&#123;</div><div class="line">   	runOnUiThread(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			Toast.makeText(getApplicationContext(),content, 1).show();</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="3-服务器"><a href="#3-服务器" class="headerlink" title="3.服务器"></a>3.服务器</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">   public class LoginServlet extends HttpServlet &#123;</div><div class="line"></div><div class="line">public void doGet(HttpServletRequest request, HttpServletResponse response)</div><div class="line">		throws ServletException, IOException &#123;</div><div class="line">	response.setContentType(&quot;text/html&quot;);</div><div class="line">	PrintWriter out = response.getWriter();</div><div class="line">	String name = request.getParameter(&quot;name&quot;);</div><div class="line">	String password = request.getParameter(&quot;password&quot;);</div><div class="line">	</div><div class="line">	if(&quot;zs&quot;.equals(name) &amp;&amp; &quot;123&quot;.equals(password))&#123;</div><div class="line">		out.println(&quot;success&quot;);</div><div class="line">	&#125;else&#123;</div><div class="line">		out.println(&quot;fail&quot;);</div><div class="line">	&#125;</div><div class="line">	out.flush();</div><div class="line">	out.close();</div><div class="line"> &#125;</div><div class="line">public void doPost(HttpServletRequest request, HttpServletResponse response)</div><div class="line">		throws ServletException, IOException &#123;</div><div class="line"></div><div class="line">	response.setContentType(&quot;text/html&quot;);</div><div class="line">	doGet(request,response);</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/100.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/101.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/29/Android-55-Android的GET和POST方式提交数据/" class="archive-article-date">
+  	<time datetime="2017-03-29T15:52:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-页面静态化" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -699,76 +762,6 @@
 
 
   
-    <article id="post-Android-30-listview的优化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/18/Android-30-listview的优化/">Android(30)-listview的优化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>将public int getCount() {return 100000000;}并且在下面方法中加入System.out.print(“hello”+position);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public View getView(int position, View convertView, ViewGroup parent) &#123;</div><div class="line">	TextView tv = new TextView(getApplicationContext());</div><div class="line">    System.out.print(&quot;hello&quot;+position);</div><div class="line">	 tv.setText(&quot;hello&quot;+position);//显示的内容</div><div class="line">	 return tv;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
-<p>运行后会出现什么现象呢？  </p>
-<ol>
-<li>1.虽然是输入的1亿次，但是此时模拟器屏幕上至多只显示23个view，此时console(控制台)上显示的也是23次    </li>
-<li>2.向上拖动屏幕上显示更多,此时console也是显示更多，拖动到400多次的时候会出现内存溢出    </li>
-<li><p>3.内存溢出原来:在我们创建应用时候,android虚拟机会给应用分配16M空间,快速拖动屏幕会快速执行getView方法，android中采用垃圾回收机制，当申请的内存大于释放的速度时候就会出现问题(慢慢拖是可以的)<br>解决:使用getView方法的第二个参数,convertView介绍如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/86.png" alt=""><br>按着提示我们修改getView方法最终为:  </p>
-<pre><code>//获取一个view,用来显示listview的数据,会作为listview的条目出现
-   @Override
-   public View getView(int position, View convertView, ViewGroup parent) {
-       TextView tv;
-       if(convertView==null){
-           tv = new TextView(getApplicationContext());
-       }else{
-           tv = (TextView) convertView;
-       }
-       tv.setText(&quot;hello&quot;+position);//显示的内容
-       return tv;
-   }
-</code></pre><p>结论:getView方法只要有一个条目在模拟器屏幕上显示出来就会执行一次,原理就像电梯一样,view是不变的,变得只是承载的数据内容  </p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/18/Android-30-listview的优化/" class="archive-article-date">
-  	<time datetime="2017-03-18T09:37:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
@@ -834,7 +827,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 10.91px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 11.82px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
     			</div>
     	</section>
     
