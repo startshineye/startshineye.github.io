@@ -27,7 +27,7 @@ Java的内">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/32.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/33.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/34.png">
-<meta property="og:updated_time" content="2017-06-11T09:52:56.366Z">
+<meta property="og:updated_time" content="2017-06-12T14:51:21.920Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM(三)-常见JVM参数配置">
 <meta name="twitter:description" content="前言1.一个优秀的Java程序员必须了解GC的工作原理、如何优化GC的性能、如何与GC进行有限的交互，因为有一些应用程序对性能要求较高，例如嵌入式系统、实时系统等，只有全面提升内存的管理效率 ，才能提高整个应用程序的性能。本篇文章首先简单介绍GC的工作原理之后，然后再对GC的几个关键问题进行深入探讨，最后提出一些Java程序设计建议，从GC角度提高Java程序的性能2.gc基本原理
@@ -209,6 +209,14 @@ Java的内">
 <li>-XX:NewRatio:新生代（eden+2*s）和老年代（不包含永久区）的比值,4 表示 新生代:老年代=1:4，即年轻代占堆的1/5</li>
 <li>XX:SurvivorRatio:设置两个Survivor区和eden的比,<br>8表示 两个Survivor :eden=2:8，即一个Survivor占年轻代的1/10</li>
 <li>实例<br>#####3.栈的分配参数</li>
+<li><p>-XX:+HeapDumpOnOutOfMemoryError：OOM时导出堆到文件</p>
+</li>
+<li><p>-XX:+HeapDumpPath：导出OOM的路径</p>
+</li>
+<li><p>-Xmx20m -Xms5m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=d:/a.dump<br>做堆的转存:在系统宕机内存溢出,我们很难排查出问题,这个时候我们可以做一个转存:-XX:+HeapDumpOnOutOfMemoryError<br>转存的位置为:-XX:+HeapDumpPath<br>-Xmx20m -Xms5m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=d:/a.dump<br>把内存溢出日志打印到d盘的a.dump文件上</p>
+</li>
+<li>XX:OnOutOfMemoryError<br>在OOM时，执行一个脚本<br>“-XX:OnOutOfMemoryError=D:/tools/jdk1.7_40/bin/printstack.bat %p“<br>当程序OOM时，在D:/a.txt中将会生成线程的dump<br>可以在OOM时，发送邮件，甚至是重启程序</li>
+<li>根据实际事情调整新生代和幸存代的大小:<br>官方推荐新生代占堆的3/8<br>幸存代占新生代的1/10<br>在OOM时，记得Dump出堆，确保可以排查现场问题<br>#####4.永久区分配参数<br>-XX:PermSize  -XX:MaxPermSize<br>设置永久区的初始空间和最大空间<br>他们表示，一个系统可以容纳多少个类型<br>#####3.栈大小分配<br>-Xss<br>1.栈指的就是线程私有的一块区域,这个区域是每个线程都必须有的,栈里面的主要内容就是栈帧,栈帧里面就是有局部变量表,操作数栈,引用。一般我们分配栈的时候是几百k,栈越大,说明线程数越少,所以我们应该为了线程数越多,我们需要把栈空间分配的比较小,但是栈大小又决定了函数调用的深度,栈越小,可能会出现栈溢出<br>2.通常只有几百K<br>3.决定了函数调用的深度<br>4.每个线程都有独立的栈空间<br>局部变量、参数 分配在栈上  </li>
 </ol>
 
       
