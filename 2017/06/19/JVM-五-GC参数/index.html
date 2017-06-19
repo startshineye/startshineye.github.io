@@ -14,11 +14,15 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="前言本节主要讲解以下部分：1.堆回顾2.JVM中三种垃圾回收机制:串行收集器,并行收集器,CMS收集器3.Tomcat实际演示  
 内容1.堆回顾1.在前面章节可以知道,堆主要分为2类：新生代(eden)，老年代。绝大多数对象一分配就在新生代中,当然也有一些例外：比如栈上分配(对象是分配到栈上)，大对象有时候是分配到老年代中2.对象在新生代收集之后,如果对象能够幸存,则对象会放到幸存带,即surv">
-<meta property="og:updated_time" content="2017-06-19T15:48:51.716Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/41.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/42.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/43.png">
+<meta property="og:updated_time" content="2017-06-19T16:05:26.316Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="JVM(五)-GC参数">
 <meta name="twitter:description" content="前言本节主要讲解以下部分：1.堆回顾2.JVM中三种垃圾回收机制:串行收集器,并行收集器,CMS收集器3.Tomcat实际演示  
 内容1.堆回顾1.在前面章节可以知道,堆主要分为2类：新生代(eden)，老年代。绝大多数对象一分配就在新生代中,当然也有一些例外：比如栈上分配(对象是分配到栈上)，大对象有时候是分配到老年代中2.对象在新生代收集之后,如果对象能够幸存,则对象会放到幸存带,即surv">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/06/41.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -173,8 +177,9 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本节主要讲解以下部分：<br>1.堆回顾<br>2.JVM中三种垃圾回收机制:串行收集器,并行收集器,CMS收集器<br>3.Tomcat实际演示  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h4 id="1-堆回顾"><a href="#1-堆回顾" class="headerlink" title="1.堆回顾"></a>1.堆回顾</h4><p>1.在前面章节可以知道,堆主要分为2类：新生代(eden)，老年代。绝大多数对象一分配就在新生代中,当然也有一些例外：比如栈上分配(对象是分配到栈上)，大对象有时候是分配到老年代中<br>2.对象在新生代收集之后,如果对象能够幸存,则对象会放到幸存带,即survive区,如图的s0,s1区，也可以叫做from,to<br>3.当对象在内存中经历无数次垃圾收集之后,对象年龄到达一定之后会变成老年代  </p>
-<h4 id="2-JVM中三种垃圾回收机制"><a href="#2-JVM中三种垃圾回收机制" class="headerlink" title="2.JVM中三种垃圾回收机制"></a>2.JVM中三种垃圾回收机制</h4><h5 id="2-1串行收集器"><a href="#2-1串行收集器" class="headerlink" title="2.1串行收集器"></a>2.1串行收集器</h5><p>1.最古老，最稳定（年代久远,但是历经考验最稳定）<br>2.效率高<br>3.最大缺点:可能会产生较长停顿（因为串行使用一个线程，是用一个串行队列）,所以在多和下是不具有优势的<br>4.-XX:+UseSerialGC<br>新生代,老年代使用串行回收<br>新生代复制算法<br>老年代标记-压缩法  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h4 id="1-堆回顾"><a href="#1-堆回顾" class="headerlink" title="1.堆回顾"></a>1.堆回顾</h4><p>1.在前面章节可以知道,堆主要分为2类：新生代(eden)，老年代。绝大多数对象一分配就在新生代中,当然也有一些例外：比如栈上分配(对象是分配到栈上)，大对象有时候是分配到老年代中<br>2.对象在新生代收集之后,如果对象能够幸存,则对象会放到幸存带,即survive区,如图的s0,s1区，也可以叫做from,to<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/41.png" alt=""><br>3.当对象在内存中经历无数次垃圾收集之后,对象年龄到达一定之后会变成老年代  </p>
+<h4 id="2-JVM中三种垃圾回收机制"><a href="#2-JVM中三种垃圾回收机制" class="headerlink" title="2.JVM中三种垃圾回收机制"></a>2.JVM中三种垃圾回收机制</h4><h5 id="2-1串行收集器"><a href="#2-1串行收集器" class="headerlink" title="2.1串行收集器"></a>2.1串行收集器</h5><p>1.最古老，最稳定（年代久远,但是历经考验最稳定）<br>2.效率高<br>3.最大缺点:可能会产生较长停顿（因为串行使用一个线程，是用一个串行队列）,所以在多和下是不具有优势的<br>4.-XX:+UseSerialGC<br>新生代,老年代使用串行回收<br>新生代复制算法<br>老年代标记-压缩法<br>5.如图：<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/42.png" alt=""><br>应用程序线程之中,应用程序线程可能是有很多个的,一旦回收开始，应用程序全部暂停,串行回收器中GC线程只有把1个,当GC完成之后,应用程序开始恢复运行</p>
+<h5 id="2-2并行收集器"><a href="#2-2并行收集器" class="headerlink" title="2.2并行收集器"></a>2.2并行收集器</h5><p>1.ParNew是一种并行收集器：par-parallel  New-指代新生代<br>从以上可以知道这是一个新生代的并行收集器,老年代串行回收<br>2.-XX:+UseParNewGC<br>新生代并行<br>老年代串行<br>Serial收集器新生代的并行版本<br>复制算法<br>多线程，需要多核支持<br>-XX:ParallelGCThreads 限制线程数量<br>3.如图：<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/43.png" alt=""><br>他是多个线程负责回收,</p>
 
       
     </div>
