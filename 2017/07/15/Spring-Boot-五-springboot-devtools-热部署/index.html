@@ -4,21 +4,21 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>netty实践(二)-NIO | Startshineye的博客</title>
+  <title>Spring Boot(五)-springboot+devtools(热部署) | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="NIO1.代码1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001">
+  <meta name="description" content="前言1.在前一节中,我们通过改变方法的返回值,不需要重新部署后就可以在前端直接显示,但是我们添加新的方法之后,访问就访问不到,热部署失败2.通过使用springloaded进行热部署,但是有些代码修改了,并不会进行热部署  
+spring-boot-devtools1.spring-boot-devtools 是一个为开发者服务的一个模块，其中最重要的功能就是自动应用代码更改到最新的App上面去。">
 <meta property="og:type" content="article">
-<meta property="og:title" content="netty实践(二)-NIO">
-<meta property="og:url" content="https://github.com/startshineye/2017/05/21/netty实践-二-NIO/index.html">
+<meta property="og:title" content="Spring Boot(五)-springboot+devtools(热部署)">
+<meta property="og:url" content="https://github.com/startshineye/2017/07/15/Spring-Boot-五-springboot-devtools-热部署/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="NIO1.代码1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/5/socketIO.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/5/NIO.png">
-<meta property="og:updated_time" content="2017-05-21T07:37:27.131Z">
+<meta property="og:description" content="前言1.在前一节中,我们通过改变方法的返回值,不需要重新部署后就可以在前端直接显示,但是我们添加新的方法之后,访问就访问不到,热部署失败2.通过使用springloaded进行热部署,但是有些代码修改了,并不会进行热部署  
+spring-boot-devtools1.spring-boot-devtools 是一个为开发者服务的一个模块，其中最重要的功能就是自动应用代码更改到最新的App上面去。">
+<meta property="og:updated_time" content="2017-07-15T10:36:57.689Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="netty实践(二)-NIO">
-<meta name="twitter:description" content="NIO1.代码1234567891011121314151617181920212223242526272829303132333435363738394041424344454647484950515253545556575859606162636465666768697071727374757677787980818283848586878889909192939495969798991001">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/5/socketIO.png">
+<meta name="twitter:title" content="Spring Boot(五)-springboot+devtools(热部署)">
+<meta name="twitter:description" content="前言1.在前一节中,我们通过改变方法的返回值,不需要重新部署后就可以在前端直接显示,但是我们添加新的方法之后,访问就访问不到,热部署失败2.通过使用springloaded进行热部署,但是有些代码修改了,并不会进行热部署  
+spring-boot-devtools1.spring-boot-devtools 是一个为开发者服务的一个模块，其中最重要的功能就是自动应用代码更改到最新的App上面去。">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -154,7 +154,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-netty实践-二-NIO" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="w-Spring-Boot-五-springboot-devtools-热部署" class="article article-type-w" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -164,7 +164,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      netty实践(二)-NIO
+      Spring Boot(五)-springboot+devtools(热部署)
     </h1>
   
 
@@ -172,22 +172,31 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="NIO"><a href="#NIO" class="headerlink" title="NIO"></a>NIO</h4><h6 id="1-代码"><a href="#1-代码" class="headerlink" title="1.代码"></a>1.代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div></pre></td><td class="code"><pre><div class="line">/**********</div><div class="line"> * NIOServer</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class NIOServer &#123;</div><div class="line">//通道管理器</div><div class="line">private Selector selector;</div><div class="line">/**</div><div class="line"> * 获取一个ServerSocket通道,并对该通道做一些初始化处理</div><div class="line"> * @param port 端口号</div><div class="line"> * @throws IOException </div><div class="line"> */</div><div class="line">public void initServer(int port) throws IOException&#123;</div><div class="line">	//获取一个ServerSocket通道</div><div class="line">	ServerSocketChannel serverChannel = ServerSocketChannel.open();</div><div class="line">    //设置其为非阻塞</div><div class="line">	serverChannel.configureBlocking(false);</div><div class="line">    //产生ServerSocket并绑定到port端口</div><div class="line">	serverChannel.socket().bind(new InetSocketAddress(port));</div><div class="line">	//获取通道管理器</div><div class="line">	this.selector=Selector.open();</div><div class="line">	// 将通道管理器和该通道绑定，并为该通道注册SelectionKey.OP_ACCEPT事件,注册该事件后，</div><div class="line">	// 当该事件到达时，selector.select()会返回，如果该事件没到达selector.select()会一直阻塞。</div><div class="line">	serverChannel.register(selector, SelectionKey.OP_ACCEPT);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 采用轮询的方式监听selector上是否有需要处理的事件，如果有，则进行处理</div><div class="line"> * </div><div class="line"> * @throws IOException</div><div class="line"> */</div><div class="line">public void listen() throws IOException&#123;</div><div class="line">	System.out.println(&quot;服务器启动成功&quot;);</div><div class="line">	//轮训访问selector</div><div class="line">	while(true)&#123;</div><div class="line">		// 当注册的事件到达时，方法返回；否则,该方法会一直阻塞</div><div class="line">		selector.select();</div><div class="line">		//获得selector中选中的项的迭代器，选中的项为注册的事件</div><div class="line">		Iterator&lt;SelectionKey&gt; iterator = this.selector.selectedKeys().iterator();</div><div class="line">	 while(iterator.hasNext())&#123;</div><div class="line">		 SelectionKey key = iterator.next();</div><div class="line">		 //删除已选的key，以防止重复处理</div><div class="line">		 iterator.remove();</div><div class="line">		 handler(key);</div><div class="line">		 </div><div class="line">	 &#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 处理请求</div><div class="line"> * </div><div class="line"> * @param key</div><div class="line"> * @throws IOException</div><div class="line"> */</div><div class="line">private void handler(SelectionKey key) throws IOException &#123;</div><div class="line">	// 客户端请求连接事件</div><div class="line">	if(key.isAcceptable())&#123;</div><div class="line">		handlerAccept(key);</div><div class="line">	&#125;else if(key.isReadable())&#123;</div><div class="line">		handelerRead(key);</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;</div><div class="line"></div><div class="line">   /****</div><div class="line">    * 处理连接请求</div><div class="line">    * @param key</div><div class="line"> * @throws IOException </div><div class="line">    */</div><div class="line">private void handlerAccept(SelectionKey key) throws IOException &#123;</div><div class="line">	ServerSocketChannel  server = (ServerSocketChannel) key.channel();</div><div class="line">	// 获得和客户端连接的通道</div><div class="line">	SocketChannel channel = server.accept();</div><div class="line">	//设置成非阻塞</div><div class="line">	channel.configureBlocking(false);</div><div class="line">	</div><div class="line">	//在这里可以给客户端发送信息</div><div class="line">	System.out.println(&quot;新的客户端连接&quot;);</div><div class="line">	// 在和客户端连接成功之后，为了可以接收到客户端的信息，需要给通道设置读的权限。</div><div class="line">	channel.register(this.selector, SelectionKey.OP_READ);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/***</div><div class="line"> * 处理读事件</div><div class="line"> * @param key</div><div class="line"> * @throws IOException </div><div class="line"> */</div><div class="line">public void handelerRead(SelectionKey key) throws IOException&#123;</div><div class="line">	// 服务器可读取消息:得到事件发生的Socket通道</div><div class="line">	SocketChannel channel = (SocketChannel)key.channel();</div><div class="line">	//创建读取的缓冲区</div><div class="line">	ByteBuffer buffer = ByteBuffer.allocate(1024);</div><div class="line">	int read = channel.read(buffer);</div><div class="line">	if(read&gt;0)&#123;</div><div class="line">		byte[] data = buffer.array();</div><div class="line">		String msg = new String(data).trim();</div><div class="line">		System.out.println(&quot;服务端收到信息：&quot; + msg);</div><div class="line">		</div><div class="line">		//回写数据</div><div class="line">		ByteBuffer outBuffer = ByteBuffer.wrap(&quot;好的&quot;.getBytes());</div><div class="line">		channel.write(outBuffer);// 将消息回送给客户端</div><div class="line">	&#125;else&#123;</div><div class="line">		System.out.println(&quot;客户端关闭&quot;);</div><div class="line">		key.cancel();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 启动服务端测试</div><div class="line"> * @param args</div><div class="line"> * @throws IOException </div><div class="line"> */</div><div class="line">public static void main(String[] args) throws IOException &#123;</div><div class="line">	NIOServer server = new NIOServer();</div><div class="line">	server.initServer(8000);</div><div class="line">	server.listen();</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h6><p>1.在cmd-&gt;dos-&gt;telnet 127.0.0.1 8000 输入数据后服务器输出值<br>2.在另一窗口cmd-&gt;dos-&gt;telnet 127.0.0.1 8000 输入数据后服务器输出值  </p>
-<h6 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h6><p>传统IO模型:<br>1.餐厅:我们把整个系统当做一个餐厅<br>2.大门：serverSocket当做一个大门,监听客户的到达<br>3.客人:socket客户端<br>4.服务员:线程,一个服务员就是一个线程<br>这种情况下服务一个客人就需要一个服务生,餐厅性能和消耗特别大<br>例图：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/socketIO.png" alt=""><br>NIO模型：<br>1.餐厅:我们把整个系统当做一个餐厅<br>2.大门：serverSocketChannel当做一个大门,监听客户的到达<br>3.客人:socketChannel客户端<br>4.服务员(最重要):此服务员不是单一服务的,而是一个selector,不仅可以服务客人，还可以监听大门，欢迎新来的客人，相当于一个“黑执事”<br>如图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/NIO.png" alt=""></p>
-<p>NIO代码分析：<br>1.先开启一个大门<br>2.大门交给服务厅监听（将selector注册给serverSocketChannel,会绑定一个selectKey地址）<br>3.每个客人拿到一个selectKey,处理的时候我们只需要处理key<br>4.通过serverchannel.accept()接受一个客人,再告诉selector盯紧客人（绑定一个read事件,判断其是否已经点菜）<br>5.处理点菜的事件read，打印其消息<br>6.selector.select()监听的事件是isAcceptable(),isReadable())用于区分是来了一个客人或者客人要点菜</p>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.在前一节中,我们通过改变方法的返回值,不需要重新部署后就可以在前端直接显示,但是我们添加新的方法之后,访问就访问不到,热部署失败<br>2.通过使用springloaded进行热部署,但是有些代码修改了,并不会进行热部署  </p>
+<h4 id="spring-boot-devtools"><a href="#spring-boot-devtools" class="headerlink" title="spring-boot-devtools"></a>spring-boot-devtools</h4><p>1.spring-boot-devtools 是一个为开发者服务的一个模块，其中最重要的功能就是自动应用代码更改到最新的App上面去。原理是在发现代码有更改之后，重新启动应用，但是速度比手动停止后再启动还要更快，更快指的不是节省出来的手工操作的时间。<br>2.其深层原理是使用了两个ClassLoader，一个Classloader加载那些不会改变的类（第三方Jar包），另一个ClassLoader加载会更改的类，称为  restart ClassLoader<br>3.这样在有代码更改的时候，原来的restart ClassLoader 被丢弃，重新创建一个restart ClassLoader，由于需要加载的类相比较少，所以实现了较快的重启时间（5秒以内）</p>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><h5 id="1-添加依赖包"><a href="#1-添加依赖包" class="headerlink" title="1.添加依赖包"></a>1.添加依赖包</h5><p>因为是使用spring-boot-devtools,所以我们应该添加此包的时候注释掉spring-loader. </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">        &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</div><div class="line">        &lt;optional&gt;true&lt;/optional&gt;</div><div class="line">       &lt;scope&gt;true&lt;/scope&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-添加spring-boot-maven-plugin"><a href="#2-添加spring-boot-maven-plugin" class="headerlink" title="2.添加spring-boot-maven-plugin"></a>2.添加spring-boot-maven-plugin</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">  &lt;build&gt;</div><div class="line">&lt;plugins&gt;</div><div class="line">    &lt;plugin&gt;</div><div class="line">           &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</div><div class="line">           &lt;configuration&gt;</div><div class="line">         		&lt;!--fork :  如果没有该项配置，肯呢个devtools不会起作用，即应用不会restart --&gt;</div><div class="line">               &lt;fork&gt;true&lt;/fork&gt;</div><div class="line">           &lt;/configuration&gt;</div><div class="line">       &lt;/plugin&gt;</div><div class="line">&lt;/plugins&gt;</div><div class="line">  &lt;/build&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-说明"><a href="#3-说明" class="headerlink" title="3.说明"></a>3.说明</h5><p>1.devtools会监听classpath下的文件变动，并且会立即重启应用（发生在保存时机），注意：因为其采用的虚拟机机制，该项重启是很快的。<br>2.devtools可以实现页面热部署（即页面修改后会立即生效，这个可以直接在application.properties文件中配置spring.thymeleaf.cache=false来实现(这里注意不同的模板配置不一样)。  </p>
+<h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><p>去掉spring-boot:run,然后启动：<br>添加方法：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">   @RequestMapping(&quot;/hello2&quot;)</div><div class="line">public String hello2()&#123;</div><div class="line">	return &quot;hello2&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输入:<a href="http://localhost:8080/hello2" target="_blank" rel="external">http://localhost:8080/hello2</a>  输出:”hello2”</p>
+<p>添加类Hello2Controller:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">   @RestController</div><div class="line">   public class Hello2Controller &#123;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/hello2c&quot;)</div><div class="line">   public String hello()&#123;</div><div class="line">   	return &quot;Hello2Controller&quot;;</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输入：<a href="http://localhost:8080/hello2c" target="_blank" rel="external">http://localhost:8080/hello2c</a>  输出:”Hello2Controller”</p>
+<p>1.修改类–&gt;保存：应用会重启<br>2.修改配置文件–&gt;保存：应用会重启<br>3.修改页面–&gt;保存：应用会重启，页面会刷新（原理是将spring.thymeleaf.cache设为false  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/05/21/netty实践-二-NIO/" class="archive-article-date">
-  	<time datetime="2017-05-20T16:45:08.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-21</time>
+      <a href="/2017/07/15/Spring-Boot-五-springboot-devtools-热部署/" class="archive-article-date">
+  	<time datetime="2017-07-15T09:27:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-15</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
 	</div>
 
       
@@ -200,18 +209,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2017/05/21/netty实践-三-netty之helloword服务端/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          netty实践(三)-netty之helloword服务端
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/05/20/netty实践-一-传统IO/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">netty实践(一)-传统IO</div>
+    <a href="/2017/07/15/Spring-Boot-四-Spring-Boot热部署-springloader/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Spring Boot(四)-Spring Boot热部署(springloader)</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -257,7 +257,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="netty实践-二-NIO" data-title="netty实践(二)-NIO" data-url="https://github.com/startshineye/2017/05/21/netty实践-二-NIO/"></div>
+	<div class="ds-thread" data-thread-key="Spring-Boot-五-springboot-devtools-热部署" data-title="Spring Boot(五)-springboot+devtools(热部署)" data-url="https://github.com/startshineye/2017/07/15/Spring-Boot-五-springboot-devtools-热部署/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
