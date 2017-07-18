@@ -152,6 +152,85 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringMVC注解定时器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/08/SpringMVC注解定时器/">SpringMVC定时器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在做ftp下载其他机器文件时候，需要用到定时器，定时ftp下载并保存文件到数据库，找了很多定时器，考虑到用的是SpringMVC,则就用SpringMVC定时器</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>搭建SpringMVC定时器如下步骤：</p>
+<h6 id="1-JAR包："><a href="#1-JAR包：" class="headerlink" title="1.JAR包："></a>1.JAR包：</h6><p>aopalliance-1.0.jar<br>commons-logging-1.1.3.jar<br>spring-aop-3.2.4.RELEASE.jar<br>spring-beans-3.2.4.RELEASE.jar<br>spring-context-3.2.4.RELEASE.jar<br>spring-core-3.2.4.RELEASE.jar<br>spring-expression-3.2.4.RELEASE.jar<br>spring-web-3.2.4.RELEASE.jar<br>spring-webmvc-3.2.4.RELEASE.jar</p>
+<h6 id="2-配置我们的SpringMVC文件"><a href="#2-配置我们的SpringMVC文件" class="headerlink" title="2.配置我们的SpringMVC文件"></a>2.配置我们的SpringMVC文件</h6><ol>
+<li><p>xmlns添加  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">task=&quot;http://www.springframework.org/schema/task&quot;</div></pre></td></tr></table></figure>
+</li>
+<li><p>然后xsi:schemaLocation加下面的内容  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">http://www.springframework.org/schema/task</div><div class="line">http://www.springframework.org/schema/task/spring-task-3.2.xsd</div></pre></td></tr></table></figure>
+</li>
+<li><p>task任务扫描注解</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;task:annotation-driven/&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>扫描位置</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;context:component-scan base-package=&quot;com.yxm&quot;&gt;&lt;/context:component-scan&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="3-测试类"><a href="#3-测试类" class="headerlink" title="3.测试类"></a>3.测试类</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * springmvc定时任务</div><div class="line"> * @author yxm</div><div class="line"> * @date 2016-12-8</div><div class="line"> */</div><div class="line">@Component</div><div class="line">public class MyTask &#123;</div><div class="line">   @Scheduled(fixedRate = 1000*2)//间隔2秒</div><div class="line">   public void run()&#123;</div><div class="line">	   System.out.println(&quot;******Timer 执行********&quot;);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="4-文件布局"><a href="#4-文件布局" class="headerlink" title="4.文件布局"></a>4.文件布局</h6><p><img src="http://i1.piimg.com/576993/20a5546e4432de15.png" alt="Markdown"></p>
+<h6 id="5-注意"><a href="#5-注意" class="headerlink" title="5.注意"></a>5.注意</h6><ol>
+<li>spring的@Scheduled注解  需要写在实现上</li>
+<li>定时器的任务方法不能有返回值（如果有返回值，spring初始化的时候会告诉你有个错误、需要设定一个proxytargetclass的某个值为true）</li>
+<li>实现类上要有组件的注解@Component</li>
+</ol>
+<h6 id="6-源码"><a href="#6-源码" class="headerlink" title="6.源码"></a>6.源码</h6><p><a href="https://github.com/startshineye/SpringMVC-">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/08/SpringMVC注解定时器/" class="archive-article-date">
+  	<time datetime="2016-12-08T13:10:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringMVC/">SpringMVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/SSM-SpringMVC/">SSM SpringMVC</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -685,71 +764,6 @@
 
 
   
-    <article id="post-自己写一个apache服务器-三-web服务器工具类" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/03/自己写一个apache服务器-三-web服务器工具类/">自己写一个apache服务器(三)-web服务器工具类</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="Web服务器开发准备"><a href="#Web服务器开发准备" class="headerlink" title="Web服务器开发准备"></a>Web服务器开发准备</h4><ol>
-<li>使用JDK版本：JDK1.7</li>
-<li>集成开发环境IDE：MyEclipse</li>
-<li>浏览器：FireFox</li>
-<li>web服务器名称：javaServer</li>
-<li>开发者:yxm</li>
-</ol>
-<h4 id="javaServer-01-工具类定义"><a href="#javaServer-01-工具类定义" class="headerlink" title="javaServer-01[工具类定义]"></a>javaServer-01[工具类定义]</h4><p>打开MyEclipse集成开发环境设置工作区的字符编码方式为UTF-8<br><img src="http://p1.bpimg.com/576993/3346235a42033d7b.png" alt="Markdown"><br>新建Java Project,项目名称为:javaServer-01<br><img src="http://p1.bpimg.com/576993/23d224c6fa83436f.png" alt="Markdown"><br>创建软件包，package在Java开发中的作用可以很好的组织程序，便于查找与维护，WEB服务器的研发公司是yxm，所以包名为：com.yxm.javaserver.core，该包存放WEB服务器核心程序<br><img src="http://p1.bpimg.com/576993/c11d572f7bf4a11b.png" alt="Markdown"><br>开始编写WEB服务器的第一个Java程序，该Java程序是服务器启动入口，在该Java程序中编写main方法。客户端程序我们不需要编写，使用浏览器软件代替。在core包下新建BootStrap.java文件，并编写main方法，提供相关注释<br>1<a href=""></a><br>在项目开发中都是需要记录日志，日志一般包括很多等级，例如错误ERROR、警告WARN、消息INFO等，并且有专门负责记录日志的开源项目，例如log4j可以很好的完成日志管理，我们这里不使用log4j，自定义日志记录器Logger进行日志记录，简单记录消息INFO，对记录日志有初步认识即可，日志信息要求包括：[日志等级]发生时间 发生了什么，日志直接输出到控制台，日志记录器属于工具，新建软件包com.yxm.javaserver.util，新建日志记录器Logger，定义log方法完成日志记录<br><img src="http://p1.bpimg.com/576993/c0b420ab20e625c2.png" alt="Markdown"></p>
-<p>日志记录的时候需要获取系统当前时间，系统当前时间的使用可能不止在日志工具类中需要使用，可能在其它位置也需要使用，我们可以再定义一个日期工具类专门获取系统当前时间，这样代码可以复用<br><img src="http://p1.bpimg.com/576993/645b9dee53a3b601.png" alt="Markdown"></p>
-<p>修改日志工具类Logger中的log方法<br><img src="http://p1.bpimg.com/576993/a7417553e815808a.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/03/自己写一个apache服务器-三-web服务器工具类/" class="archive-article-date">
-  	<time datetime="2016-12-03T02:53:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
@@ -815,7 +829,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.64px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 13.64px;">Spring Boot</a> <a href="/tags/Spring-Bott/" style="font-size: 10px;">Spring Bott</a> <a href="/tags/SpringBoot/" style="font-size: 10px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Sring-Boot/" style="font-size: 10px;">Sring Boot</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.83px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.83px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 14.17px;">Spring Boot</a> <a href="/tags/Spring-Bott/" style="font-size: 10px;">Spring Bott</a> <a href="/tags/SpringBoot/" style="font-size: 10px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Sring-Boot/" style="font-size: 10px;">Sring Boot</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.83px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.5px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 15px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 15px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.17px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     
