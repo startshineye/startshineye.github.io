@@ -6,16 +6,21 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>Sppring Boot(九)-Spring Boot JdbcTemplate | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+  <meta name="description" content="前言本节主要讲述以下几个内容1.在pom.xml加入jdbcTemplate的依赖2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate3.编写DemoService类，引入DemoDao进行使用4.编写Demo2Controller进行5.简单测试  
+内容1.在pom.xml加入jdbcTemplate的依赖 &amp;lt;dependency&amp;gt;">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Sppring Boot(九)-Spring Boot JdbcTemplate">
 <meta property="og:url" content="https://github.com/startshineye/2017/07/18/Sppring-Boot-九-Spring-Boot-JdbcTemplate/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:updated_time" content="2017-07-18T15:48:18.110Z">
+<meta property="og:description" content="前言本节主要讲述以下几个内容1.在pom.xml加入jdbcTemplate的依赖2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate3.编写DemoService类，引入DemoDao进行使用4.编写Demo2Controller进行5.简单测试  
+内容1.在pom.xml加入jdbcTemplate的依赖 &amp;lt;dependency&amp;gt;">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/18.png">
+<meta property="og:updated_time" content="2017-07-19T01:31:58.387Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sppring Boot(九)-Spring Boot JdbcTemplate">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:description" content="前言本节主要讲述以下几个内容1.在pom.xml加入jdbcTemplate的依赖2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate3.编写DemoService类，引入DemoDao进行使用4.编写Demo2Controller进行5.简单测试  
+内容1.在pom.xml加入jdbcTemplate的依赖 &amp;lt;dependency&amp;gt;">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/18.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -169,7 +174,61 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本节主要讲述以下几个内容<br>1.在pom.xml加入jdbcTemplate的依赖<br>2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate<br>3.编写DemoService类，引入DemoDao进行使用<br>4.编写Demo2Controller进行<br>5.简单测试  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在pom-xml加入jdbcTemplate的依赖"><a href="#1-在pom-xml加入jdbcTemplate的依赖" class="headerlink" title="1.在pom.xml加入jdbcTemplate的依赖"></a>1.在pom.xml加入jdbcTemplate的依赖</h5><pre><code> &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+如果在JPA已经加入的话，则可以不用引入以上的配置。
+&lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h5 id="2-编写DemoDao类，声明为：-Repository，引入JdbcTemplate"><a href="#2-编写DemoDao类，声明为：-Repository，引入JdbcTemplate" class="headerlink" title="2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate"></a>2.编写DemoDao类，声明为：@Repository，引入JdbcTemplate</h5><p>如果需要使用JdbcTemplate只需要在需要使用的类中加入：<br>@Resource<br>private JdbcTemplate jdbcTemplate;</p>
+<pre><code>import com.kfit.demo.bean.Cat;
+/**
+ * 使用@Repository注解，标注这是一个持久化操作对象.
+ * @author yxm
+ *
+ */
+@Repository
+public class CatDao {
+@Resource
+private JdbcTemplate jdbcTemplate;
+
+/**
+ * 1、定义一个Sql语句；
+ * 2、定义一个RowMapper.
+ * 3、执行查询方法.
+ */
+public Cat select(String catName){
+    String sql = &quot;select * from cat where cat_name = ?&quot;;
+    RowMapper&lt;Cat&gt; rowMapper = new BeanPropertyRowMapper&lt;Cat&gt;(Cat.class);
+    return  jdbcTemplate.queryForObject(sql, rowMapper, catName);
+}
+}
+</code></pre><h5 id="3-编写DemoService类，引入DemoDao进行使用"><a href="#3-编写DemoService类，引入DemoDao进行使用" class="headerlink" title="3.编写DemoService类，引入DemoDao进行使用"></a>3.编写DemoService类，引入DemoDao进行使用</h5><pre><code>@Service
+public class CatService {
+@Resource
+private CatDao catDao;
+public Cat findCatByCatName(String catName){
+    return catDao.select(catName);
+}
+}
+</code></pre><h5 id="4-编写Demo2Controller进行"><a href="#4-编写Demo2Controller进行" class="headerlink" title="4.编写Demo2Controller进行"></a>4.编写Demo2Controller进行</h5><pre><code>@RestController
+@RequestMapping(&quot;/cat&quot;)
+public class CatController {
+@Resource
+private CatService catService;
+
+@RequestMapping(&quot;/findByJdbcTemplate&quot;)
+public Cat findByJdbcTemplate(String catName){
+    return catService.findByCatName(catName);
+}
+}
+</code></pre><h5 id="5-简单测试"><a href="#5-简单测试" class="headerlink" title="5.简单测试"></a>5.简单测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/18.png" alt="">   </p>
+
       
     </div>
     <div class="article-info article-info-index">
