@@ -6,16 +6,19 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>Sppring Boot(十三)-Spring Boot使用freemarker | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+  <meta name="description" content="前言Spring Boot 使用freemarker步骤分为四步骤:1.在pom.xml中添加freemarker依赖2.application.properties文件添加freemarker配置3.编写模板文件.ftl(FreeMarker Template Language)4.编写访问文件的controller5.测试  
+内容1.在pom.xml中添加freemarker依赖&amp;lt;de">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Sppring Boot(十三)-Spring Boot使用freemarker">
 <meta property="og:url" content="https://github.com/startshineye/2017/07/22/Sppring-Boot-十三-Spring-Boot使用freemarker/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:updated_time" content="2017-07-22T12:25:20.124Z">
+<meta property="og:description" content="前言Spring Boot 使用freemarker步骤分为四步骤:1.在pom.xml中添加freemarker依赖2.application.properties文件添加freemarker配置3.编写模板文件.ftl(FreeMarker Template Language)4.编写访问文件的controller5.测试  
+内容1.在pom.xml中添加freemarker依赖&amp;lt;de">
+<meta property="og:updated_time" content="2017-07-22T13:16:55.688Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Sppring Boot(十三)-Spring Boot使用freemarker">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:description" content="前言Spring Boot 使用freemarker步骤分为四步骤:1.在pom.xml中添加freemarker依赖2.application.properties文件添加freemarker配置3.编写模板文件.ftl(FreeMarker Template Language)4.编写访问文件的controller5.测试  
+内容1.在pom.xml中添加freemarker依赖&amp;lt;de">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -169,7 +172,66 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Spring Boot 使用freemarker步骤分为四步骤:<br>1.在pom.xml中添加freemarker依赖<br>2.application.properties文件添加freemarker配置<br>3.编写模板文件.ftl(FreeMarker Template Language)<br>4.编写访问文件的controller<br>5.测试  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在pom-xml中添加freemarker依赖"><a href="#1-在pom-xml中添加freemarker依赖" class="headerlink" title="1.在pom.xml中添加freemarker依赖"></a>1.在pom.xml中添加freemarker依赖</h5><pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-freemarker&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h5 id="2-application-properties文件添加freemarker配置"><a href="#2-application-properties文件添加freemarker配置" class="headerlink" title="2.application.properties文件添加freemarker配置"></a>2.application.properties文件添加freemarker配置</h5><pre><code>########################################################
+###FREEMARKER (FreeMarkerAutoConfiguration)
+########################################################
+spring.freemarker.allow-request-override=false
+spring.freemarker.cache=true
+spring.freemarker.check-template-location=true
+spring.freemarker.charset=UTF-8
+spring.freemarker.content-type=text/html
+spring.freemarker.expose-request-attributes=false
+spring.freemarker.expose-session-attributes=false
+spring.freemarker.expose-spring-macro-helpers=false
+#spring.freemarker.prefix=
+#spring.freemarker.request-context-attribute=
+#spring.freemarker.settings.*=
+#spring.freemarker.suffix=.ftl
+#spring.freemarker.template-loader-path=classpath:/templates/ #comma-separated list
+#spring.freemarker.view-names= # whitelist of view names   that can be resolved
+</code></pre><h5 id="3-编写模板文件-ftl-FreeMarker-Template-Language"><a href="#3-编写模板文件-ftl-FreeMarker-Template-Language" class="headerlink" title="3.编写模板文件.ftl(FreeMarker Template Language)"></a>3.编写模板文件.ftl(FreeMarker Template Language)</h5><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+    &lt;title&gt;Hello World!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;p&gt;${hello}&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="4-编写访问文件的controller"><a href="#4-编写访问文件的controller" class="headerlink" title="4.编写访问文件的controller"></a>4.编写访问文件的controller</h5><pre><code>@Controller
+@RequestMapping(&quot;/template&quot;)
+public class TemplateController {
+/**
+ * 跳转页面不携带数据
+ * @return
+ */
+@RequestMapping(&quot;/th&quot;)
+public String helloThymeleaf(){
+    return &quot;hello&quot;;
+}
+/**
+ * 返回页面并携带参数
+ * @return
+ */
+@RequestMapping(&quot;/th1&quot;)
+public String helloThymeleaf1(Map&lt;String,Object&gt; map){
+    map.put(&quot;hello&quot;,&quot;Hello Thymeleaf&quot;);
+    return &quot;hello&quot;;
+}
+
+@RequestMapping(&quot;/freemark&quot;)
+public String helloFreeMarker(Map&lt;String,Object&gt; map){
+    map.put(&quot;hello&quot;,&quot;hello FreeMarker!&quot;);//返回的数据
+    return &quot;hello&quot;;//返回的页面
+}
+}
+</code></pre><h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><p>访问:<a href="http://localhost:8081/template/freemark" target="_blank" rel="external">http://localhost:8081/template/freemark</a> 输出结果:hello FreeMarker!</p>
+
       
     </div>
     <div class="article-info article-info-index">
@@ -178,6 +240,11 @@
   	<time datetime="2017-07-22T12:25:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
 </a>
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
       
 
       <div class="clearfix"></div>
@@ -315,7 +382,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.64px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 15.45px;">Spring Boot</a> <a href="/tags/Spring-Bott/" style="font-size: 10px;">Spring Bott</a> <a href="/tags/SpringBoot/" style="font-size: 10px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Sring-Boot/" style="font-size: 10.91px;">Sring Boot</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.33px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 15.83px;">Spring Boot</a> <a href="/tags/Spring-Bott/" style="font-size: 10px;">Spring Bott</a> <a href="/tags/SpringBoot/" style="font-size: 10px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Sring-Boot/" style="font-size: 10.83px;">Sring Boot</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.5px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.17px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.17px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.17px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     
