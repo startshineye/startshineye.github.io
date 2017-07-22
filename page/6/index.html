@@ -152,6 +152,76 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-30-listview的优化" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/18/Android-30-listview的优化/">Android(30)-listview的优化</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>将public int getCount() {return 100000000;}并且在下面方法中加入System.out.print(“hello”+position);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public View getView(int position, View convertView, ViewGroup parent) &#123;</div><div class="line">	TextView tv = new TextView(getApplicationContext());</div><div class="line">    System.out.print(&quot;hello&quot;+position);</div><div class="line">	 tv.setText(&quot;hello&quot;+position);//显示的内容</div><div class="line">	 return tv;</div><div class="line">	&#125;</div></pre></td></tr></table></figure></p>
+<p>运行后会出现什么现象呢？  </p>
+<ol>
+<li>1.虽然是输入的1亿次，但是此时模拟器屏幕上至多只显示23个view，此时console(控制台)上显示的也是23次    </li>
+<li>2.向上拖动屏幕上显示更多,此时console也是显示更多，拖动到400多次的时候会出现内存溢出    </li>
+<li><p>3.内存溢出原来:在我们创建应用时候,android虚拟机会给应用分配16M空间,快速拖动屏幕会快速执行getView方法，android中采用垃圾回收机制，当申请的内存大于释放的速度时候就会出现问题(慢慢拖是可以的)<br>解决:使用getView方法的第二个参数,convertView介绍如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/86.png" alt=""><br>按着提示我们修改getView方法最终为:  </p>
+<pre><code>//获取一个view,用来显示listview的数据,会作为listview的条目出现
+   @Override
+   public View getView(int position, View convertView, ViewGroup parent) {
+       TextView tv;
+       if(convertView==null){
+           tv = new TextView(getApplicationContext());
+       }else{
+           tv = (TextView) convertView;
+       }
+       tv.setText(&quot;hello&quot;+position);//显示的内容
+       return tv;
+   }
+</code></pre><p>结论:getView方法只要有一个条目在模拟器屏幕上显示出来就会执行一次,原理就像电梯一样,view是不变的,变得只是承载的数据内容  </p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/18/Android-30-listview的优化/" class="archive-article-date">
+  	<time datetime="2017-03-18T09:37:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-easyui-数据网格显示聊天记录" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -669,63 +739,6 @@ public class MyListAdapter extends BaseAdapter{
       
       <a href="/2017/03/12/Android-22-生成xml第二种方式/" class="archive-article-date">
   	<time datetime="2017-03-12T08:06:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-21-生成xml第一种方式" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/12/Android-21-生成xml第一种方式/">Android(21)-生成xml第一种方式</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ol>
-<li>1.以下我们生成如下内容的.xml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/76.png" alt=""></li>
-<li>2.应用:一般我们需要备份短信(把短信文件备份到.xml中) </li>
-<li>3.步骤:<br>1.初始化数据<br>2.生成函数(用StringBuffer拼接生成,生成.xml并保存到SD卡中,往SD卡写数据需要加权限)</li>
-</ol>
-<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><h6 id="1-生成ui"><a href="#1-生成ui" class="headerlink" title="1.生成ui"></a>1.生成ui</h6><p>略</p>
-<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><p>写逻辑函数<br>1.构造初始化数据dataList(用javaBean)<br>2.StringBuffer拼接xml头信息<br>3.拼接根节点<br>4.子节点是有序多个,遍历拼接<br>5.保存到sd卡文件中<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">  public class MainActivity extends Activity &#123;</div><div class="line">  @Override</div><div class="line">  protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">      super.onCreate(savedInstanceState);</div><div class="line">      setContentView(R.layout.activity_main);</div><div class="line">  &#125;</div><div class="line">  //生成xml</div><div class="line">  public void click()&#123;</div><div class="line">  	//1.构造初始化数据dataList(用javaBean)  </div><div class="line">       List&lt;Sms&gt; dataList = new ArrayList&lt;Sms&gt;();	</div><div class="line">       for (int i = 0; i &lt; 2; i++) &#123;</div><div class="line">      	 Sms sms = new Sms();</div><div class="line">		     sms.setAddress(&quot;110&quot;);</div><div class="line">		     sms.setBody(&quot;nihaoa&quot;);</div><div class="line">		     sms.setDate(&quot;2015&quot;);</div><div class="line">		     dataList.add(sms);</div><div class="line"> &#125;</div><div class="line">       </div><div class="line">  	//2.StringBuffer拼接xml头信息  </div><div class="line">       StringBuffer br = new StringBuffer();</div><div class="line">       br.append(&quot;&lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;utf-8\&quot;?&gt;&quot;);</div><div class="line">  	//3.拼接根节点</div><div class="line">       br.append(&quot;&lt;smss&gt;&quot;);</div><div class="line">  	//4.子节点是有序多个,遍历拼接  </div><div class="line">       for (Sms sms : dataList) &#123;</div><div class="line">	br.append(&quot;&lt;sms&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;address&gt;&quot;);</div><div class="line">	br.append(sms.getAddress());</div><div class="line">	br.append(&quot;&lt;/address&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;body&gt;&quot;);</div><div class="line">	br.append(sms.getBody());</div><div class="line">	br.append(&quot;&lt;/body&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;date&gt;&quot;);</div><div class="line">	br.append(sms.getDate());</div><div class="line">	br.append(&quot;&lt;/date&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;/sms&gt;&quot;);</div><div class="line"> &#125;</div><div class="line">       </div><div class="line">       br.append(&quot;&lt;/smss&gt;&quot;);</div><div class="line">  	</div><div class="line">       try &#123;</div><div class="line">	//保存到sd卡文件中</div><div class="line">	 File file = new File(Environment.getExternalStorageDirectory().getPath(),&quot;sms.xml&quot;);</div><div class="line">	 FileOutputStream fos = new FileOutputStream(file);</div><div class="line">	 fos.write(br.toString().getBytes());</div><div class="line">	 fos.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
-<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>增加权限<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;</div></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/12/Android-21-生成xml第一种方式/" class="archive-article-date">
-  	<time datetime="2017-03-12T08:06:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
 </a>
       
 	<div class="article-tag tagcloud">
