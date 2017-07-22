@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="前言在很多时候开发中我们不是使用jsp来传输数据,我们是使用模板引擎来传送数据,这样的好处是前后前可以并行开发,降低了前台和后台的耦合度,其中thymeleaf就是一个很好的模板引擎,在Spring Boot项目中运用thymeleaf我们只需要引入Spring-Boot自带的thymeleaf依赖。
 内容在Spring Boot中使用thymeleaf的具体步骤如下：1.在pom.xml中引入t">
-<meta property="og:updated_time" content="2017-07-21T01:40:07.464Z">
+<meta property="og:updated_time" content="2017-07-22T12:56:09.122Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Spring Boot(十二)-spring boot使用thymeleaf">
 <meta name="twitter:description" content="前言在很多时候开发中我们不是使用jsp来传输数据,我们是使用模板引擎来传送数据,这样的好处是前后前可以并行开发,降低了前台和后台的耦合度,其中thymeleaf就是一个很好的模板引擎,在Spring Boot项目中运用thymeleaf我们只需要引入Spring-Boot自带的thymeleaf依赖。
@@ -201,7 +201,29 @@ spring.thymeleaf.cache=false
 hello world
 &lt;/body&gt;
 &lt;/html&gt;
-</code></pre><h5 id="4-编写访问模板文件controller"><a href="#4-编写访问模板文件controller" class="headerlink" title="4.编写访问模板文件controller"></a>4.编写访问模板文件controller</h5><h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><p>访问的时候后台输出以下错误:  </p>
+</code></pre><h5 id="4-编写访问模板文件controller"><a href="#4-编写访问模板文件controller" class="headerlink" title="4.编写访问模板文件controller"></a>4.编写访问模板文件controller</h5><pre><code>@Controller
+@RequestMapping(&quot;/template&quot;)
+public class TemplateController {
+
+/**
+ * 跳转页面不携带数据
+ * @return
+ */
+@RequestMapping(&quot;/th&quot;)
+public String helloThymeleaf(){
+    return &quot;hello&quot;;
+}
+/**
+ * 返回页面并携带参数,注意向页面传递值时候哦用map的话,必须将map作为方法的参数,自己定义一个map返回的话是无效的
+ * @return
+ */
+@RequestMapping(&quot;/th1&quot;)
+public String helloThymeleaf1(Map&lt;String,Object&gt; map){
+    map.put(&quot;hello&quot;,&quot;Hello Thymeleaf&quot;);
+    return &quot;hello&quot;;
+}
+}
+</code></pre><h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><p>访问的时候后台输出以下错误:  </p>
 <pre><code>org.xml.sax.SAXParseException: 元素类型 &quot;meta&quot; 必须由匹配的结束标记 &quot;&lt;/meta&gt;&quot; 终止。
 at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.createSAXParseException(ErrorHandlerWrapper.java:203) ~[na:1.8.0_112]
 at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.fatalError(ErrorHandlerWrapper.java:177) ~[na:1.8.0_112]
@@ -209,7 +231,8 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
 at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:327) ~[na:1.8.0_112]
 </code></pre><p>原因是thymeleaf必须的标签包含”/“结束：  </p>
 <pre><code>&quot;&lt;meta charset=&quot;UTF-8&quot;/&gt;&quot;改变成&quot;&lt;meta charset=&quot;UTF-8&quot;/&gt;&quot;
-</code></pre><p>访问:<a href="http://localhost:8081/template/th" target="_blank" rel="external">http://localhost:8081/template/th</a> 输出结果:hello world </p>
+</code></pre><p>访问:<a href="http://localhost:8081/template/th" target="_blank" rel="external">http://localhost:8081/template/th</a> 输出结果:hello world</p>
+<p>访问:<a href="http://localhost:8081/template/th1" target="_blank" rel="external">http://localhost:8081/template/th1</a> 输出结果:hello world Hello Thymeleaf    </p>
 
       
     </div>
@@ -233,6 +256,15 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
 
   
 <nav id="article-nav">
+  
+    <a href="/2017/07/22/Sppring-Boot-十三-Spring-Boot使用freemarker/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Sppring Boot(十三)-Spring Boot使用freemarker
+        
+      </div>
+    </a>
   
   
     <a href="/2017/07/19/Spring-Boot-十一-配置server信息/" id="article-nav-older" class="article-nav-link-wrap">
