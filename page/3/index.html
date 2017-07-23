@@ -152,6 +152,70 @@
       <div class="body-wrap">
         
   
+    <article id="post-JVM-四-GC算法与种类" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/12/JVM-四-GC算法与种类/">JVM(四)-GC算法与种类</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本节主要分为以下章节:  </p>
+<h6 id="1-GC概念"><a href="#1-GC概念" class="headerlink" title="1.GC概念"></a>1.GC概念</h6><h6 id="2-GC算法"><a href="#2-GC算法" class="headerlink" title="2.GC算法"></a>2.GC算法</h6><p>1.引用计数法<br>2.标记清除<br>3.标记压缩<br>4.复制算法  </p>
+<h6 id="3-可触及性"><a href="#3-可触及性" class="headerlink" title="3.可触及性"></a>3.可触及性</h6><h6 id="4-Stop-The-World"><a href="#4-Stop-The-World" class="headerlink" title="4.Stop-The-World"></a>4.Stop-The-World</h6><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-GC概念-1"><a href="#1-GC概念-1" class="headerlink" title="1.GC概念"></a>1.GC概念</h5><p>1.GC即Garbage Collection 垃圾收集,这里的垃圾就是系统运行过程中无用的对象,这里的对象是占据一定的内存空间的,如果不被释放掉,长期占据空间的话就会导致内存使用完,即我们所说的内存溢出。因此这些无用的对象必须在一定时间范围内清除掉,从而保证内存可用,在C，C++中由程序员主动的申请和释放资源。没有所谓的垃圾回收,而在java中,由一个专门用于垃圾回收的线程不停在后台扫描,自动将无用的内存进行释放。<br>2.GC的概念不是java本身提出来的,在1960年 List使用了GC<br>3.Java中,GC的对象是堆空间和永久区,所以堆空间和永久区有GC管理</p>
+<h6 id="2-GC算法-1"><a href="#2-GC算法-1" class="headerlink" title="2.GC算法"></a>2.GC算法</h6><p>如何回收无用的在堆空间和永久区中的对象,其实是由一套算法来决定  </p>
+<h6 id="2-1引用计数法"><a href="#2-1引用计数法" class="headerlink" title="2.1引用计数法"></a>2.1引用计数法</h6><p>1.在老牌垃圾回收算法中使用引用计数法,引用计数法通过引用计数标记一个对象是不是垃圾,是不是应该回收,是很古老的算法,从COM,ActionScript3，python语言中还在用<br>2.引用计数思想:为每个对象都标记一个使用数量,只要有一个人使用对象,就会在引用数量上加1,二个人使用,则会在此引用数量标记为2,三个人使用,就会标记引用数量为3,一旦有人释放这个引用数量,就会在此引用数量上减1,当一个对象的引用数量为0也就是没有人使用它了,则这个对象就可以进行对量空间的释放<br>3.引用计数器的实现很简单，对于一个对象A，只要有任何一个对象引用了A，则A的引用计数器就加1，当引用失效时，引用计数器就减1。只要对象A的引用计数器的值为0，则对象A就不可能再被使用。<br>4.引用计数法示例如下图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/35.png" alt=""><br>(一):根对象会有若干个引用,引用的对象将会也有其他引用,能够引用到的对象就认为是可达的有效对象<br>(二):当一个引用一旦消失之后,这个对象就变成不可达对象,变成不可达对象的引用将会变为0,二此时根节点的引用将会将去1.<br>(三):说明可达对象变成不可达对象之后,将会被回收</p>
+<p>引用计数法的问题:<br>1.引用和去引用伴随加法和减法,影响性能<br>2.很难处理循环引用问题<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/36.png" alt=""><br>注:不可达的对象是垃圾对象,应该被回收:<br>(一)：标记为2的对象有2个对象对其进行了引用,因此此引用标记数为2<br>(二):一旦根对象对其引用消失了,这个时候,变成红色,中间对象引用减去1<br>(三)：中间对象引用为1，其是一个不应该被清除的对象,则对于跟对象而言右边三个对象都是不可达的对象,但是引用标记又不为1,则不能被回收,造成不可达的对象是垃圾对象,不能被回收。</p>
+<h6 id="2-2-标记清除"><a href="#2-2-标记清除" class="headerlink" title="2.2.标记清除"></a>2.2.标记清除</h6><p>1.标记清除发分为标志阶段,清除阶段<br>2.标记-清除算法是现代垃圾回收算法的思想基础。标记-清除算法将垃圾回收分为两个阶段：标记阶段和清除阶段。一种可行的实现是，在标记阶段，首先通过根节点，标记所有从根节点开始的可达对象。因此，未被标记的对象就是未被引用的垃圾对象(不可达对象)。然后，在清除阶段，清除所有未被标记的对象。<br>3.原理如下图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/37.png" alt=""><br>标记阶段:首先从根节点摸索下去的浅灰色标记为可达对象,这些对象不应该被回收.<br>清除阶段:将未被标记的对象(不可达的垃圾对象)清除掉  </p>
+<h6 id="2-3-标记压缩"><a href="#2-3-标记压缩" class="headerlink" title="2.3.标记压缩"></a>2.3.标记压缩</h6><p>1.对标记清除做了优化,和标记清除算法基本是一致的,<br>标记阶段：首先也是从根节点开始对可达对象进行标记<br>清除阶段:不是简单清除未被标记的对象,而是将所有”存活对象”复制到内存的一端.然后清理边界外所有的空间.<br>2.原理图如下：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/38.png" alt=""><br>浅灰色:存活对象, 深灰色:垃圾对象 白色:空闲空间  箭头指向:表示移动<br>标记压缩算法首先是标记出了对象是否存活,标记处对象存活之后,他开始移动存活对象,而不是清除未被标记对象,根据箭头所示复制,然后清除边界<br>3.思考：<br>标记压缩发对标记清除发而言,有什么优势呢？<br>应该是效率高</p>
+<h6 id="2-4-复制算法"><a href="#2-4-复制算法" class="headerlink" title="2.4.复制算法"></a>2.4.复制算法</h6><p>1.与标记-清除算法而言,复制算法是一种相对高效的回收方法<br>2.不适合存活对象较多的场合 如:老年代<br>3.原理：将原有的内存空间分配为两块,每次只是用其中一块,在垃圾回收时候,将正在使用的内存中的存活对象复制到未使用的内存块中,之后,清除正在使用的内存块中(也就是原来内存块)的所有对象,交换两个内存的角色,完成垃圾回收.<br>4.原理图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/39.png" alt=""><br>分配的两块空间完全一样,内存大小是一样的。但是每一次只使用其中一块,如果是1G的内存,那么使用中只能使用512M空间，根据箭头所示方向,存活对象被复制到了另一块空间,然后之前空间不管存活与否全部处理。原本使用的对象被清空,第二块中只包含存活对象,以此类推当第二块快使用完后，又复制到第一块中<br>5.缺陷:空间浪费,只能使用一半的空间<br>整合标记清理思想,尽量提高空间利用率,因此对复制算法进行扩展,原理图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/40.png" alt=""><br>有四块空间:对象产生空间1,复制算法核心2(复制空间),3(空闲空间)， 老年代空间(担保空间4)<br>系统使用中总是有一块空白空间3是不用的,2空间是有用的,垃圾回收进行时候,大对象直接进入担保空间(老年代空间)大对象比较大【原因一：2(复制空间)空间不一定能存下,复制空间不一定很大,有可能很小,因为复制空间越大,浪费空间越多 原因二：大对象放到复制空间,则小对象没有对方去,则小对象可能排挤到老年代中不太合理】,老年对象进入老年代空间<br>一个对象几次回收之后都没有被回收,每次回收年龄都加一:则对象会达到老年对象（多次未被回收对象,被长期引用对象）,剩余对象将会被复制到空白空间。复制完之后清除原来的空间1,2,3.<br>6.从GC打印日志可以看到，新生代分为3个区：以上1区就是eden区也就是对象产生地方，from to 就是2,3区,<br>7.根据地址界的上下界算出新生代大小是15M但是可以知道,新生代总的大小是13824k，其实就是我们浪费了to中的空间,复制算法就是会浪费一般空间</p>
+<h6 id="2-5分代思想"><a href="#2-5分代思想" class="headerlink" title="2.5分代思想"></a>2.5分代思想</h6><p>1.依据对象存活周期进行分类,短命对象归为新生代,长命对象归为老年代<br>2.根据不同特点,选择合适的收集方法<br>少量对象存活（新生代），适合复制算法，存活对象比较多的话进行大量复制效率差，如果少《一下子完成<br>大量对象存活,适合标记清除或者标记压缩  </p>
+<h6 id="2-6-GC算法总结整理"><a href="#2-6-GC算法总结整理" class="headerlink" title="2.6 GC算法总结整理"></a>2.6 GC算法总结整理</h6><p>1.引用计数：没有被Java采用<br>2标记-清除，标记-压缩比较适合老年代<br>3.复制算法：新生代</p>
+<h6 id="3-可触及性-1"><a href="#3-可触及性-1" class="headerlink" title="3.可触及性"></a>3.可触及性</h6><p>以上所有算法都是基于垃圾对象,垃圾对象被回收,为了解释垃圾对象,我们需要知道可触及性<br>1.可触及的：从根节点可以触及到这个对象，从根节点触发的引用量中有这个对象<br>2.可复活的：一旦所有引用被释放，就是可复活状态，因为在finalize()中可能复活该对象,现阶段不可触及,下阶段有肯能被触及<br>3.不可触及的：在finalize()后，可能会进入不可触及状态，不可触及的对象不可能复活，可以回收<br>4.经验：避免使用finalize()，操作不慎可能导致错误。<br>5.优先级低，何时被调用， 不确定，何时发生GC不确定<br>6.可以使用try-catch-finally来替代它  </p>
+<h6 id="3-1-根"><a href="#3-1-根" class="headerlink" title="3.1 根"></a>3.1 根</h6><p>我们一直在讨论根节点出发,到底什么是根呢？<br>1.栈中引用对象可以认为是根对象,线程栈中的局部变量<br>2.方法区中:静态成员或者常量对象<br>3.JNI方法栈中引用对象</p>
+<h6 id="4-Stop-The-World-1"><a href="#4-Stop-The-World-1" class="headerlink" title="4.Stop-The-World"></a>4.Stop-The-World</h6><h6 id="4-1-停止大世界-会影响java中所有线程"><a href="#4-1-停止大世界-会影响java中所有线程" class="headerlink" title="4.1 停止大世界,会影响java中所有线程"></a>4.1 停止大世界,会影响java中所有线程</h6><p>1.Java中一种全局暂停的现象<br>2.全局停顿，所有Java代码停止，native代码可以执行，但不能和JVM交互<br>3.多半由于GC引起：Dump线程，死锁检查，堆Dump  </p>
+<h6 id="4-2GC时为什么会有全局停顿？"><a href="#4-2GC时为什么会有全局停顿？" class="headerlink" title="4.2GC时为什么会有全局停顿？"></a>4.2GC时为什么会有全局停顿？</h6><p>1.类比在聚会时打扫房间，聚会时很乱，又有新的垃圾产生，房间永远打扫不干净，只有让大家停止活动了，才能将房间打扫干净。<br>2.危害：1.长时间服务停止，没有响应，2.遇到HA系统，可能引起主备切换，严重危害生产环境。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/12/JVM-四-GC算法与种类/" class="archive-article-date">
+  	<time datetime="2017-06-12T15:06:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-JVM-三-常见JVM参数配置" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -749,78 +813,6 @@
       
       <a href="/2017/05/31/netty实践-八-netty心跳/" class="archive-article-date">
   	<time datetime="2017-05-31T14:56:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-netty实践-七-单客户端多连接" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/30/netty实践-七-单客户端多连接/">netty实践(七)-单客户端多连接</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-线程池"><a href="#1-线程池" class="headerlink" title="1.线程池"></a>1.线程池</h4><h6 id="1-线程池工作原理"><a href="#1-线程池工作原理" class="headerlink" title="1.线程池工作原理"></a>1.线程池工作原理</h6><p>1.原理图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8E%9F%E7%90%86%E5%9B%BE.png" alt="线程池原理图"><br>2.分析:  </p>
-<ol>
-<li>线程池工作的时候一开始会初始化几个线程</li>
-<li>单线程:每个线程会被分配一个任务队列,从任务队列里面取出一个任务,执行run方法,执行完之后又从Runnable队列里面取出一个任务,接着执行，如果没有就阻塞等待  </li>
-<li>多个单线程组成一个多线程,每次执行Executor时候,会把任务分配给多个线程中的Runnable队列  </li>
-<li>整个线程池因为有多个Runable队列,所以可以并发执行   </li>
-<li>假如一个线程池只有一个队列,所以他是串行的,所以是线程安全的  </li>
-<li>我们做单客户端多线程,怎样做到多线程维护,运用到线程池和对象组</li>
-</ol>
-<p>3.结论<br>1.一个线程(thread)+队列 = 一个单线程线程池 也就意味着任务是线性串行执行的，线程安全的<br>2.线程安全不会产生阻塞效应,使用对象组<br>3.线程不安全:会产生阻塞效应,使用对象池  </p>
-<h4 id="2-对象池"><a href="#2-对象池" class="headerlink" title="2.对象池"></a>2.对象池</h4><p>1.原理图<br><img src="https://github.com/startshineye/img/blob/master/2017/5/%E5%AF%B9%E8%B1%A1%E6%B1%A0.png" alt="对象池原理图"><br>2.分析  </p>
-<ol>
-<li>首先初始化N个对象,将其放入队列里面,当外部需要一个对象时候,从队列中获取到对象后并返回,使用完毕之后是返回到线程池  </li>
-<li>对象池通常运用到线程不安全或者在多线程并发条件下会出现阻塞,比如数据库连接池,数据库连接数释放资源情况下就是返回到线程池中</li>
-</ol>
-<h4 id="3-对象组"><a href="#3-对象组" class="headerlink" title="3.对象组"></a>3.对象组</h4><p>1.原理图<br>2.分析  </p>
-<ol>
-<li>首先初始化N个对象,将其放入数组里面,当外部需要一个对象时候,从数组中获取到对象后并返回,使用完毕之后无需将对象归还到数组中,因为获取到对象时候,并未从数组中移除,也就意味着当你使用这个对象时候,这个对象有可能被其他使用 </li>
-<li>对象池通常运用到线程安全或者在多线程并发条件下会不出现阻塞,比如数据库连接池,数据库连接数释放资源情况下就是返回到线程池中<h4 id="4-netty5下"><a href="#4-netty5下" class="headerlink" title="4.netty5下"></a>4.netty5下</h4>由于我们要并发写的对象是使用的channel,查看源码channel是线程安全的,所以我们用对象组<h6 id="1-思路"><a href="#1-思路" class="headerlink" title="1.思路"></a>1.思路</h6>1.创建客户端服务类<br>2.创建对象组,并把channel放入里面<br>3.每次获取一个channel<br>4.创建一个启动类  </li>
-</ol>
-<h6 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h6><p>1.客户端类<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line">   package com.yxm.six;</div><div class="line">   import java.util.ArrayList;</div><div class="line">   import java.util.List;</div><div class="line">   import java.util.concurrent.atomic.AtomicInteger;</div><div class="line">   import io.netty.bootstrap.Bootstrap;</div><div class="line">   import io.netty.channel.Channel;</div><div class="line">   import io.netty.channel.ChannelFuture;</div><div class="line">   import io.netty.channel.ChannelInitializer;</div><div class="line">   import io.netty.channel.EventLoopGroup;</div><div class="line">   import io.netty.channel.nio.NioEventLoopGroup;</div><div class="line">   import io.netty.channel.socket.nio.NioSocketChannel;</div><div class="line">   import io.netty.handler.codec.string.StringDecoder;</div><div class="line">   import io.netty.handler.codec.string.StringEncoder;</div><div class="line">   /**</div><div class="line">    * 多线程客户端</div><div class="line">    * @author yxm</div><div class="line">    */</div><div class="line">   public class MutiClient &#123;</div><div class="line">   //客户端服务类</div><div class="line">private Bootstrap bootstrap = new Bootstrap();</div><div class="line">//对象组(channel组)</div><div class="line">private List&lt;Channel&gt; channels = new ArrayList&lt;&gt;();</div><div class="line">//原子类计数器</div><div class="line">private final AtomicInteger index = new AtomicInteger();</div><div class="line"></div><div class="line">/**</div><div class="line"> * 初始化</div><div class="line"> */</div><div class="line">public void init(int count)&#123;</div><div class="line">	//创建worker</div><div class="line">	EventLoopGroup worker = new NioEventLoopGroup();</div><div class="line">	//设置连接池</div><div class="line">	bootstrap.group(worker);</div><div class="line">	//设置工厂</div><div class="line">	bootstrap.channel(NioSocketChannel.class);</div><div class="line">	//设置管道</div><div class="line">	bootstrap.handler(new ChannelInitializer&lt;Channel&gt;()&#123;</div><div class="line"></div><div class="line">		@Override</div><div class="line">		protected void initChannel(Channel ch) throws Exception &#123;</div><div class="line">			// TODO Auto-generated method stub</div><div class="line">			ch.pipeline().addLast(new StringEncoder());</div><div class="line">			ch.pipeline().addLast(new StringDecoder());</div><div class="line">			ch.pipeline().addLast(new ClientHandler());</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	for(int i=0;i&lt;count;i++)&#123;</div><div class="line">		ChannelFuture future = bootstrap.connect(&quot;127.0.0.1&quot;,10101);</div><div class="line">	   channels.add(future.channel());</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 获取会话</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">public Channel nextChannel()&#123;</div><div class="line">	return getFirstActiveChannel(0);</div><div class="line">&#125;</div><div class="line">   </div><div class="line">public Channel getFirstActiveChannel(int count)&#123;</div><div class="line">	Channel channel = channels.get(Math.abs(index.getAndIncrement() % channels.size()));</div><div class="line">      if(!channel.isActive())&#123;</div><div class="line">   	   //重连</div><div class="line">   	   reconnect(channel);</div><div class="line">   	   if(count&gt;channels.size())&#123;</div><div class="line">   		   throw new  RuntimeException(&quot;no can use channel&quot;);</div><div class="line">   	   &#125;</div><div class="line">   	   return getFirstActiveChannel(count+1);</div><div class="line">      &#125;</div><div class="line">      return channel;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 重连</div><div class="line"> */</div><div class="line">public void reconnect(Channel channel)&#123;</div><div class="line">	synchronized (channel) &#123;</div><div class="line">	  if(channels.indexOf(channel)==-1)&#123;</div><div class="line">		  return;</div><div class="line">	  &#125;	</div><div class="line">	  ChannelFuture future = bootstrap.connect(&quot;127.0.0.1&quot;,10101);</div><div class="line">	  channels.set(channels.indexOf(channel), future.channel());</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
-<p>2.启动类:<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">  package com.yxm.six;</div><div class="line">  import java.io.BufferedReader;</div><div class="line">  import java.io.InputStreamReader;</div><div class="line"> /**</div><div class="line">  * 启动类</div><div class="line">  * @author yxm</div><div class="line">  *</div><div class="line">  */</div><div class="line">   public class Start &#123;</div><div class="line">    public static void main(String[] args) &#123;</div><div class="line"> MutiClient client = new MutiClient();</div><div class="line"> client.init(4);</div><div class="line"> BufferedReader br = new BufferedReader(new InputStreamReader(System.in));</div><div class="line"> while(true)&#123;</div><div class="line">  try &#123;</div><div class="line">	System.err.println(&quot;请输入:  &quot;);</div><div class="line">	String msg = br.readLine();</div><div class="line">	client.nextChannel().writeAndFlush(msg);</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">&#125;</div><div class="line"> &#125;</div><div class="line">   &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
-<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>1.启动服务类<br>2.启动客户端</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/30/netty实践-七-单客户端多连接/" class="archive-article-date">
-  	<time datetime="2017-05-30T14:19:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-30</time>
 </a>
       
 	<div class="article-tag tagcloud">
