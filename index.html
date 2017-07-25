@@ -171,7 +171,58 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.Spring Boot(19)-Spring Boot Servlet对servlet方法进行了说明,过滤器（Filter）和监听器（Listener）的注册方法和 Servlet 一样，不清楚的可以查看下上一篇文章（19）： 本文将直接使用@WebFilter和@WebListener的方式，完成一个Filter 和一个 Listener；使用注解<br>2.filter和listener都是javax.servlet下的类,所以我们需要引入servlet依赖  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>首先引入servlet的依赖:</p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;  
+</code></pre><h5 id="1-过滤器（Filter）文件"><a href="#1-过滤器（Filter）文件" class="headerlink" title="1.过滤器（Filter）文件"></a>1.过滤器（Filter）文件</h5><p>1.步骤:(1)自定义filter实现 javax.servlet.Filter接口 (2)使用@WebFilter(filterName=”myFilter”,urlPatterns=”/*”)和@ServletComponentScan  </p>
+<p>2.代码:  </p>
+<pre><code>@WebFilter(filterName=&quot;myFilter&quot;,urlPatterns=&quot;/*&quot;)
+public class MyFilter implements Filter{
+
+public void destroy() {
+    System.out.println(&quot;过滤后销毁&quot;);
+}
+
+public void doFilter(ServletRequest arg0, ServletResponse arg1,
+        FilterChain arg2) throws IOException, ServletException {
+    System.out.println(&quot;过滤操作&quot;);
+}
+
+public void init(FilterConfig arg0) throws ServletException {
+    System.out.println(&quot;过滤前初始化&quot;);
+}
+}
+</code></pre><h5 id="2-ServletContext监听器（Listener）文件"><a href="#2-ServletContext监听器（Listener）文件" class="headerlink" title="2.ServletContext监听器（Listener）文件"></a>2.ServletContext监听器（Listener）文件</h5><p>1.步骤:(1)自定义listener实现 ServletContextListener接口 (2)使用@@WebListener和@ServletComponentScan  </p>
+<p>2.代码: </p>
+<pre><code>@WebListener
+public class MyListener implements ServletContextListener{
+
+public void contextDestroyed(ServletContextEvent event) {
+    System.out.println(&quot;ServletContext销毁&quot;+event);
+}
+
+public void contextInitialized(ServletContextEvent event) {
+    System.out.println(&quot;ServletContext初始化&quot;+event);
+
+}
+}
+</code></pre><h5 id="3-App-java"><a href="#3-App-java" class="headerlink" title="3 App.java"></a>3 App.java</h5><pre><code>@SpringBootApplication
+@ServletComponentScan
+public class App 
+{
+public static void main( String[] args )
+{
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+  SpringApplication.run(App.class, args);
+}
+}
+</code></pre><h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><p>访问:<a href="http://localhost:8081/myFilter/" target="_blank" rel="external">http://localhost:8081/myFilter/</a> 在控制台打印出:<br>ServletContext初始化javax.servlet.ServletContextEvent[source=org.apache.catalina.core.StandardContext$NoPluggabilityServletContext@6c423c1c]<br>过滤前初始化<br>过滤操作(访问时候出现)    </p>
+
       
     </div>
     <div class="article-info article-info-index">
