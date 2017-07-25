@@ -152,6 +152,62 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-33-数组适配器介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/19/Android-33-数组适配器介绍/">Android(33)-数组适配器介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li>1.前一节我们的listview中展示的view是一个个布局,但是假如我们listview中展示的view是一个个view呢?比如说全都是TextView,我们此时该用什么适配器呢？  </li>
+<li>2.我们使用类ArrayAdapter(因为是一个类,所以直接)<h4 id="操作"><a href="#操作" class="headerlink" title="操作"></a>操作</h4>我们只需要创建一个item.xml，他不是布局,只是一个视图<h6 id="1-ui"><a href="#1-ui" class="headerlink" title="1.ui"></a>1.ui</h6>新建item.xml,内容如下:   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;utf-8&quot;?&gt;</div><div class="line">&lt;TextView xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">android:id=&quot;@+id/textView1&quot;</div><div class="line">android:layout_width=&quot;wrap_content&quot;</div><div class="line">android:layout_height=&quot;wrap_content&quot;</div><div class="line">android:text=&quot;TextView&quot; /&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="2-逻辑"><a href="#2-逻辑" class="headerlink" title="2.逻辑"></a>2.逻辑</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line">String[] obj = new String[]&#123;&quot;张三&quot;,&quot;李四&quot;,&quot;王五&quot;&#125;;</div><div class="line">@Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line">    //1.找到控件</div><div class="line">    ListView lv = (ListView) findViewById(R.id.lv);</div><div class="line">    //数据显示</div><div class="line">    ArrayAdapter&lt;String&gt; adapter = new ArrayAdapter&lt;String&gt;(getApplicationContext(), R.layout.item, obj);</div><div class="line">    lv.setAdapter(adapter);</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>测试结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/90.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/19/Android-33-数组适配器介绍/" class="archive-article-date">
+  	<time datetime="2017-03-18T16:13:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-32-打气筒介绍" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -725,67 +781,6 @@ public class MyListAdapter extends BaseAdapter{
 
 
   
-    <article id="post-Android-24-Android下数据库" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/12/Android-24-Android下数据库/">Android(24)-Android下数据库</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="Android数据库介绍"><a href="#Android数据库介绍" class="headerlink" title="Android数据库介绍"></a>Android数据库介绍</h4><ol>
-<li>1.Android的数据库是用sqlite</li>
-<li>2.sqlite是一个轻量级的数据库,是嵌入到手机里面的</li>
-<li>3.什么情况下用数据库?有大量相似结构的数据需要存储的时候  </li>
-<li>4.在java中,当我们书写File file = new File(“info.txt”);并不会生成info.txt文件,只有当我们使用流的时候才会生成,FileOutPutStream fos = new FileOutPutStream(file);</li>
-<li>5.在Android中创建一个数据库,用SQLiteOpenHelper </li>
-<li>6.使用SQLite Expert Professional这个工具可打开我们创建的数据库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/77.png" alt="">  <h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4>创建数据库步骤:<br>1.创建一个类继承SQLiteOpenHelper<br>2.实例化此类的对象,并且创建一个数据库</li>
-</ol>
-<h6 id="1-创建一个类继承SQLiteOpenHelper"><a href="#1-创建一个类继承SQLiteOpenHelper" class="headerlink" title="1.创建一个类继承SQLiteOpenHelper"></a>1.创建一个类继承SQLiteOpenHelper</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">   public class MyOpenHelper extends SQLiteOpenHelper &#123;</div><div class="line">   </div><div class="line">/***</div><div class="line"> * </div><div class="line"> * @param context 上下文</div><div class="line"> * @param name 数据库名字</div><div class="line"> * @param factory 目的为了创建cursor对象</div><div class="line"> * @param version 数据库版本 从1开始</div><div class="line"> */</div><div class="line">public MyOpenHelper(Context context) &#123;</div><div class="line">	super(context,&quot;yxm.db&quot;,null,1);</div><div class="line"> &#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void onCreate(SQLiteDatabase arg0) &#123;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void onUpgrade(SQLiteDatabase arg0, int arg1, int arg2) &#123;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-实例化此类的对象-并且创建一个数据库"><a href="#2-实例化此类的对象-并且创建一个数据库" class="headerlink" title="2.实例化此类的对象,并且创建一个数据库"></a>2.实例化此类的对象,并且创建一个数据库</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line">@Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">    super.onCreate(savedInstanceState);</div><div class="line">    setContentView(R.layout.activity_main);</div><div class="line">    </div><div class="line">    //创建一个数据库</div><div class="line">    MyOpenHelper helper = new MyOpenHelper(getApplicationContext());</div><div class="line">    //打开或者创建数据库 如果第一次就是创建 反其实打开</div><div class="line">    SQLiteDatabase writableDatabase = helper.getWritableDatabase();</div><div class="line">    //打开或者创建数据库 如果第一次就创建 如果磁盘满了 返回只读</div><div class="line">    SQLiteDatabase readableDatabase = helper.getReadableDatabase();</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><p>注意:1.MyOpenHelper helper = new MyOpenHelper(getApplicationContext());这一句不代表就已经创建了数据库，就比如java中,当我们书写File file = new File(“info.txt”);并不会生成info.txt文件,只有当我们使用流的时候才会生成,FileOutPutStream fos = new FileOutPutStream(file);需要加上  SQLiteDatabase readableDatabase = helper.getReadableDatabase();<br>2.cusor类似于java中的ResultSet，就是一个游标，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/78.png" alt=""> </p>
-<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/79.png" alt="">  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/12/Android-24-Android下数据库/" class="archive-article-date">
-  	<time datetime="2017-03-12T14:29:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -851,7 +846,7 @@ public class MyListAdapter extends BaseAdapter{
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.82px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.91px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.64px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.36px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.45px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.45px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18.18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.73px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.91px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.09px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.82px;">SpringMVC</a> <a href="/tags/Sring-Boot/" style="font-size: 10.91px;">Sring Boot</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.64px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.91px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.91px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.45px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.73px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.91px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.73px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.91px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.73px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.91px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.82px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.82px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.82px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.73px;">代理</a> <a href="/tags/前端/" style="font-size: 10.91px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.64px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.27px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.55px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.82px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.55px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 19.09px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.64px;">转载</a> <a href="/tags/集合/" style="font-size: 13.64px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.83px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.17px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.17px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.17px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.33px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     
