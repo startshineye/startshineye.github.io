@@ -152,6 +152,62 @@
       <div class="body-wrap">
         
   
+    <article id="post-异常-Class-path-contains-multiple-SLF4J-bindings" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/">异常:Class path contains multiple SLF4J bindings</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><p>SLF4J: Class path contains multiple SLF4J bindings.<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.7.12.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: See <a href="http://www.slf4j.org/codes.html#multiple_bindings" target="_blank" rel="external">http://www.slf4j.org/codes.html#multiple_bindings</a> for an explanation.<br>log4j:WARN No appenders could be found for logger (org.apache.http.client.protocol.RequestAddCookies).<br>log4j:WARN Please initialize the log4j system properly.</p>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>jar包冲突<br><img src="http://p1.bpimg.com/576993/2ebcd66aa2ec8a42.png" alt="Markdown"></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/" class="archive-article-date">
+  	<time datetime="2017-01-10T16:27:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-11</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异常/">异常</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-异常/">javaSE,异常</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-类加载器-三-编写对class文件进行加密的工具类" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -757,88 +813,9 @@
 
 
   
-    <article id="post-泛型-二-泛型的内部原理及深层应用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/03/泛型-二-泛型的内部原理及深层应用/">泛型(二)-泛型的内部原理及深层应用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="泛型原理"><a href="#泛型原理" class="headerlink" title="泛型原理"></a>泛型原理</h4><ol>
-<li>泛型是提供给javac编译器使用的，可以限定集合中的输入类型,让编译器挡住源程序中的非法输入,编译器编译带类型说明的集合时会去除掉”类型”信息,使程序运行效率不受影响,对于参数化的泛型类型,getClass()字节码的返回值和原始类型完全一样。由于编译生成的字节码会去掉泛型的类型信息,只要能跳过编译器,就可以往某个泛型集合中加入其它类型的数据,例如,用反射得到集合,再调用其add方法即可。<h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4></li>
-<li>去类型化<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static List container()&#123;</div><div class="line">	   List list = new ArrayList();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2L);</div><div class="line">	   list.add(&quot;3&quot;);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  private static List&lt;Integer&gt; newcontainer()&#123;</div><div class="line">	   List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2);</div><div class="line">	   list.add(3);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	  //1.获取旧的字节码</div><div class="line">	  Class container = container().getClass();</div><div class="line">	  </div><div class="line">	  //2.获取泛型的字节码</div><div class="line">	  Class newcontainer = newcontainer().getClass();</div><div class="line">	  System.out.println(&quot; &quot;+container+&quot;****&quot;+newcontainer);</div><div class="line">	  //class java.util.ArrayList****class java.util.ArrayList</div><div class="line">	  System.out.println(container==newcontainer);//true</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>以上代码可以限定集合中的输入类型,让编译器挡住源程序中的非法输入,编译器编译带类型说明的集合时会去除掉”类型”信息</p>
-<ol>
-<li>通过反射绕开编译器的泛型，反射已经得到了字节码，字节码是编译后的内容<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) throws Exception&#123;</div><div class="line">  //1.定义一个泛型集合</div><div class="line">  List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();</div><div class="line">  </div><div class="line">  //2.通过反射绕开编译</div><div class="line">     //获得字节码（绕开编译器）</div><div class="line">    Class listClass = list.getClass();</div><div class="line">     //获取字节码上的方法类,并启动list对象上的add方法，传参数为“abc”</div><div class="line">    listClass.getMethod(&quot;add&quot;,Object.class).invoke(list,&quot;abc&quot;);</div><div class="line">    </div><div class="line">  //3.输出list中内容</div><div class="line">    System.out.println(list);//输出：【abc】</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h4 id="泛型常用术语"><a href="#泛型常用术语" class="headerlink" title="泛型常用术语"></a>泛型常用术语</h4><h6 id="ArrayList类定义和ArrayList类引用中涉及如下术语"><a href="#ArrayList类定义和ArrayList类引用中涉及如下术语" class="headerlink" title="ArrayList类定义和ArrayList类引用中涉及如下术语"></a>ArrayList<e>类定义和ArrayList<integer>类引用中涉及如下术语</integer></e></h6><ol>
-<li>整个成为ArrayList<e>泛型类型</e></li>
-<li>ArrayList<e>中E称为类型变量和类型参数</e></li>
-<li>整个ArrayList<integer>成为参数化的类型</integer></li>
-<li>ArrayList<integer>中的Integer成为类型参数的实例或实际类型参数</integer></li>
-<li>ArrayList<integer>中的&lt;&gt;念着typeof</integer></li>
-<li>ArrayList成为原始类型</li>
-</ol>
-<h6 id="参数化类型与原始类型的兼容性"><a href="#参数化类型与原始类型的兼容性" class="headerlink" title="参数化类型与原始类型的兼容性"></a>参数化类型与原始类型的兼容性</h6><ol>
-<li>参数化类型可以引用一个原始类型对象,编译器告警告,例如： Collection<string> c = new Vector();<br>}</string></li>
-<li>原始类型可以引用一个参数化类型对象,编译报告警告,例如： Collection c = new Vector<string>();<br>}<h6 id="参数化类型不考虑类型参数的继承关系"><a href="#参数化类型不考虑类型参数的继承关系" class="headerlink" title="参数化类型不考虑类型参数的继承关系"></a>参数化类型不考虑类型参数的继承关系</h6></string></li>
-<li>Collection<string> c = new Vector<object>();错误</object></string></li>
-<li>Collection<object> c = new Vector<string>();也错误<h6 id="创建数组不能使用参数化类型"><a href="#创建数组不能使用参数化类型" class="headerlink" title="创建数组不能使用参数化类型"></a>创建数组不能使用参数化类型</h6></string></object></li>
-<li>Vector<integer>[] list = new  Vector<integer>[10];<h6 id="以下正确吗？"><a href="#以下正确吗？" class="headerlink" title="以下正确吗？"></a>以下正确吗？</h6>Vecto v1 = new Vector<string>();<br>Collection<object> v=v1;<br>编译器是编译时一行行检查语法，不考虑运行期</object></string></integer></integer></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/03/泛型-二-泛型的内部原理及深层应用/" class="archive-article-date">
-  	<time datetime="2017-01-03T13:30:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
     </nav>
   
 
@@ -901,7 +878,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.83px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.17px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.17px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.17px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.33px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.67px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.83px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.33px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.83px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.5px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.83px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.17px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.67px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.33px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.83px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.83px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.83px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.83px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 10px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.83px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.67px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.67px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.67px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.83px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.33px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.17px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.67px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.17px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.33px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.33px;">转载</a> <a href="/tags/集合/" style="font-size: 13.33px;">集合</a>
     			</div>
     	</section>
     
