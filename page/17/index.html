@@ -152,6 +152,72 @@
       <div class="body-wrap">
         
   
+    <article id="post-java反射-四-成员变量的反射" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/19/java反射-四-成员变量的反射/">java反射(四)-成员变量的反射</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li><p>反射是将java对象的各个信息存放到类的字节码中，从字节码我们可以得到类的各个信息（构造类，属性，成员变量）。其信息是字节码上对象，没有具体定义到类上。</p>
+</li>
+<li><p>代码分析  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">   private int x;</div><div class="line">   public int y;</div><div class="line">   </div><div class="line">   public ReflectPoint(int x, int y) &#123;</div><div class="line">	super();</div><div class="line">	this.x = x;</div><div class="line">	this.y = y;</div><div class="line">    &#125;</div><div class="line">   public static void main(String[] args) throws Exception&#123;</div><div class="line">	/**</div><div class="line">	 * 运用反射得到ReflectPoint的属性y</div><div class="line">	 * 得到某个类的成员变量（字段）</div><div class="line">	 */</div><div class="line">	 ReflectPoint p1 = new ReflectPoint(3, 5);</div><div class="line">	 </div><div class="line">	  Class c = p1.getClass(); //首先得到类的字节码（类的字节码中有成员变量信息）</div><div class="line">	  Field filedY = c.getField(&quot;y&quot;);//得到字节码上的成员变量y</div><div class="line">	  /*filedY的值是5吗？错，这里的filedY是字节码上对象，没有具体定义到类上。</div><div class="line">	   * filedY不是对象身上的变量，而是类上，要用他去取某个对象上对应的值</div><div class="line">	   * 我们可以通过p1,p2,p3...得到filedY,所以filedY不代表对象上具体的值，他只是一个变量</div><div class="line">	  */</div><div class="line">	  Object y = filedY.get(p1);//取得变量在某个对象(p1)上的值</div><div class="line">	  System.out.println(y);//输出5</div><div class="line">	  </div><div class="line">	  //取x</div><div class="line">	 //Exception in thread &quot;main&quot; java.lang.NoSuchFieldException: x</div><div class="line">	  //因为x是私有的不可见，所以报错</div><div class="line">	  Field fieldX = p1.getClass().getField(&quot;x&quot;);</div><div class="line">	  </div><div class="line">	  //正确，获取定义的所有变量，不管可见或者不可见</div><div class="line">	  Field declaredFieldX = p1.getClass().getDeclaredField(&quot;x&quot;);</div><div class="line">	  System.out.println(declaredFieldX);//Exception in thread &quot;main&quot; java.lang.NoSuchFieldException: x</div><div class="line"></div><div class="line">	  //可以让你见，但是不给你用，可以&quot;暴力&quot;</div><div class="line">	  Field fieldX1 = p1.getClass().getDeclaredField(&quot;x&quot;);</div><div class="line">	  fieldX1.setAccessible(true);//设置可访问</div><div class="line">	  System.out.println(fieldX1.get(p1));//3</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="Field类"><a href="#Field类" class="headerlink" title="Field类"></a>Field类</h4><ol>
+<li>Field类代表某个类中的一个成员变量</li>
+<li>得到的Field对象是对应到类上面的成员变量,还是对应到对象上的成员变量?类只有一个,而该类的实例对象有多少,如果是与对象关联,那关联的是哪个对象？所以字段fieldx代表的是x的定义,而不是真正的x变量。</li>
+<li>举例：将任意一个对象中的所有String类型的 成员变量所对应的字符串内容中的”b”改成”a”.<br>思路：1.扫描一个类对象上所有String类型的变量<br>2.迭代所有字段，得到某个字段类型，再和String比较<br>3.拿到值<br>4.运用repalce取代<br>代码：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">	public String str1 = &quot;abc&quot;;</div><div class="line">	public String str2 = &quot;aabbc&quot;;</div><div class="line">	public String str3 = &quot;hello&quot;;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public String toString() &#123;</div><div class="line">		return &quot;ReflectPoint [str1=&quot; + str1 + &quot;, str2=&quot; + str2 + &quot;, str3=&quot;</div><div class="line">				+ str3 + &quot;]&quot;;</div><div class="line">	&#125;</div><div class="line">   </div><div class="line">	/**</div><div class="line">	 * 将任意一个对象中的所有String类型的 成员变量所对应的字符串内容中的&quot;b&quot;改成&quot;a&quot;.</div><div class="line">	 */</div><div class="line">	private static void change(Object obj) throws Exception&#123;</div><div class="line">		//1.获取对象的所有属性</div><div class="line">		Field[] fields = obj.getClass().getFields();</div><div class="line">		//2.迭代</div><div class="line">		for (Field field : fields) &#123;</div><div class="line">			if(field.getType() == String.class)&#123;//3.获取field的类型判断是不是String类型</div><div class="line">				//4.拿到值</div><div class="line">				String  oldValue= (String)field.get(obj);</div><div class="line">				System.out.println(oldValue);</div><div class="line">				</div><div class="line">				//5.替换值</div><div class="line">				String newValue = oldValue.replace(&quot;b&quot;,&quot;a&quot;);</div><div class="line">				</div><div class="line">				//6.设置值</div><div class="line">				field.set(obj, newValue);//设置obj对象field值为newVaule</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	public static void main(String[] args) throws Exception&#123;</div><div class="line">		/**</div><div class="line">		 * 将任意一个对象中的所有String类型的 成员变量所对应的字符串内容中的&quot;b&quot;改成&quot;a&quot;.</div><div class="line">		 */</div><div class="line">		   ReflectPoint p1 = new ReflectPoint();   </div><div class="line">		   change(p1);</div><div class="line">	       System.out.println(p1);//ReflectPoint [str1=aac, str2=aaaac, str3=hello]</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/19/java反射-四-成员变量的反射/" class="archive-article-date">
+  	<time datetime="2016-12-19T13:14:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="w-java反射-三-Constructor类" class="article article-type-w" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -660,62 +726,6 @@
       
       <a href="/2016/12/14/自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12/" class="archive-article-date">
   	<time datetime="2016-12-14T04:58:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十三-访问的小java不存在-javaServer11" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十三-访问的小java不存在-javaServer11/">自己写一个apache服务器(十三)-访问的小java不存在-javaServer11</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="访问的小java不存在-javaServer11"><a href="#访问的小java不存在-javaServer11" class="headerlink" title="访问的小java不存在-javaServer11"></a>访问的小java不存在-javaServer11</h4><p>在以上程序的基础之上我们需要考虑请求的URI是否不存在，如果不存在需要提示客户端404错误，代码如下<br><img src="http://p1.bpimg.com/576993/091094e95b498cc3.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求访问<br><img src="http://p1.bpimg.com/576993/28ae2ce84dbe5961.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/14/自己写一个apache服务器-十三-访问的小java不存在-javaServer11/" class="archive-article-date">
-  	<time datetime="2016-12-13T16:21:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
 </a>
       
 	<div class="article-tag tagcloud">
