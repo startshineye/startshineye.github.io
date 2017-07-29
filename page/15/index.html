@@ -152,6 +152,81 @@
       <div class="body-wrap">
         
   
+    <article id="post-类加载器-一-类加载器及委托机制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/08/类加载器-一-类加载器及委托机制/">类加载器(一)-类加载器及委托机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h4><h6 id="1-简要介绍类加载器及作用"><a href="#1-简要介绍类加载器及作用" class="headerlink" title="1.简要介绍类加载器及作用"></a>1.简要介绍类加载器及作用</h6><ol>
+<li>类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。</li>
+<li>类加载器作用：加载类到内存中<h6 id="2-类加载器其他介绍"><a href="#2-类加载器其他介绍" class="headerlink" title="2.类加载器其他介绍"></a>2.类加载器其他介绍</h6></li>
+<li>java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassLoader</li>
+<li><p>类加载器也是java类，由于类加载器的类本身也要被加载,显然必须有第一个类加载器不是java类,这正是BootStrap(用c++写的二进制代码).</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//1.获得ClassLoaderTest类的类加载器(反射)</div><div class="line">	  String name = ClassLoaderTest.class.getClassLoader().getClass().getName();</div><div class="line">	  System.out.println(name);//输出：sun.misc.Launcher$AppClassLoader</div><div class="line">	  </div><div class="line">	//2.获取System类的类加载器</div><div class="line">	 ClassLoader sysClassLoader = System.class.getClassLoader();</div><div class="line">	  System.out.println(sysClassLoader);//输出：null,说明System类没有类加载器，它由BootStrap加载</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织,在实例化每个类加载器对象的时候,需要为其指定一个父级类加载器对象或者默认采用系统类装载器为其父级类加载。</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//3.java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织</div><div class="line">	  ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();</div><div class="line">	  while(classLoader != null)&#123;//循环获取父类</div><div class="line">		  System.out.println(classLoader.getClass().getName());</div><div class="line">		  classLoader = classLoader.getParent();</div><div class="line">	  &#125;</div><div class="line">	  System.out.println(classLoader);//最后输出的是最上层根</div><div class="line">	  /**</div><div class="line">	   * 输出结果为:</div><div class="line">	   * sun.misc.Launcher$AppClassLoader</div><div class="line">         sun.misc.Launcher$ExtClassLoader</div><div class="line">         null</div><div class="line">	   */</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="3-类加载器之间的父子关系和管辖范围图"><a href="#3-类加载器之间的父子关系和管辖范围图" class="headerlink" title="3.类加载器之间的父子关系和管辖范围图"></a>3.类加载器之间的父子关系和管辖范围图</h6><ol>
+<li>图<br><img src="http://p1.bqimg.com/576993/95f6f9a54d7f0d25.png" alt="Markdown"></li>
+<li>总结：<br>BootStrap加载rt.jar里面的类,System类就是rt.jar里面的<br>我们一般写的类是用AppClassLoader.</li>
+</ol>
+<h4 id="类加载器的委托机制"><a href="#类加载器的委托机制" class="headerlink" title="类加载器的委托机制"></a>类加载器的委托机制</h4><h6 id="1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？"><a href="#1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？" class="headerlink" title="1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？"></a>1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？</h6><ol>
+<li>首先当前线程的类加载器去加载线程中的第一个类</li>
+<li>如果类A中引用了类B，java虚拟机将使用加载类A的类装载器来加载类B</li>
+<li>还可以直接调用ClassLoader.loadClass()方法来指定某个类加载器去加载某个类</li>
+<li>每个类加载器加载类时，又先委托给其上级类加载器</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/08/类加载器-一-类加载器及委托机制/" class="archive-article-date">
+  	<time datetime="2017-01-08T04:05:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-08</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-泛型-九-通过反射获取泛型实际类型" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -777,80 +852,6 @@
 
 
   
-    <article id="post-注解-二-注解的定义及反射调用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/02/注解-二-注解的定义及反射调用/">注解(二)-注解的定义及反射调用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本文主要掌握：  </p>
-<ol>
-<li>注解定义</li>
-<li>注解调用<h4 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a>1.概述</h4></li>
-<li>注解就相当于你的源程序中要调用的一个类(注解本来就是一个类,一个@interface 类)，要在源程序中应用某个注解,得先准备好这个注解类,就像你要调用某个类,得先开发好这个类。<h4 id="1-注解的应用结构图"><a href="#1-注解的应用结构图" class="headerlink" title="1.注解的应用结构图"></a>1.注解的应用结构图</h4><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/51.png" alt="注解的应用结构图"></li>
-</ol>
-<h4 id="2-注解实例"><a href="#2-注解实例" class="headerlink" title="2.注解实例"></a>2.注解实例</h4><h6 id="1-定义注解"><a href="#1-定义注解" class="headerlink" title="1.定义注解"></a>1.定义注解</h6><p>@interface就是代表一个注解类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public @interface AAnnotation &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<h6 id="2-应用注解的类"><a href="#2-应用注解的类" class="headerlink" title="2.应用注解的类"></a>2.应用注解的类</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@AAnnotation</div><div class="line">public class B &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h6 id="3-对应用了注解类的类进行反射操作的类"><a href="#3-对应用了注解类的类进行反射操作的类" class="headerlink" title="3.对应用了注解类的类进行反射操作的类"></a>3.对应用了注解类的类进行反射操作的类</h6><p>1.对一个类进行检查运用反射<br>2.运用 反射首先要搞到类的字节码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) &#123;</div><div class="line">	 //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码</div><div class="line">	//1.获取当前的注解</div><div class="line">	boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);</div><div class="line">	//2.如果存在注解,则打印出注解对象</div><div class="line">	if(annotationPresent)&#123;</div><div class="line">		AAnnotation aa = B.class.getAnnotation(AAnnotation.class);</div><div class="line">		System.out.println(aa);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>以上没有打印结果，原因就是因为他的生命周期不在runtime时期</p>
-<h4 id="3-注解生命周期-元注解：Retention"><a href="#3-注解生命周期-元注解：Retention" class="headerlink" title="3.注解生命周期(元注解：Retention)"></a>3.注解生命周期(元注解：Retention)</h4><h6 id="1-Retention"><a href="#1-Retention" class="headerlink" title="1.@Retention"></a>1.@Retention</h6><ol>
-<li>在以上注解上加上@Retention(RetentionPolicy.RUNTIME)<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">public @interface AAnnotation &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>运行以下类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) &#123;</div><div class="line">	 //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码</div><div class="line">	//1.获取当前的注解</div><div class="line">	boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);</div><div class="line">	//2.如果存在注解,则打印出注解对象</div><div class="line">	if(annotationPresent)&#123;</div><div class="line">		AAnnotation aa = B.class.getAnnotation(AAnnotation.class);</div><div class="line">		System.out.println(aa);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>以上输出：@com.yxm.annotation.AAnnotation()</p>
-<ol>
-<li>@Retention(RetentionPolicy.RUNTIME)表示告诉虚拟机注解一直保存到运行期间。</li>
-<li>@Retention元注解取值三种:<br>1.RetentionPolicy.SOURCE,RetentionPolicy.CLASS,RetentionPolicy.RUNTIME：分别对应:java源文件–&gt;class文件–&gt;内存中的字节码<h4 id="4-注解目标-元注解：Target"><a href="#4-注解目标-元注解：Target" class="headerlink" title="4.注解目标(元注解：Target)"></a>4.注解目标(元注解：Target)</h4>Target的默认值为任何元素,设置Target等于ElementType.METHOD,原来加在类上的注解就报错了,改用数组方式设置{ElementType.METHOD,ElementType.TYPE}就可以了，TYPE代表java中所有类型,包括类,接口等  </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/02/注解-二-注解的定义及反射调用/" class="archive-article-date">
-  	<time datetime="2017-01-02T06:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/14/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="extend next" rel="next" href="/page/16/">Next &raquo;</a>
@@ -916,7 +917,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.54px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.77px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.08px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.15px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.38px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.62px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.69px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.31px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.77px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.23px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.54px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.08px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.77px;">Websocket</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.77px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.62px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.31px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.77px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.31px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.77px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.31px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 12.31px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.77px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.54px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.54px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.54px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.31px;">代理</a> <a href="/tags/前端/" style="font-size: 10.77px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.08px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.92px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.85px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.54px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.85px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.46px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.08px;">转载</a> <a href="/tags/集合/" style="font-size: 13.08px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.54px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.77px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 13.08px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.15px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.38px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.62px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.69px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.31px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.77px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.23px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.54px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Weblogic/" style="font-size: 13.08px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.77px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.77px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.62px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.31px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.77px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.31px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.77px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.31px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.08px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.77px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.54px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.54px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.54px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.31px;">代理</a> <a href="/tags/前端/" style="font-size: 10.77px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 13.08px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.92px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.85px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.54px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.85px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.46px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 13.08px;">转载</a> <a href="/tags/集合/" style="font-size: 13.08px;">集合</a>
     			</div>
     	</section>
     
