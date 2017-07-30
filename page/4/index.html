@@ -152,6 +152,131 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring-Boot-四-Spring-Boot热部署-springloader" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/15/Spring-Boot-四-Spring-Boot热部署-springloader/">Spring Boot(四)-Spring Boot热部署(springloader)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="问题提出"><a href="#问题提出" class="headerlink" title="问题提出"></a>问题提出</h4><ol>
+<li>热部署，就是在应用正在运行的时候升级软件，却不需要重新启动应用。</li>
+<li>在编写代码的时候，你会发现我们只是简单把打印信息改变了，就需要重新部署，如果是这样的编码方式，那么我们估计一天下来就真的是打几个Hello World就下班了。那么如何解决热部署的问题呢？那就是springloaded</li>
+</ol>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><h5 id="1-添加plugin"><a href="#1-添加plugin" class="headerlink" title="1.添加plugin"></a>1.添加plugin</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">  &lt;!-- 构造编译节点 --&gt;</div><div class="line">  &lt;build&gt;</div><div class="line">  &lt;!-- 添加springloader plugin --&gt;</div><div class="line">  &lt;plugins&gt;</div><div class="line">    &lt;plugin&gt;</div><div class="line">       		&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">       		&lt;artifactId&gt;spring-boot-maven-plugin &lt;/artifactId&gt;</div><div class="line">       		&lt;dependencies&gt;  </div><div class="line">          &lt;dependency&gt;  </div><div class="line">              &lt;groupId&gt;org.springframework&lt;/groupId&gt;  </div><div class="line">              &lt;artifactId&gt;springloaded&lt;/artifactId&gt;  </div><div class="line">              &lt;version&gt;1.2.4.RELEASE&lt;/version&gt;</div><div class="line">          &lt;/dependency&gt;  </div><div class="line">       &lt;/dependencies&gt;  </div><div class="line">       &lt;executions&gt;  </div><div class="line">          &lt;execution&gt;  </div><div class="line">              &lt;goals&gt;  </div><div class="line">                  &lt;goal&gt;repackage&lt;/goal&gt;  </div><div class="line">              &lt;/goals&gt;  </div><div class="line">              &lt;configuration&gt;  </div><div class="line">                  &lt;classifier&gt;exec&lt;/classifier&gt;  </div><div class="line">              &lt;/configuration&gt;  </div><div class="line">          &lt;/execution&gt;  </div><div class="line">     		&lt;/executions&gt;</div><div class="line">&lt;/plugin&gt;</div><div class="line">  &lt;/plugins&gt;</div><div class="line"> &lt;/build&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-运行"><a href="#2-运行" class="headerlink" title="2.运行"></a>2.运行</h5><p>有两种启动方式来测试热部署</p>
+<h6 id="2-1方式一"><a href="#2-1方式一" class="headerlink" title="2.1方式一"></a>2.1方式一</h6><p>使用spring-boot:run<br>右键项目-&gt;run as-&gt;maven build-&gt;在goals里面添加spring-boot:run<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/6.png" alt=""><br>操作:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/7.png" alt=""><br>改动HelloController中hello方法:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@RequestMapping(&quot;/hello&quot;)</div><div class="line">public String hello()&#123;</div><div class="line">return &quot;hello world&quot;+(new Date());</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/8.png" alt=""></p>
+<p>注意：使用spring-boot:run时候我们关掉应用,然后重新在app.main中run as java apllication会出现错误: </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/9.png" alt=""></p>
+<p>说明端口号已经被暂用,但是我们已经关闭了应用后在启动的<br>原因:虽然我们已经关闭了应用,但是进程还没有关闭,启动任务管理器去关闭进程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/10.png" alt=""></p>
+<h6 id="2-2方式二"><a href="#2-2方式二" class="headerlink" title="2.2方式二"></a>2.2方式二</h6><p>基于以上原因我们还是运用第二种方式比较好  </p>
+<p>1.把spring-loader-1.2.4.RELEASE.jar下载下来，放到项目的lib目录中<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/11.png" alt=""><br>2.然后把IDEA的run参数里VM参数设置为：-javaagent:.\lib\springloaded-1.2.4.RELEASE.jar -noverify<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2017/7/12.png" target="_blank" rel="external"></a><br>2.然后启动就可以了，这样在run as的时候，也能进行热部署<br>改变hello返回值之后再次访问浏览器还是正确的</p>
+<h5 id="3-问题"><a href="#3-问题" class="headerlink" title="3.问题"></a>3.问题</h5><p>假如我们新加一个方法hello2()时候再次访问hello2中时候不会输出</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/15/Spring-Boot-四-Spring-Boot热部署-springloader/" class="archive-article-date">
+  	<time datetime="2017-07-15T07:30:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Spring-Boot-三-Spring-Boot完美使用FastJson解析JSON数据" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/15/Spring-Boot-三-Spring-Boot完美使用FastJson解析JSON数据/">Spring Boot(三)-Spring Boot完美使用FastJson解析JSON数据</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>有些人使用比较习惯的json框架是fastjson,所以spring boot默认的json使用起来比较不习惯，所以很自然我就想能不能使用fastjson进行json解析呢？</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-引入fastjson依赖库"><a href="#1-引入fastjson依赖库" class="headerlink" title="1.引入fastjson依赖库"></a>1.引入fastjson依赖库</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"> &lt;dependency&gt;</div><div class="line">&lt;groupId&gt;com.alibaba&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;fastjson&lt;/artifactId&gt;</div><div class="line">&lt;version&gt;1.2.15&lt;/version&gt;</div><div class="line"> &lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>这里要说下很重要的话，官方文档说的1.2.10以后，会有两个方法支持HttpMessageconvert，一个是FastJsonHttpMessageConverter，支持4.2以下的版本，一个是FastJsonHttpMessageConverter4支持4.2以上的版本，具体有什么区别暂时没有深入研究。这里也就是说：低版本的就不支持了，所以这里最低要求就是1.2.10+。</p>
+<h5 id="2-配置fastjson-支持两种方法"><a href="#2-配置fastjson-支持两种方法" class="headerlink" title="2.配置fastjson(支持两种方法)"></a>2.配置fastjson(支持两种方法)</h5><h6 id="2-1-方法一"><a href="#2-1-方法一" class="headerlink" title="2.1 方法一"></a>2.1 方法一</h6><p>1.启动类继承WebMvcConfigurerAdapter<br>2.覆盖方法configureMessageConverters</p>
+<p>Person:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">   public class Person &#123;</div><div class="line">private String name;</div><div class="line">private Integer age;</div><div class="line"></div><div class="line">@JSONField(format=&quot;yyyy-MM-dd&quot;)</div><div class="line">private Date createTime;//添加fastjson相关格式化</div><div class="line"></div><div class="line">public String getName() &#123;</div><div class="line">	return name;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setName(String name) &#123;</div><div class="line">	this.name = name;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Integer getAge() &#123;</div><div class="line">	return age;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setAge(Integer age) &#123;</div><div class="line">	this.age = age;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Date getCreateTime() &#123;</div><div class="line">	return createTime;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setCreateTime(Date createTime) &#123;</div><div class="line">	this.createTime = createTime;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>APP:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 在这里我们使用@SpringBootApplication指定这是一个 spring boot的应用程序.</div><div class="line">   * @author Administrator</div><div class="line">   *</div><div class="line">   */</div><div class="line">   @SpringBootApplication</div><div class="line">   public class App extends WebMvcConfigurerAdapter&#123;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void configureMessageConverters(List&lt;HttpMessageConverter&lt;?&gt;&gt; converters)&#123;</div><div class="line">	/**</div><div class="line">	 * 1.定义转换消息的对象 convert</div><div class="line">	 * 2.添加fastjson配置信息,例如:是否要格式化返回的json数据</div><div class="line">	 * 3.在convert中添加配置信息</div><div class="line">	 * 4.将convert添加到converters中</div><div class="line">	 */</div><div class="line">	//1.定义转换消息的对象 convert</div><div class="line">	FastJsonHttpMessageConverter converter = new FastJsonHttpMessageConverter();</div><div class="line">	//2.添加fastjson配置信息,例如:是否要格式化返回的json数据</div><div class="line">    FastJsonConfig fastJsonConfig = new FastJsonConfig();</div><div class="line">    fastJsonConfig.setSerializerFeatures(SerializerFeature.PrettyFormat);</div><div class="line">    //3.在convert中添加配置信息</div><div class="line">    converter.setFastJsonConfig(fastJsonConfig);</div><div class="line">    //4.将convert添加到converters中</div><div class="line">    converters.add(converter);</div><div class="line">&#125;</div><div class="line">   public static void main( String[] args )</div><div class="line">   &#123;</div><div class="line">   	/**</div><div class="line">	 * 在main方法中启动应用程度</div><div class="line">	 */</div><div class="line">   	SpringApplication.run(App.class, args);</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>HelloController:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 在这里我们使用RestController  （等价于于 @Controller 和 @RequestBody）</div><div class="line">   * @author Administrator</div><div class="line">   *</div><div class="line">   */</div><div class="line">   @RestController</div><div class="line">   public class HelloController &#123;</div><div class="line">/**</div><div class="line"> * 在这里我们使用@RequestMapping 建立请求映射:</div><div class="line"> * http://127.0.0.1:8080/hello</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">@RequestMapping(&quot;/hello&quot;)</div><div class="line">   public String hello()&#123;</div><div class="line">   return &quot;hello world&quot;;</div><div class="line">   &#125;</div><div class="line">/**</div><div class="line"> * 打开工程lib下jar知 ：Spring Boot默认使用的json解析框架是jackson</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">@RequestMapping(&quot;/json&quot;)</div><div class="line">public Person getJson()&#123;</div><div class="line">	Person person = new Person();</div><div class="line">	person.setAge(23);</div><div class="line">	person.setName(&quot;zs&quot;);</div><div class="line">	person.setCreateTime(new Date());</div><div class="line">	return person;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>第二种方法时在App.java启动类中，<br>注入Bean : HttpMessageConverters此处略</p>
+<h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p>run as在浏览器输入：<a href="http://localhost:8080/json.do" target="_blank" rel="external">http://localhost:8080/json.do</a><br>{ “age”:23, “createTime”:”2017-07-15”, “name”:”zs” }</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/15/Spring-Boot-三-Spring-Boot完美使用FastJson解析JSON数据/" class="archive-article-date">
+  	<time datetime="2017-07-15T06:45:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Spring-Boot-二-返回json数据" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -686,114 +811,6 @@
 
 
   
-    <article id="post-java并发编程-四-volatile关键字" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/07/java并发编程-四-volatile关键字/">java并发编程(四)-volatile关键字</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="volatile关键字概念"><a href="#volatile关键字概念" class="headerlink" title="volatile关键字概念"></a>volatile关键字概念</h4><h5 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h5><p>volatile概念:volatile关键字主要作用是是变量在多个线程间可见<br>volatile主要是修饰变量,类似于:private int age=0;private修饰了age,我们用volatile修饰变量可以如下:private volatile int age=0;</p>
-<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/06/07/java并发编程-四-volatile关键字/" class="archive-article-date">
-  	<time datetime="2017-06-07T13:32:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-java并发编程-三-synchronized细节问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/05/java并发编程-三-synchronized细节问题/">java并发编程(三)-synchronized细节问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="synchronized锁重入"><a href="#synchronized锁重入" class="headerlink" title="synchronized锁重入"></a>synchronized锁重入</h4><h5 id="细节1"><a href="#细节1" class="headerlink" title="细节1"></a>细节1</h5><p>关键字synchronized拥有锁重入的功能,也就是在使用synchronized时,当一个线程得到一个对象的锁后,再次请求此对象是是可以再次得到该对象的锁，例如下面例子:</p>
-<h6 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">   public class SyncDubbol &#123;</div><div class="line">   public synchronized void m1()&#123;</div><div class="line">   System.out.println(&quot;m1..&quot;);</div><div class="line">   m2();</div><div class="line">   &#125;;</div><div class="line">   public synchronized void m2()&#123;</div><div class="line">   System.out.println(&quot;m2..&quot;);</div><div class="line">   m3();</div><div class="line">   &#125;;</div><div class="line">   public synchronized void m3()&#123;</div><div class="line">   System.out.println(&quot;m3..&quot;);</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">  final SyncDubbol syncDubbol = new SyncDubbol();</div><div class="line">  Thread t1 =  new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		syncDubbol.m1();</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line">  t1.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div><div class="line">   结果：同时输出</div><div class="line">   m1..</div><div class="line">   m2..</div><div class="line">   m3..</div></pre></td></tr></table></figure>
-</code></pre><h5 id="细节2"><a href="#细节2" class="headerlink" title="细节2"></a>细节2</h5><p>对于web应用程序,异常释放锁的情况,如果不及时处理,很有可能对你的应用程序业务逻辑产生严重错误,比如你现在执行一个队列任务,很多对象都去在等待第一个对象正确执行完毕再去释放锁,但是第一个对象由于异常的出现,导致业务逻辑没有正常执行完毕,就释放了锁,那么可想而知后续的对象执行的都是错误的逻辑。所以这一点要引起注意,在编写代码的时候,一定要考虑周全</p>
-<h5 id="代码-1"><a href="#代码-1" class="headerlink" title="代码"></a>代码</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div></pre></td><td class="code"><pre><div class="line">   public class SyncException &#123;</div><div class="line">   private int i=0;</div><div class="line">   public synchronized void operation()&#123;</div><div class="line">   	while (true) &#123;</div><div class="line">		try &#123;</div><div class="line">			i++;</div><div class="line">			Thread.sleep(1000);</div><div class="line">			System.out.println(Thread.currentThread().getName()+&quot; i=&quot;+i);</div><div class="line">			if(i==10)&#123;</div><div class="line">				Integer.parseInt(&quot;a&quot;);//制造一个异常</div><div class="line">			&#125;</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">			System.out.println(&quot;log info i=&quot;+i);</div><div class="line">			//throw new RuntimeException();</div><div class="line">		&#125;</div><div class="line">   	&#125;</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">	final SyncException syncException = new SyncException();</div><div class="line">	Thread t1 =  new Thread(new Runnable() &#123;</div><div class="line">		@Override</div><div class="line">		public void run() &#123;</div><div class="line">			syncException.operation();</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	t1.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div><div class="line">   当我们注释:throw new RuntimeException();</div><div class="line">   输出:</div><div class="line">   Thread-0 i=1</div><div class="line">Thread-0 i=2</div><div class="line">Thread-0 i=3</div><div class="line">Thread-0 i=4</div><div class="line">Thread-0 i=5</div><div class="line">Thread-0 i=6</div><div class="line">Thread-0 i=7</div><div class="line">Thread-0 i=8</div><div class="line">Thread-0 i=9</div><div class="line">Thread-0 i=10</div><div class="line">log info i=10</div><div class="line">java.lang.NumberFormatException: For input string: &quot;a&quot;</div><div class="line">at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)</div><div class="line">at java.lang.Integer.parseInt(Integer.java:492)</div><div class="line">at java.lang.Integer.parseInt(Integer.java:527)</div><div class="line">at com.two.SyncException.operation(SyncException.java:12)</div><div class="line">at com.two.SyncException$1.run(SyncException.java:25)</div><div class="line">at java.lang.Thread.run(Thread.java:722)</div><div class="line">Thread-0 i=11</div><div class="line">Thread-0 i=12</div><div class="line">Thread-0 i=13</div><div class="line">Thread-0 i=14</div><div class="line">Thread-0 i=15</div><div class="line">   </div><div class="line">   不注释掉:throw new RuntimeException();</div><div class="line">   Thread-0 i=1</div><div class="line">Thread-0 i=2</div><div class="line">Thread-0 i=3</div><div class="line">Thread-0 i=4</div><div class="line">Thread-0 i=5</div><div class="line">Thread-0 i=6</div><div class="line">Thread-0 i=7</div><div class="line">Thread-0 i=8</div><div class="line">Thread-0 i=9</div><div class="line">Thread-0 i=10</div><div class="line">java.lang.NumberFormatException: For input string: &quot;a&quot;</div><div class="line">log info i=10</div><div class="line">at java.lang.NumberFormatException.forInputString(NumberFormatException.java:65)</div><div class="line">at java.lang.Integer.parseInt(Integer.java:492)</div><div class="line">at java.lang.Integer.parseInt(Integer.java:527)</div><div class="line">at com.two.SyncException.operation(SyncException.java:12)</div><div class="line">at com.two.SyncException$1.run(SyncException.java:26)</div><div class="line">at java.lang.Thread.run(Thread.java:722)</div><div class="line">   Exception in thread &quot;Thread-0&quot; java.lang.RuntimeException</div><div class="line">at com.two.SyncException.operation(SyncException.java:17)</div><div class="line">at com.two.SyncException$1.run(SyncException.java:26)</div><div class="line">at java.lang.Thread.run(Thread.java:722)</div></pre></td></tr></table></figure>
-</code></pre><p>结论：  </p>
-<ol>
-<li>如果synchronized在处理多个任务的时候，(以上每个i代表一次任务),如果执行到中途一个任务时候,我们还需要执行其他业务,我们可以打印一个错误日志/continnue;多个任务没有关联关系</li>
-<li>如果多个任务有关联关系,我们在执行到中途有异常时候不应该再去执行,我们可以抛出一个throw new RuntimeException();</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/06/05/java并发编程-三-synchronized细节问题/" class="archive-article-date">
-  	<time datetime="2017-06-05T14:02:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -859,7 +876,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 10.71px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 11.43px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     

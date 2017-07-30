@@ -152,6 +152,133 @@
       <div class="body-wrap">
         
   
+    <article id="post-Dom" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/30/Dom/">Dom</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/30/Dom/" class="archive-article-date">
+  	<time datetime="2017-07-30T08:50:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Vue-3-vue-js核心思想" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/30/Vue-3-vue-js核心思想/">Vue(3)-vue.js核心思想</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>Vue.js是一个提供MVVM数据双向绑定的库，专注于UI层面，核心思想是：数据驱动、组件系统。</p>
+<h5 id="数据驱动"><a href="#数据驱动" class="headerlink" title="数据驱动"></a>数据驱动</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/97.png" alt="">  </p>
+<p>只要改变数据，Vuejs会通过Directives指令对DOM进行封装，当数据发生变化，会通知相应的DOM进行变化,Vuejs会对DOM进行监听，通过DOMListeners监听视图的变化，通知数据进行改变，这样就实现了数据的双向绑定  </p>
+<p>数据相应原理：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/98.png" alt=""><br>现在有一份a.b的数据，当vue对象实例化的时候，会通过es5的Object.defineproperty创建setter和getter方法，vuejs编译模板生成指令对象（黄色部分），每个指令对象都会关联一个watcher。当我们对指令的a.b做求值时，会触发getter方法；（绿色部分）把依赖设置到了Watcher，当a.b数据发生改变时，会触发setter，通知到对应关联的watcher，watcher会对a.b进行求值，计算对比新旧值，发现值改变了，watcher会通知到指令，调用指令的update方法，由于指令是对DOM的封装，所以指令会通过原生DOM的方法，更新视图  </p>
+<ol>
+<li>Vue.js数据观测原理在技术实现上，利用的是ES5Object.defineProperty和存储器属性: getter和setter（所以只兼容IE9及以上版本），可称为基于依赖收集的观测机制。核心是VM，即ViewModel，保证数据和视图的一致性。  </li>
+<li><p>watcher：每一个指令都会有一个对应的用来观测数据的对象，叫做watcher，比如v-text=”msg”, ，即为两个watcher，watcher对象中包含了待渲染的关联DOM元素。  </p>
+<p> <div id="app"></div></p>
+ 
+<p> <br> var app = new Vue({<br> el: ‘#app’,<br> data: {<br>  message: ‘Hello Vue!’<br> }<br> })</p>
+</li>
+</ol>
+<p>基于依赖收集的观测机制原理：<br>1.将原生的数据改造成 “可观察对象”，通常为，调用defineProperty改变data对象中数据为存储器属性。一个可观察对象可以被取值getter，也可以被赋值setter。<br>2.在解析模板，也就是在watcher的求值过程中，每一个被取值的可观察对象都会将当前的watcher注册为自己的一个订阅者，并成为当前watcher的一个依赖。<br>3.当一个被依赖的可观察对象被赋值时，它会通知notify所有订阅自己的watcher重新求值，并触发相应的更新，即watcher对象中关联的DOM改变渲染。    </p>
+<p>依赖收集的优点在于可以精确、主动地追踪数据的变化，不需要手动触发或对作用域中所有watcher都求值（angular脏检查实现方式的缺点）。特殊的是，对于数组，需要通过包裹数组的可变方法（比如push）来监听数组的变化。在添加/删除属性，或是修改数组特定位置元素时，也需要调用特定的函数，如obj.$add(key, value)才能触发更新。这是受ES5的语言特性所限   </p>
+<h5 id="组件系统"><a href="#组件系统" class="headerlink" title="组件系统"></a>组件系统</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/99.png" alt=""><br>组件设置原则：<br>1.页面上每个独立的可视/可交互区域视为一个组件,每个组件对应一个工程目录，组件所需要的各种资源在这个目录就近维护（包括JS ,CSS等）<br>2.页面不过是组件的容器，组件可以嵌套自由组合形成完整的页面  </p>
+<p>注册一个组件：    </p>
+<pre><code>Vue.component(&apos;my-component&apos;, {
+ // 模板
+ template: &apos;&lt;div&gt;{{msg}} {{privateMsg}}&lt;/div&gt;&apos;,
+ // 接受参数
+  props: {
+      msg: String    
+  },
+  // 私有数据，需要在函数中返回以避免多个实例共享一个对象
+  data: function () {
+      return {
+          privateMsg: &apos;component!&apos;
+     }
+  }
+})
+&lt;my-component msg=&quot;hello&quot;&gt;&lt;/my-component&gt; 
+</code></pre><p>组件的核心选项：<br>1 模板（template）：模板声明了数据和最终展现给用户的DOM之间的映射关系。<br>2 初始数据（data）：一个组件的初始数据状态。对于可复用的组件来说，这通常是私有的状态。<br>3 接受的外部参数(props)：组件之间通过参数来进行数据的传递和共享。<br>4 方法（methods）：对数据的改动操作一般都在组件的方法内进行。<br>5 生命周期钩子函数（lifecycle hooks）：一个组件会触发多个生命周期钩子函数，最新2.0版本对于生命周期函数名称改动很大。<br>6 私有资源（assets）：Vue.js当中将用户自定义的指令、过滤器、组件等统称为资源。一个组件可以声明自己的私有资源。私有资源只有该组件和它的子组件可以调用。  </p>
+<p>Webpack是一个开源的前端模块构建工具，它提供了强大的loader API来定义对不同文件格式的预处理逻辑，这是.vue后缀单文件组件形式的基础。所以在此基础上，尤大开发的vue-loader允许将模板、样式、逻辑三要素整合在同一个文件中，以.vue文件后缀形成单文件组件格式，方便项目架构和开发引用。  </p>
+<h5 id="其他特性"><a href="#其他特性" class="headerlink" title="其他特性"></a>其他特性</h5><p>1 异步批量DOM更新：当大量数据变动时，所有受到影响的watcher会被推送到一个队列中，并且每个watcher只会推进队列一次。这个队列会在进程的下一个 tick异步执行。这个机制可以避免同一个数据多次变动产生的多余DOM操作，也可以保证所有的DOM写操作在一起执行，避免DOM读写切换可能导致的layout。<br>2 动画系统：Vue.js提供了简单却强大的动画系统，当一个元素的可见性变化时，用户不仅可以很简单地定义对应的CSS Transition或Animation效果，还可以利用丰富的JavaScript钩子函数进行更底层的动画处理。<br>3 可扩展性：除了自定义指令、过滤器和组件，Vue.js还提供了灵活的mixin机制，让用户可以在多个组件中复用共同的特性。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/30/Vue-3-vue-js核心思想/" class="archive-article-date">
+  	<time datetime="2017-07-30T08:30:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Vue-2-vue-js" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -709,140 +836,6 @@ javax.servlet.http.HttpServlet.service(HttpServlet.java:802)
 
 
   
-    <article id="post-Redis-1-Redis的诞生" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/26/Redis-1-Redis的诞生/">Redis(1)-Redis的诞生</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Redis的创建者"><a href="#1-Redis的创建者" class="headerlink" title="1.Redis的创建者"></a>1.Redis的创建者</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/33.png" alt=""></p>
-<h5 id="2-LLOOGG-com"><a href="#2-LLOOGG-com" class="headerlink" title="2.LLOOGG.com"></a>2.LLOOGG.com</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/34.png" alt=""></p>
-<h5 id="3-LLOOGG-com用户界面"><a href="#3-LLOOGG-com用户界面" class="headerlink" title="3.LLOOGG.com用户界面"></a>3.LLOOGG.com用户界面</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/35.png" alt=""></p>
-<h5 id="3-LLOOGG-com运作方式"><a href="#3-LLOOGG-com运作方式" class="headerlink" title="3.LLOOGG.com运作方式"></a>3.LLOOGG.com运作方式</h5><p>方式1<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/36.png" alt=""><br>方式2<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/37.png" alt=""></p>
-<h5 id="4-LLOOGG-com负载问题"><a href="#4-LLOOGG-com负载问题" class="headerlink" title="4.LLOOGG.com负载问题"></a>4.LLOOGG.com负载问题</h5><p>VPS（Virtual Private Server 虚拟专用服务器）技术，将一台服务器分割成多个虚拟专享服务器的优质服务。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/38.png" alt=""></p>
-<h5 id="5-Redis的诞生"><a href="#5-Redis的诞生" class="headerlink" title="5.Redis的诞生"></a>5.Redis的诞生</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/39.png" alt=""></p>
-<h5 id="6-Redis的演进"><a href="#6-Redis的演进" class="headerlink" title="6.Redis的演进"></a>6.Redis的演进</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/40.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/26/Redis-1-Redis的诞生/" class="archive-article-date">
-  	<time datetime="2017-07-26T14:38:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Spring-Boot-22-Spring-Boot启动时加载数据CommandLineRunner" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/26/Spring-Boot-22-Spring-Boot启动时加载数据CommandLineRunner/">Spring Boot(22)-Spring Boot启动时加载数据CommandLineRunner</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>实际应用中,我们有”在项目服务启动的时候就去加载一些数据或做一些事”的需求。<br>为了解决这样的问题，Spring Boot 为我们提供了一个方法，通过实现接口 CommandLineRunner 来实现。很简单，只需要一个类就可以，无需其他配置。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-步骤"><a href="#1-步骤" class="headerlink" title="1.步骤"></a>1.步骤</h5><p>步骤:(1)实现CommandLineRunner (2)添加@Component (3)在需要执行顺序的时候用注解:@Order(value=2)其中value值越小那么执行越早 </p>
-<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><p>在com.yxm.runner下创建MyRunnner1,MyRunner2<br>1.MyRunnner1  </p>
-<pre><code>@Component
-@Order(value=1)
-public class MyRunner1 implements CommandLineRunner{
-public void run(String... arg0) throws Exception {
-    System.out.println(&quot;----服务启动执行MyRunner1 ,执行加载数据等操作----&quot;+arg0);
-}
-}
-</code></pre><p>2.MyRunnner2  </p>
-<pre><code>@Component
-@Order(value=2)
-public class MyRunner2 implements CommandLineRunner{
-
-public void run(String... arg0) throws Exception {
-    System.out.println(&quot;----服务启动执行MyRunner2 ,执行加载数据等操作----&quot;+arg0);
-}
-}
-</code></pre><h5 id="3-配置参数"><a href="#3-配置参数" class="headerlink" title="3.配置参数"></a>3.配置参数</h5><p>1.App.java中配置  </p>
-<pre><code>SpringApplication.run(App.class, new String[]{&quot;hello&quot;,&quot;jack&quot;});
-</code></pre><p>2.Myeclipse中:  </p>
-<pre><code>Myeclipse中给java应用传args参数的方法如下：
-1、先写好Java代码，比如文件名为IntArrqy.java；
-2、在工具栏或菜单上点run as下边有个Run Configuration；
-3、在弹出窗口点选第二个标签arguments；
-4、把你想输入的参数写在program argumenst就可以了，多个参数使用空格隔开。
-完成后点run即可通过运行结果看到参数使用情况了。
-</code></pre><h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><p>—-服务启动执行MyRunner1 ,执行加载数据等操作—-[Ljava.lang.String;@3ca005a7<br>—-服务启动执行MyRunner2 ,执行加载数据等操作—-[Ljava.lang.String;@3ca005a7<br>根据控制台结果可判断，@Order 注解的执行优先级是按value值从小到大顺序。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/26/Spring-Boot-22-Spring-Boot启动时加载数据CommandLineRunner/" class="archive-article-date">
-  	<time datetime="2017-07-26T01:16:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -908,7 +901,7 @@ public void run(String... arg0) throws Exception {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 10.71px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 11.43px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
