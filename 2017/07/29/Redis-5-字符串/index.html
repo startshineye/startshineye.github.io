@@ -1,0 +1,492 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>Redis(5)-字符串 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="二进制数据操作1.设置和获取二进制数据SET,GET,SETNX,APPEND等命令同样可以用于设置二进制数据。  
+2.二进制位的索引和储存文字时一样,字符串键在存储二进制位时，索引也是从0开始。  
+但是和储存文字时,索引从左到右依次递增不同,当字符串键储存的是二进制位时,二进制位的索引会从左到右依次递减。 
+3.设置二进制位的值SETBIT key index value  
+将给定索引上的">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Redis(5)-字符串">
+<meta property="og:url" content="https://github.com/startshineye/2017/07/29/Redis-5-字符串/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="二进制数据操作1.设置和获取二进制数据SET,GET,SETNX,APPEND等命令同样可以用于设置二进制数据。  
+2.二进制位的索引和储存文字时一样,字符串键在存储二进制位时，索引也是从0开始。  
+但是和储存文字时,索引从左到右依次递增不同,当字符串键储存的是二进制位时,二进制位的索引会从左到右依次递减。 
+3.设置二进制位的值SETBIT key index value  
+将给定索引上的">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/76.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/77.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/78.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/79.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/80.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/81.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/82.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/83.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/84.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/85.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/86.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/87.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/88.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/89.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/90.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/91.png">
+<meta property="og:updated_time" content="2017-07-29T12:19:45.693Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Redis(5)-字符串">
+<meta name="twitter:description" content="二进制数据操作1.设置和获取二进制数据SET,GET,SETNX,APPEND等命令同样可以用于设置二进制数据。  
+2.二进制位的索引和储存文字时一样,字符串键在存储二进制位时，索引也是从0开始。  
+但是和储存文字时,索引从左到右依次递增不同,当字符串键储存的是二进制位时,二进制位的索引会从左到右依次递减。 
+3.设置二进制位的值SETBIT key index value  
+将给定索引上的">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/7/76.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-Redis-5-字符串" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Redis(5)-字符串
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="二进制数据操作"><a href="#二进制数据操作" class="headerlink" title="二进制数据操作"></a>二进制数据操作</h4><h5 id="1-设置和获取二进制数据"><a href="#1-设置和获取二进制数据" class="headerlink" title="1.设置和获取二进制数据"></a>1.设置和获取二进制数据</h5><p>SET,GET,SETNX,APPEND等命令同样可以用于设置二进制数据。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/76.png" alt="">  </p>
+<h5 id="2-二进制位的索引"><a href="#2-二进制位的索引" class="headerlink" title="2.二进制位的索引"></a>2.二进制位的索引</h5><p>和储存文字时一样,字符串键在存储二进制位时，索引也是从0开始。  </p>
+<p>但是和储存文字时,索引从左到右依次递增不同,当字符串键储存的是二进制位时,二进制位的索引会从左到右依次递减。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/77.png" alt=""> </p>
+<h5 id="3-设置二进制位的值"><a href="#3-设置二进制位的值" class="headerlink" title="3.设置二进制位的值"></a>3.设置二进制位的值</h5><p>SETBIT key index value  </p>
+<p>将给定索引上的二进制位的值设置为value,命令返回被设置的位原来储存的旧值。  </p>
+<p>复杂度O(1)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/78.png" alt="">  </p>
+<h5 id="4-获取二进制位的值"><a href="#4-获取二进制位的值" class="headerlink" title="4.获取二进制位的值"></a>4.获取二进制位的值</h5><p>GETBIT key index  </p>
+<p>返回给定索引上的二进制位的值。<br>复杂度为O(1)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/79.png" alt="">  </p>
+<h5 id="5-计算值为1的二进制位的数量"><a href="#5-计算值为1的二进制位的数量" class="headerlink" title="5.计算值为1的二进制位的数量"></a>5.计算值为1的二进制位的数量</h5><p>BITCOUNT key [start][end]  </p>
+<p>计算并返回字符串键储存的值中,被设置为1的二进制位的数量。  </p>
+<p>一般情况下,给定的整个字符串键都会进行计数操作,但通过指定额外的 start或end参数,可以让计数只在特定索引范围的位上进行。  </p>
+<p>start和end参数的设置和GETRANGE命令类似,都可以使用负数值:比如-1表示最后一个位,而-2表示倒数第二个位,以此类推。  </p>
+<p>复杂度O(N),其中N为被计算二进制位的数量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/80.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/81.png" alt="">  </p>
+<h5 id="6-二进制位运算"><a href="#6-二进制位运算" class="headerlink" title="6.二进制位运算"></a>6.二进制位运算</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/82.png" alt=""><br>BITO示例<br>假设现在b1储存了二进制01001101,而b2键储存了二进制10110101。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/83.png" alt=""> </p>
+<h5 id="7-示例"><a href="#7-示例" class="headerlink" title="7.示例"></a>7.示例</h5><h6 id="7-1在线人数统计"><a href="#7-1在线人数统计" class="headerlink" title="7.1在线人数统计"></a>7.1在线人数统计</h6><p>一些网站具备了在线人数统计功能,通过这个功能可以看到一段时间内(比如这个小时,或者这一天),曾经登录过这个网站的会员人数。  </p>
+<p>首页   289 人在线 最高纪录815  </p>
+<p>某网站的在线人数统计结果,显示目前有289个会员在线。  </p>
+<p>通过使用字符串键以及二进制数据处理命令,我们也可以构建一个高效并且节约内存的在线人数统计实现。  </p>
+<h6 id="7-2在用户id和位索引之间进行关联"><a href="#7-2在用户id和位索引之间进行关联" class="headerlink" title="7.2在用户id和位索引之间进行关联"></a>7.2在用户id和位索引之间进行关联</h6><p>之前说过,字符串键储存的每个二进制位都有与之对应的索引,比如对于一个8位长的二进制值来说,它的各个二进制位的索引值为0至7。  </p>
+<p>因为网站通常每一个会员都有一个自己的数字id,比如peter的id可能是3,而jack的id可能是5，所以我们可以在用户id和二进制位的索引之间进行关联:  </p>
+<ol>
+<li>如果id为N的用户在线,我们就将索引为N的二级制位的值设置为1。  </li>
+<li>如果索引为N的二进制的值为0,这表示id为N用户不在线。  </li>
+<li>使用BITCOUNT可以统计有 多少个用户在线。  </li>
+<li>通过为每段时间分别储存一个二进制值,我们就可以为每段时间都记录在线用户的数量。(每小时创建一个键或者每天创建一个键,诸如此类)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/84.png" alt="">  <h6 id="7-3-在线用户统计的API及其实现"><a href="#7-3-在线用户统计的API及其实现" class="headerlink" title="7.3 在线用户统计的API及其实现"></a>7.3 在线用户统计的API及其实现</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/85.png" alt=""></li>
+</ol>
+<h6 id="7-4-关于用户在线统计的更多信息"><a href="#7-4-关于用户在线统计的更多信息" class="headerlink" title="7.4 关于用户在线统计的更多信息"></a>7.4 关于用户在线统计的更多信息</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/86.png" alt="">  </p>
+<h6 id="示例-使用Redis缓存热门图片"><a href="#示例-使用Redis缓存热门图片" class="headerlink" title="示例:使用Redis缓存热门图片"></a>示例:使用Redis缓存热门图片</h6><p>图片网站要存储大量的图片(通常放在硬盘里面),而少部分热门图片将会被经常访问到。  </p>
+<p>为了加快网站获取热门图片的速度,我们可以利用Redis能够储存二进制这一特性,使用之前构建的缓存程序来缓存图片网站中的热门图片。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/87.png" alt=""></p>
+<h5 id="8-储存中文时注意事项"><a href="#8-储存中文时注意事项" class="headerlink" title="8.储存中文时注意事项"></a>8.储存中文时注意事项</h5><h6 id="8-1-注意事项"><a href="#8-1-注意事项" class="headerlink" title="8.1 注意事项"></a>8.1 注意事项</h6><p>一个英文字符只需要使用单个文字来存储,而一个中文字符却需要使用多个字节来存储。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/88.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/89.png" alt="">  </p>
+<h6 id="8-2-SETRANGE和SETRANGE实例"><a href="#8-2-SETRANGE和SETRANGE实例" class="headerlink" title="8.2 SETRANGE和SETRANGE实例"></a>8.2 SETRANGE和SETRANGE实例</h6><p>setrange和getrange情况类似:因为这两个命令所使用的索引是根据字节而不是字符来编排的,所以调用setrange或者getrange来处理中文,得不到我们想要的结果。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/90.png" alt="">  </p>
+<h6 id="8-5-结婚"><a href="#8-5-结婚" class="headerlink" title="8.5 结婚"></a>8.5 结婚</h6><p>不要使用以下三个命令来处理中文:<br>STRLEN,SETRANGE和GETRANGE  </p>
+<p>例外情况:如果你想要知道被储存的中文包含多少个字节,那么可以使用STRLEN。  </p>
+<h5 id="9总结"><a href="#9总结" class="headerlink" title="9总结"></a>9总结</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/91.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/29/Redis-5-字符串/" class="archive-article-date">
+  	<time datetime="2017-07-29T08:41:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2017/07/30/Vue-1-MVVM/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Vue(1)-MVVM
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/07/28/Redis-4-字符串/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">Redis(4)-字符串</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="Redis-5-字符串" data-title="Redis(5)-字符串" data-url="https://github.com/startshineye/2017/07/29/Redis-5-字符串/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 10px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
