@@ -152,6 +152,223 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十八-实现资源转发-javaServer16" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/">自己写一个apache服务器(十八)-实现资源转发-javaServer16</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="实现资源转发-javaServer16"><a href="#实现资源转发-javaServer16" class="headerlink" title="实现资源转发-javaServer16"></a>实现资源转发-javaServer16</h4><p>我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了两个Servlet，先执行LoginServlet，然后再跳转到EmpListServlet继续执行，这个我们应该怎么做呢？<br>有人说，在LoginServlet中service方法执行结束的时候，由WebApp开发人员手动调用EmpListServlet中的service方法不就行了吗。这当然是不行的，因为Servlet对象的创建，包括Servlet对象上方法的调用，都是由Web服务器来管理的，WebApp开发人员无权干涉。那该怎么办呢？只好把这个Servlet对象上service方法的真正调用交给Web服务器来完成了。<br>那我们把这种机制定义为转发机制，转发过程中必须保证是在同一个请求当中，为了保证LoginServlet和EmpListServlet在同一个请求当中，必须保证LoginServlet和EmpListServlet共享同一个request对象和同一个response对象。<br>那就让我们的角色转变为Web服务器的开发人员，定义一个“请求转发器”类型，类名RequestDispatcherImpl，在转发器中定义转发方法，将request和response参数传递过去，如下图所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">public class RequestDispatcherImpl implements RequestDispatcher &#123;</div><div class="line">   private String uri;</div><div class="line">   </div><div class="line">   public RequestDispatcherImpl(String uri)&#123;</div><div class="line">	   this.uri=uri;</div><div class="line">   &#125;</div><div class="line">	@Override</div><div class="line">	public void forward(ServletRequest request, ServletResponse response) &#123;</div><div class="line">      if(uri.endsWith(&quot;.html&quot;) || uri.endsWith(&quot;.htm&quot;))&#123;</div><div class="line">    	  String htmlPath = uri.substring(1);</div><div class="line">    	  System.out.println(htmlPath);</div><div class="line">    	  BufferedReader br=null;</div><div class="line">    	  try &#123;</div><div class="line">    		  br=new BufferedReader(new FileReader(htmlPath));</div><div class="line">		      String temp = null;</div><div class="line">		      while((temp = br.readLine())!=null)&#123;</div><div class="line">		    	  response.getWriter().print(temp);</div><div class="line">		      &#125;</div><div class="line">    	  &#125; catch (Exception e) &#123;</div><div class="line">    		  e.printStackTrace();</div><div class="line">		  &#125;finally&#123;</div><div class="line">			  if(br!=null)&#123;//br关闭流</div><div class="line">				  try &#123;</div><div class="line">					br.close();</div><div class="line">				&#125; catch (IOException e) &#123;</div><div class="line">					e.printStackTrace();</div><div class="line">				&#125;</div><div class="line">			  &#125;</div><div class="line">		  &#125;</div><div class="line">      &#125;else&#123;</div><div class="line">    	  String s1 = uri.substring(1);</div><div class="line">    	  System.out.println(s1);</div><div class="line">    	  String webappname=&quot;&quot;;</div><div class="line">    	  if(s1.contains(&quot;/&quot;))&#123;</div><div class="line">    		  webappname=s1.split(&quot;/&quot;)[0];</div><div class="line">    	  &#125;else&#123;</div><div class="line">    		  webappname=s1;</div><div class="line">    	  &#125;</div><div class="line">    	  String servletPath = s1.substring(webappname.length());</div><div class="line">    	  if(servletPath.length()&gt;0)&#123;</div><div class="line">    		  String servletName = WebParse.servletMaps.get(webappname).get(servletPath);</div><div class="line">    	      Servlet servlet = ServletCache.get(servletName);</div><div class="line">    	      if(servlet == null)&#123;</div><div class="line">    	    	  try &#123;</div><div class="line">    	    		  servlet = (Servlet)Class.forName(servletName).newInstance();</div><div class="line">				 &#125;catch (Exception e) &#123;</div><div class="line">					 e.printStackTrace();</div><div class="line">				 &#125;</div><div class="line">    	      &#125;</div><div class="line">    	      servlet.service(request, response);</div><div class="line">    	  &#125; </div><div class="line">	  &#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上WEB服务器的开发人员将请求转发器开发之后，该请求转发器对象肯定要在WebApp中使用，所以SUN应该制定请求转发器接口，WebApp的开发人员应该面向该请求转发器接口编程，那么我们的角色转变为SUN公司，制定接口如下：<br><img src="http://i1.piimg.com/576993/7ee2a1666472a075.png" alt="Markdown"><br>角色转变为WEB服务器的开发人员，让请求转发器对象实现以上的请求转发器接口，代码如下所示：<br><img src="http://i1.piimg.com/576993/e64f04f4c42322e7.png" alt="Markdown"><br>请求转发器类型我们已经定义好了，但是这个对象对于WebApp的开发人员来说怎么能获取到呢？在Servlet类中采用new的方式吗？当然不行，因为对于WebApp的开发人员来说请求转发器类型是不可见的，也就是说WebApp的开发人员不知道有RequestDispatcherImpl这样一个类，他只知道RequestDispatcherImpl实现了SUN提供的RequestDispatcher接口。那怎么能获取到该转发器对象呢？对于WebApp的开发人员来说，一个Servlet类的service方法中有两个参数，一个是request，一个是response，WebApp的开发人员是可以调用request接口中的方法的，所以SUN可以在request接口中加入下面的方法：<br><img src="http://i1.piimg.com/576993/253af750fc140865.png" alt="Markdown"><br>SUN制定的request接口发生了变化，自然实现类需要进一步实现这个方法，开发角色转变为WEB服务器的开发人员，代码如下所示：<br><img src="http://i1.piimg.com/576993/da2996da681764ce.png" alt="Markdown"><br>转发器开发完毕，接下来我们测试一下是否可以正常使用，开发角色转变为WebApp的开发人员，分别开发AServlet、BServlet、testForward.html，AServlet执行然后转发到BServlet执行，BServlet执行再转发到testForward.html，代码和配置如下所示：<br><img src="http://i1.piimg.com/576993/87b76fd935f16cff.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/dfb56fa0928cf282.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/72fe49dac1242242.png" alt="Markdown"><br>启动httpserver，打开浏览器，输入以下访问地址，发送请求，测试结果如下所示：<br><img src="http://i1.piimg.com/576993/8aac1cefef8c7b03.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" class="archive-article-date">
+  	<time datetime="2016-12-18T02:06:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="Servlet对象实现单例-javaServer15"><a href="#Servlet对象实现单例-javaServer15" class="headerlink" title="Servlet对象实现单例-javaServer15"></a>Servlet对象实现单例-javaServer15</h4><p><img src="http://p1.bqimg.com/576993/9de8ce76a89f8de2.png" alt="Markdown"><br>从上图可以看出，每一次浏览器客户端发送请求的时候，WEB服务器都会通过反射机制创建一个新的Servlet对象，当多线程同时并发访问的时候，在WEB服务器的JVM中会有大量的Servlet对象，使JVM的堆内存压力增大，耗费占用大量的堆内存空间。并且每一次都创建Servlet对象，显然效率是比较低的，怎么做既可以节省堆内存的开销又可以提高程序的执行效率呢？当然，此时你肯定想到了单实例的方式，也就是说当浏览器客户端第一次发送请求的时候创建Servlet对象，将Servlet对象和对应的请求URI存放到缓存当中，当浏览器客户端第2+次发送请求的时候直接从缓存当中获取请求URI对应的Servlet实例，直接调用Servlet对象的service方法。这样做我们就可以达到既节省了内存的开销，又提高了程序的执行速度。接下来我们做一个简单的设计，如下图所示：<br><img src="http://p1.bqimg.com/576993/4deb9f3067265d0c.png" alt="Markdown"><br>接下来就让我们一步一步实现吧，我们的角色转变为WEB服务器的开发人员，先来写一段伪代码（还不能马上执行的程序），如下图所示：<br><img src="http://p1.bqimg.com/576993/915022ed9e4702df.png" alt="Markdown"> </p>
+<p>目前，我们的角色还是WEB服务器的开发人员，让我们一起来实现ServletCache类，如下图所示：<br><img src="http://p1.bqimg.com/576993/2aa425905a6764fe.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送多次请求进行测试，测试结果如下：<br><img src="http://p1.bqimg.com/576993/0944d5fb03b81c17.png" alt="Markdown"><br>控制台<br><img src="http://p1.bqimg.com/576993/b9612c1531e0f4f7.png" alt="Markdown"><br>通过以上的测试结果可以看到Servlet对象已达到了单实例，但是这里所谓的单实例，并不属于单例模式，真正的单例模式要求构造函数私有化的，这里之所以可以做到单实例，是因为Servlet对象的生命周期由服务器来管理，服务器只创建一次，所以可以达到单实例的效果，这种单实例可以被称为伪单例。<br>另外需要注意的是，Servlet对象是单实例的，这个时候就应该注意多线程并发带来的安全问题，尽量不要在Servlet类中使用实例变量。  </p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" class="archive-article-date">
+  	<time datetime="2016-12-17T16:37:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十六-接收表单提交数据-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/">自己写一个apache服务器(十六)-接收表单提交数据-javaServer14</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="接收表单提交数据-javaServer14"><a href="#接收表单提交数据-javaServer14" class="headerlink" title="接收表单提交数据-javaServer14"></a>接收表单提交数据-javaServer14</h4><p>到目前为止，服务器端已经可以完成响应了。接下来我们解决什么问题呢？大家都知道当用户登录的时候会提交登录的用户名和密码，那么在服务器端的小Java程序中怎么去获取这些信息呢？显然需要Web服务器帮助我们将数据解析出来，放到某个对象中，然后WebApp的开发人员从该对象中直接获取数据使用。那么接下来我们的角色转变为Web服务器的开发人员，定义一个类专门完成数据的解析封装。提交的数据在哪里呢？看下图<br><img src="http://i1.piimg.com/576993/bdb78460774d2678.png" alt="Markdown"><br>其实我们有必要将请求协议的全部内容封装到某个对象当中，以便WebApp开发人员的使用，不过将请求协议全部内容封装到某个对象中，这将是一个非常繁琐的过程，我们这里就不再实现这个功能了，我们只将请求行上的URI部分的数据封装就行了。由于该对象中封装了请求协议，所以我们把这个对象叫做请求对象request。请求行上的URI部分提交的数据格式为uri?name=value&amp;name=value…，其中name是form表单控件的name属性，value是form表单控件的value属性，这个格式是W3C制定的HTTP协议的一部分。我们可以让表单提交的数据更复杂一些，来看一看提交了哪些数据？编写如下的html<br><img src="http://i1.piimg.com/576993/7a8ca244990558e7.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问Save.html，如下图所示<br><img src="http://i1.piimg.com/576993/3618b6d720385870.png" alt="Markdown"><br>填写表单，点击保存按钮提交数据，查看浏览器地址栏的地址，如下图所示<br><img src="http://p1.bqimg.com/576993/72b71c781db03306.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/ad47a100f0a01269.png" alt="Markdown"><br>以上出现404错误是很正常的，因为底层/oa/user/save请求URI对应要执行的Servlet类并没有编写，也没有在web.xml文件中进行相关配置，所以访问的资源不存在。后面我们再解决这个404的错误。我们看到浏览器地址栏上提交了这样的数据<a href="http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示" target="_blank" rel="external">http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示</a><br><img src="http://p1.bpimg.com/576993/a43f8b8f21c02753.png" alt="Markdown"><br>接下来我们的角色转变为Web服务器的开发人员，开始进行数据的解析与封装，达到上图的效果，我们单独定义一个负责请求协议封装的类，起名为RequestObject，并在该类中定义parameterMap属性表示以上的Map<string,string[]>，代码如下图所示<br><img src="http://p1.bpimg.com/576993/241ca1ff7a2d3b77.png" alt="Markdown"><br>对以上编写的RequestObject中的getParameter方法和getParameterValues方法进行单元测试，建立单元测试类，编写测试程序，测试结果如下图所示<br><img src="http://i1.piimg.com/576993/6581c3451ba19b50.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/5e02b2d72beec0c0.png" alt="Markdown"><br>测试通过之后，开始使用RequestObject，继续保持我们的角色Web服务器开发人员，在HandlerRequest中当截获到请求的URI之后，将请求的URI封装到RequestObject对象中，为了让WebApp的开发人员能够拿到表单的数据，将RequestObject传递给Servlet的service方法，代码如下所示<br><img src="http://i1.piimg.com/576993/3870a3fdbfe60f74.png" alt="Markdown"><br>角色转变为SUN公司，修改Servlet接口中的service方法，代码如下<br><img src="http://i1.piimg.com/576993/ff1cde55e5b889b0.png" alt="Markdown"><br>角色转变为WebApp开发人员，修改LoginServlet，解决编译错误，代码如下：<br><img src="http://i1.piimg.com/576993/d3fbc205bd2b13f6.png" alt="Markdown"><br>那么此时的问题又来了，Servlet是SUN公司的规范，但是为什么规范中出现了RequestObject类型，RequestObject类型是WEB服务器程序，看下图<br><img src="http://i1.piimg.com/576993/82cac017d60bf1d5.png" alt="Markdown"><br>怎么解决这个耦合呢？当然，和我们以前的解决思路是一样的，Servlet规范中service方法的第一个参数应该是一个接口，我们现在以SUN公司的角色制定接口，如下图所示：<br><img src="http://i1.piimg.com/576993/7c1af26c0cf82f62.png" alt="Markdown"><br>角色转变为Web服务器的开发人员，RequestObject类实现以上接口，如下图所示：<br><img src="http://i1.piimg.com/576993/c897bf4b920aaf6e.png" alt="Markdown"><br>角色转变为SUN公司，修改核心接口Servlet中的service方法，使之解耦合，如下图所示：<br><img src="http://i1.piimg.com/576993/dd66fa8e6e635502.png" alt="Markdown"><br>SUN将接口改动之后，该接口的实现类LoginServlet编译错误，角色转变为WebApp的开发人员，解决编译错误，如下图所示：<br><img src="http://i1.piimg.com/576993/81a77ee1e3dd2cf7.png" alt="Markdown"><br>那么接下来我们的角色转变为WebApp的开发人员，应该去解决如下图所示的404错误问题了：<br><img src="http://i1.piimg.com/576993/9245801d880ab4d5.png" alt="Markdown"><br>上图中显示的404错误表示访问的资源不存在，请求的URI是/oa/user/save，那么接下来整个的开发过程就交给WebApp的开发人员了，编写web.xml文件，然后编写对应的Servlet类，实现service方法，完成信息的保存，我们先来做第一步，编写web.xml，如下图所示：<br><img src="http://i1.piimg.com/576993/e69bee641b3307ea.png" alt="Markdown"></string,string[]></p>
+<p>第二步，编写SaveServlet，重写service方法，获取用户提交的信息，将用户提交的信息保存到数据库当中，保存成功或者失败，将最终的结果响应到浏览器，如下图所示：<br><img src="http://i1.piimg.com/576993/982e76dc1243c15b.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问save.html，在表单上填写数据然后提交，效果如下图所示：<br><img src="http://i1.piimg.com/576993/20f641bcb12f3b8f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/" class="archive-article-date">
+  	<time datetime="2016-12-14T11:27:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/">自己写一个apache服务器(十五)-ServletResponse接口引入-javaServer13</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="http://i1.piimg.com/576993/fd252e56b596b3b4.png" alt="Markdown"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="http://i1.piimg.com/576993/4ae601d053f04cc8.png" alt="Markdown"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="http://i1.piimg.com/576993/a05edcce5a794c03.png" alt="Markdown"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="http://i1.piimg.com/576993/4912a1df660f538d.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="http://i1.piimg.com/576993/28a206aafd4c510a.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png" alt="Markdown"><br>我们应该解决下图中的问题了<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="http://i1.piimg.com/576993/9cb5d9fed71587ec.png" alt="Markdown"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="http://i1.piimg.com/576993/92a6f6e678207b88.png" alt="Markdown"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="http://i1.piimg.com/576993/8c415ac9c288a8ce.png" alt="Markdown"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/" class="archive-article-date">
+  	<time datetime="2016-12-14T10:39:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -601,248 +818,6 @@ alert(filterarray[key]);
 
 
   
-    <article id="post-自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/">自己写一个apache服务器(十二)-Web服务器代码和WebApp代码解耦合(javaServer-10)</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="Web服务器代码和WebApp代码解耦合-javaServer-10"><a href="#Web服务器代码和WebApp代码解耦合-javaServer-10" class="headerlink" title="Web服务器代码和WebApp代码解耦合(javaServer-10)"></a>Web服务器代码和WebApp代码解耦合(javaServer-10)</h4><p><img src="http://p1.bqimg.com/576993/256358dbc34a0c7f.png" alt="Markdown"></p>
-<ol>
-<li>分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类，上面的程序中还使用了“new LoginServlet();”，这显然是错误的。另外在上面的Web服务器程序中编写了具体的请求路径/oa/login，这显然是不合理的，对于Web服务器来说浏览器客户端发送的请求是未知的。但是我们知道浏览器发送的请求路径/oa/login是和底层WebApp中的LoginServlet存在映射关系/绑定关系的。而这种关系的指定必须由WebApp的开发人员来指定，我相信大家此时应该想到了“配置文件”，在配置文件中指定请求URI和对应要执行的Servlet。该配置文件的编写由WebApp程序员来完成，但是该文件由Web服务器开发人员读取并解析，所以该文件的名字、该文件的存放位置、该文件中所编写的配置元素都不能随意编写，必须提前制定好一个规范，那么这个规范由谁来制定呢？当然是由SUN公司来负责制定。  </li>
-<li>接下来我们的角色再次发生了转变，我们现在是规范的制定者SUN。制定规范如下所示，规范就是规定，没有为什么，以后服务器开发人员和WebApp的开发人员只要严格按照规范开发即可。下面这段规范是这样制定的：<br><img src="http://p1.bqimg.com/576993/07b5f9d2cc56d6be.png" alt="Markdown"><br>以上配置文件规定了什么呢？第一：配置文件的名字；第二：配置文件存放位置；第三：配置文件中编写哪些标签。接下来我们的角色转变为WebApp的开发人员，按照规范新建web.xml文件，并将其存放到规范中要求的路径下，在该文件中编写规范中规定的标签，如下图所示<br><img src="http://p1.bqimg.com/576993/0974c3b46539d61d.png" alt="Markdown"></li>
-</ol>
-<p>接下来我们的角色再次转变为Web服务器的开发人员，服务器开发者负责解析web.xml文件，那么这个文件在什么时候解析呢？解析出来的数据存放到哪里呢？这些问题由服务器开发者决定，SUN的规范中并没有特殊的要求。web.xml文件中主要配置了请求URI和对应的Servlet完整类名，请求URI更像一个Map集合的key，对应的Servlet完整类名更像一个Map集合的value，所以我们决定采用一个Map集合存储解析出来的数据。在浏览器发送请求的时候再去解析web.xml文件时有点晚了，所以我们决定在Web服务器启动阶段解析web.xml文件，以下是Web服务器开发人员编写的解析web.xml文件的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">package com.yxm.javaserver.core;</div><div class="line"></div><div class="line">import java.util.HashMap;</div><div class="line">import java.util.List;</div><div class="line">import java.util.Map;</div><div class="line">import java.util.Set;</div><div class="line"></div><div class="line">import org.dom4j.Document;</div><div class="line">import org.dom4j.DocumentException;</div><div class="line">import org.dom4j.Element;</div><div class="line">import org.dom4j.io.SAXReader;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 解析每个WebApp的web.xml</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class WebParse &#123;</div><div class="line">     public static Map&lt;String,Map&lt;String,String&gt;&gt; servletMaps=new HashMap&lt;String,Map&lt;String,String&gt;&gt;();</div><div class="line">     public void parse(String[] webAppNames) throws DocumentException&#123;</div><div class="line">    	 for(String webAppName:webAppNames)&#123;</div><div class="line">    		 Map&lt;String,String&gt; servletMap = parse(webAppName);</div><div class="line">    		 servletMaps.put(webAppName, servletMap);</div><div class="line">    	 &#125;</div><div class="line">     &#125;</div><div class="line">     private static Map&lt;String,String&gt; parse(String webAppName) throws DocumentException&#123;</div><div class="line">    	String webFilePath = webAppName + &quot;/WEB-INF/web.xml&quot;;</div><div class="line">    	SAXReader reader = new SAXReader();</div><div class="line">    	Document document = reader.read(webFilePath);</div><div class="line">    	List&lt;Element&gt; servletNodes = document.selectNodes(&quot;/web-app/servlet&quot;);</div><div class="line">    	Map&lt;String, String&gt; servletInfoMap = new HashMap&lt;String,String&gt;();</div><div class="line">        for (Element servletNode : servletNodes) &#123;</div><div class="line">        	Element servletNameNode = (Element)servletNode.selectSingleNode(&quot;servlet-name&quot;);</div><div class="line">        	String servletName = servletNameNode.getTextTrim();</div><div class="line">        	</div><div class="line">        	Element servletClassNode = (Element)servletNode.selectSingleNode(&quot;servlet-class&quot;);</div><div class="line">        	String servletClass = servletClassNode.getTextTrim();</div><div class="line">        	servletInfoMap.put(servletName, servletClass);</div><div class="line">        &#125;</div><div class="line">        List&lt;Element&gt; servletMappingNodes = document.selectNodes(&quot;/web-app/servlet-mapping&quot;);</div><div class="line">    	Map&lt;String, String&gt; servletMappingInfoMap = new HashMap&lt;String,String&gt;();</div><div class="line">        for (Element servletMappingNode : servletMappingNodes) &#123;</div><div class="line">        	Element servletNameNode = (Element)servletMappingNode.selectSingleNode(&quot;servlet-name&quot;);</div><div class="line">        	String servletName = servletNameNode.getTextTrim();</div><div class="line">        	</div><div class="line">        	Element servletPathNode = (Element)servletMappingNode.selectSingleNode(&quot;url-pattern&quot;);</div><div class="line">        	String servletPath = servletPathNode.getTextTrim();</div><div class="line">        	servletMappingInfoMap.put(servletName, servletPath);</div><div class="line">        &#125;</div><div class="line">         Map&lt;String,String&gt; servletMap = new HashMap&lt;String,String&gt;();</div><div class="line">         Set&lt;String&gt; servletNames = servletMappingInfoMap.keySet();</div><div class="line">          for (String servletName : servletNames) &#123;</div><div class="line">        	  String servletPath = servletMappingInfoMap.get(servletName);</div><div class="line">        	  String servletClassName = servletInfoMap.get(servletName);</div><div class="line">        	  servletMap.put(servletPath, servletClassName);</div><div class="line">          &#125;</div><div class="line">          return servletMap;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>在服务器启动阶段解析每个WebApp的web.xml文件，在BootStrap中加入如下代码<br><img src="http://p1.bqimg.com/576993/b445fe64e3dd544b.png" alt="Markdown"><br>以上代码在服务器启动阶段解析每个WebApp的web.xml文件，其中WebApp的名字oa写死到服务器程序中了，其实对于Web服务器来说根本就不知道该Web服务器下有哪些WebApp。这个问题怎么解决呢？我们可以规定一个目录，例如该目录的名字叫做webapps，让所有的WebApp都放到我们所指定的webapps目录下，这样我们就可以在Web服务器中动态获取所有WebApp的名字了，这个功能大家自己完成，这里不再实现这个功能了。<br>现在我们的角色还是Web服务器开发人员，web.xml文件已经在服务器启动阶段解析了，用户的请求路径已经和对应的Servlet完整类名绑定在一起了，分析以下程序应该如何修改<br><img src="http://p1.bqimg.com/576993/87b158a4db6c0e6e.png" alt="Markdown"><br>我们在服务器端程序中可以获取到请求URI，我们通过请求URI获取对应的Servlet完整类名，通过反射机制，调用该Servlet类的无参数构造方法，完成Servlet对象的创建，代码如下所示<br><img src="http://p1.bqimg.com/576993/4f6870dc7b41db1c.png" alt="Markdown"><br>Web服务器的开发人员又遇到了新的问题，虽然我们在服务器端根据请求URI找到了对应的Servlet完整类名，也通过反射机制将Servlet对象创建成功了，但是对于Web服务器的开发人员来说并不知道该Servlet对象中有什么方法，这个时候只有SUN再次出面制定规范了。接下来我们的角色发生了改变，我们现在是SUN公司，制定一个Servlet接口，该接口的实现者是WebApp，调用者Web服务器，以下是SUN公司制定的Servlet规范的核心接口<br><img src="http://p1.bqimg.com/576993/d763dd51cae70e48.png" alt="Markdown"><br>接下来我们的角色转变为WebApp的开发人员，让LoginServlet实现该接口<br><img src="http://p1.bqimg.com/576993/3aa7b98c5fbdc0e0.png" alt="Markdown"><br>接下来我们的角色转变为Web服务器的开发人员，在HandlerRequest类中面向Servlet接口调用service方法即可<br><img src="http://p1.bqimg.com/576993/801e24ef4849eff5.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL，发送请求<br><img src="http://p1.bqimg.com/576993/51071cbb6ba513d6.png" alt="Markdown"><br>控制台输出：<br><img src="http://p1.bqimg.com/576993/1df182faf6223e80.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/" class="archive-article-date">
-  	<time datetime="2016-12-05T15:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十一-客户端访问java程序-javaServer09" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/">自己写一个apache服务器(十一)-客户端访问java程序-javaServer09</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="客户端访问java程序-javaServer09"><a href="#客户端访问java程序-javaServer09" class="headerlink" title="客户端访问java程序-javaServer09"></a>客户端访问java程序-javaServer09</h4><ol>
-<li>在上一个版本中，浏览器客户端发送的请求是<a href="http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html，从请求路径上看到浏览器客户端访问的是WebApp中的静态html页面，服务器找到该静态页面之后直接将html页面响应到浏览器即可，但是如果浏览器发送这样的请求http://127.0.0.1:8080/oa/login?username=admin&amp;password=123表示他们要访问的是什么呢？从请求路径的字面意思上理解，这是浏览器向服务器发送了一个登录的请求，需要服务器端执行一段“Java程序”来处理这次的登录请求，负责处理登录的Java程序应当获取到浏览器提交的用户名和密码，并且负责连接数据库，验证用户名和密码是否正确，如果正确则响应给浏览器一条登录成功的信息，如果错误则响应给浏览器一条登录失败的信息。</a>    </li>
-<li>处理登录的Java程序应该由谁来编写呢？编写完成之后，又应该由谁来管理调用呢？我们一起来分析一下，将来系统中会存在很多功能，例如：银行账户转账、查询员工信息、保存员工信息、银行账户开户等，这些功能中的每一个功能都需要执行对应的服务器端Java程序来完成的，都是和具体的业务逻辑紧密相关的，显然这种Java程序的编写不应该是服务器的开发人员，因为服务器的开发人员不知道具体的业务是什么，所以像以上列举的每一个功能的实现都需要WebApp的开发人员来完成开发。开发完成之后，将处理某个功能的Java程序放到Web服务器中，由Web服务器来负责管理调用。  </li>
-<li>大家需要注意的是，浏览器向服务器发送请求并且提交数据的格式是什么？这个提交数据的格式其实属于HTTP协议的一部分，这是W3C提前制定好的，格式是：<a href="http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。" target="_blank" rel="external">http://ip:port/uri?name=value&amp;name=value.....，并且这个数据在HTTP协议的请求行上提交，最终会显示在浏览器的地址栏上。</a>  </li>
-<li>那么，接下来让我们一起实现上面的功能，该功能的实现需要Web服务器开发人员、WebApp开发人员共同配合完成。我们现在的角色转变为WebApp的开发人员，开始编写Java程序处理用户的登录请求。服务器端的小java程序英文是：Server Applet，所以我们把服务器端的小java程序叫做：Servlet。新建软件包org.yxm.oa.servlet，然后在该软件包中新建LoginServlet.java，编写LoginServlet处理用户的登录请求<br><img src="http://p1.bpimg.com/576993/769bc03af18668c2.png" alt="Markdown"><br>接下来我们的开发角色再次转变为WEB服务器开发人员，开发服务器端程序调用LoginServlet的service方法。大家设想一下，将来WebApp中不仅有一个LoginServlet，还会有其它的小Java程序，每一个小Java程序都对应处理某一个业务，那么对于我们服务器的开发人员来说怎么确定调用哪个Servlet呢？就像上一个版本中/oa/index.html是服务器中的一个资源，像html这样的资源还有很多，服务器怎么知道浏览器客户端要访问的是哪个资源呢？当然是通过用户的请求路径了。其实LoginServlet也是服务器端的一种资源，只不过这种资源不是html，而是一段Java程序，所以服务器也可以先截获用户的请求路径，然后通过请求URI决定调用哪个Servlet。因此可以说，“请求URI”和对应要执行的“Servlet程序”之间有一种绑定关系。那么接下来就让我们编写Web服务器端的程序，截获请求URI，根据请求URI来对应调用Servlet。（HandlerRequest）<br><img src="http://p1.bpimg.com/576993/8ce4e66091fadfd2.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL，发送请求<br><img src="http://p1.bpimg.com/576993/c1e1ba4b59086228.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/a855af6f310a9e7a.png" alt="Markdown"><br>浏览器再输入<br><img src="http://p1.bpimg.com/576993/035ef0f2141fd367.png" alt="Markdown"><br>服务器输出<br><img src="http://p1.bpimg.com/576993/990000ef11415100.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/" class="archive-article-date">
-  	<time datetime="2016-12-04T13:49:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/">自己写一个apache服务器(十)-响应静态html资源到浏览器-javaServer08</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="响应静态html资源到浏览器-javaServer08"><a href="#响应静态html资源到浏览器-javaServer08" class="headerlink" title="响应静态html资源到浏览器-javaServer08"></a>响应静态html资源到浏览器-javaServer08</h4><ol>
-<li>截获到请求的URI之后，判断请求的是否为服务器中的html资源，如果是服务器中的某个webapp的html资源，服务器端程序应找到该文件，并且将该文件中的html代码读取到JVM内存中，然后再将内存中的html代码响应到浏览器页面上，如果客户端请求的资源在服务器端webapp中未找到，服务器应提示浏览器客户端“您访问的资源不存在”，这就是著名的404错误。404被称为HTTP状态码，属于HTTP协议的一部分。  </li>
-<li>webapp以及webapp中的html资源不是web服务器开发人员需要完成的，应该是webapp的开发人员负责开发的。web服务器只负责读取该html资源然后响应到浏览器页面上。所以此时我们的开发角色发生了改变，我们现在的角色变为webapp的开发人员。在javaServer的根目录下新建web应用起名oa（办公系统），在oa文件夹下新建index.html文件，并编写简单的html代码，如下图：<br><img src="http://p1.bqimg.com/576993/fc22be9e5296c6d3.png" alt="Markdown"><br>角色再次转回到服务器开发人员，在HandlerRequest中继续处理请求，目前已经截获到请求的URI，判断请求URI是否以html或htm结尾，如果是以html或htm结尾，服务器定位到该html文件，将其读取到JVM内存中，然后再将这些html代码响应到浏览器页面上，浏览器解释执行html代码展示效果：<br><img src="http://p1.bqimg.com/576993/9262992bab8f471f.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源存在的时候）<br><img src="http://p1.bqimg.com/576993/6869f6b883cac8d1.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源不存在的时候）<br><img src="http://p1.bqimg.com/576993/85446849d6d956bd.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:58:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-九-服务器拦截URI-javaServer07" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/">自己写一个apache服务器(九)-服务器拦截URI-javaServer07</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="服务器拦截URI-javaServer07"><a href="#服务器拦截URI-javaServer07" class="headerlink" title="服务器拦截URI-javaServer07"></a>服务器拦截URI-javaServer07</h4><ol>
-<li>开始处理客户端的请求，首先我们需要知道客户端访问的是哪一个资源，我们怎么才能知道客户端访问的哪个资源呢？答案当然是在服务器端获取客户端请求的URI，那么请求的URI在哪里呢？请求的URI在HTTP请求协议的请求行上。所以我们需要读取请求协议的第一行数据，然后从这些数据中解析出URI，从而得出客户要访问的是服务器端的哪个资源。  </li>
-<li>URL和URI是什么？它们之间是什么关系？URL是统一资源定位符，例如在浏览器地址栏上直接输入的请求路径:<a href="http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。</a>  </li>
-<li>HTTP协议请求协议的详细内容如下图所示，请求行由三部分组成：请求方式+URI+协议版本号，我们需要获取的就是请求行上的URI<br><img src="http://p1.bqimg.com/576993/53533ca077c5f0f2.png" alt="Markdown"><br>在HandlerRequest中编写程序读取请求行，并解析字符串，截获URI<br><img src="http://p1.bqimg.com/576993/6b22e093fda5080f.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL：<a href="http://127.0.0.1:8099/oa/index.html进行访问测试" target="_blank" rel="external">http://127.0.0.1:8099/oa/index.html进行访问测试</a><br><img src="http://p1.bqimg.com/576993/173dbe2952ffadd9.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:15:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/18/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/20/">Next &raquo;</a>
@@ -908,7 +883,7 @@ alert(filterarray[key]);
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 11.43px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 12.14px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
