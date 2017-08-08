@@ -152,6 +152,229 @@
       <div class="body-wrap">
         
   
+    <article id="w-动手写一个MVC-四-模型层设计" class="article article-type-w" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/23/动手写一个MVC-四-模型层设计/">动手写一个MVC(四)-模型层设计</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><p>前几节没有具体地给出从视图层传来的请求如何经过控制器到达模型层的，只是给出了一个接口，然后让所有模型层类都实现这个接口，最后通过这个接口中的方法doAction来转入模型层进行处理。本节就来讲述如何在模型层通过doAction方法来实现视图层的请求处理。  </p>
+<h6 id="实现一个公用的接口Action-java"><a href="#实现一个公用的接口Action-java" class="headerlink" title="实现一个公用的接口Action.java"></a>实现一个公用的接口Action.java</h6><p>这里再把前面定义的接口Action.java列出，Action.java的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action&#123; </div><div class="line">public HashMap doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>这个接口的作用就是通过doAction方法来实现动作的转换，因此，所有的模型层类都要实现这个接口</li>
+</ol>
+<h6 id="所有的模型层类都实现这个接口"><a href="#所有的模型层类都实现这个接口" class="headerlink" title="所有的模型层类都实现这个接口"></a>所有的模型层类都实现这个接口</h6><p>假定有一个模型层类为WebExamAction.java，主要用来负责在线考试系统的业务处理，则这个类要实现Action接口。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public class WebExamAction implements Action&#123; </div><div class="line">//根据页面的请求，进行动作的转换 </div><div class="line">public HashMap doAction(HashMap infoIn) &#123; </div><div class="line">String action = (infoIn.get(&quot;action&quot;) == null) ? &quot;&quot; : </div><div class="line">(String)infoIn.get(&quot;action&quot;); </div><div class="line">HashMap infoOut = new HashMap(); </div><div class="line">if (action.equals(&quot;&quot;)) infoOut = this.doInit (infoIn); </div><div class="line">else if (action.equals(&quot;insert&quot;)) infoOut = this.doInsert (infoIn); </div><div class="line">return infoOut; </div><div class="line">&#125;</div><div class="line">/**该方法设置用户登录时页面的初始信息 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInit(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName); </div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125;</div><div class="line"></div><div class="line">/**该方法用来进行新增 </div><div class="line">* @param infoIn </div><div class="line">* @return HashMap </div><div class="line">*/ </div><div class="line">private HashMap doInsert(HashMap infoIn) &#123; </div><div class="line">HashMap infoOut = infoIn; </div><div class="line">int clerkId = (infoIn.get(&quot;clerkId&quot;) == null || &quot;&quot;.equals </div><div class="line">(infoIn.get(&quot;clerkId&quot;))) ? -1 : Integer.parseInt((String) </div><div class="line">infoIn.get (&quot;clerkId&quot;)); </div><div class="line">try &#123; </div><div class="line">//取得考生姓名 </div><div class="line">Users user = new Users(); </div><div class="line">String clerkName = user.getName(clerkId); </div><div class="line">infoOut.put(&quot;clerkName&quot;, clerkName);</div><div class="line">&#125; catch(Exception e) &#123; </div><div class="line">e.printStackTrace(); </div><div class="line">&#125; finally &#123; </div><div class="line">return infoOut; </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>这里，在doAction中根据从页面传来的action进行动作请求的转换。 </li>
+<li>通过一个名为infoIn的HashMap，来负责传入页面中元素的值。 </li>
+<li>通过一个名为infoOut的HashMap，来负责将处理后的数据传出。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/23/动手写一个MVC-四-模型层设计/" class="archive-article-date">
+  	<time datetime="2016-11-22T16:23:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-动手写一个MVC-三-控制层设计" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/22/动手写一个MVC-三-控制层设计/">动手写一个MVC(三)-控制层设计</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
+<li>控制层主要用来转发从视图层传来的数据和请求到相对应的模型层，因此，实现它最好的方式莫过于使用Servlet了。  </li>
+<li>当从视图层获取请求后，首先通过对web.xml文件的配置，使其转入Servlet，在Servlet中完成对页面中数据的封装和对相应模型的选择。  </li>
+<li>然后再到相应的模型层进行数据处理；当在模型层数据处理完毕后，通过RequestDispatcher将处理后的数据返回相应的视图页面。  </li>
+</ol>
+<h6 id="使用servlet"><a href="#使用servlet" class="headerlink" title="使用servlet"></a>使用servlet</h6><p>使用doPost()来处理相应的中转请求, 示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public void doGet(HttpServletRequest req, HttpServletResponse res) </div><div class="line">throws ServletException, IOException &#123; </div><div class="line">doPost(req, res); </div><div class="line">&#125;</div><div class="line">//使用post提交方式</div><div class="line">public void doPost(HttpServletRequest req, HttpServletResponse res) </div><div class="line">throws ServletException, IOException &#123; </div><div class="line">do_Dispatcher (req, res); </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>不论采用get还是post提交方式，都将执行do_Dispatcher(req, res)方法。   </li>
+<li>do_Dispatcher(req, res)是用来处理视图层发送来的请求的方法。  </li>
+</ol>
+<h6 id="获取从视图传来的值"><a href="#获取从视图传来的值" class="headerlink" title="获取从视图传来的值"></a>获取从视图传来的值</h6><p>直接使用request方式来获取从页面提交的数据，在要获取的数据比较多的情况下，会比较烦琐，而且直接将request传递给模型层不符合Model2规范. 将对从页面传来的值进行封装，将其放在一个Map中，然后再传递给模型层，这样在模型层就可以直接使用Map中的值。示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">private Map getRequestToMap(HttpServletRequest req) throws Exception &#123; </div><div class="line">req.setCharacterEncoding(&quot;GBK&quot;); </div><div class="line">Map infoIn = new HashMap(); </div><div class="line">for (Enumeration e = req.getParameterNames(); e.hasMoreElements ();) </div><div class="line">&#123;//获取页面中所有元素名 </div><div class="line">String strName = (String)e.nextElement(); </div><div class="line">String[] values = (String[]) req.getParameterValues (strName); </div><div class="line">//根据名称获取对应的值 </div><div class="line">if (values == null) &#123;//假如没有值 </div><div class="line">infoIn.put(strName, &quot;&quot;); </div><div class="line">&#125; else if (values.length == 1) &#123;//假如只有一个值 </div><div class="line">infoIn.put(strName, values[0]); </div><div class="line">&#125; else &#123;//假如有多个值 </div><div class="line">infoIn.put(strName, values); </div><div class="line">&#125; </div><div class="line">&#125; </div><div class="line">return infoIn; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>代码说明：  </p>
+<ol>
+<li>req.setCharacterEncoding(“GBK”)，这里首先将从视图层传来的数据设定编码为GBK。  </li>
+<li>HashMap infoIn = new HashMap()，定义一个HashMap，用来存放从request中获取的数据。  </li>
+<li>req.getParameterNames()，用来获取从页面中传来的所有元素。  </li>
+<li>req.getParameterValues()，用来根据元素名称来获取元素对应的值，并将元素名称和值的对应关系存入HashMap中。如果元素的值为空，则在HashMap中将元素名称对应的值置为空；如果只有一个值，则将该值存入；如果有多个值，则存入数组<br>####### 处理请求到模型层<br>一个视图对应一个模型，也可能一个视图对应多个模型，但只有一个控制器，所以，为了实现一个控制器可以转发到多个模型中去，就需要使用接口，让所有模型都实现这个接口，然后在控制器里，仅仅是面对接口编程即可。这里定义一个接口Action.java.Action.java的示例代码如下:  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface Action &#123;</div><div class="line">	public Map doAction(HashMap infoIn);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>在控制器中只针对这个接口处理即可。示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//调用相应的业务逻辑</div><div class="line">Class&lt;?&gt; clazz = Class.forName(getActionName(systemName,logicName));</div><div class="line">Action action = (Action)clazz.newInstance();</div><div class="line">Map infoOut = action.doAction(infoIn);</div><div class="line">代码说明：— getActionName()方法是获取实现接口Action的类的名称和所在的包。示例代码如下:</div><div class="line">private String getActionName(String systemName ,String actionName) </div><div class="line">throws IOException, Exception &#123; </div><div class="line">return &quot;com. &quot; + systemName + &quot;.action.&quot; + actionName; </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="返回视图层"><a href="#返回视图层" class="headerlink" title="返回视图层"></a>返回视图层</h6><p>这里使用RequestDispatcher返回视图层。示例代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">req.setAttribute(&quot;infoOut&quot;, infoOut);</div><div class="line">req.setAttribute(&quot;infoOut&quot;, infoOut); </div><div class="line">RequestDispatcher rd = req.getRequestDispatcher(&quot;/&quot;+ systemName + </div><div class="line">&quot;/jsp/&quot; + forwardJsp+ &quot;.jsp&quot;); </div><div class="line">rd.forward(req, res);</div></pre></td></tr></table></figure></p>
+<h6 id="定义web-xml文件"><a href="#定义web-xml文件" class="headerlink" title="定义web.xml文件"></a>定义web.xml文件</h6><p>定义web.xml文件，是将所有以do为后缀的请求，都转入控制器进行分派。web.xml文件的示例代码如下：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</div><div class="line">&lt;web-app xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; xmlns:web=&quot;http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot; version=&quot;2.5&quot;&gt;</div><div class="line">  &lt;display-name&gt;&lt;/display-name&gt;</div><div class="line">  &lt;servlet&gt;</div><div class="line">    &lt;description&gt;控制器实例&lt;/description&gt;</div><div class="line">    &lt;display-name&gt;&gt;web.xml的示例&lt;/display-name&gt;</div><div class="line">    &lt;!-- 定义控制器 --&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;servlet-class&gt;com.yxm.mvc.ActionServlet&lt;/servlet-class&gt;</div><div class="line">  &lt;/servlet&gt;</div><div class="line">   &lt;!--拦截所有以do为后缀的请求--&gt;</div><div class="line">  &lt;servlet-mapping&gt;</div><div class="line">    &lt;servlet-name&gt;ActionServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;url-pattern&gt;*.do&lt;/url-pattern&gt;</div><div class="line">  &lt;/servlet-mapping&gt;</div><div class="line">  &lt;welcome-file-list&gt;</div><div class="line">   &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;</div><div class="line"> &lt;/welcome-file-list&gt;</div><div class="line">&lt;/web-app&gt;</div></pre></td></tr></table></figure></p>
+<p>代码说明：   </p>
+<ol>
+<li>com.gd.web.GdServlet，表示控制器为com.gd.web.GdServlet。   </li>
+<li>*.do，表示拦截所有以do为后缀的请求。  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/22/动手写一个MVC-三-控制层设计/" class="archive-article-date">
+  	<time datetime="2016-11-22T14:17:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-动手写一个MVC-二-视图层设计" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/20/动手写一个MVC-二-视图层设计/">动手写一个MVC(二)-视图层设计</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介："><a href="#简介：" class="headerlink" title="简介："></a>简介：</h4><ol>
+<li>视图层用来显示用户所需要的数据，一般由JSP、JavaScript、JavaBean和自定义标签组成的</li>
+<li>视图层和控制层在MVC的概念上是分离的，但其实它们之间还是需要有很大的联系的，因为控制层需要从视图层获取用户提交的数据，然后把数据进行转换，并传递给模型层；等模型层处理完数据后，控制层还需要把数据返回到视图层，以供用户查看</li>
+</ol>
+<h4 id="jsp视图层使用"><a href="#jsp视图层使用" class="headerlink" title="jsp视图层使用"></a>jsp视图层使用</h4><ol>
+<li>视图层采用JSP技术，是展现用户数据的一种较好的方式。因为在JSP中，可以使用JavaScript、JavaBean和自定义标签等，这些技术结合在一起，就能获得一个灵活的数据组合方式。</li>
+<li>使用JSP的过程中，有以下几点需要注意<br>a.为了防止乱码的发生，在本框架中，所有的JSP页面都采用GBK的编码方式，即在JSP页面的顶部添加如下代码：  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;%@ page contentType=&quot;text/html; charset=GBK&quot; language=&quot;java&quot; import= </div><div class="line">&quot;java.sql.*&quot; errorPage=&quot;&quot; %&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>b．为了便于统一管理，需要在所有的JSP页面的顶部都添加如下代码：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;%! public static final String appId = 页面名称; %&gt;</div></pre></td></tr></table></figure></p>
+<p>C. 为了防止提交时页面的跳转混乱，在JSP页面的底端都添加以下代码:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;script&gt; </div><div class="line">window.name=&quot;&lt;%=页面名称+&quot;_&quot;+session.getId()%&gt;&quot;; </div><div class="line">&lt;/script&gt;</div><div class="line">```  </div><div class="line">#### 数据提交和获取</div><div class="line">1. 一般在web.xml中定义Servlet的请求方式. 可以将所有的JSP页面的请求都转入Servlet进行处理，这样就很容易通过request、response实现JSP和Servlet之间的数据转换.</div><div class="line">2. 在Servlet中通过request获取从JSP页面传来的数据，然后将模型层处理过的数据通过response传递到JSP页面，在JSP页面用request来获取从控制层传来的数据  </div><div class="line">(1). （1）	在提交数据时，因为在控制层需要判断客户端提交的动作、要调用的模型层和要返回的页面，所以需要在JSP的表单中隐藏3个元素：action（动作）、logicName（要调用的模型层）和forwardJsp（要返回的页面）。示例代码如下：</div></pre></td></tr></table></figure></p>
+<p><form name="form1" action="/myApp/do" method="post"> </form></p>
+<p><input type="hidden" name="action" value=""> </p>
+<p><input type="hidden" name="logicName" value=""> </p>
+<p><input type="hidden" name="forwardJsp" value=" "><br><br>提交数据时，就可以通过submit方法来提交数据。示例代码如下：<br>function submit() {<br>form1.forwardJsp.value = “index”;<br>form1.logicName.value = “Logic”;<br>form1.target = “&lt;%=”index _”+session.getId()%&gt;”;<br>form1.action.value = “insert”;<br>form1.submit();<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">3. 代码说明：  </div><div class="line">1.	客户端的数据要提交到Logic类里的insert方法，在insert方法处理完毕后，要返回到index页面，这个页面返回时仍放在index中</div><div class="line">2.	通过这种隐藏的方法，还可以把一些不需要客户看到的数据传递到Servlet  </div><div class="line">(1) 在获取数据时，因为在Servlet中是通过response来把数据传递到JSP页面中的，所以，在JSP页面通过request来获取时，如果要获取的数据比较多，则会比较烦琐。因此，要在Servlet中把所有要传递到JSP页面中的数据存放在一个Map中，这样，在JSP页面只需要使用一次request把Map取出，然后剩余的数据就可以直接从Map中获取了。示例代码如下:</div></pre></td></tr></table></figure></p>
+<p>&lt;%<br>HashMap infoOut=(request.getAttribute(“infoOut”)==null)?new HashMap():<br>(HashMap)request.getAttribute(“infoOut”);<br>//定义消息<br>String msg=infoOut.get(“msg”)==null ? “” :(String)infoOut.get(“msg”);<br>String clerkId = null == request.getParameter(“clerkId”) ? “” :<br>request.getParameter(“clerkId”);<br>String clerkName = infoOut.get(“clerkName”) == null ? “” :<br>(String) infoOut.get(“clerkName”);<br>%&gt;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">#### 通用的JavaScript函数</div><div class="line">两个JavaScript方法可以通用：一个是表单提交的方法；另一个是打开窗口的方法，下面来分别进行介绍 </div><div class="line">1. 从上面数据提交的方法submit里可以看出，表单提交时的target和action属性与submit方法其实是通用的，而经常改变的可能是forwardJsp和logicName。所以，可以把通用的抽取出来，则上面提交数据的方法可以改为</div></pre></td></tr></table></figure></p>
+<p>function submit(target, action) {<br>form1.target = target;<br>form1.action.value = action;<br>form1.submit();<br>}<br>function insert() {<br>form1.forwardJsp.value = “index”;<br>form1.logicName.value = “Logic”;<br>submit(‘&lt;%=index +”_”+session.getId()%&gt;’,’insert’);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">2. （2）	对于窗口的打开方法，为了在整个应用中统一风格，通常在系统中将其抽取出来，成为公用方法。一般来说，会对要打开的url、窗口名称、窗口宽度和高度进行设定，而其他属性保持一致,代码如下: </div><div class="line">``` </div><div class="line">function openWin(name, url, width, height) &#123; </div><div class="line">var screenWidth = screen.width;</div><div class="line">var screenHeight = screen.height;</div><div class="line">var w; </div><div class="line">&lt;!--定义窗口属性--&gt; </div><div class="line">w=window.open(url,name, &quot;width=&quot;+width+&quot;,height=&quot;+height+&quot;, </div><div class="line">menubar= no,resizable=yes,toolbar=no,directories=no, </div><div class="line">location=no,scrollbars =yes,status=yes,copyhistory=0&quot;); </div><div class="line">w.moveTo((screenWidth-width)/2, (screenHeight-height)/2); </div><div class="line">w.focus(); </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>代码说明:<br>A．传入的参数有4个，分别是：窗口名称、要打开的url、窗口宽度和高度<br>B．w.moveTo((screenWidth-width)/2, (screenHeight-height)/2)的意思是：使打开的窗口在屏幕的中间。<br>C．w.focus()的意思是：使焦点在打开的窗口上。  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/20/动手写一个MVC-二-视图层设计/" class="archive-article-date">
+  	<time datetime="2016-11-20T13:27:44.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-20</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/动手写一个MVC/">动手写一个MVC</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/mvc/">mvc</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-动手写一个MVC-一-mvc框架示意图" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -676,188 +899,6 @@ public class SystemInit extends HttpServlet {
 
 
   
-    <article id="post-Oracle-11g用户创建，授权，导入dmp文件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/05/Oracle-11g用户创建，授权，导入dmp文件/">Oracle 11g用户创建，授权，导入dmp文件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>导入dmp文件，需要知道这个dmp文件创建的用户。因此需要先创建用户，并授权给它。</p>
-<h6 id="1-用户的创建"><a href="#1-用户的创建" class="headerlink" title="1. 用户的创建"></a>1. 用户的创建</h6><p>首先,以system用户登录Oracle SQL Developer<br>其次,输入：<br>create user userfocus identified by pasfocus;<br>接着就是运行这句话，只要出现如下图所示的运行时间，就成功创建了一个用户。</p>
-<h6 id="2-用户的授权-命令如下所示-三个系统角色都给了这个用户"><a href="#2-用户的授权-命令如下所示-三个系统角色都给了这个用户" class="headerlink" title="2. 用户的授权,命令如下所示:(三个系统角色都给了这个用户)"></a>2. 用户的授权,命令如下所示:(三个系统角色都给了这个用户)</h6><p>grant connect, resource,dba to userfocus;</p>
-<p><img src="http://i1.piimg.com/576993/c2866d1c9a5da6a3.png" alt="Markdown"></p>
-<h6 id="3-在cmd下输入导入命令"><a href="#3-在cmd下输入导入命令" class="headerlink" title="3. 在cmd下输入导入命令"></a>3. 在cmd下输入导入命令</h6><p>具体命令如下<br>imp  userfocus/pasfocus@XE  file=d:\focus.dmp   full=y;<br><img src="http://i1.piimg.com/576993/d35e9e3071efbb52.png" alt="Markdown"><br>(其中userfocus是你的用户名,pasfocus是密码,@是必须要写的命令,XE是你的数据库实例d:\focus.dmp是你的导入的数据库文件,full=y是必须要写的参数<br>同时要注意：第一个斜杠 / 与 第二个斜杠 \ 是不一样的)</p>
-<p>输入完成后，回车，oracle回有提示，按照提示输入即可</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/05/Oracle-11g用户创建，授权，导入dmp文件/" class="archive-article-date">
-  	<time datetime="2016-11-05T08:14:24.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/数据库-Oracle/">数据库 Oracle</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-ORA-01017-invalid-username-password-logon-denied解决" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/05/ORA-01017-invalid-username-password-logon-denied解决/">ORA-01017: invalid username/password; logon denied解决</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>今天项目要实现跨域访问，所以需要在很久不用的电脑上安装oracle相关软件，发现以前已经安装过<br>所以就直接输入oracle自带用户scott/tiger。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><ol>
-<li>在操作数据库时候，输入以下username/password，然后报错<br><img src="http://i1.piimg.com/576993/d8eba01c3b4de2be.png" alt="Markdown">  </li>
-</ol>
-<p><img src="http://i1.piimg.com/576993/62316d2c2deae8f2.png" alt="Markdown"><br>2.此时想到修改其密码，但是，很久没用已经忘记了Oracle的sys/system的用户密码<br>查看此解决方法：<br><a href="https://startshineye.github.io/2016/11/05/Oracle%E5%BF%98%E8%AE%B0sys-system%E7%9A%84%E5%AF%86%E7%A0%81%E8%A7%A3%E5%86%B3/" target="_blank" rel="external">https://startshineye.github.io/2016/11/05/Oracle%E5%BF%98%E8%AE%B0sys-system%E7%9A%84%E5%AF%86%E7%A0%81%E8%A7%A3%E5%86%B3/</a><br>3.拥有sys和system的用户密码后直接执行<br><img src="http://i1.piimg.com/576993/46450a3790d2c21b.png" alt="Markdown"><br>然后登陆<br><img src="http://i1.piimg.com/576993/415ab5311ac99351.png" alt="Markdown"></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/05/ORA-01017-invalid-username-password-logon-denied解决/" class="archive-article-date">
-  	<time datetime="2016-11-05T05:39:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/数据库-Oracle/">数据库 Oracle</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Oracle忘记sys-system的密码解决" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/05/Oracle忘记sys-system的密码解决/">Oracle忘记sys/system的密码解决</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>  很多开发的时候我们都会忘记Oracle的sys/system密码，此两个用户也是最大的权限用户，一旦不可用，我们如果又忘记其他需要使用的用户名和密码，这将会让我们无法操作数据库。以下就针对以上问题解决。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><ol>
-<li><p>输入sqlplus /nolog<br><img src="http://i1.piimg.com/576993/355d92d193d93493.png" alt="Markdown"></p>
-</li>
-<li><p>输入conn /as sysdba<br>如果报错：ora-01031:insufficient privileges<br><img src="http://i1.piimg.com/576993/ebde33e89e925004.png" alt="Markdown"><br>请参考：ora-01031:insufficient privileges解决方法：<a href="https://startshineye.github.io/2016/11/05/ora-01031-insufficient-privileges%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/" target="_blank" rel="external">https://startshineye.github.io/2016/11/05/ora-01031-insufficient-privileges%E8%A7%A3%E5%86%B3%E6%96%B9%E6%B3%95/</a></p>
-</li>
-<li><p>连接上后然后修改sys/system用户名和密码<br><img src="http://i1.piimg.com/576993/ebde33e89e925004.png" alt="Markdown"></p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/05/Oracle忘记sys-system的密码解决/" class="archive-article-date">
-  	<time datetime="2016-11-05T05:31:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/数据库-Oracle/">数据库 Oracle</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/21/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="extend next" rel="next" href="/page/23/">Next &raquo;</a>
@@ -923,7 +964,7 @@ public class SystemInit extends HttpServlet {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 13.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.14px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.33px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.33px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 14.67px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.33px;">im</a> <a href="/tags/jQuery/" style="font-size: 12px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
