@@ -4,21 +4,44 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>代理(四)-动态代理类的设计原理与结构 | Startshineye的博客</title>
+  <title>redis(8)-列表上 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
+  <meta name="description" content="前言以有序的方式储存多个可重复的值  
+内容1.列表(list)一个列表可以包含一个或一个以上数量的项(item),每个项按照它们被推入到列表的位置来排序。  
+每个列表项所处的位置决定了这个项的索引值(index),索引以0为开始,从列表的左端到右端依次递增,位于列表最左端(表头)的项的索引为0,而位于列表最右端(表尾)的项的索引为N-1,其中N为列表长度。  
+列表包含的项可以出现重复,他们不">
 <meta property="og:type" content="article">
-<meta property="og:title" content="代理(四)-动态代理类的设计原理与结构">
-<meta property="og:url" content="https://github.com/startshineye/2017/01/15/代理-四-动态代理类的设计原理与结构/index.html">
+<meta property="og:title" content="redis(8)-列表上">
+<meta property="og:url" content="https://github.com/startshineye/2017/08/20/redis-8-列表上/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/83.png">
-<meta property="og:updated_time" content="2017-01-15T05:11:02.939Z">
+<meta property="og:description" content="前言以有序的方式储存多个可重复的值  
+内容1.列表(list)一个列表可以包含一个或一个以上数量的项(item),每个项按照它们被推入到列表的位置来排序。  
+每个列表项所处的位置决定了这个项的索引值(index),索引以0为开始,从列表的左端到右端依次递增,位于列表最左端(表头)的项的索引为0,而位于列表最右端(表尾)的项的索引为N-1,其中N为列表长度。  
+列表包含的项可以出现重复,他们不">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/30.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/31.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/32.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/33.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/34.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/35.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/36.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/37.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/38.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/39.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/40.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/41.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/42.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/43.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/44.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/45.png">
+<meta property="og:updated_time" content="2017-08-20T13:21:39.844Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="代理(四)-动态代理类的设计原理与结构">
-<meta name="twitter:description" content="动态生成的类成为目标类的代理1.动态代理类的工作原理图分析:1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。2.图中log()被硬编码，我们把代理代码直接写在代理类中,以">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png">
+<meta name="twitter:title" content="redis(8)-列表上">
+<meta name="twitter:description" content="前言以有序的方式储存多个可重复的值  
+内容1.列表(list)一个列表可以包含一个或一个以上数量的项(item),每个项按照它们被推入到列表的位置来排序。  
+每个列表项所处的位置决定了这个项的索引值(index),索引以0为开始,从列表的左端到右端依次递增,位于列表最左端(表头)的项的索引为0,而位于列表最右端(表尾)的项的索引为N-1,其中N为列表长度。  
+列表包含的项可以出现重复,他们不">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/30.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -154,7 +177,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-代理-四-动态代理类的设计原理与结构" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-redis-8-列表上" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -164,7 +187,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      代理(四)-动态代理类的设计原理与结构
+      redis(8)-列表上
     </h1>
   
 
@@ -172,33 +195,53 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="动态生成的类成为目标类的代理"><a href="#动态生成的类成为目标类的代理" class="headerlink" title="动态生成的类成为目标类的代理"></a>动态生成的类成为目标类的代理</h4><h6 id="1-动态代理类的工作原理图"><a href="#1-动态代理类的工作原理图" class="headerlink" title="1.动态代理类的工作原理图"></a>1.动态代理类的工作原理图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png" alt=""><br>分析:<br>1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。<br>2.图中log()被硬编码，我们把代理代码直接写在代理类中,以后别人想要修改代码将会不方便<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/83.png" alt=""><br>3.我们应该将那个代码作为参数传递进去,而不是硬编码(系统功能代码以参数形式传递过去)<br>4.在javascript中传递代码是用eval()函数解析,但是java中没有这样的用法，所以我们不能直接传递字符串进去,而是传递一个对象，我们到时候就调用对象的方法log(),以上“圈”就是一个对象,这就是现象切面编程(把切面的代码用对象进行封装,然后以对象的方式传递给你,你执行对象就相当于执行了切面的代码)</p>
-<h6 id="2-怎样将目标类传进去"><a href="#2-怎样将目标类传进去" class="headerlink" title="2.怎样将目标类传进去?"></a>2.怎样将目标类传进去?</h6><ol>
-<li>直接在InvocationHandler实现类中创建目标类的实例对象,可以看运行效果和加入日志代理,但是没有实际意义.</li>
-<li>为InvocationHandler实现类注入目标类的实例对象,不能采用匿名内部类的形式了.</li>
-<li>让匿名的InvocationHandler实现类访问外面方法中的目标类实例对象的final类型的引用变量<h6 id="3-将创建代理的过程改为一种更优雅的方式"><a href="#3-将创建代理的过程改为一种更优雅的方式" class="headerlink" title="3.将创建代理的过程改为一种更优雅的方式"></a>3.将创建代理的过程改为一种更优雅的方式</h6></li>
-<li>myeclipse重构出一个getProxy方法绑定接收目标同时返回代理对象,让调用者更懒惰,更方便,调用者甚至不用接触任何代理的API</li>
-</ol>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>以有序的方式储存多个可重复的值  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-列表-list"><a href="#1-列表-list" class="headerlink" title="1.列表(list)"></a>1.列表(list)</h5><p>一个列表可以包含一个或一个以上数量的项(item),每个项按照它们被推入到列表的位置来排序。  </p>
+<p>每个列表项所处的位置决定了这个项的索引值(index),索引以0为开始,从列表的左端到右端依次递增,位于列表最左端(表头)的项的索引为0,而位于列表最右端(表尾)的项的索引为N-1,其中N为列表长度。  </p>
+<p>列表包含的项可以出现重复,他们不必是唯一的。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/30.png" alt="">  </p>
+<h6 id="1-1-推入和弹出操作"><a href="#1-1-推入和弹出操作" class="headerlink" title="1.1 推入和弹出操作"></a>1.1 推入和弹出操作</h6><p>了解如何向列表添加项,以及如何从列表里面删除项  </p>
+<p>####### 从列表左端推入值<br>LPUSH key value [value …]  </p>
+<p>将一个或以上数量的值依次推入到列表的左端,命令返回新值被推入之后,列表目前包含的项数量。  </p>
+<p>复杂度O(N),其中N为被推入值的数量,如果只推入一个值,那么命令的复杂度为O(1)。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/31.png" alt="">  </p>
+<p>####### 从列表左端推入多个值</p>
+<p>如果执行LPUSH命令时给定多个值,那么各个值将按照给定时的顺序,从左到右依次地被推入到列表左端。  </p>
+<p>举个例子,执行命令:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/32.png" alt="">  </p>
+<p>####### 从列表右端推入多个值<br>RPUSH key value [value …]  </p>
+<p>将一个或以上数量的值依次推入到列表的右端,命令返回新值被推入之后,列表目前包含的项数量。  </p>
+<p>复杂度O(N),其中N依次为被推入值的数量,如果只推入一个值,那么命令的复杂度为O(1)。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/33.png" alt="">  </p>
+<p>####### 从列表的右端推入多个值<br>如果执行RPUSH命令时候给定了多个值,那么各个值将按照所给定时的顺序,从左到右依次地推入到表的右端  </p>
+<p>举个例子:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/34.png" alt="">  </p>
+<p>####### 从列表的两端弹出项<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/35.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/36.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/37.png" alt=""> </p>
+<p>####### 获取列表的长度<br>LLEN key  </p>
+<p>返回列表key的长度,也即是,返回列表包含的列表项数量。  </p>
+<p>因为Redis会记录每个列表的长度,所以 这个命令无须遍历列表,它的复杂度为O(1)。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/38.png" alt="">  </p>
+<p>####### 返回给定索引上的项<br>LINDEX key index  </p>
+<p>返回列表键key中,指定索引 index上的列表项。index索引可以是正数或者负数。  </p>
+<p>复杂度为O(N),N为列表长度。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/39.png" alt=""> </p>
+<p>####### 返回给定索引范围之内的所有项<br>LRANGE key start stop  </p>
+<p>返回列表键key中,从索引start至索引stop范围内的所有列表项。两个索引参数都可以是正数或者负数。  </p>
+<p>复杂度O(N),N为被返回的列表项数量。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/41.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/42.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/44.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/45.png" alt="">   </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/01/15/代理-四-动态代理类的设计原理与结构/" class="archive-article-date">
-  	<time datetime="2017-01-15T03:34:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-15</time>
+      <a href="/2017/08/20/redis-8-列表上/" class="archive-article-date">
+  	<time datetime="2017-08-20T10:56:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-20</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
 	</div>
 
       
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java代理/">java代理</a>
-	</div>
-
 
       <div class="clearfix"></div>
     </div>
@@ -208,18 +251,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2017/01/16/获取当前线程/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          获取当前线程
-        
-      </div>
-    </a>
   
-  
-    <a href="/2017/01/14/代理-三-InvocationHander对象内部功能/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">代理(三)-InvocationHander对象内部功能</div>
+    <a href="/2017/08/20/redis-7-散列下/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">redis(7)-散列下</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -265,7 +299,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="代理-四-动态代理类的设计原理与结构" data-title="代理(四)-动态代理类的设计原理与结构" data-url="https://github.com/startshineye/2017/01/15/代理-四-动态代理类的设计原理与结构/"></div>
+	<div class="ds-thread" data-thread-key="redis-8-列表上" data-title="redis(8)-列表上" data-url="https://github.com/startshineye/2017/08/20/redis-8-列表上/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
