@@ -4,17 +4,34 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives: 2017 | Startshineye的博客</title>
+  <title>redis(7)-散列下 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/2017/page/17/index.html">
+  <meta name="description" content="前言散列和字符串也有很多相似的地方
+内容1.效果类似命令  
+2.散列和字符串区别如果散列键能做的事情,字符串键也能做,那么我们为什么不使用字符串键呢？
+2.1散列好处(1):将数据放到同一个地方1.散列可以将一些相关数据信息存储到同一个地方,而不是直接分散地存储在整个数据库里面,这不仅方便了数据管理,还可以尽量避免误操作发生  
+2.字符串存储多个值时候会创建多个键,但是对于散列只需要创建一个键">
+<meta property="og:type" content="article">
+<meta property="og:title" content="redis(7)-散列下">
+<meta property="og:url" content="https://github.com/startshineye/2017/08/20/redis-7-散列下/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="前言散列和字符串也有很多相似的地方
+内容1.效果类似命令  
+2.散列和字符串区别如果散列键能做的事情,字符串键也能做,那么我们为什么不使用字符串键呢？
+2.1散列好处(1):将数据放到同一个地方1.散列可以将一些相关数据信息存储到同一个地方,而不是直接分散地存储在整个数据库里面,这不仅方便了数据管理,还可以尽量避免误操作发生  
+2.字符串存储多个值时候会创建多个键,但是对于散列只需要创建一个键">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/27.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/28.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/29.png">
+<meta property="og:updated_time" content="2017-08-20T10:34:43.390Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="redis(7)-散列下">
+<meta name="twitter:description" content="前言散列和字符串也有很多相似的地方
+内容1.效果类似命令  
+2.散列和字符串区别如果散列键能做的事情,字符串键也能做,那么我们为什么不使用字符串键呢？
+2.1散列好处(1):将数据放到同一个地方1.散列可以将一些相关数据信息存储到同一个地方,而不是直接分散地存储在整个数据库里面,这不仅方便了数据管理,还可以尽量避免误操作发生  
+2.字符串存储多个值时候会创建多个键,但是对于散列只需要创建一个键">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/8/27.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,349 +167,131 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-redis-7-散列下" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
+    <h1 class="article-title" itemprop="name">
+      redis(7)-散列下
+    </h1>
   
+
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>散列和字符串也有很多相似的地方</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-效果类似命令"><a href="#1-效果类似命令" class="headerlink" title="1.效果类似命令"></a>1.效果类似命令</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/27.png" alt="">  </p>
+<h5 id="2-散列和字符串区别"><a href="#2-散列和字符串区别" class="headerlink" title="2.散列和字符串区别"></a>2.散列和字符串区别</h5><p>如果散列键能做的事情,字符串键也能做,那么我们为什么不使用字符串键呢？</p>
+<h6 id="2-1散列好处-1-将数据放到同一个地方"><a href="#2-1散列好处-1-将数据放到同一个地方" class="headerlink" title="2.1散列好处(1):将数据放到同一个地方"></a>2.1散列好处(1):将数据放到同一个地方</h6><p>1.散列可以将一些相关数据信息存储到同一个地方,而不是直接分散地存储在整个数据库里面,这不仅方便了数据管理,还可以尽量避免误操作发生  </p>
+<p>2.字符串存储多个值时候会创建多个键,但是对于散列只需要创建一个键,如下:message一个键可以存储散列  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/28.png" alt="">  </p>
+<h6 id="2-2散列好处-1-避免键名冲突"><a href="#2-2散列好处-1-避免键名冲突" class="headerlink" title="2.2散列好处(1):避免键名冲突"></a>2.2散列好处(1):避免键名冲突</h6><p>在介绍字符串键的时候,我们说过,可以在命名键的时候,使用分隔符来避免命名冲突,但更好的办法是直接使用散列键来储存键值对数据。  </p>
+<p>举个例子,如果我们需要储存多条消息,那么我们可能会按照格式message::<id>::<field>的方式来创建字符串键并储存数据,比如使用message::12345::receiver键来储存id为12345的消息的接收者,使用message::10086::sender键来储存id为10086的发送者,诸如此类。</field></id></p>
+<p>但更好的办法是直接使用message::<id>散列键来表示消息信息,并将与消息有关的各项信息储存到散列的各个域里面,比如创建message::12345散列,并将该消息的各项信息分别储存到这个散列的id域,receiver域和sender域里面。  </id></p>
+<p>这保证了数据库中每个键的作用都是固定的,单一的,储存的信息都是被隔离的,从而最大限度地键名冲突  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/29.png" alt=""> </p>
+<h6 id="2-3散列好处-3-减少内存占用"><a href="#2-3散列好处-3-减少内存占用" class="headerlink" title="2.3散列好处(3):减少内存占用"></a>2.3散列好处(3):减少内存占用</h6><p>在一般情况下,保存相同数量的键值对信息,使用散列键比使用字符串键更节约内存。  </p>
+<p>因为在数据库里面创建的每个键都带有数据库附加的管理信息(比如这个键的类型,最后一次被访问的时间等等),所以数据库里面的键越多,服务器在储存附加管理信息方面耗费的内存就越多,花在管理数据库键上的cpu也会越多  </p>
+<p>除此之外,当散列保存的域值对数量比较少的时候,Redis会自动使用一种占用内存非常少的数据结构来做散列的底层实现 ,在散列的数量比较多的时候,这一措施对减少内存有很大的帮助。</p>
+<h5 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h5><p>只要有可能的话,就尽量使用散列键而不是字符串键来储存键值对数据,因为散列键管理方便,能够避免键冲突,并且还能节约内存。  </p>
+<p>一些没办法使用散列键来替代字符串键的情况:<br>1.使用二进制位操作命令：因为Redis目前支持对字符串键进行SETBIT,GETBIT,BITOP等操作,如果你想使用这些操作,那么只能使用字符串键。<br>2.使用过期功能:Redis的键过期功能目前只能对键进行过期操作,而不能对散列的域进行过期操作,因此如果你要对键值对数据使用过期功能的话,那么只能把键值对储存在字符串里面。关于过期键的详细信息会在之后介绍。  </p>
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/07/泛型-七-泛型方法练习及推断/" class="archive-article-date">
-  	<time datetime="2017-01-07T10:00:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-07</time>
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/20/redis-7-散列下/" class="archive-article-date">
+  	<time datetime="2017-08-20T09:01:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-20</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/07/泛型-七-泛型方法练习及推断/">泛型(七)-泛型方法练习及推断</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/07/泛型-六-自定义泛型方法及应用/" class="archive-article-date">
-  	<time datetime="2017-01-07T08:22:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/07/泛型-六-自定义泛型方法及应用/">泛型(六)-自定义泛型方法及应用</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
 	</div>
 
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
+      
 
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/05/泛型-五-泛型综合运用/" class="archive-article-date">
-  	<time datetime="2017-01-05T15:23:08.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-05</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/05/泛型-五-泛型综合运用/">泛型(五)-泛型综合运用</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/08/20/redis-6-散列/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">redis(6)-散列</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/04/泛型-三-泛型中的通配符/" class="archive-article-date">
-  	<time datetime="2017-01-04T14:19:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-04</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/04/泛型-三-泛型中的通配符/">泛型(三)-泛型中的通配符</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/03/泛型-二-泛型的内部原理及深层应用/" class="archive-article-date">
-  	<time datetime="2017-01-03T13:30:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/03/泛型-二-泛型的内部原理及深层应用/">泛型(二)-泛型的内部原理及深层应用</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/03/泛型-一-泛型的入门/" class="archive-article-date">
-  	<time datetime="2017-01-03T12:36:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/03/泛型-一-泛型的入门/">泛型(一)-泛型的入门</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="redis-7-散列下" data-title="redis(7)-散列下" data-url="https://github.com/startshineye/2017/08/20/redis-7-散列下/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/02/注解-三-注解的属性/" class="archive-article-date">
-  	<time datetime="2017-01-02T11:42:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/02/注解-三-注解的属性/">注解(三)-注解的属性</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/02/注解-二-注解的定义及反射调用/" class="archive-article-date">
-  	<time datetime="2017-01-02T06:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/02/注解-二-注解的定义及反射调用/">注解(二)-注解的定义及反射调用</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/01/02/注解-一-了解注解/" class="archive-article-date">
-  	<time datetime="2017-01-02T06:10:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/01/02/注解-一-了解注解/">注解(一)-了解注解</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
-	</div>
-
-          
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
-	</div>
-
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/2017/page/16/">&laquo; Prev</a><a class="page-number" href="/archives/2017/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/2017/page/15/">15</a><a class="page-number" href="/archives/2017/page/16/">16</a><span class="page-number current">17</span>
-    </nav>
-  
 
 
       </div>
@@ -515,8 +314,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
