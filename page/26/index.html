@@ -152,6 +152,121 @@
       <div class="body-wrap">
         
   
+    <article id="post-Oracle实现主键自增" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/30/Oracle实现主键自增/">Oracle实现主键自增</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>  之前用mysql数据库可以轻松实现主键自增，只需选择主键自增项完成，如今使用Oracle数据库要求实现主键自增</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p> Oracle实现主键自增主要通过以下3步完成：<br>1.建表(FOUSS_IM_THREAD)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">  create table FOUSS_IM_THREAD</div><div class="line">(</div><div class="line">  THREADID     NUMBER not null,</div><div class="line">  SOURCE       NUMBER,</div><div class="line">  USERID       VARCHAR2(50),</div><div class="line">  USERNAME     VARCHAR2(100),</div><div class="line">  AGENTID      VARCHAR2(20),</div><div class="line">  AGENTNAME    VARCHAR2(100),</div><div class="line">  CREATETIME   DATE,</div><div class="line">  LASTTIME     DATE,</div><div class="line">  SATISFACTION VARCHAR2(50)</div><div class="line">)</div></pre></td></tr></table></figure></p>
+<p>2.建立序列（THREAD_SEQ）<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">create sequence THREAD_SEQ</div><div class="line">minvalue 1</div><div class="line">maxvalue 999999999999999999999999999</div><div class="line">start with 921</div><div class="line">increment by 1</div><div class="line">cache 20;</div><div class="line">注：建立序列，最小值为1，从1开始计数和每次递增量为1；</div></pre></td></tr></table></figure></p>
+<p>3.建立触发器(tr_thread)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">create or replace trigger tr_thread</div><div class="line">before insert on FOUSS_IM_THREAD</div><div class="line">for each row</div><div class="line">begin</div><div class="line">select thread_seq.nextval into :new.threadid   from dual;</div><div class="line">end;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/30/Oracle实现主键自增/" class="archive-article-date">
+  	<time datetime="2016-10-30T06:51:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术-Oracle/">技术 Oracle</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-java-io-EOFException" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/30/java-io-EOFException/">java.io.EOFException</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前Tomcat服务器一直启动正常，今天启动Tomcat服务器出现异常</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.异常<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">严重: IOException while loading persisted sessions: java.io.EOFException 严重: Exception loading sessions from persistent storage</div></pre></td></tr></table></figure></p>
+<p>2.解决方法<br>tomcat对硬盘的session读取失败，彻底解决办法一下：将work下面的文件清空</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/30/java-io-EOFException/" class="archive-article-date">
+  	<time datetime="2016-10-30T06:42:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Tomcat/">Tomcat</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术-服务器/">技术 服务器</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Oracle用户解锁" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -810,147 +925,9 @@ public void testSet() {
 
 
   
-    <article id="post-org-apache-jasper-JasperException-Unable-to-compile-class-for-JSP" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/23/org-apache-jasper-JasperException-Unable-to-compile-class-for-JSP/">org.apache.jasper.JasperException: Unable to compile class for JSP</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>  几天前项目一直是可以运行的，今早一起来打来服务器，点击前端JSP页面就出现以下错误：  </p>
-<pre><code>严重: Servlet.service() for servlet [action] in context with path [/focus] threw exception [org.apache.jasper.JasperException: Unable to compile class for JSP: 
-
-An error occurred at line: [36] in the generated java file: [E:\tomcat7\apache-tomcat-7.0.57\work\Catalina\localhost\focus\org\apache\jsp\chats\chatRecord\chatRecord_jsp.java]
-The method getJspApplicationContext(ServletContext) is undefined for the type JspFactory
-
-Stacktrace:] with root cause
-org.apache.jasper.JasperException: Unable to compile class for JSP: 
-
-An error occurred at line: [36] in the generated java file: [E:\tomcat7\apache-tomcat-7.0.57\work\Catalina\localhost\focus\org\apache\jsp\chats\chatRecord\chatRecord_jsp.java]
-The method getJspApplicationContext(ServletContext) is undefined for the type JspFactory
-</code></pre><p>一开始百度了很多东西，都说是JAR包冲突，以下是常见解决方法：<br><img src="http://i1.piimg.com/576993/6ce37e8847efa4ea.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/0e32b79be433f005.png" alt="Markdown"><br>但是，自己查找了两个jar发现并没有冲突，然后就在服务器下实现了下面的操作：  </p>
-<ol>
-<li>删除服务器下面webapps下的项目<br><img src="http://i1.piimg.com/576993/d1528cea0085d819.png" alt="Markdown">  </li>
-<li><p>删除E:\tomcat7\apache-tomcat-7.0.57\work\Catalina\localhost目录下文件<br><img src="http://i1.piimg.com/576993/1e0809cfe3b7c022.png" alt="Markdown"></p>
-</li>
-<li><p>如果实在都不行的话就重启Myeclipse</p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/23/org-apache-jasper-JasperException-Unable-to-compile-class-for-JSP/" class="archive-article-date">
-  	<time datetime="2016-10-23T06:24:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JSP/">JSP</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/技术/">技术</a><a class="article-category-link" href="/categories/技术/JSP/">JSP</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-HashMap原理及面试" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/23/HashMap原理及面试/">HashMap原理及面试</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://p1.bqimg.com/576993/e1361e5dd90d9c13.png" alt="Markdown"></p>
-<h4 id="hashMap底层原理"><a href="#hashMap底层原理" class="headerlink" title="hashMap底层原理"></a>hashMap底层原理</h4><p><img src="http://p1.bqimg.com/576993/4cbe8f47bd3f0a0c.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/0c15715877142d9f.png" alt="Markdown"></p>
-<hr>
-<h4 id="hashMap原理分析"><a href="#hashMap原理分析" class="headerlink" title="hashMap原理分析"></a>hashMap原理分析</h4><p><img src="http://p1.bqimg.com/576993/46da278ce8c9ea96.png" alt="Markdown"></p>
-<hr>
-<h4 id="hashMap测试题"><a href="#hashMap测试题" class="headerlink" title="hashMap测试题"></a>hashMap测试题</h4><ul>
-<li>map.put的返回值<br>返回值为：所”关联key”的上一个value值；比如map.put(“a”,”hello”)//关联的key=”a”上一个value为null<br>map.put(“a”,”world”)//关联的key=”a”上一个value为world</li>
-<li>底层采用hash表，先计算key的hash值找到数组下表，hash值相同数组下表相同，在判断key和链表上的key是否相同，如果相同，则覆盖。</li>
-<li>测试实例<br><img src="http://p1.bqimg.com/576993/acef638343dc4366.png" alt="Markdown">  </li>
-</ul>
-<hr>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/23/HashMap原理及面试/" class="archive-article-date">
-  	<time datetime="2016-10-23T05:01:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java集合/">java集合</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/技术/">技术</a><a class="article-category-link" href="/categories/技术/Java/">Java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/25/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/27/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/25/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/27/">Next &raquo;</a>
     </nav>
   
 
@@ -1013,7 +990,7 @@ The method getJspApplicationContext(ServletContext) is undefined for the type Js
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.33px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 16px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 16.43px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     

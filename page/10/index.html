@@ -152,6 +152,119 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-26-sql语句增删查改实现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/14/Android-26-sql语句增删查改实现/">Android(26)-sql语句增删查改实现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1：ui线性布局4个按钮点击实现增删查改</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-画ui"><a href="#1-画ui" class="headerlink" title="1.画ui"></a>1.画ui</h6><p>使用线性布局,画四个button按钮,并绑定四个方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">    &lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">    xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;match_parent&quot;</div><div class="line">    android:orientation=&quot;vertical&quot;</div><div class="line">    tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line"></div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;add&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;add&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;delete&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;delete&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;select&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;select&quot;</div><div class="line">        /&gt;</div><div class="line">    </div><div class="line">    &lt;Button </div><div class="line">        android:onClick=&quot;update&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        android:layout_height=&quot;wrap_content&quot;</div><div class="line">        android:text=&quot;update&quot;</div><div class="line">        /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure></p>
+<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><p>1.创建类继承SQLiteOpenHelper(在onCreate)<br>2.实例化此类的对象<br>3.书写增删查改方法<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">    public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">    private MySQLite mySQLite;</div><div class="line"></div><div class="line">	@Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">        </div><div class="line">        mySQLite = new MySQLite(getApplicationContext());</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">	//增</div><div class="line">	public void add(View v)&#123;</div><div class="line">		SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">		db.execSQL(&quot;insert into info(name,phone) values(?,?)&quot;,new Object[]&#123;&quot;zs&quot;,&quot;123&quot;&#125;);</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//删</div><div class="line">    public void delete(View v)&#123;</div><div class="line">    	SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">    	db.execSQL(&quot;delete from info where name = ?&quot;,new Object[]&#123;&quot;zs&quot;&#125;);</div><div class="line">	&#125;</div><div class="line">    </div><div class="line">    //查</div><div class="line">    public void select(View v)&#123;</div><div class="line">    	//获取可读数据库连接</div><div class="line">    	SQLiteDatabase db = mySQLite.getReadableDatabase();</div><div class="line">    	//执行有返回值的方法</div><div class="line">    	Cursor result = db.rawQuery(&quot;selete * from info&quot;,null);</div><div class="line">    	//输出</div><div class="line">    	if(result!=null &amp;&amp; result.getCount()&gt;0)&#123;</div><div class="line">    		while (result.moveToNext()) &#123;</div><div class="line">				 String name = result.getString(1);</div><div class="line">				 String phone = result.getString(2);</div><div class="line">				System.out.println(&quot;name&quot;+name+&quot;  &quot;+&quot;phone&quot;+phone);</div><div class="line">			&#125;</div><div class="line">    	&#125;</div><div class="line">    	</div><div class="line">    &#125;</div><div class="line">    </div><div class="line">    //改</div><div class="line">   public void update(View v)&#123;</div><div class="line">	   SQLiteDatabase db = mySQLite.getWritableDatabase();</div><div class="line">	   db.execSQL(&quot;update info set phone = ? where name = ?&quot;,new Object[]&#123;&quot;110&quot;,&quot;zs&quot;&#125;);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/80.png" alt=""></p>
+<h4 id="注意事项"><a href="#注意事项" class="headerlink" title="注意事项"></a>注意事项</h4><p>缺陷:  </p>
+<ol>
+<li>1.sql语句容易写错(比如：将半角写成全角)  </li>
+<li>2.执行sql语句没有返回值,不容易进行判断<br>优点:<br>容易进行多表查询     </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/14/Android-26-sql语句增删查改实现/" class="archive-article-date">
+  	<time datetime="2017-03-14T13:16:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Android-25-数据库OnCreate方法介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-25-数据库OnCreate方法介绍/">Android(25)-数据库OnCreate方法介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h6 id="1-onCreate方法"><a href="#1-onCreate方法" class="headerlink" title="1.onCreate方法"></a>1.onCreate方法</h6><ol>
+<li>1.使用SQLite Expert Professional这个工具可以打开我们创建的数据库  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">//当数据库第一次被创建时候调用    </div><div class="line">//这个方法特别适合做表结构初始化,创建表就是写sql语句  </div><div class="line">@Override  </div><div class="line">public void onCreate(SQLiteDatabase db) &#123;   </div><div class="line">//查看SQLiteDatabase的API文档可知，用execSQL执行命令    </div><div class="line">//google工程师规定一般 id用_id来表示  </div><div class="line">db.execSQL(&quot;create table  info(_id integer primary key       autoincrement,namme varchar(20))&quot;);  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="2-onUpgrade方法"><a href="#2-onUpgrade方法" class="headerlink" title="2.onUpgrade方法"></a>2.onUpgrade方法</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">   /***</div><div class="line">    * 当数据库版本升级时候调用</div><div class="line">    * </div><div class="line">    * 这个方法适合做表结构的更新</div><div class="line">    */</div><div class="line">@Override</div><div class="line">public void onUpgrade(SQLiteDatabase db, int arg1, int arg2) &#123;</div><div class="line"> db.execSQL(&quot;alter table info add phone varchar(20)&quot;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>注：1.修改表结构时候多用onUpgrade<br>   2.当数据库版本降级的时候此方法将会报错</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-25-数据库OnCreate方法介绍/" class="archive-article-date">
+  	<time datetime="2017-03-12T15:51:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-24-Android下数据库" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -604,136 +717,9 @@
 
 
   
-    <article id="post-Android-16-使用上下文获取文件目录" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/09/Android-16-使用上下文获取文件目录/">Android(16)-使用上下文获取文件目录</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="使用上下文获取文件目录"><a href="#使用上下文获取文件目录" class="headerlink" title="使用上下文获取文件目录"></a>使用上下文获取文件目录</h4><p>在上一节中我们写死文件路径会报一个警告,如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/59.png" alt=""><br>知道:我们在编写代码的时候不适用硬编码,而是使用上下文获取文件路径.  </p>
-<ol>
-<li>1.替换UserUserInfoUtils中获取文件方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/62.png" alt=""></li>
-<li>2.在MainActivity.java中传递上下文<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/60.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/63.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/09/Android-16-使用上下文获取文件目录/" class="archive-article-date">
-  	<time datetime="2017-03-08T16:24:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-09</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-15-登录案例开发" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/07/Android-15-登录案例开发/">Android(15)-登录案例开发</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本课主要实现对用户登录信息的保存</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-登录界面"><a href="#1-登录界面" class="headerlink" title="1.登录界面"></a>1.登录界面</h6><p>本节做一个登录模块,最主要的模块效果图设计如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/55.png" alt="">  </p>
-<ol>
-<li>布局<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/56.png" alt="">  </li>
-<li>画ui<br>按照布局画ui <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;vertical&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot;&gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_username&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:hint=&quot;请输入用户名&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_password&quot;</div><div class="line">    android:password=&quot;true&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:hint=&quot;请输入密码&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;RelativeLayout </div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    &gt;</div><div class="line"> &lt;CheckBox </div><div class="line">     android:id=&quot;@+id/cb_isCheck&quot;</div><div class="line">     android:layout_width=&quot;wrap_content&quot;</div><div class="line">     android:layout_height=&quot;wrap_content&quot;</div><div class="line">     android:text=&quot;记住用户名和密码&quot;</div><div class="line">     /&gt;</div><div class="line"> &lt;Button </div><div class="line">     android:onClick=&quot;login&quot;</div><div class="line">     android:layout_width=&quot;wrap_content&quot;</div><div class="line">     android:layout_height=&quot;wrap_content&quot;</div><div class="line">     android:layout_alignParentRight=&quot;true&quot;</div><div class="line">     android:text=&quot;login&quot;</div><div class="line">     /&gt;</div><div class="line">&lt;/RelativeLayout&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>效果图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/57.png" alt=""></p>
-<h6 id="2-把数据保存到data目录-写逻辑"><a href="#2-把数据保存到data目录-写逻辑" class="headerlink" title="2.把数据保存到data目录(写逻辑)"></a>2.把数据保存到data目录(写逻辑)</h6><p>1.找到我们想要的控件<br>2.写按钮的点击事件login<br>3.login()里面拿到用户名和密码,判断是否为空(给出提示),不为空的话<br>4.判断checkBox是否勾选,勾选存储数据到data下面的login对应的应用下(io流),否则,提示  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">   private EditText username;</div><div class="line">private EditText password;</div><div class="line">private CheckBox cb_isCheck;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       super.onCreate(savedInstanceState);</div><div class="line">       setContentView(R.layout.activity_main);</div><div class="line">       username = (EditText)findViewById(R.id.et_username);</div><div class="line">       password = (EditText)findViewById(R.id.et_password);</div><div class="line">       cb_isCheck = (CheckBox)findViewById(R.id.cb_isCheck);</div><div class="line">   </div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   private void login(View v)&#123;</div><div class="line">   	//login()里面拿到用户名和密码,判断是否为空(给出提示),不为空的话  </div><div class="line">   	//想要获得用户名密码控件里面的值,我们把它们定义成成员变量</div><div class="line">   	String name = username.getText().toString().trim();</div><div class="line">   	String pwd = password.getText().toString().trim();</div><div class="line">   	</div><div class="line">   	if(TextUtils.isEmpty(name) || TextUtils.isEmpty(pwd))&#123;</div><div class="line">   		Toast.makeText(MainActivity.this,&quot;用户名或者密码不为空&quot;, 1).show();</div><div class="line">   	&#125;else&#123;</div><div class="line">   		//不为空,判断勾选(获取checkBox)</div><div class="line">   		if(cb_isCheck.isChecked())&#123;</div><div class="line">   			//保存用户信息</div><div class="line">   			boolean result = UserInfoUtils.saveUserInfo(name,pwd);</div><div class="line">   			if(result)&#123;</div><div class="line">   				Toast.makeText(MainActivity.this, &quot;保存成功&quot;, 1).show();</div><div class="line">   			&#125;else&#123;</div><div class="line">   				Toast.makeText(MainActivity.this, &quot;保存失败&quot;, 1).show();</div><div class="line">   			&#125;</div><div class="line">   			cb_isCheck.setChecked(false);</div><div class="line">   		&#125;else&#123;</div><div class="line">   			Toast.makeText(MainActivity.this, &quot;cb勾选&quot;, 1).show();</div><div class="line">   		&#125;</div><div class="line">   	&#125;</div><div class="line">    &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   //工具类</div><div class="line">   public class UserInfoUtils &#123;</div><div class="line">//保存用户名和密码</div><div class="line">   public static boolean saveUserInfo(String username,String password)&#123;</div><div class="line">   	String result = username+password;</div><div class="line">   	String path = &quot;/data/data/com.yxm.login&quot;;</div><div class="line">   	//定义文件保存位置</div><div class="line">   	File file = new File(path);</div><div class="line">   	//定义一个输出流</div><div class="line">   	try &#123;</div><div class="line">		FileOutputStream fos = new FileOutputStream(file);</div><div class="line">		fos.write(result.getBytes());</div><div class="line">		fos.flush();</div><div class="line">		fos.close();</div><div class="line">		return true;</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">		return false;</div><div class="line">	&#125;</div><div class="line">    &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li>文件保存位置(DDMS-&gt;data/data/com.yxm.login)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/58.png" alt="">  </li>
-</ol>
-<h6 id="3-把用户名和密码显示出来-记住密码的逻辑"><a href="#3-把用户名和密码显示出来-记住密码的逻辑" class="headerlink" title="3.把用户名和密码显示出来(记住密码的逻辑)"></a>3.把用户名和密码显示出来(记住密码的逻辑)</h6><p>1.读出保存文本文件的内容放到map中<br>2.然后显示到空间页面上 </p>
-<ol>
-<li><p>1.在UserInfoUtils加入一个读取方法  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">     //读取用户信息到Map中</div><div class="line">    public static Map&lt;String,String&gt; readUserInfo()&#123;</div><div class="line">    	try &#123;</div><div class="line">			Map&lt;String, String&gt; map = new HashMap&lt;String,String&gt;();</div><div class="line">			String path = &quot;/data/data/com.yxm.login/info.txt&quot;;</div><div class="line">			File file = new File(path);</div><div class="line">			FileInputStream fis = new FileInputStream(file);</div><div class="line">			BufferedReader br = new BufferedReader(new InputStreamReader(fis));</div><div class="line">			String content = br.readLine();</div><div class="line">			String[] split = content.split(&quot;##&quot;);</div><div class="line">			map.put(&quot;name&quot;, split[0]);</div><div class="line">			map.put(&quot;pwd&quot;, split[1]);</div><div class="line">			fis.close();</div><div class="line">			return map;</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			// TODO Auto-generated catch block</div><div class="line">			e.printStackTrace();</div><div class="line">			return null;</div><div class="line">		&#125;</div><div class="line">    &#125;</div><div class="line">    ``` </div><div class="line">2. 2.在MainActivity中调用</div></pre></td></tr></table></figure>
-<p> Map<string, string=""> userInfo = UserInfoUtils.readUserInfo();</string,></p>
-<pre><code>if(userInfo!=null){
- username.setText(userInfo.get(&quot;name&quot;));
- password.setText(userInfo.get(&quot;name&quot;));
-</code></pre><p> }<br> ```</p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/07/Android-15-登录案例开发/" class="archive-article-date">
-  	<time datetime="2017-03-07T14:43:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
     </nav>
   
 
@@ -796,7 +782,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.33px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 16px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 16.43px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
