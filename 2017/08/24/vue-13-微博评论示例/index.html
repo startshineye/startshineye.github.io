@@ -18,7 +18,7 @@
 内容1.功能要求1.点击”提交评论”,我们把提交的数据扔到下面留言框.2.页面刷新时候我们需要展示已经添加的一些数据  
 2.实现要求1.点击”提交评论”,我们把提交的数据扔到下面留言框. a.点击事件:v-on:事件  @事件 b.发送数据请求:this.$http.get()/post()/jsonp() this.$http() c:按照接口请求数据 
 接口为:">
-<meta property="og:updated_time" content="2017-08-24T16:06:53.974Z">
+<meta property="og:updated_time" content="2017-08-30T14:51:40.089Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="vue(13)-微博评论示例">
 <meta name="twitter:description" content="前言基于vue的微博评论案例
@@ -197,7 +197,7 @@
 </code></pre><p>d:请求成功时候渲染:在vue的data里面定义msgData[{},{}],里面内容是返回结果<br>e:在view里面遍历用vue-for<br>f:暂无留言出来条件:v-show  msgData.length==0<br>5:清空textarea  </p>
 <h6 id="2-页面刷新时候我们需要展示已经添加的一些数据"><a href="#2-页面刷新时候我们需要展示已经添加的一些数据" class="headerlink" title="2.页面刷新时候我们需要展示已经添加的一些数据"></a>2.页面刷新时候我们需要展示已经添加的一些数据</h6><p>a.获取某一页<br>b.接口:weibo.php?act=get&amp;page=1    获取一页数据  </p>
 <pre><code>返回：[{id: ID, content: &quot;内容&quot;, time: 时间戳, acc: 顶次数, ref: 踩次数}, {...}, ...]
-</code></pre><p>c.交互:getPageData(n)<br>d:需要在页面一加载调用:能不能提供一个类似于：window.load函数,其实是vue有自带的:vue的生存周期  </p>
+</code></pre><p>c.交互:getPageData(n)<br>d:需要在页面一加载调用:能不能提供一个类似于：window.load函数,其实是vue有自带的:vue的生存周期<br>e:vue类似于window.load函数就是:ready  </p>
 <h5 id="3-代码"><a href="#3-代码" class="headerlink" title="3.代码:"></a>3.代码:</h5><pre><code>&lt;!doctype html&gt;
 &lt;html&gt;
 &lt;head&gt;
@@ -242,16 +242,41 @@
                         //清空textarea数据
                         this.t1=&quot;&quot;;
                     });
+                },
+                getPageData:function (n) {
+                    this.$http({
+                        url:URL,
+                        data:{
+                           act:&quot;get&quot;,
+                            page:n
+                        }
+                    }).then(function(res){
+                       //将分页数据加载到数据中(msgData)
+                        var arr = res.data;
+                        //遍历数据
+                        for(var i=0;i&lt;arr.length;i++){
+                            this.msgData.push({
+                                content:arr[i].content,
+                                time:arr[i].time,
+                                acc:arr[i].acc,
+                                ref:arr[i].ref,
+                                id:arr[i].id
+                            })
+                        }
+                    });
                 }
+            },
+            ready:function(){
+                //页面一加载就查询第一页
+                this.getPageData(1);
             }
         });
     };
 &lt;/script&gt;
 &lt;/head&gt;
-
 &lt;body&gt;
 &lt;div class=&quot;znsArea&quot;&gt;
- &lt;!--留言--&gt;
+&lt;!--留言--&gt;
  &lt;div class=&quot;takeComment&quot;&gt;
     &lt;textarea name=&quot;textarea&quot; class=&quot;takeTextField&quot; id=&quot;tijiaoText&quot; v-model=&quot;msg&quot;&gt;&lt;/textarea&gt;
     &lt;div class=&quot;takeSbmComment&quot;&gt;
