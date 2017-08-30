@@ -152,6 +152,81 @@
       <div class="body-wrap">
         
   
+    <article id="post-Redis-2-Redis特色" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/26/Redis-2-Redis特色/">Redis(2)-Redis特色</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-独特的键值对模型"><a href="#1-独特的键值对模型" class="headerlink" title="1.独特的键值对模型"></a>1.独特的键值对模型</h5><p>1.很多数据库只能处理一种数据结构:  </p>
+<ol>
+<li>SQL 数据库–表格  </li>
+<li>Memcached–键值对数据库,键和值都是字符串  </li>
+<li>文档数据库(CouchDB,MongoDB)–由JSON/BSON组成的文档  </li>
+</ol>
+<p>2.而一旦数据库提供的数据结构不适合去做某件事情时候,程序写起来就会非常麻烦。比如一般的oracle和mysql的并行操作时候需要两张表的关联(join-on)  </p>
+<p>3.Redis也是键值对数据库,但是和Memcached不同的是,Redis的值不仅可以是字符串,它还可以是其他五种数据结构中的任意一种。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/41.png" alt=""> </p>
+<p>4.通过选用不同的数据结构,用户可以使用Redis解决各式各样的问题 </p>
+<h5 id="2-内存存储-速度极快"><a href="#2-内存存储-速度极快" class="headerlink" title="2.内存存储,速度极快"></a>2.内存存储,速度极快</h5><p>Redis将数据存储在内存里面,读写数据的时候都不会受到硬盘I/O速度的限制,所以速度极快  </p>
+<p>硬盘数据库工作模式:SQL数据库,工作方式是将值存储到硬盘中,将索引存储到内存中。当数据库去查找某个值的时候,先去内存中找到值所对应的索引,然后根据索引去找到存储到硬盘中的数据,问题:在读取写入硬盘的时候,由于速度比较慢,读写比较多的时候,将会导致阻塞或者等待比较长的时间      </p>
+<p>内存数据库工作模式:直接把值存放在内存中,内存数据库直接通过内存访问 值</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/42.png" alt=""></p>
+<h5 id="3-丰富的附加功能"><a href="#3-丰富的附加功能" class="headerlink" title="3.丰富的附加功能"></a>3.丰富的附加功能</h5><p>1.持久化功能:将存储在内存里面的数据保存到硬盘里面,保障数据安全,方便进行数据备份和恢复（redis服务一关电或者断点内存中数据就会没有，所以就需要通过持久化将数据进行备份）<br>2.发布与订阅功能:将消息同时分发给多个客户端,用于构建广播系统(聊天室中运用挺多)<br>3.过期键功能:为数据库键设置一个过期时间,让它在指定时间之后自动删除<br>4.事物功能:原子地执行多个操作,并提供乐观锁功能,保证处理数据时候的安全性.<br>5.脚本功能:在服务器端原子地执行多个操作,完成复杂的 功能,并减少客户端与服务器端通信往返次数(多次客户端的操作写在脚本里面,然后一次性在服务器端执行)<br>6.复制:为指定的redis服务器创建一个或多个复制品,用于提升数据安全性,并分担读请求的负载<br>7.Sentinel：监控Redis服务器状态,并在服务器发生故障时候,进行自动故障转移.<br>8.集群:创建分布式数据库,每个服务器分别执行一部分写操作和读操作  </p>
+<h5 id="4-完善的文档"><a href="#4-完善的文档" class="headerlink" title="4.完善的文档"></a>4.完善的文档</h5><p>Redis具有完善,易读的文档,加上Redis本身功能的简单性，就算是新手也可以轻松上手<br>以下是官网上为每一个命令都做了详细文档.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/43.png" alt=""></p>
+<h5 id="5-良好的支持"><a href="#5-良好的支持" class="headerlink" title="5.良好的支持"></a>5.良好的支持</h5><p>1.antire非常勤奋,在每个版本都会不断增加有用的新功能:  </p>
+<ol>
+<li>2.6新增脚本功能,并为很多命令添加了多参数支持(比如:SADD,ZADD,等等);    </li>
+<li>2.8添加了数据库通知功能,HyperLogLog数据结构以及SCAN命令,实现了部分重同步;  </li>
+<li>3.0将会推出稳定版的Redis集群,另外还有很多新功能在持续开发中…</li>
+</ol>
+<p>2.Bug一旦出现就会被修复,齐全的测试套件以及稳扎稳打的开发策略,使得Redis健壮可靠  </p>
+<p>3.有问题时候,在Redis论坛发帖,或者到Redis的GitHub页面发issue,又或者和作者联系  </p>
+<p>4.Pivotal公司雇佣antirez全力开发Redis,无后顾之忧，并提供专门的Redis开发和维护咨询工作  </p>
+<p>5.阿里云，百度云，Amazon,RedisLab等公司都提供了基于Redis的应用服务  </p>
+<h5 id="6-广泛使用"><a href="#6-广泛使用" class="headerlink" title="6.广泛使用"></a>6.广泛使用</h5><p>1.Twitter使用Redis来存储用户时间线<br>2.StackOverflow使用Redis来进行缓存和消息分发<br>3.Pinterest使用Redis来构建关注模型(follow model)和兴趣图谱(iinterest graph)<br>4.Flickr使用redis构建队列<br>5.GitHub使用Redis作为持久化的键值对数据库,并使用Resque来实现消息队列<br>6.新浪微博使用Redis来实现计数器,反方索引,排行榜，消息队列，存储用户关系<br>7.知乎使用Redis来进行计数，缓存，消息分发和任务调度  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/26/Redis-2-Redis特色/" class="archive-article-date">
+  	<time datetime="2017-07-26T15:17:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Redis-1-Redis的诞生" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1256,125 +1331,6 @@ public long save(Demo name);
 
 
   
-    <article id="post-Sppring-Boot-十四-Spring-Boot添加JSP支持" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/22/Sppring-Boot-十四-Spring-Boot添加JSP支持/">Sppring Boot(十四)-Spring Boot添加JSP支持</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Spring Boot添加JSP支持分为六部执行<br>1.创建Maven web project;<br>2.pom.xml文件添加依赖<br>3.配置application.properties支持jsp<br>4.编写Controller<br>5.编写jsp页面<br>6.编写启动类App.java  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-创建Maven-web-project"><a href="#1-创建Maven-web-project" class="headerlink" title="1.创建Maven web project;"></a>1.创建Maven web project;</h5><p>使用MyEclipse新建一个Maven Web Project ，项目取名为：<br>spring-boot-jsp</p>
-<h5 id="2-pom-xml文件添加依赖"><a href="#2-pom-xml文件添加依赖" class="headerlink" title="2.pom.xml文件添加依赖"></a>2.pom.xml文件添加依赖</h5><p>主要添加一下依赖节点:<br>1.spring boot parent节点<br>2.jdk的版本<br>3.web支持<br>4.servlet 依赖<br>5.JSTL<br>6.tomcat 的支持  </p>
-<h6 id="1-1-spring-boot-parent节点"><a href="#1-1-spring-boot-parent节点" class="headerlink" title="1.1.spring boot parent节点"></a>1.1.spring boot parent节点</h6><pre><code>&lt;!-- spring boot parent节点，引入这个之后，在下面和spring boot相关的就不需要引入版本了; --&gt;
-&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
-&lt;/parent&gt;
-</code></pre><h6 id="1-2-jdk的版本"><a href="#1-2-jdk的版本" class="headerlink" title="1.2.jdk的版本"></a>1.2.jdk的版本</h6><pre><code> &lt;!-- 指定一下jdk的版本 ，这里我们使用jdk 1.8 ,默认是1.6 --&gt;
-&lt;properties&gt;
-&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
- &lt;java.version&gt;1.8&lt;/java.version&gt;
-&lt;/properties&gt;
-</code></pre><h6 id="1-3-web支持"><a href="#1-3-web支持" class="headerlink" title="1.3.web支持"></a>1.3.web支持</h6><pre><code>&lt;!-- web支持: 1、web mvc; 2、restful; 3、jackjson支持; 4、aop ........ --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-</code></pre><h6 id="1-4-servlet-依赖"><a href="#1-4-servlet-依赖" class="headerlink" title="1.4.servlet 依赖"></a>1.4.servlet 依赖</h6><pre><code>&lt;!-- servlet 依赖. --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-</code></pre><h6 id="1-5-JSTL"><a href="#1-5-JSTL" class="headerlink" title="1.5.JSTL"></a>1.5.JSTL</h6><pre><code> &lt;!-- JSTL（JSP Standard Tag Library，JSP标准标签库)是一个不断完善的开放源代码的JSP标签库，是由apache的jakarta小组来维护的。 --&gt; 
-  &lt;dependency&gt;
-        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-        &lt;artifactId&gt;jstl&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h6 id="1-6-tomcat-的支持"><a href="#1-6-tomcat-的支持" class="headerlink" title="1.6.tomcat 的支持"></a>1.6.tomcat 的支持</h6><pre><code>&lt;!-- tomcat 的支持.--&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.tomcat.embed&lt;/groupId&gt;
-        &lt;artifactId&gt;tomcat-embed-jasper&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-</code></pre><h5 id="3-配置application-properties支持jsp"><a href="#3-配置application-properties支持jsp" class="headerlink" title="3.配置application.properties支持jsp"></a>3.配置application.properties支持jsp</h5><p>添加src/main/resources/application.properties：</p>
-<pre><code>#页面默认前缀目录
-spring.mvc.view.prefix=/WEB-INF/jsp/
-#响应页面默认后缀
-spring.mvc.view.suffix=.jsp
-#自定义属性，可以在Controller中读取
-application.hello=Hello Angel From application
-</code></pre><h5 id="4-编写Controller"><a href="#4-编写Controller" class="headerlink" title="4.编写Controller"></a>4.编写Controller</h5><pre><code>@Controller
-public class HelloController {
-@RequestMapping(&quot;hello&quot;)
-public String hello(Map&lt;String,Object&gt; map){
-    map.put(&quot;hello&quot;,&quot;Hello JSP&quot;);
-    return &quot;hello&quot;;
-}
-}
-</code></pre><h5 id="5-编写jsp页面"><a href="#5-编写jsp页面" class="headerlink" title="5.编写jsp页面"></a>5.编写jsp页面</h5><pre><code>&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=ISO-8859-1&quot;
-pageEncoding=&quot;ISO-8859-1&quot;%&gt;
-&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=ISO-8859-1&quot;&gt;
-&lt;title&gt;Spring Boot JSP&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  ${hello}
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="6-编写启动类App-java"><a href="#6-编写启动类App-java" class="headerlink" title="6.编写启动类App.java"></a>6.编写启动类App.java</h5><p>访问:<a href="http://localhost:8081/hello" target="_blank" rel="external">http://localhost:8081/hello</a> 输出结果:Hello JSP</p>
-<p>特别说明：针对el表达式，类似${hello}这个对于servlet的版本是有限制的，2.4版本版本以下是不支持的，是无法进行识别的，请注意。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/22/Sppring-Boot-十四-Spring-Boot添加JSP支持/" class="archive-article-date">
-  	<time datetime="2017-07-22T13:52:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -1440,7 +1396,7 @@ pageEncoding=&quot;ISO-8859-1&quot;%&gt;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 17.86px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
