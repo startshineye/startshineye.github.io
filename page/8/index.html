@@ -152,6 +152,76 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-五-构建多线程NIO系统" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/25/netty实践-五-构建多线程NIO系统/">netty实践(五)-构建多线程NIO系统</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>在前面我们已经知道,socketIO传输是单线程阻塞的OIO传输,为了提高效率,我们是创建一个线程池,然后创建一个任务放在里面执行,然而之前说的NIO是单线程的,但是为了提高效率,我们可否可以通过创建一个线程池,把任务 放到里面去,有那么简单吗？</li>
+<li>一个NIO是不是只能有一个selector？<br>不是，一个系统可以有多个selector  </li>
+<li>selector是不是只能注册一个ServerSocketChannel？<br>不是，可以注册多个<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4></li>
+</ol>
+<h5 id="1-传统socketIO"><a href="#1-传统socketIO" class="headerlink" title="1.传统socketIO"></a>1.传统socketIO</h5><h6 id="1-结构图"><a href="#1-结构图" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/socketIO.png" alt=""></p>
+<h6 id="2-分析"><a href="#2-分析" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
+<li>一个线程就是一个服务生</li>
+<li>对于有多个客人(socket客户端)我们需要创建多个服务生为其服务</li>
+</ol>
+<h5 id="2-NIO"><a href="#2-NIO" class="headerlink" title="2.NIO"></a>2.NIO</h5><h6 id="1-结构图-1"><a href="#1-结构图-1" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/f1d028a762950f82ae68236c36bc9d07eef8d954/2017/5/NIO.png" alt=""></p>
+<h6 id="2-分析-1"><a href="#2-分析-1" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
+<li>一个线程+selector才是一个服务生</li>
+<li>此一个服务生干的事情很多,既要看大门,接受其OP_ACCEPT,又需要为客人服务，执行OP_READ时间</li>
+</ol>
+<h5 id="3-NettyIO"><a href="#3-NettyIO" class="headerlink" title="3.NettyIO"></a>3.NettyIO</h5><p>其实NettyIO就是一个多线程条件下的NIO，因为直接通过构建线程池,创建一个任务让线程池去执行此任务是会报”NullPoint Exception”<br>原因:一个客户端请求过来进行了两次处理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/%E6%88%AA%E5%9B%BE05.png" alt=""></p>
+<h6 id="1-结构图-2"><a href="#1-结构图-2" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/NettyIO.png" alt=""></p>
+<h6 id="2-分析-2"><a href="#2-分析-2" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
+<li>我们为每一片区域都加入一个服务员,并且给看大门的也加入服务员,每一个服务员就是一个线程</li>
+<li>每一个服务员就负责他的那一块</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/05/25/netty实践-五-构建多线程NIO系统/" class="archive-article-date">
+  	<time datetime="2017-05-25T15:01:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-四-netty之helloword客户端" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -678,58 +748,6 @@
 
 
   
-    <article id="post-页面静态化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/26/页面静态化/">页面静态化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>实现以下布局:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/97.png" alt=""> </p>
-<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><p>如下：<br>    <figure class="highlight html"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line"><span class="meta">&lt;!doctype html&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">html</span>&gt;</span></div><div class="line"> <span class="tag">&lt;<span class="name">head</span>&gt;</span></div><div class="line">   <span class="comment">&lt;!--声明当前页面编码集:中文编码GBK,国际编码(utf-8)--&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">meta</span> <span class="attr">http-equiv</span>=<span class="string">"Content-Type"</span> <span class="attr">content</span>=<span class="string">"text/htmml;charset=utf-8"</span>&gt;</span></div><div class="line">   <span class="comment">&lt;!--网页三要素:标题,关键字,描述--&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">title</span>&gt;</span>页面静态化<span class="tag">&lt;/<span class="name">title</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span>=<span class="string">"keywords"</span> <span class="attr">content</span>=<span class="string">"关键词,关键词"</span>&gt;</span></div><div class="line">   <span class="tag">&lt;<span class="name">meta</span> <span class="attr">name</span> = <span class="string">"description"</span> <span class="attr">content</span>=<span class="string">"页面静态化"</span>&gt;</span></div><div class="line">  </div><div class="line">  <span class="comment">&lt;!--css/js--&gt;</span></div><div class="line">  <span class="tag">&lt;<span class="name">style</span> <span class="attr">type</span>=<span class="string">"text/css"</span>&gt;</span><span class="undefined"></span></div><div class="line">   *&#123;margin: 0;padding: 0;&#125;</div><div class="line">   body&#123;font-size: 12px;font-family: "微软雅黑";color: #666;&#125;</div><div class="line">   h1&#123;text-align: center;line-height: 100px;&#125;</div><div class="line"></div><div class="line">   .search&#123;text-align: center;&#125;</div><div class="line">   .search .s-url&#123;width: 300px;height: 32px;padding-left: 10px;outline: none;border: 1px solid #dfdfdf;&#125;</div><div class="line">   .search .s-btn&#123;width: 100px;height: 32px;background:#ff3300;color:#FFFFFF;outline: none;border-radius: 0px 3px 3px 0px;cursor: pointer;&#125;</div><div class="line">   .search .s-btn:hover&#123;background: #e60000;&#125;</div><div class="line"></div><div class="line">   .box&#123;width: 100%;height: 300px;margin: 30px 0;&#125;</div><div class="line">    .btn&#123;width: 200px;height: 36px;display: block;text-align: center;line-height: 36px;text-decoration: none;color: #ffffff;background: #ff9900;margin: 0 auto;border-radius: 80%;&#125;</div><div class="line">    .btn:hover&#123;background: #e60000;&#125;</div><div class="line"> /**</div><div class="line">text-decoration: none;去掉下划线</div><div class="line">line-height: 36px；垂直对其</div><div class="line">margin: 0 auto;左右居中</div><div class="line">.btn:hover&#123;background: #e60000;&#125;:选中时候变色;</div><div class="line"> ***/</div><div class="line">  <span class="tag">&lt;/<span class="name">style</span>&gt;</span></div><div class="line"> <span class="tag">&lt;/<span class="name">head</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">h1</span>&gt;</span>Java开发页面静态化技术<span class="tag">&lt;/<span class="name">h1</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">div</span> <span class="attr">class</span> = <span class="string">"search"</span>&gt;</span></div><div class="line">请输入网址:<span class="tag">&lt;<span class="name">input</span> <span class="attr">type</span>=<span class="string">"text"</span> <span class="attr">class</span> = <span class="string">"s-url"</span> <span class="attr">placeholder</span>=<span class="string">"请输入网址..."</span>/&gt;</span><span class="tag">&lt;<span class="name">input</span> <span class="attr">class</span> = <span class="string">"s-btn"</span> <span class="attr">type</span>=<span class="string">"button"</span> <span class="attr">value</span>=<span class="string">"获取源代码"</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">div</span>&gt;</span></div><div class="line"><span class="tag">&lt;<span class="name">textarea</span> <span class="attr">class</span> = <span class="string">"box"</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">textarea</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;<span class="name">a</span> <span class="attr">href</span>=<span class="string">"#"</span> <span class="attr">class</span>=<span class="string">"btn"</span>&gt;</span>生成静态页面<span class="tag">&lt;/<span class="name">a</span>&gt;</span></div><div class="line"></div><div class="line"><span class="tag">&lt;/<span class="name">body</span>&gt;</span></div><div class="line"><span class="tag">&lt;/<span class="name">html</span>&gt;</span></div></pre></td></tr></table></figure></p>
-<h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>1.text-decoration: none;去掉下划线<br>2.line-height: 36px；垂直对其<br>3.margin: 0 auto;左右居中<br>4..btn:hover{background: #e60000;}:选中时候变色;  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/26/页面静态化/" class="archive-article-date">
-  	<time datetime="2017-03-26T11:57:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -795,7 +813,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.29px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18.57px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Sppring-Boot/" style="font-size: 10px;">Sppring Boot</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 19.33px;">Spring Boot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
