@@ -152,6 +152,98 @@
       <div class="body-wrap">
         
   
+    <article id="post-redis-6-散列" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/20/redis-6-散列/">redis(6)-散列</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>散列是由多个键值组成  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-散列"><a href="#1-散列" class="headerlink" title="1.散列"></a>1.散列</h5><ol>
+<li>一个散列是由多个域值对(field-value pair)组成,散列的域和值都可以是文字,整数,浮点数或者二进制数据。  </li>
+<li>同一个散列里面的每个域必须是独一无二,各不相同的,而域的值没有这一严格要求,换句话说,不同域的值可以是重复的。  </li>
+<li>通过命令,用户可以对散列执行设置域值对,获取域的值,检查域是否存在等操作,也可以让Redis返回散列包含的所有域,所有值或者所有域值对。</li>
+</ol>
+<p>消息的散列:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/12.png" alt=""></p>
+<h5 id="2-基本操作"><a href="#2-基本操作" class="headerlink" title="2.基本操作"></a>2.基本操作</h5><p>基本操作:关联域值对,获取域的值,检查域是否存在,获取域值对数据是否存在,等等。  </p>
+<h6 id="2-1关联域值对"><a href="#2-1关联域值对" class="headerlink" title="2.1关联域值对"></a>2.1关联域值对</h6><p>HSET key field value  </p>
+<p>在散列键key中关联给定的域值对field和value。如果域fiield之前没有关联值,那么命令返回1；如果域field已经有关联值,那么命令用新值覆盖旧值,并返回0。  </p>
+<p>复杂度O(1)  </p>
+<p>设置关联域值对:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/14.png" alt=""><br>每执行一步就会出现下面的每一步场景<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/13.png" alt="">  </p>
+<h6 id="2-2-获取域所关联的值"><a href="#2-2-获取域所关联的值" class="headerlink" title="2.2 获取域所关联的值"></a>2.2 获取域所关联的值</h6><p>HGET key filed  </p>
+<p>返回散列键key中,域filed所关联的值。如果域filed没有关联值,那么返回nil  </p>
+<p>复杂度O(1)  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/15.png" alt=""></p>
+<h6 id="2-3仅当域不存在时，关联域值对"><a href="#2-3仅当域不存在时，关联域值对" class="headerlink" title="2.3仅当域不存在时，关联域值对"></a>2.3仅当域不存在时，关联域值对</h6><p>HSETNX key filed  value   </p>
+<p>如果散列键key中,域filed不存在(也即是,还没有与之关联的值),那么关联给定的域值对filed和value。  </p>
+<p>如果域field已经有与之相关联的值,那么命令不做动作,返回为0。  </p>
+<p>复杂度O(1)  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/16.png" alt=""></p>
+<h6 id="2-4检查域是否存在"><a href="#2-4检查域是否存在" class="headerlink" title="2.4检查域是否存在"></a>2.4检查域是否存在</h6><p>HEXISTS key filed  </p>
+<p>查看散列键key中,给定域是否存在;存在返回1，不存在返回0。  </p>
+<p>复杂度O(1)  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/17.png" alt=""></p>
+<h6 id="2-5-删除给定的域值对"><a href="#2-5-删除给定的域值对" class="headerlink" title="2.5 删除给定的域值对"></a>2.5 删除给定的域值对</h6><p>HDEL key filed [feild …]  </p>
+<p>删除散列键key中的一个或者多个指定域,以及那些域的值。不存在的域将会被忽略。命令返回被成功删除的域值对数量。  </p>
+<p>复杂度为O(N),N为被删除的域值对数量。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/18.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/19.png" alt="">  </p>
+<h6 id="2-6-获取散列包含的键值对数量"><a href="#2-6-获取散列包含的键值对数量" class="headerlink" title="2.6 获取散列包含的键值对数量"></a>2.6 获取散列包含的键值对数量</h6><p>HLEN key  </p>
+<p>返回散列键key包含的域值对数量  </p>
+<p>复杂度O(1)  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/20.png" alt="">  </p>
+<h5 id="3-批量操作"><a href="#3-批量操作" class="headerlink" title="3.批量操作"></a>3.批量操作</h5><p>一次对多个域,多个值或者多个域值对进行操作  </p>
+<h6 id="3-1-一次设置或获取散列中的多个域值对"><a href="#3-1-一次设置或获取散列中的多个域值对" class="headerlink" title="3.1 一次设置或获取散列中的多个域值对"></a>3.1 一次设置或获取散列中的多个域值对</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/21.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/22.png" alt="">  </p>
+<h6 id="3-2-获取散列包含的所有域-值-或者域值对"><a href="#3-2-获取散列包含的所有域-值-或者域值对" class="headerlink" title="3.2 获取散列包含的所有域,值,或者域值对"></a>3.2 获取散列包含的所有域,值,或者域值对</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/23.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/24.png" alt=""> </p>
+<p>为什么命令叫hkeys而不是hfields?<br>对于散列来说,key和field表示的是同一个意思,并且key比field更容易拼写。所以redis选择使用keys来做命令的名字,而不是hfields。  </p>
+<h5 id="4-数字操作"><a href="#4-数字操作" class="headerlink" title="4.数字操作"></a>4.数字操作</h5><p>和字符串键的值一样,在散列里面,域的值也可以被解释为数字,并执行相应的数字操作。  </p>
+<h6 id="4-1对域的值执行自增操作"><a href="#4-1对域的值执行自增操作" class="headerlink" title="4.1对域的值执行自增操作"></a>4.1对域的值执行自增操作</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/25.png" alt="">  </p>
+<p>虽然Redis没有提供与以上两个命令相匹配的hdecrby命令和hdecrbyfloat命令,但我们同样可以通过将increment设置为负数来达到做减法的效果  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/20/redis-6-散列/" class="archive-article-date">
+  	<time datetime="2017-08-20T03:01:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-20</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-git-Template-render-error" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1360,106 +1452,6 @@ at processImmediate [as _immediateCallback] (timers.js:582:5)
       
       <a href="/2017/08/06/vue-v-on-clic/" class="archive-article-date">
   	<time datetime="2017-08-06T04:18:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-06</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-v-for" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/06/vue-v-for/">vue-v-for</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当我们遍历data里面的数组或者json时候我们就需要用到v-for  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-v-for"><a href="#1-v-for" class="headerlink" title="1.v-for"></a>1.v-for</h5><pre><code>循环:
-数组:
-v-for=&quot;name in arr&quot;  
-vue提供(但是在2.0丢弃)
-  1序列.{{$index}} 
-
-json：
-v-for=&quot;name in json&quot;
-vue提供(但是在2.0丢弃)
-  1序列.{{$index}}  
-  2.json中key:{{$key}}
-
-v-for=&quot;(k,v) in json&quot; 有时候我们需要输出key
-</code></pre><h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><p>1.view  </p>
-<pre><code>&lt;div id=&quot;app&quot;&gt;
-    &lt;!--遍历数组--&gt;
-       &lt;ul&gt;
-       &lt;li v-for=&quot;name in msg&quot;&gt;
-           {{name}} {{$index}}
-       &lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;br&gt;
-    &lt;!--遍历json1--&gt;
-    &lt;ul&gt;
-       &lt;li v-for=&quot;name in msg1&quot;&gt;
-          {{$key}} {{name}} {{$index}}
-       &lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;br&gt;
-    &lt;!--遍历json2--&gt;
-    &lt;ul&gt;
-       &lt;li v-for=&quot;(k,v) in msg2&quot;&gt;
-         {{k}} {{v}}
-       &lt;/li&gt;
-    &lt;/ul&gt;
- &lt;/div&gt;
-</code></pre><p>2.model,modelview</p>
-<pre><code>var vm = new Vue({
-             el:&quot;#app&quot;,
-             data:{
-                  msg:[&quot;apple&quot;,&quot;banana&quot;,&quot;orange&quot;],
-            msg1:{
-              a:&quot;apple&quot;,b:&quot;banana&quot;,o:&quot;orange&quot;
-            },
-            msg2:{
-             a:&quot;apple&quot;,b:&quot;banana&quot;,o:&quot;orange&quot;
-            }     
-             }
-         });
-</code></pre><p>3.效果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/2.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/06/vue-v-for/" class="archive-article-date">
-  	<time datetime="2017-08-06T03:08:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-06</time>
 </a>
       
 	<div class="article-tag tagcloud">
