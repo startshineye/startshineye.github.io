@@ -152,6 +152,159 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-9-属性" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/09/vue-9-属性/">vue(9)-属性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.其实,属性跟指令是不一样的,指令是扩展了标签,是框架自带的如:v-model,他在标签中找不到和他有关的东西<br>2.属性:用于说明标签的特征,比如：class,style</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>vue里面的属性其实就是对原来标签属性的修改,是在原来标签的基础之上的  </p>
+<h5 id="1-基本属性"><a href="#1-基本属性" class="headerlink" title="1.基本属性"></a>1.基本属性</h5><p>v-bind:属性 简写为: :属性<br>1.基本属性<br>src属性<br>v-bind:src=”a”   a 只是数据名称<br>:src = “a”<br><img src=""><br>  在vue2.0时候不行<br><img v-bind:src="url">  推荐  </p>
+<p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    window.onload=function(){
+        new Vue({
+            el:&quot;#box&quot;,
+            data:{
+               url:&quot;https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png&quot;,
+                w:&quot;100px&quot;,
+                t:&quot;这是一个图片&quot;
+            }
+            }
+        );
+    }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+  &lt;!--绑定src--&gt;
+  &lt;img v-bind:src=&quot;url&quot;&gt;&lt;br&gt;
+  &lt;img :src=&quot;url&quot;&gt;
+  &lt;!--其他属性:width--&gt;
+  &lt;img :src=&quot;url&quot; :width=&quot;w&quot; :title=&quot;t&quot;&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/4.png" alt=""></p>
+<h5 id="2-特殊属性-class-style"><a href="#2-特殊属性-class-style" class="headerlink" title="2.特殊属性:class  style"></a>2.特殊属性:class  style</h5><h5 id="2-1-class"><a href="#2-1-class" class="headerlink" title="2.1 class:"></a>2.1 class:</h5><p>a)第一种::class=”[red]”  red是data里面数据 但是 此处的red就是data里面的red也是style里面的red data里面red只是一个代号,其值必须和style里面的相似，如下:<br>b)第二种:{red:true,b:true}  </p>
+<p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    window.onload=function(){
+        new Vue({
+            el:&quot;#box&quot;,
+            data:{
+                red:&apos;red&apos;,
+                t:&quot;b&quot;
+            }
+            }
+        );
+    }
+&lt;/script&gt;
+&lt;style&gt;
+    .red{
+        color: red;
+    }
+    .b{
+        background: blue;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+  &lt;!--原生态方式--&gt;
+  &lt;strong class=&quot;red&quot;&gt;张三&lt;/strong&gt;&lt;br&gt;
+  &lt;!--此处的red就是data里面的red也是style里面的red--&gt;
+  &lt;strong :class=&quot;[red]&quot;&gt;李四&lt;/strong&gt;&lt;br&gt;
+  &lt;!--多个时候,以,隔开--&gt;
+  &lt;strong :class=&quot;[red,t]&quot;&gt;王五&lt;/strong&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/5.png" alt=""></p>
+<h6 id="2-style"><a href="#2-style" class="headerlink" title="2.style:"></a>2.style:</h6><p> 和class类似<br> 注意：符合样式,采用驼峰命名<br> :style=”[c]”<br> :style=”[c,d]”<br> :style=”json” </p>
+<p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    window.onload=function(){
+        new Vue({
+            el:&quot;#box&quot;,
+            data:{
+             c:{color:&apos;red&apos;},
+                b:{backgroundColor:&apos;blue&apos;}
+            }
+            }
+        );
+    }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+&lt;strong :style=&quot;[c,b]&quot;&gt;中国&lt;/strong&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt; 
+</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/6.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/09/vue-9-属性/" class="archive-article-date">
+  	<time datetime="2017-08-09T15:24:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-09</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-8-事件" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1033,66 +1186,6 @@ v-for=&quot;(k,v) in json&quot; 有时候我们需要输出key
       
       <a href="/2017/07/30/Vue-3-vue-js核心思想/" class="archive-article-date">
   	<time datetime="2017-07-30T08:30:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Vue-2-vue-js" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/30/Vue-2-vue-js/">Vue(2)-vue.js</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-什么是vue-js"><a href="#1-什么是vue-js" class="headerlink" title="1.什么是vue.js"></a>1.什么是vue.js</h5><ol>
-<li>它是一个轻量级MVVM框架(体积很小,解压后只有20多kb)  </li>
-<li>数据驱动+组件化的前端开发( 数据驱动+组件化是vue.js核心思想)  </li>
-<li>github超过25k+的star数,社区完善  </li>
-</ol>
-<h5 id="2-对比Angular-React"><a href="#2-对比Angular-React" class="headerlink" title="2.对比Angular React"></a>2.对比Angular React</h5><p>对于前短信选型,我们第一是去看这个社区,比如vue.js社区就是很棒的, 但是光光社区也是不够的,好需要进行区别的对比,比如以下:</p>
-<ol>
-<li>vue.js更轻量,gzip后大小只有20K+(Angular有56k React有44k)  </li>
-<li>vue.js更易上手,学习曲线平稳(Angular入门最难,概念太多,完全颠覆了前端开发的模式思维,比如一些依赖注入对于一些前端来说完全不知所云,这也是因为Angular起先是一帮搞java的人写的,很多思想都是沿用后端技术,React会好一些,但是React还有自己一套js语法,所以Angular和React学习曲线高)  </li>
-<li>吸收两家之长,借鉴了Angular的指令和react的组件化  </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/30/Vue-2-vue-js/" class="archive-article-date">
-  	<time datetime="2017-07-30T05:14:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
 </a>
       
 	<div class="article-tag tagcloud">
