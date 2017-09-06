@@ -152,7 +152,7 @@
       <div class="body-wrap">
         
   
-    <article id="post-vue-24-组件" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-vue-26-模板" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -162,7 +162,51 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/03/vue-24-组件/">vue(24)-组件</a>
+      <a class="article-title" href="/2017/09/07/vue-26-模板/">vue(26)-模板</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/07/vue-26-模板/" class="archive-article-date">
+  	<time datetime="2017-09-06T16:02:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-07</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-25-组件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/03/vue-25-组件/">vue(25)-组件</a>
     </h1>
   
 
@@ -177,8 +221,8 @@
 });
 Vue.component(&quot;aaa&quot;,Aaa);
 </code></pre><p>2.（就是把extend出对象放入component中)  </p>
-<h5 id="1-普通组件使用"><a href="#1-普通组件使用" class="headerlink" title="1.普通组件使用"></a>1.普通组件使用</h5><p>普通组件的使用:1.创建组件(Vue.extend方法创建一个组件): 2.注册组件(Vue.component方法注册组件)  </p>
-<pre><code>&lt;body&gt;
+<h5 id="1-全局组件"><a href="#1-全局组件" class="headerlink" title="1.全局组件"></a>1.全局组件</h5><p>普通组件的使用:1.创建组件(Vue.extend方法创建一个组件): 2.注册组件(Vue.component方法注册组件)</p>
+<h6 id="1-1-定义"><a href="#1-1-定义" class="headerlink" title="1.1 定义"></a>1.1 定义</h6><pre><code>&lt;body&gt;
 &lt;div id = &quot;box&quot;&gt;
 &lt;!--3.调用组件--&gt;
   &lt;aaa&gt;&lt;/aaa&gt;
@@ -204,7 +248,7 @@ var vm = new Vue({
 &lt;/script&gt;
 &lt;/body&gt;  
 </code></pre><p>输出: 方式一:定义组件  </p>
-<h5 id="1-组件里面放数据"><a href="#1-组件里面放数据" class="headerlink" title="1.组件里面放数据"></a>1.组件里面放数据</h5><pre><code>var Aaa = Vue.extend({
+<h6 id="1-2-组件里面放数据"><a href="#1-2-组件里面放数据" class="headerlink" title="1.2 组件里面放数据"></a>1.2 组件里面放数据</h6><pre><code>var Aaa = Vue.extend({
     data(){
         return {
             msg:&quot;组件里面放数据&quot;
@@ -244,12 +288,135 @@ var vm = new Vue({
 &lt;/script&gt;
 &lt;/body&gt;
 </code></pre><p>输出:组件里面放数据  </p>
+<h6 id="1-3-组件里面放事件"><a href="#1-3-组件里面放事件" class="headerlink" title="1.3 组件里面放事件"></a>1.3 组件里面放事件</h6><p>点击组件时候组件里面的数据变化: Vue.extend()类似于new Vue()里面的方法定义相似:</p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;组件里面放数据&quot;
+        }
+    },
+    methods:{
+        change:function(){
+           this.msg=&quot;change事件执行&quot;;
+        }
+    },
+   template:&quot;&lt;h3 @click=&apos;change&apos;&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+Vue.component(&quot;aaa&quot;,Aaa);
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt; 
+</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.gif" alt=""></p>
+<h5 id="2-局部组件"><a href="#2-局部组件" class="headerlink" title="2. 局部组件"></a>2. 局部组件</h5><p>全局组件:我们把组件的注册从new Vue()中分离出来了,new Vue()其实就是一个根,我们把组件的注册放入到new Vue()对象中去，也就是可以放到vue中components里面。  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;局部组件&quot;
+        }
+    },
+   template:&quot;&lt;h3&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    },
+    components:{
+      &apos;aaa&apos;:Aaa
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:局部组件  </p>
+<h5 id="3-组件的另一种方式"><a href="#3-组件的另一种方式" class="headerlink" title="3.组件的另一种方式"></a>3.组件的另一种方式</h5><p>组件的另一种方式就是将组件的注册直接放入到组件中</p>
+<p>1.全局组件:  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+Vue.component(&quot;aaa&quot;,{
+    template:&quot;组件另一种方式&quot;
+});
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:组件另一种方式  </p>
+<p>2.局部  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;my-aaa&gt;&lt;/my-aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    },
+    components:{
+        &quot;my-aaa&quot;:{
+            template:&quot;局部组件另一种方式&quot;
+        }
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:局部组件另一种方式</p>
+<h5 id="4-动态组件"><a href="#4-动态组件" class="headerlink" title="4.动态组件"></a>4.动态组件</h5><p>多个组件可以使用同一个挂载点，然后动态的在他们之间切换。使用保留的<component>元素，动态地绑定到它的is特性。下面的列子在同一个vue实例下挂了aaa、bbb、ccc三个组件，通过特性currentView动态切换组件显示。其中 :is=”a” a指代是哪个组件  </component></p>
+<p>1.通过<component :is="组件名字">元素  2.由is决定是哪个组件  </component></p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;input type=&quot;button&quot; @click=&quot;a=&apos;aaa&apos;&quot; value=&quot;aaa组件&quot;&gt;
+  &lt;input type=&quot;button&quot; @click=&quot;a=&apos;bbb&apos;&quot; value=&quot;bbb组件&quot;&gt;
+  &lt;component :is=&quot;a&quot;&gt;&lt;/component&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;&lt;h2&gt;我是组件aaa&lt;/h2&gt;&quot;
+      },
+       &quot;bbb&quot;:{
+          template:&quot;&lt;h2&gt;我是组件bbb&lt;/h2&gt;&quot;
+       }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:<br><img src="11.gif" alt=""></p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/09/03/vue-24-组件/" class="archive-article-date">
+      <a href="/2017/09/03/vue-25-组件/" class="archive-article-date">
   	<time datetime="2017-09-03T14:56:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
 </a>
       
@@ -1178,82 +1345,6 @@ document.onclick=function(){
       
       <a href="/2017/08/31/vue-17-computed计算属性/" class="archive-article-date">
   	<time datetime="2017-08-30T16:02:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-16-过滤html" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/30/vue-16-过滤html/">vue(16)-过滤html</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当我们输入的消息是:  </p>
-<pre><code>&lt;span&gt;welcome&lt;/span&gt;
-</code></pre><p>时候,我们需要将最终结束输出为:welcome  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-代码"><a href="#1-代码" class="headerlink" title="1.代码"></a>1.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
- &lt;div id=&quot;box&quot;&gt;
-   原样输出:&lt;span&gt;{{msg}}&lt;/span&gt;&lt;br&gt;
-   闪烁过滤输出:&lt;span&gt;{{{msg}}}&lt;/span&gt;&lt;br&gt;
-   不闪烁过滤输出:&lt;span v-html=&quot;msg&quot;&gt;&lt;/span&gt;
-  &lt;/div&gt;
- &lt;script&gt;
-  new Vue({
-      el:&quot;#box&quot;,
-      data:{
-          msg:&apos;&lt;strong&gt;hello vue&lt;/strong&gt;&apos;
-      }
-  });
- &lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/100.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/30/vue-16-过滤html/" class="archive-article-date">
-  	<time datetime="2017-08-30T15:43:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-30</time>
 </a>
       
 	<div class="article-tag tagcloud">
