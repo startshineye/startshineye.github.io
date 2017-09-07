@@ -411,6 +411,112 @@ var vm = new Vue({
 &lt;/script&gt;
 &lt;/body&gt;
 </code></pre><p>输出:<br><img src="11.gif" alt=""></p>
+<h5 id="5-父子组件"><a href="#5-父子组件" class="headerlink" title="5.父子组件"></a>5.父子组件</h5><p>父子节点调用:</p>
+<pre><code>&lt;!--第一种:子组件名放在父节点里面--&gt;
+&lt;aaa&gt;
+    &lt;bbb&gt;&lt;/bbb&gt;
+&lt;/aaa&gt;
+</code></pre><p>调用时候:子组件直接在父组件的template里面  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;!--第一种:子组件名放在父节点里面--&gt;
+   &lt;aaa&gt;
+   &lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;&lt;h2&gt;我是组件aaa&lt;/h2&gt;&lt;bbb&gt;&lt;/bbb&gt;&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  template:&quot;&lt;h3&gt;我是组件bbb&lt;/h3&gt;&quot;
+              }
+          }
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="4.png" alt="">  </p>
+<p>父节点里面的数据,父节点可以访问,但是子节点不能访问。vue默认情况下,子组件也没法访问父组件数据  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;!--第一种:子组件名放在父节点里面--&gt;
+   &lt;aaa&gt;
+   &lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          data(){
+              return{
+                  msg:&quot;我是父节点数据&quot;
+              }
+          },
+          template:&quot;&lt;h2&gt;我是组件aaa-&gt;{{msg}}&lt;/h2&gt;&lt;bbb&gt;&lt;/bbb&gt;&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  template:&quot;&lt;h3&gt;我是组件bbb-&gt;{{msg}}&lt;/h3&gt;&quot;
+              }
+          }
+      }
+   }
+ });
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="5.png" alt=""></p>
+<p>组件间传递数据:<br>使用模板标签:<template></template><br>1.子组件就想获取父组件data: props:[]  </p>
+<pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;aaa&gt;
+    &lt;/aaa&gt;
+&lt;/div&gt;
+
+&lt;template id=&quot;aaa&quot;&gt;
+    &lt;h1&gt;11111&lt;/h1&gt;
+    &lt;bbb :mmm=&quot;msg2&quot; :my-msg=&quot;msg&quot;&gt;&lt;/bbb&gt;
+&lt;/template&gt;
+&lt;script&gt;
+    var vm=new Vue({
+        el:&apos;#box&apos;,
+        data:{
+            a:&apos;aaa&apos;
+        },
+        components:{
+            &apos;aaa&apos;:{
+                data(){
+                    return {
+                        msg:111,
+                        msg2:&apos;我是父组件的数据&apos;
+                    }
+                },
+                template:&apos;#aaa&apos;,
+                components:{
+                    &apos;bbb&apos;:{
+                        props:{
+                            &apos;m&apos;:String,
+                            &apos;myMsg&apos;:Number
+                        },
+                        template:&apos;&lt;h3&gt;我是bbb组件-&gt;{{mmm}} &lt;br&gt; {{myMsg}}&lt;/h3&gt;&apos;
+                    }
+                }
+            }
+        }
+    });
+
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="6.png" alt=""></p>
 
       
     </div>
