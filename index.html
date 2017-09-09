@@ -411,7 +411,7 @@ var vm = new Vue({
 &lt;/script&gt;
 &lt;/body&gt;
 </code></pre><p>输出:  </p>
-<p><img src="https://github.com/startshineye/img/blob/master/2017/9/11.gif" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/11.gif" alt=""></p>
 <h5 id="5-父子组件"><a href="#5-父子组件" class="headerlink" title="5.父子组件"></a>5.父子组件</h5><p>父子节点调用:</p>
 <pre><code>&lt;!--第一种:子组件名放在父节点里面--&gt;
 &lt;aaa&gt;
@@ -443,7 +443,7 @@ var vm = new Vue({
 });
 &lt;/script&gt;
 &lt;/body&gt;
-</code></pre><p><img src="4.png" alt="">  </p>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.png" alt="">  </p>
 <p>父节点里面的数据,父节点可以访问,但是子节点不能访问。vue默认情况下,子组件也没法访问父组件数据  </p>
 <pre><code>&lt;body&gt;
 &lt;div id = &quot;box&quot;&gt;
@@ -475,9 +475,9 @@ var vm = new Vue({
  });
 &lt;/script&gt;
 &lt;/body&gt;
-</code></pre><p><img src="5.png" alt=""></p>
-<p>组件间传递数据:<br>使用模板标签:<template></template><br>1.子组件就想获取父组件data: props:[]  </p>
-<pre><code>&lt;body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/5.png" alt=""></p>
+<h5 id="6-组件间传递数据"><a href="#6-组件间传递数据" class="headerlink" title="6. 组件间传递数据:"></a>6. 组件间传递数据:</h5><p>使用模板标签:<template></template>  </p>
+<h5 id="6-1-子组件就想获取父组件data-props"><a href="#6-1-子组件就想获取父组件data-props" class="headerlink" title="6.1.子组件就想获取父组件data: props:[]"></a>6.1.子组件就想获取父组件data: props:[]</h5><pre><code>&lt;body&gt;
 &lt;div id=&quot;box&quot;&gt;
     &lt;aaa&gt;
     &lt;/aaa&gt;
@@ -517,7 +517,66 @@ var vm = new Vue({
 
 &lt;/script&gt;
 &lt;/body&gt;
-</code></pre><p><img src="6.png" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/6.png" alt=""></p>
+<h6 id="6-2-父组件获取子组件数据"><a href="#6-2-父组件获取子组件数据" class="headerlink" title="6.2 父组件获取子组件数据"></a>6.2 父组件获取子组件数据</h6><p>实质:子组件把自己的数据发送到父组件<br>子组件发送方法:vm.$emit(数据名称,数据);<br>父组件接收方法:@数据名称=”父组件方法名”  </p>
+<p>实例:通过点击一个按钮,父组件拿到子组件里面的数据  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+
+&lt;!--父组件--&gt;
+&lt;template id = &quot;aaa&quot;&gt;
+  &lt;span&gt;我是父组件-&gt;{{msg}}&lt;/span&gt;
+  &lt;bbb @child-msg=&quot;get&quot;&gt;&lt;/bbb&gt;
+&lt;/template&gt;
+
+&lt;!--子组件--&gt;
+&lt;template id=&quot;bbb&quot;&gt;
+  &lt;h3&gt;子组件&lt;/h3&gt;
+  &lt;input type=&quot;button&quot; value=&quot;send&quot; @click=&quot;send&quot;&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          data(){
+              return{
+                  msg:&quot;父节点数据&quot;
+              }
+          },
+          methods:{
+             get(msg){//获取到的数据
+                this.msg=msg;
+             }
+          },
+          template:&quot;#aaa&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  data(){
+                      return {
+                          childmsg:&quot;我是子组件数据&quot;
+                      }
+                  },
+                  template:&quot;#bbb&quot;,
+                  methods:{
+                          send(){
+                              this.$emit(&quot;child-msg&quot;,this.childmsg);
+                          }
+                  }
+              }
+          }
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.gif" alt=""></p>
 
       
     </div>
