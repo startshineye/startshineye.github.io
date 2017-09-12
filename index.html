@@ -233,6 +233,33 @@ public void setEnvironment(Environment environment) {
  }
 }
 </code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.png" alt=""></p>
+<h6 id="2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性"><a href="#2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性" class="headerlink" title="2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性"></a>2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性</h6><p>1.加入依赖  </p>
+<pre><code>&lt;!--spring-boot-configuration:spring boot 配置处理器; --&gt;
+ &lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+       &lt;optional&gt;true&lt;/optional&gt;
+ &lt;/dependency&gt;
+</code></pre><p>2.@ConfigurationProperties 读取application属性配置文件中的属性。</p>
+<pre><code>@Configuration
+@ConditionalOnClass(Mongo.class)
+@EnableConfigurationProperties(MongoProperties.class)
+public class MongoAutoConfiguration {
+
+@Autowired
+private MongoProperties properties;
+
+}
+</code></pre><ol>
+<li>@ConditionOnClass表明该@Configuration仅仅在一定条件下才会被加载，这里的条件是Mongo.class位于类路径上</li>
+<li>@EnableConfigurationProperties将Spring Boot的配置文件（application.properties）中的spring.data.mongodb.*属性映射为MongoProperties并注入到MongoAutoConfiguration中。</li>
+<li><p>@ConditionalOnMissingBean说明Spring Boot仅仅在当前上下文中不存在Mongo对象时，才会实例化一个Bean。这个逻辑也体现了Spring Boot的另外一个特性——自定义的Bean优先于框架的默认配置，我们如果显式的在业务代码中定义了一个Mongo对象，那么Spring Boot就不再创建。</p>
+<p> @ConfigurationProperties(prefix = “spring.data.mongodb”)<br> public class MongoProperties {</p>
+<p> private String host;<br> privateint port = DBPort.PORT;<br> private String uri = “mongodb://localhost/test”;<br> private String database;</p>
+<p> // … getters/ setters omitted<br> }</p>
+</li>
+</ol>
+<p>它就是以spring.data.mongodb作为前缀的属性，然后通过名字直接映射为对象的属性，同时还包含了一些默认值。如果不配置，那么mongo.uri就是mongodb://localhost/test。  </p>
 
       
     </div>
