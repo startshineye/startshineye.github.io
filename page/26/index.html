@@ -152,6 +152,66 @@
       <div class="body-wrap">
         
   
+    <article id="post-解决Myeclipse10内存溢出" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/11/07/解决Myeclipse10内存溢出/">解决Myeclipse10内存溢出</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h4><p>启动项目，报错：<br> java.lang.OutOfMemoryError: PermGen space</p>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><h6 id="1-在Myeclipse根目录下修改myeclipse-ini："><a href="#1-在Myeclipse根目录下修改myeclipse-ini：" class="headerlink" title="1. 在Myeclipse根目录下修改myeclipse.ini："></a>1. 在Myeclipse根目录下修改myeclipse.ini：</h6><p>#utf8 (do not remove)<br>-startup<br>../Common/plugins/org.eclipse.equinox.launcher_1.2.0.v20110502.jar<br>–launcher.library<br>../Common/plugins/org.eclipse.equinox.launcher.i18n.win32.win32.x86_64_4.2.0.v201201111650<br>-install<br>C:\Users\xxx\AppData\Local\MyEclipse\MyEclipse 10<br>-vm<br>C:\Users\xxx\AppData\Local\MyEclipse\Common\binary\com.sun.java.jdk.win32.x86_64_1.6.0.013\bin\javaw.exe<br>-configuration<br>C:\Users\xxx\AppData\Local\MyEclipse\MyEclipse 10\configuration<br>-vmargs<br>-Xmx1024m<br>-XX:MaxPermSize=512m<br>-XX:ReservedCodeCacheSize=128m<br>-Dosgi.nls.warnings=ignore</p>
+<h6 id="2-myeclipse-ini里配置后"><a href="#2-myeclipse-ini里配置后" class="headerlink" title="2. myeclipse.ini里配置后"></a>2. myeclipse.ini里配置后</h6><ol>
+<li>设置Default VM Arguments<br>在myEclipse中，打开Windows-&gt; Preferences-&gt;Java-&gt;Installed JREs-&gt;点击正在使用的JDK-&gt;Edit-&gt;Default VM Arguments文本框中输入：-Xms64m   -Xmx256m </li>
+<li>如果是web工程还报内存溢出，可能就要设置tomcat内存。<br>（1）tomcat的安装根目录%tomcat%bin/catalina.bat文件，SET JAVA_OPTS 一行；<br>（2）myeclipse配置web服务器配置 Window—Preferences—Myeclipse—Servers—tomcat 5.x—JDK的Optional Java VM arguments配置为：<br>-Xms256m -Xmx512m -XX:MaxNewSize=256m -XX:MaxPermSize=256m</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/11/07/解决Myeclipse10内存溢出/" class="archive-article-date">
+  	<time datetime="2016-11-07T14:45:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/工具-Myeclipse/">工具 Myeclipse</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringMVC入门" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -824,75 +884,9 @@
 
 
   
-    <article id="post-Cookie-二" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/02/Cookie-二/">Cookie(二)</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h6 id="4-Cookie不可跨域"><a href="#4-Cookie不可跨域" class="headerlink" title="4.Cookie不可跨域"></a>4.Cookie不可跨域</h6><p>  Cookie是不可跨域的，阿里巴巴颁发给用户的Cookie通行证，当用户访问京东时候是不会被携带的</p>
-<h6 id="5-Cookie中编码"><a href="#5-Cookie中编码" class="headerlink" title="5.Cookie中编码"></a>5.Cookie中编码</h6><ol>
-<li>中文是Unicode字符，在内存中占据4个字节</li>
-<li>英文是ASCII字符，内存中只占2个字节</li>
-<li>Cookie中使用Unicode字符时,需要对Unicode字符进行编码否则乱码，输出时，需要经过解码。<br>提示：Cookie中保存中文只能编码。一般使用UTF-8编码即可。不推荐使用GBK等中文编码，因为浏览器不一定支持，而且JavaScript也不支持GBK编码</li>
-</ol>
-<h6 id="6-Cookie特性"><a href="#6-Cookie特性" class="headerlink" title="6.Cookie特性"></a>6.Cookie特性</h6><p>Java中把Cookie封装成了javax.servlet.http.Cookie类。每个Cookie都是该Cookie类的对象。服务器通过操作Cookie类对象对客户端Cookie进行操作。通过request.getCookie()获取客户端提交的所有Cookie（以Cookie[]数组形式返回），通过response.addCookie(Cookiecookie)向客户端设置Cookie。</p>
-<p>Cookie对象使用key-value属性对的形式保存用户状态，一个Cookie对象保存一个属性对，一个request或者response同时使用多个Cookie。因为Cookie类位于包javax.servlet.http.*下面，所以JSP中不需要import该类</p>
-<h6 id="7-Cookie属性"><a href="#7-Cookie属性" class="headerlink" title="7.Cookie属性"></a>7.Cookie属性</h6><ol>
-<li>除了name,value属性外，Cookie还有其他属性，每个属性对应有getter,setter方法。</li>
-<li>Cookie常用属性如下：<br><img src="http://p1.bpimg.com/576993/876953c1cd61fda4.png" alt="Markdown"><h6 id="8-Cookie修改-删除"><a href="#8-Cookie修改-删除" class="headerlink" title="8.Cookie修改,删除"></a>8.Cookie修改,删除</h6>如果要删除某个Cookie，只需要新建一个同名的Cookie，并将maxAge设置为0，并添加到response中覆盖原来的Cookie。注意是0而不是负数。负数代表其他的意义</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/02/Cookie-二/" class="archive-article-date">
-  	<time datetime="2016-11-02T14:12:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Cookie/">Cookie</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/Web-Cookie/">Web Cookie</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/25/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><a class="extend next" rel="next" href="/page/27/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/25/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="page-number current">26</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><span class="space">&hellip;</span><a class="page-number" href="/page/30/">30</a><a class="extend next" rel="next" href="/page/27/">Next &raquo;</a>
     </nav>
   
 
@@ -955,7 +949,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 10px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 10.67px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
