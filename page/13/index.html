@@ -152,6 +152,123 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-17-把数据保存到SD卡" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-17-把数据保存到SD卡/">Android(17)-把数据保存到SD卡</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="数据保存到SD卡"><a href="#数据保存到SD卡" class="headerlink" title="数据保存到SD卡"></a>数据保存到SD卡</h4><ol>
+<li>1.复制Android(17)的登录工程,修改包名和Strings目录<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/64.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/65.png" alt=""></li>
+<li><p>2.只需要修改UserInfoUtils的保存位置路径就可以了</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">String path = &quot;/mnt/sdcard/info.tx&quot;;</div></pre></td></tr></table></figure>
+</li>
+<li><p>3.运行工程报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/66.png" alt=""><br>往SD卡写数据,需要写外部存储设备的权限<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/67.png" alt=""></p>
+</li>
+<li><p>4.不要使用硬编码<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/68.png" alt=""></p>
+</li>
+</ol>
+<h4 id="Environment-API"><a href="#Environment-API" class="headerlink" title="Environment API"></a>Environment API</h4><p>在不要使用硬编码的情况下,我们使用EnviromentAPI来获取外部存储卡的路径,在保存数据代码如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">String sdPath = Environment.getExternalStorageDirectory().getPath();</div><div class="line">File file = new File(sdPath,&quot;info.txt&quot;);</div></pre></td></tr></table></figure></p>
+<p>读取文件信息中修改:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">//读取文件数据</div><div class="line">String sdPath = Environment.getExternalStorageDirectory().getParent();</div><div class="line">File file = new File(sdPath,&quot;info.txt&quot;);</div></pre></td></tr></table></figure></p>
+<h4 id="存在的问题"><a href="#存在的问题" class="headerlink" title="存在的问题"></a>存在的问题</h4><p>在上面中我们会知道有一个潜在的问题,那就是当我们把SD卡卸载后,数据就没地方保存或者保存的数据就无效了。  </p>
+<h6 id="判断SD卡文件是否可用"><a href="#判断SD卡文件是否可用" class="headerlink" title="判断SD卡文件是否可用"></a>判断SD卡文件是否可用</h6><p>注意要模拟sd卡卸载情况,用4.0+手机模拟器是不行的因为Android已经去掉了可卸载情况。<br>我们可以用4.0之下的手机来模拟sd卡卸载情况,以下我们使用2.3手机<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/69.png" alt=""><br>所以我们在MainActivity.java中进行判断(Evironment)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/70.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-17-把数据保存到SD卡/" class="archive-article-date">
+  	<time datetime="2017-03-12T04:37:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Android-16-使用上下文获取文件目录" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/09/Android-16-使用上下文获取文件目录/">Android(16)-使用上下文获取文件目录</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="使用上下文获取文件目录"><a href="#使用上下文获取文件目录" class="headerlink" title="使用上下文获取文件目录"></a>使用上下文获取文件目录</h4><p>在上一节中我们写死文件路径会报一个警告,如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/59.png" alt=""><br>知道:我们在编写代码的时候不适用硬编码,而是使用上下文获取文件路径.  </p>
+<ol>
+<li>1.替换UserUserInfoUtils中获取文件方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/62.png" alt=""></li>
+<li>2.在MainActivity.java中传递上下文<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/60.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/63.png" alt=""></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/09/Android-16-使用上下文获取文件目录/" class="archive-article-date">
+  	<time datetime="2017-03-08T16:24:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-09</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-15-登录案例开发" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -657,130 +774,6 @@
 
 
   
-    <article id="post-Android-七-AndroidManifest-xml介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/04/Android-七-AndroidManifest-xml介绍/">Android(七)-AndroidManifest.xml介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/19.png" alt=""><br>AndroidManifest.xml文件是Android最重要文件之一也不过分,下面介绍此文件的以下配置.四大主键都是在这里面配置的  </p>
-<ol>
-<li>package=”com.yxm.helloworld”–应用包名</li>
-<li>android:versionCode=”1”–应用版本</li>
-<li>android:versionName=”学海无涯苦作舟”–应用版本的名字<br>重新部署应用后会发现:设置-&gt;应用-&gt;helloworld<br>显示版本:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/20.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/21.png" alt="">  </li>
-<li><p>user-sdk:sdk最小版本最好不能太大不然就不能使用</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">    &lt;uses-sdk</div><div class="line">    android:minSdkVersion=&quot;8&quot;</div><div class="line">    android:targetSdkVersion=&quot;18&quot; /&gt;</div><div class="line">    ```  </div><div class="line"></div><div class="line">5. appliaction:当前应用</div><div class="line">android:allowBackup=&quot;true&quot;  </div><div class="line">android:icon=&quot;@drawable/ic_launcher&quot; &quot;@&quot;理解成R文件,此句话相当于去R.java文件下drawable下的ic_launcher</div><div class="line">6. android:label=&quot;@string/app_name&quot;默认标题</div><div class="line">7. activity</div></pre></td></tr></table></figure>
-<p> &lt;activity</p>
-<pre><code>android:name=&quot;com.yxm.helloworld.MainActivity&quot;
-android:label=&quot;@string/app_name&quot; &gt;
-&lt;intent-filter&gt;
-    &lt;action android:name=&quot;android.intent.action.MAIN&quot; /&gt;
-    &lt;category android:name=&quot;android.intent.category.LAUNCHER&quot; /&gt;
-&lt;/intent-filter&gt;
-</code></pre><p> <br> ```<br>说明android.intent.action.MAIN，android.intent.category.LAUNCHER此activity是主要的是首先就启动的<br>android:name=”com.yxm.helloworld.MainActivity”表明首先启动这个activity<br>android:icon=”@drawable/ic_launcher”可以改成自己的图片<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/22.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/23.png" alt=""><br>点击android:name=”com.yxm.helloworld.MainActivity”进入Mainactivity<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/24.png" alt=""></p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/04/Android-七-AndroidManifest-xml介绍/" class="archive-article-date">
-  	<time datetime="2017-03-04T09:52:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-八-DDMS" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/04/Android-八-DDMS/">Android(八)-DDMS</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <ol>
-<li><p>0.列举模拟器和真机<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/8.png" alt=""></p>
-</li>
-<li><p>1.实现截屏<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/9.png" alt=""></p>
-</li>
-<li>2.手机目录和应用包名<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/10.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/11.png" alt=""><br>如果我们自己创建一个应用,它也会在data-data目录下有自己的包名</li>
-<li>3.模拟打电话<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/12.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/13.png" alt=""></li>
-<li>4.模拟发短信<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/14.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/04/Android-八-DDMS/" class="archive-article-date">
-  	<time datetime="2017-03-04T08:34:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/12/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="page-number current">13</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="space">&hellip;</span><a class="page-number" href="/page/30/">30</a><a class="extend next" rel="next" href="/page/14/">Next &raquo;</a>
@@ -846,7 +839,7 @@ android:label=&quot;@string/app_name&quot; &gt;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 10.67px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 12px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
