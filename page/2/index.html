@@ -152,6 +152,418 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-25-组件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/03/vue-25-组件/">vue(25)-组件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>什么是组件：组件是Vue.js最强大的功能之一。组件可以扩展HTML元素，封装可重用的代码。在较高层面上，组件是自定义的元素，Vue.js的编译器为它添加特殊功能。在有些情况下，组件也可以是原生HTML元素的形式，以is特性扩展。组件就是一个大的对象  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.组件可以看成是HTML的扩展:比如：<aaa></aaa>可以看成是HTML的扩展，但是<aaa>在HTML中没有,我们需要自己来扩展,调用,这样就引出了组件。<br>2.定义一个组件:<br>1.全局组件  </aaa></p>
+<pre><code>var Aaa = Vue.extend({
+   template:&quot;&lt;h3&gt;方式一:定义组件&lt;/h3&gt;&quot;
+});
+Vue.component(&quot;aaa&quot;,Aaa);
+</code></pre><p>2.（就是把extend出对象放入component中)  </p>
+<h5 id="1-全局组件"><a href="#1-全局组件" class="headerlink" title="1.全局组件"></a>1.全局组件</h5><p>普通组件的使用:1.创建组件(Vue.extend方法创建一个组件): 2.注册组件(Vue.component方法注册组件)</p>
+<h6 id="1-1-定义"><a href="#1-1-定义" class="headerlink" title="1.1 定义"></a>1.1 定义</h6><pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+/********
+ * 1.方式一:定义组件(从Vue中extend出:内部是json结构)
+ * *******/
+var Aaa = Vue.extend({
+   template:&quot;&lt;h3&gt;方式一:定义组件&lt;/h3&gt;&quot;
+});
+/****************
+ * 2.注册组件(注册组件时候取名)
+ * ************************/
+Vue.component(&quot;aaa&quot;,Aaa);
+console.info(&quot;Aaa&quot;,Aaa);
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;  
+</code></pre><p>输出: 方式一:定义组件  </p>
+<h6 id="1-2-组件里面放数据"><a href="#1-2-组件里面放数据" class="headerlink" title="1.2 组件里面放数据"></a>1.2 组件里面放数据</h6><pre><code>var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;组件里面放数据&quot;
+        }
+    },
+   template:&quot;&lt;h3&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+Vue.component(&quot;aaa&quot;,Aaa);
+</code></pre><p>组件里面放数据：data(数据)必须是函数的形式,函数必须返回一个对象(一般为json对象)  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+/********
+ * 1.方式一:定义组件(从Vue中extend出:内部是json结构)
+ * *******/
+var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;组件里面放数据&quot;
+        }
+    },
+   template:&quot;&lt;h3&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+/****************
+ * 2.注册组件(注册组件时候取名)
+ * ************************/
+ Vue.component(&quot;aaa&quot;,Aaa);
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:组件里面放数据  </p>
+<h6 id="1-3-组件里面放事件"><a href="#1-3-组件里面放事件" class="headerlink" title="1.3 组件里面放事件"></a>1.3 组件里面放事件</h6><p>点击组件时候组件里面的数据变化: Vue.extend()类似于new Vue()里面的方法定义相似:</p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;组件里面放数据&quot;
+        }
+    },
+    methods:{
+        change:function(){
+           this.msg=&quot;change事件执行&quot;;
+        }
+    },
+   template:&quot;&lt;h3 @click=&apos;change&apos;&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+Vue.component(&quot;aaa&quot;,Aaa);
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt; 
+</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.gif" alt=""></p>
+<h5 id="2-局部组件"><a href="#2-局部组件" class="headerlink" title="2. 局部组件"></a>2. 局部组件</h5><p>全局组件:我们把组件的注册从new Vue()中分离出来了,new Vue()其实就是一个根,我们把组件的注册放入到new Vue()对象中去，也就是可以放到vue中components里面。  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var Aaa = Vue.extend({
+    data(){
+        return {
+            msg:&quot;局部组件&quot;
+        }
+    },
+   template:&quot;&lt;h3&gt;{{msg}}&lt;/h3&gt;&quot;
+});
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    },
+    components:{
+      &apos;aaa&apos;:Aaa
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:局部组件  </p>
+<h5 id="3-组件的另一种方式"><a href="#3-组件的另一种方式" class="headerlink" title="3.组件的另一种方式"></a>3.组件的另一种方式</h5><p>组件的另一种方式就是将组件的注册直接放入到组件中</p>
+<p>1.全局组件:  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+Vue.component(&quot;aaa&quot;,{
+    template:&quot;组件另一种方式&quot;
+});
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:组件另一种方式  </p>
+<p>2.局部  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;!--3.调用组件--&gt;
+  &lt;my-aaa&gt;&lt;/my-aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+ el:&quot;#box&quot;,
+    data:{
+     msg:&quot;hello vue&quot;
+    },
+    components:{
+        &quot;my-aaa&quot;:{
+            template:&quot;局部组件另一种方式&quot;
+        }
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:局部组件另一种方式</p>
+<h5 id="4-动态组件"><a href="#4-动态组件" class="headerlink" title="4.动态组件"></a>4.动态组件</h5><p>多个组件可以使用同一个挂载点，然后动态的在他们之间切换。使用保留的<component>元素，动态地绑定到它的is特性。下面的列子在同一个vue实例下挂了aaa、bbb、ccc三个组件，通过特性currentView动态切换组件显示。其中 :is=”a” a指代是哪个组件  </component></p>
+<p>1.通过<component :is="组件名字">元素  2.由is决定是哪个组件  </component></p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;input type=&quot;button&quot; @click=&quot;a=&apos;aaa&apos;&quot; value=&quot;aaa组件&quot;&gt;
+  &lt;input type=&quot;button&quot; @click=&quot;a=&apos;bbb&apos;&quot; value=&quot;bbb组件&quot;&gt;
+  &lt;component :is=&quot;a&quot;&gt;&lt;/component&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;&lt;h2&gt;我是组件aaa&lt;/h2&gt;&quot;
+      },
+       &quot;bbb&quot;:{
+          template:&quot;&lt;h2&gt;我是组件bbb&lt;/h2&gt;&quot;
+       }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/11.gif" alt=""></p>
+<h5 id="5-父子组件"><a href="#5-父子组件" class="headerlink" title="5.父子组件"></a>5.父子组件</h5><p>父子节点调用:</p>
+<pre><code>&lt;!--第一种:子组件名放在父节点里面--&gt;
+&lt;aaa&gt;
+    &lt;bbb&gt;&lt;/bbb&gt;
+&lt;/aaa&gt;
+</code></pre><p>调用时候:子组件直接在父组件的template里面  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;!--第一种:子组件名放在父节点里面--&gt;
+   &lt;aaa&gt;
+   &lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;&lt;h2&gt;我是组件aaa&lt;/h2&gt;&lt;bbb&gt;&lt;/bbb&gt;&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  template:&quot;&lt;h3&gt;我是组件bbb&lt;/h3&gt;&quot;
+              }
+          }
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.png" alt="">  </p>
+<p>父节点里面的数据,父节点可以访问,但是子节点不能访问。vue默认情况下,子组件也没法访问父组件数据  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+  &lt;!--第一种:子组件名放在父节点里面--&gt;
+   &lt;aaa&gt;
+   &lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          data(){
+              return{
+                  msg:&quot;我是父节点数据&quot;
+              }
+          },
+          template:&quot;&lt;h2&gt;我是组件aaa-&gt;{{msg}}&lt;/h2&gt;&lt;bbb&gt;&lt;/bbb&gt;&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  template:&quot;&lt;h3&gt;我是组件bbb-&gt;{{msg}}&lt;/h3&gt;&quot;
+              }
+          }
+      }
+   }
+ });
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/5.png" alt=""></p>
+<h5 id="6-组件间传递数据"><a href="#6-组件间传递数据" class="headerlink" title="6. 组件间传递数据:"></a>6. 组件间传递数据:</h5><p>使用模板标签:<template></template>  </p>
+<h5 id="6-1-子组件就想获取父组件data-props"><a href="#6-1-子组件就想获取父组件data-props" class="headerlink" title="6.1.子组件就想获取父组件data: props:[]"></a>6.1.子组件就想获取父组件data: props:[]</h5><pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;aaa&gt;
+    &lt;/aaa&gt;
+&lt;/div&gt;
+
+&lt;template id=&quot;aaa&quot;&gt;
+    &lt;h1&gt;11111&lt;/h1&gt;
+    &lt;bbb :mmm=&quot;msg2&quot; :my-msg=&quot;msg&quot;&gt;&lt;/bbb&gt;
+&lt;/template&gt;
+&lt;script&gt;
+    var vm=new Vue({
+        el:&apos;#box&apos;,
+        data:{
+            a:&apos;aaa&apos;
+        },
+        components:{
+            &apos;aaa&apos;:{
+                data(){
+                    return {
+                        msg:111,
+                        msg2:&apos;我是父组件的数据&apos;
+                    }
+                },
+                template:&apos;#aaa&apos;,
+                components:{
+                    &apos;bbb&apos;:{
+                        props:{
+                            &apos;m&apos;:String,
+                            &apos;myMsg&apos;:Number
+                        },
+                        template:&apos;&lt;h3&gt;我是bbb组件-&gt;{{mmm}} &lt;br&gt; {{myMsg}}&lt;/h3&gt;&apos;
+                    }
+                }
+            }
+        }
+    });
+
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/6.png" alt=""></p>
+<h6 id="6-2-父组件获取子组件数据"><a href="#6-2-父组件获取子组件数据" class="headerlink" title="6.2 父组件获取子组件数据"></a>6.2 父组件获取子组件数据</h6><p>实质:子组件把自己的数据发送到父组件<br>子组件发送方法:vm.$emit(数据名称,数据);<br>父组件接收方法:@数据名称=”父组件方法名”  </p>
+<p>实例:通过点击一个按钮,父组件拿到子组件里面的数据  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;&lt;/aaa&gt;
+&lt;/div&gt;
+
+&lt;!--父组件--&gt;
+&lt;template id = &quot;aaa&quot;&gt;
+  &lt;span&gt;我是父组件-&gt;{{msg}}&lt;/span&gt;
+  &lt;bbb @child-msg=&quot;get&quot;&gt;&lt;/bbb&gt;
+&lt;/template&gt;
+
+&lt;!--子组件--&gt;
+&lt;template id=&quot;bbb&quot;&gt;
+  &lt;h3&gt;子组件&lt;/h3&gt;
+  &lt;input type=&quot;button&quot; value=&quot;send&quot; @click=&quot;send&quot;&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          data(){
+              return{
+                  msg:&quot;父节点数据&quot;
+              }
+          },
+          methods:{
+             get(msg){//获取到的数据
+                this.msg=msg;
+             }
+          },
+          template:&quot;#aaa&quot;,
+          components:{
+              &quot;bbb&quot;:{
+                  data(){
+                      return {
+                          childmsg:&quot;我是子组件数据&quot;
+                      }
+                  },
+                  template:&quot;#bbb&quot;,
+                  methods:{
+                          send(){
+                              this.$emit(&quot;child-msg&quot;,this.childmsg);
+                          }
+                  }
+              }
+          }
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/03/vue-25-组件/" class="archive-article-date">
+  	<time datetime="2017-09-03T14:56:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-24-动画" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1155,105 +1567,6 @@ document.onclick=function(){
 
 
   
-    <article id="post-vue-15-防止刚加载时闪烁" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/30/vue-15-防止刚加载时闪烁/">vue(15)-防止刚加载时闪烁</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当网络慢时候，我们以</p>
-<pre><code>{{}}
-</code></pre><p>加载vue数据时候,会出现首先显示两大括号,此时就需要用到vue中标签</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-v-clock属性"><a href="#1-v-clock属性" class="headerlink" title="1.v-clock属性"></a>1.v-clock属性</h5><p>v-clock[属性]  防止闪烁  用在比较大的段落  </p>
-<pre><code> &lt;style&gt;
-    [v-clock]{
-       display: none;
-    }
-&lt;/style&gt;
-&lt;div class=&quot;reply&quot; v-for=&quot;item in msgData&quot; v-cloak&gt;
-            &lt;p class=&quot;replyContent&quot;&gt;{{item.content}}&lt;/p&gt;
-            &lt;p class=&quot;operation&quot;&gt;
-                &lt;span class=&quot;replyTime&quot;&gt;{{item.time}}&lt;/span&gt;
-                &lt;span class=&quot;handle&quot;&gt;
-                    &lt;a href=&quot;javascript:;&quot; class=&quot;top&quot;&gt;{{item.acc}}&lt;/a&gt;
-                    &lt;a href=&quot;javascript:;&quot; class=&quot;down_icon&quot;&gt;{{item.ref}}&lt;/a&gt;
-                    &lt;a href=&quot;javascript:;&quot; class=&quot;cut&quot;&gt;删除&lt;/a&gt;
-                &lt;/span&gt;
-            &lt;/p&gt;
-        &lt;/div&gt;
-</code></pre><h5 id="2-v-text"><a href="#2-v-text" class="headerlink" title="2.v-text"></a>2.v-text</h5><p>以下实例:</p>
-<pre><code>&lt;span&gt;{{msg}}&lt;/span&gt;
-</code></pre><p>当网络慢的时候会出现双大括号显示,但是我们加载v-clock到上面就会比较浪费  </p>
-<pre><code>&lt;span&gt;{{msg}}&lt;/span&gt;
-</code></pre><p>对于小段落,我们可以使用v-text </p>
-<pre><code>&lt;span v-text=&quot;msg&quot;&gt;&lt;/span&gt;
-</code></pre><p>以上永远不会出现双大括号,因为本来就不存在双大括号  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;span&gt;{{msg}}&lt;/span&gt;&lt;br&gt;
-    &lt;span v-text=&quot;msg&quot;&gt;&lt;/span&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-new Vue({
-    el:&apos;#box&apos;,
-    data:{
-        msg:&quot;hello&quot;
-    }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/30/vue-15-防止刚加载时闪烁/" class="archive-article-date">
-  	<time datetime="2017-08-30T14:54:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/30/">30</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -1319,7 +1632,7 @@ new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 12px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.33px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 12.67px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
