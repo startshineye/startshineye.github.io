@@ -152,6 +152,68 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring-Boot-五-springboot-devtools-热部署" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/15/Spring-Boot-五-springboot-devtools-热部署/">Spring Boot(五)-springboot+devtools(热部署)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.在前一节中,我们通过改变方法的返回值,不需要重新部署后就可以在前端直接显示,但是我们添加新的方法之后,访问就访问不到,热部署失败<br>2.通过使用springloaded进行热部署,但是有些代码修改了,并不会进行热部署  </p>
+<h4 id="spring-boot-devtools"><a href="#spring-boot-devtools" class="headerlink" title="spring-boot-devtools"></a>spring-boot-devtools</h4><p>1.spring-boot-devtools 是一个为开发者服务的一个模块，其中最重要的功能就是自动应用代码更改到最新的App上面去。原理是在发现代码有更改之后，重新启动应用，但是速度比手动停止后再启动还要更快，更快指的不是节省出来的手工操作的时间。<br>2.其深层原理是使用了两个ClassLoader，一个Classloader加载那些不会改变的类（第三方Jar包），另一个ClassLoader加载会更改的类，称为  restart ClassLoader<br>3.这样在有代码更改的时候，原来的restart ClassLoader 被丢弃，重新创建一个restart ClassLoader，由于需要加载的类相比较少，所以实现了较快的重启时间（5秒以内）</p>
+<h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><h5 id="1-添加依赖包"><a href="#1-添加依赖包" class="headerlink" title="1.添加依赖包"></a>1.添加依赖包</h5><p>因为是使用spring-boot-devtools,所以我们应该添加此包的时候注释掉spring-loader. </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">        &lt;artifactId&gt;spring-boot-devtools&lt;/artifactId&gt;</div><div class="line">        &lt;optional&gt;true&lt;/optional&gt;</div><div class="line">       &lt;scope&gt;true&lt;/scope&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-添加spring-boot-maven-plugin"><a href="#2-添加spring-boot-maven-plugin" class="headerlink" title="2.添加spring-boot-maven-plugin"></a>2.添加spring-boot-maven-plugin</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">  &lt;build&gt;</div><div class="line">&lt;plugins&gt;</div><div class="line">    &lt;plugin&gt;</div><div class="line">           &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-boot-maven-plugin&lt;/artifactId&gt;</div><div class="line">           &lt;configuration&gt;</div><div class="line">         		&lt;!--fork :  如果没有该项配置，肯呢个devtools不会起作用，即应用不会restart --&gt;</div><div class="line">               &lt;fork&gt;true&lt;/fork&gt;</div><div class="line">           &lt;/configuration&gt;</div><div class="line">       &lt;/plugin&gt;</div><div class="line">&lt;/plugins&gt;</div><div class="line">  &lt;/build&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-说明"><a href="#3-说明" class="headerlink" title="3.说明"></a>3.说明</h5><p>1.devtools会监听classpath下的文件变动，并且会立即重启应用（发生在保存时机），注意：因为其采用的虚拟机机制，该项重启是很快的。<br>2.devtools可以实现页面热部署（即页面修改后会立即生效，这个可以直接在application.properties文件中配置spring.thymeleaf.cache=false来实现(这里注意不同的模板配置不一样)。  </p>
+<h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><p>去掉spring-boot:run,然后启动：<br>添加方法：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">   @RequestMapping(&quot;/hello2&quot;)</div><div class="line">public String hello2()&#123;</div><div class="line">	return &quot;hello2&quot;;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输入:<a href="http://localhost:8080/hello2" target="_blank" rel="external">http://localhost:8080/hello2</a>  输出:”hello2”</p>
+<p>添加类Hello2Controller:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">   @RestController</div><div class="line">   public class Hello2Controller &#123;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/hello2c&quot;)</div><div class="line">   public String hello()&#123;</div><div class="line">   	return &quot;Hello2Controller&quot;;</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输入：<a href="http://localhost:8080/hello2c" target="_blank" rel="external">http://localhost:8080/hello2c</a>  输出:”Hello2Controller”</p>
+<p>1.修改类–&gt;保存：应用会重启<br>2.修改配置文件–&gt;保存：应用会重启<br>3.修改页面–&gt;保存：应用会重启，页面会刷新（原理是将spring.thymeleaf.cache设为false  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/15/Spring-Boot-五-springboot-devtools-热部署/" class="archive-article-date">
+  	<time datetime="2017-07-15T09:27:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Spring-Boot-四-Spring-Boot热部署-springloader" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -706,87 +768,6 @@
       
       <a href="/2017/06/10/JVM-二-JVM运行机制/" class="archive-article-date">
   	<time datetime="2017-06-10T14:27:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-JVM-一-初始JVM" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/10/JVM-一-初始JVM/">JVM(一)-初始JVM</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>###前言<br>本节主要介绍JVM以下内容<br>1.JVM概念<br>2.JVM发展历史<br>3.JVM种类<br>4.Java语言规范<br>5.JVM规范  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="JVM概念"><a href="#JVM概念" class="headerlink" title="JVM概念"></a>JVM概念</h4><ol>
-<li>JVM是Java Virtual Machine的简称。意为Java虚拟机  </li>
-<li>虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  </li>
-<li>虚拟机分类:VMWare,Visual Box,JVM  </li>
-<li>VMWare或者Visual Box都是使用软件模拟物理CPU的指令集  </li>
-<li>JVM使用软件模拟Java字节码的指令集  <h4 id="JVM发展历史"><a href="#JVM发展历史" class="headerlink" title="JVM发展历史"></a>JVM发展历史</h4><h5 id="Java历史"><a href="#Java历史" class="headerlink" title="Java历史"></a>Java历史</h5></li>
-<li>1996年 SUN JDK 1.0 Classic VM–纯解释运行，使用外挂进行JIT</li>
-<li>1997年 JDK1.1 发布–AWT、内部类、JDBC、RMI、反射</li>
-<li>1998年 JDK1.2 Solaris Exact VM–JIT 解释器混合,Accurate Memory Management 精确内存管理，数据类型敏感,提升的GC性能</li>
-<li>2000年 JDK 1.3 Hotspot 作为默认虚拟机发布 加入JavaSound</li>
-<li>2002年 JDK 1.4 Classic VM退出历史舞台  Assert正则表达式 NIO IPV6 日志API 加密类库  </li>
-<li>2004年发布 JDK1.5 即 JDK5 、J2SE 5 、Java 5：泛型,注解,装箱,枚举,可变长参数,Foreach循环  </li>
-<li>JDK1.6 JDK6：脚本语言支持,JDBC 4.0，Java编译器 API</li>
-<li>2011年 JDK7发布：延误项目推出到JDK8，G1，动态语言增强,64位系统中的压缩指针,NIO 2.0</li>
-<li>2014年 JDK8发布:Lambda表达式，语法增强  Java类型注解</li>
-<li>2016年JDK9:模块化 <h5 id="JVM历史"><a href="#JVM历史" class="headerlink" title="JVM历史"></a>JVM历史</h5></li>
-<li>使用最为广泛的JVM为HotSpot</li>
-<li>HotSpot 为Longview Technologies开发 被SUN收购</li>
-<li>2006年 Java开源 并建立OpenJDK：HotSpot  成为Sun JDK和OpenJDK中所带的虚拟机</li>
-<li>2008 年 Oracle收购BEA：得到JRockit VM</li>
-<li>2010年Oracle 收购 Sun：得到Hotspot</li>
-<li>Oracle宣布在JDK8时整合JRockit和Hotspot，优势互补：在Hotspot基础上，移植JRockit优秀特性<h5 id="各种JVM"><a href="#各种JVM" class="headerlink" title="各种JVM"></a>各种JVM</h5></li>
-<li>KVM:SUN发布，IOS Android前，广泛用于手机系统</li>
-<li>CDC/CLDC HotSpot：手机、电子书、PDA等设备上建立统一的Java编程接口,J2ME的重要组成部分</li>
-<li>JRockit:BEA </li>
-<li>IBM J9 VM:IBM内部</li>
-<li>Apache Harmony:1.兼容于JDK 1.5和JDK 1.6的Java程序运行平台，2.与Oracle关系恶劣 退出JCP ，Java社区的分裂，3.OpenJDK出现后，受到挑战 2011年 退役。4.没有大规模商用经历。5.对Android的发展有积极作用<h4 id="Java语言规范"><a href="#Java语言规范" class="headerlink" title="Java语言规范"></a>Java语言规范</h4>Java语言规范定义了java语言,主要包括:语言,变量,类型,文法<br>Java语言规范可参考J2SE  <h4 id="JVM规范"><a href="#JVM规范" class="headerlink" title="JVM规范"></a>JVM规范</h4>JVM规范定义了JVM，主要包括:Class文件格式,数字的内部表示和存储Byte  -128 to 127 (-27 to 27 - 1)，returnAddress 数据类型定义【指向操作码的指针。不对应Java数据类型，不能在运行时修改。Finally实现需要】，定义PC,堆，栈，方法区<h5 id="1-整数的表示"><a href="#1-整数的表示" class="headerlink" title="1.整数的表示"></a>1.整数的表示</h5></li>
-</ol>
-<h5 id="2-为什么用补码"><a href="#2-为什么用补码" class="headerlink" title="2.为什么用补码"></a>2.为什么用补码</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/12.png" alt=""><br>1.0造成歧义:，虽然原码非常的简单直观，但是当用原码表示0的时候就会出问题。0用原码表示分为+0和-0，当机器字长为8时，[+0]原=00000000，[-0]原=10000000。这就有问题了，同一个数却有两种表示，产生了二义性，从而给机器判断0带来了麻烦.<br>2.运算规则复杂:二是用原码运算时，符号位需要单独处理，而且运算规则很复杂。例如加法运算，若两个数异号，则先要让绝对值大的数减去绝对值小的数，然后把绝对值大的数的符号付给结果。还有就是，借位操作如果用计算机硬件实现起来是很困难的。正是因为原码有这些不足之处，才促使人们研究其他的编码方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/13.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/14.png" alt=""></p>
-<h5 id="3-VM指令集"><a href="#3-VM指令集" class="headerlink" title="3.VM指令集"></a>3.VM指令集</h5><p>1.类型转化：l2i<br>2.出栈入栈操作：aload  astore<br>3.运算：iadd  isub<br>4.流程控制：ifeq ifne<br>5.函数调用：invokevirtual invokeinterface  invokespecial  invokestatic  </p>
-<h5 id="4-JVM需要对Java-Library-提供以下支持："><a href="#4-JVM需要对Java-Library-提供以下支持：" class="headerlink" title="4.JVM需要对Java Library 提供以下支持："></a>4.JVM需要对Java Library 提供以下支持：</h5><p>1.反射 java.lang.reflect<br>2.ClassLoader<br>3.初始化class和interface<br>4.安全相关 java.security<br>5.多线程<br>6.弱引用  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/06/10/JVM-一-初始JVM/" class="archive-article-date">
-  	<time datetime="2017-06-10T12:19:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-10</time>
 </a>
       
 	<div class="article-tag tagcloud">
