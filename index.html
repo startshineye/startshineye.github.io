@@ -283,8 +283,29 @@ public static void main( String[] args )
     SpringApplication.run(App.class, args);
 }
 }
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/14.gif" alt=""></p>
-<h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><h5 id="6-上传文件限制"><a href="#6-上传文件限制" class="headerlink" title="6.上传文件限制"></a>6.上传文件限制</h5><p>对文件做一些限制是有必要的，在App.java进行编码配置：<br>限制之后就报错了:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/16.gif" alt=""></p>
+</code></pre><h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/14.gif" alt=""></p>
+<h5 id="6-上传文件限制"><a href="#6-上传文件限制" class="headerlink" title="6.上传文件限制"></a>6.上传文件限制</h5><p>对文件做一些限制是有必要的，在App.java进行编码配置：<br>限制之后就报错了:  </p>
+<pre><code>@SpringBootApplication
+public class App 
+{
+@Bean
+public MultipartConfigElement mutipartConfi(){
+    MultipartConfigFactory factory = new MultipartConfigFactory();
+    //// 设置文件大小限制 ,超了，页面会抛出异常信息，这时候就需要进行异常信息的处理了;
+    factory.setMaxFileSize(&quot;128KB&quot;); //KB,MB
+    /// 设置总上传数据总大小
+    factory.setMaxRequestSize(&quot;256KB&quot;); 
+    //Sets the directory location where files will be stored.
+    //factory.setLocation(&quot;路径地址&quot;);
+    return factory.createMultipartConfig(); 
+}
+
+public static void main( String[] args )
+{
+    SpringApplication.run(App.class, args);
+}
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/16.gif" alt=""></p>
 <h5 id="7-多文件上传"><a href="#7-多文件上传" class="headerlink" title="7.多文件上传"></a>7.多文件上传</h5><p>多文件对于前段页面比较简单，具体代码实现：  </p>
 <p>mutifile.html:  </p>
 <pre><code>&lt;!DOCTYPE html&gt;
