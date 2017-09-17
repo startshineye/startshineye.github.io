@@ -4,17 +4,21 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives | Startshineye的博客</title>
+  <title>SpringBoot(34)-Spring自带缓存 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/page/6/index.html">
+  <meta name="description" content="前言转载自Spring 3.1 引入了激动人心的基于注释（annotation）的缓存（cache）技术，它本质上不是一个具体的缓存实现方案（例如EHCache 或者 OSCache、Redis等），而是一个对缓存使用的抽象，通过在既有代码中添加少量它定义的各种 annotation，即能够达到缓存方法的返回对象的效果
+内容Spring 的缓存技术还具备相当的灵活性，不仅能够使用 SpEL（Spr">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot(34)-Spring自带缓存">
+<meta property="og:url" content="https://github.com/startshineye/2017/09/17/SpringBoot-34-Spring自带缓存/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="前言转载自Spring 3.1 引入了激动人心的基于注释（annotation）的缓存（cache）技术，它本质上不是一个具体的缓存实现方案（例如EHCache 或者 OSCache、Redis等），而是一个对缓存使用的抽象，通过在既有代码中添加少量它定义的各种 annotation，即能够达到缓存方法的返回对象的效果
+内容Spring 的缓存技术还具备相当的灵活性，不仅能够使用 SpEL（Spr">
+<meta property="og:updated_time" content="2017-09-17T03:19:59.858Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="SpringBoot(34)-Spring自带缓存">
+<meta name="twitter:description" content="前言转载自Spring 3.1 引入了激动人心的基于注释（annotation）的缓存（cache）技术，它本质上不是一个具体的缓存实现方案（例如EHCache 或者 OSCache、Redis等），而是一个对缓存使用的抽象，通过在既有代码中添加少量它定义的各种 annotation，即能够达到缓存方法的返回对象的效果
+内容Spring 的缓存技术还具备相当的灵活性，不仅能够使用 SpEL（Spr">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,346 +154,146 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-SpringBoot-34-Spring自带缓存" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
+    <h1 class="article-title" itemprop="name">
+      SpringBoot(34)-Spring自带缓存
+    </h1>
   
+
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p><a href="http://412887952-qq-com.iteye.com/blog/2294945" target="_blank" rel="external">转载自</a><br>Spring 3.1 引入了激动人心的基于注释（annotation）的缓存（cache）技术，它本质上不是一个具体的缓存实现方案（例如EHCache 或者 OSCache、Redis等），而是一个对缓存使用的抽象，通过在既有代码中添加少量它定义的各种 annotation，即能够达到缓存方法的返回对象的效果</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>Spring 的缓存技术还具备相当的灵活性，不仅能够使用 SpEL（Spring Expression Language）来定义缓存的 key 和各种 condition，还提供开箱即用的缓存临时存储方案，也支持和主流的专业缓存例如 EHCache 集成。  </p>
+<h5 id="1-特点"><a href="#1-特点" class="headerlink" title="1.特点"></a>1.特点</h5><p>1.通过少量的配置 annotation 注释即可使得既有代码支持缓存<br>2.支持开箱即用 Out-Of-The-Box，即不用安装和部署额外第三方组件即可使用缓存<br>3.支持 Spring Express Language，能使用对象的任何属性或者方法来定义缓存的 key 和 condition<br>4.支持 AspectJ，并通过其实现任何方法的缓存支持<br>5.支持自定义 key 和自定义缓存管理者，具有相当的灵活性和扩展性  </p>
+<h5 id="2-实现方式"><a href="#2-实现方式" class="headerlink" title="2.实现方式"></a>2.实现方式</h5><p>以前我们是在service层通过先判断缓存中是否存在缓存数据，如果存在直接返回数据，如果不存在从数据库中进行查询数据的方式，那么我们会发现这种方式的代码耦合型太高了。如果你之前的代码就是这么设计的，那么你可以考虑使用Spring Cache优化你的代码，你的代码将会变得优雅很多。  </p>
+<p>实现方式主要在方法上加上注解，可以注解的注解类有：<br>@Cacheable：负责将方法的返回值加入到缓存中<br>@CacheEvict：负责清除缓存  </p>
+<p>Cacheable 支持如下几个参数：<br>value：缓存位置名称，不能为空，如果使用EHCache，就是ehcache.xml中声明的cache的name<br>key：缓存的key，默认为空，既表示使用方法的参数类型及参数值作为key，支持SpEL<br>condition：触发条件，只有满足条件的情况才会加入缓存，默认为空，既表示全部都加入缓存，支持SpEL  </p>
+<pre><code> //将缓存保存进andCache，并使用参数中的userId加上一个字符串(这里使用方法名称)作为缓存的key   
+ @Cacheable(value=&quot;andCache&quot;,key=&quot;#userId + &apos;findById&apos;&quot;)  
+public SystemUser findById(String userId) {  
+SystemUser user = (SystemUser) dao.findById(SystemUser.class, userId);        
+ return user ;         
+}  
+//将缓存保存进andCache，并当参数userId的长度小于32时才保存进缓存，默认使用参数值及类型作为缓存的key  
+@Cacheable(value=&quot;andCache&quot;,condition=&quot;#userId.length &lt; 32&quot;)  
+public boolean isReserved(String userId) {  
+ System.out.println(&quot;hello andCache&quot;+userId);  
+ return false;  
+}  
+</code></pre><p>@CacheEvict 支持如下几个参数：<br>value：缓存位置名称，不能为空，同上<br>key：缓存的key，默认为空，同上<br>condition：触发条件，只有满足条件的情况才会清除缓存，默认为空，支持SpEL<br>allEntries：true表示清除value中的全部缓存，默认为false  </p>
+<pre><code>//清除掉指定key的缓存  
+ @CacheEvict(value=&quot;andCache&quot;,key=&quot;#user.userId + &apos;findById&apos;&quot;)  
+public void modifyUserRole(SystemUser user) {  
+         System.out.println(&quot;hello andCache delete&quot;+user.getUserId());  
+ }  
+//清除掉全部缓存  
+@CacheEvict(value=&quot;andCache&quot;,allEntries=true)  
+ public void setReservedUsers() {  
+  System.out.println(&quot;hello andCache deleteall&quot;);  
+}  
+</code></pre><p>一般来说，我们的更新操作只需要刷新缓存中某一个值，所以定义缓存的key值的方式就很重要，最好是能够唯一，因为这样可以准确的清除掉特定的缓存，而不会影响到其它缓存值，<br>比如我这里针对用户的操作，使用(userId+方法名称)的方式设定key值，当然，你也可以找到更适合自己的方式去设定</p>
+<p>@CachePut 注释，这个注释可以确保方法被执行，同时方法的返回值也被记录到缓存中，实现缓存与数据库的同步更新，理解为update语句。  </p>
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/30/Vue-1-MVVM/" class="archive-article-date">
-  	<time datetime="2017-07-30T00:59:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/17/SpringBoot-34-Spring自带缓存/" class="archive-article-date">
+  	<time datetime="2017-09-17T03:07:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-17</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/30/Vue-1-MVVM/">Vue(1)-MVVM</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/29/Redis-5-字符串/" class="archive-article-date">
-  	<time datetime="2017-07-29T08:41:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-29</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/29/Redis-5-字符串/">Redis(5)-字符串</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2017/09/16/SpringBoot-33-SpringBoot集成Redis实现缓存机制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringBoot(33)-SpringBoot集成Redis实现缓存机制</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/28/Redis-4-字符串/" class="archive-article-date">
-  	<time datetime="2017-07-28T02:37:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/28/Redis-4-字符串/">Redis(4)-字符串</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/28/Failed-load-instantiate-TagExtraInfo-class-org-apache-struts-taglib-tiles-UseAttributeTei/" class="archive-article-date">
-  	<time datetime="2017-07-28T02:20:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-28</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/28/Failed-load-instantiate-TagExtraInfo-class-org-apache-struts-taglib-tiles-UseAttributeTei/">Failed-load-instantiate-TagExtraInfo-class-org.apache.struts.taglib.tiles.UseAttributeTei</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Work-Problem/">Work-Problem</a></li></ul>
-	</div>
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringBoot-34-Spring自带缓存" data-title="SpringBoot(34)-Spring自带缓存" data-url="https://github.com/startshineye/2017/09/17/SpringBoot-34-Spring自带缓存/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/27/Redis-三-Redis字符串/" class="archive-article-date">
-  	<time datetime="2017-07-27T15:01:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-27</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/27/Redis-三-Redis字符串/">Redis(三)-Redis字符串</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/27/Myeclispe-MyEclipse中不能输入搜狗中文/" class="archive-article-date">
-  	<time datetime="2017-07-27T02:26:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-27</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/27/Myeclispe-MyEclipse中不能输入搜狗中文/">Myeclispe-MyEclipse中不能输入搜狗中文</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/26/Redis-2-Redis特色/" class="archive-article-date">
-  	<time datetime="2017-07-26T15:17:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/26/Redis-2-Redis特色/">Redis(2)-Redis特色</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/26/Redis-1-Redis的诞生/" class="archive-article-date">
-  	<time datetime="2017-07-26T14:38:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/26/Redis-1-Redis的诞生/">Redis(1)-Redis的诞生</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/26/Spring-Boot-22-Spring-Boot启动时加载数据CommandLineRunner/" class="archive-article-date">
-  	<time datetime="2017-07-26T01:16:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/26/Spring-Boot-22-Spring-Boot启动时加载数据CommandLineRunner/">Spring Boot(22)-Spring Boot启动时加载数据CommandLineRunner</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/07/25/Spring-Boot-21-Spring-Boot拦截器HandlerInterceptor/" class="archive-article-date">
-  	<time datetime="2017-07-25T15:25:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/07/25/Spring-Boot-21-Spring-Boot拦截器HandlerInterceptor/">Spring Boot(21)-Spring Boot拦截器HandlerInterceptor</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/5/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/4/">4</a><a class="page-number" href="/archives/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/archives/page/7/">7</a><a class="page-number" href="/archives/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/31/">31</a><a class="extend next" rel="next" href="/archives/page/7/">Next &raquo;</a>
-    </nav>
-  
 
 
       </div>
@@ -512,8 +316,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

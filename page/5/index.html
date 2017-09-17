@@ -152,6 +152,339 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-8-事件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/09/vue-8-事件/">vue(8)-事件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>vue类似于js也是有自己相应的事件,并且有自己的简写形式：v-on:click/mouseover….这些事件都有自己的简写形式  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-事件"><a href="#1-事件" class="headerlink" title="1.事件"></a>1.事件</h5><p>v-on:事件 来表示vue里面的事件<br> 简写:<br> @click/mouseover…. 推荐<br> v-on: 等价于 @  </p>
+<p>1.v-on:实例  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function () {
+                   alert(1);
+               }
+           }
+       });
+   }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+       &lt;input type=&quot;button&quot; value=&quot;按钮&quot; v-on:click=&quot;show()&quot;&gt;
+       &lt;input type=&quot;button&quot; value=&quot;等价按钮&quot; @click=&quot;show()&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="2-事件对象"><a href="#2-事件对象" class="headerlink" title="2.事件对象"></a>2.事件对象</h5><p>@click=”show($event)”代表点击事件的事件对象 从$event中我们可以拿到很多点击事件的东西  </p>
+<h6 id="2-1-冒泡事件"><a href="#2-1-冒泡事件" class="headerlink" title="2.1 冒泡事件"></a>2.1 冒泡事件</h6><p>1.事件冒泡:当我们点击一个事件时候会弹出其他父事件:如下:弹出1再弹出2 </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+           },
+           methods:{
+               show:function () {
+                   alert(1);
+               },
+               show2:function(){
+                   alert(2);
+               }
+           }
+       });
+   }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+       &lt;div @click=&quot;show2();&quot;&gt;
+           &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @click=&quot;show()&quot;&gt;
+       &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>2.阻止冒泡: a)event.cancelBubble=true; b)@click.stop 推荐   </p>
+<p> a)event.cancelBubble=true;</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+           },
+           methods:{
+               show:function (ev) {
+                   alert(1);//
+                   ev.cancelBubble=true;
+               },
+               show2:function(){
+                   alert(2);
+               }
+           }
+       });
+   }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;div id=&quot;box&quot;&gt;
+       &lt;div @click=&quot;show2();&quot;&gt;
+           &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @click=&quot;show($event)&quot;&gt;
+       &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p> b)@click.stop 推荐</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function () {
+                   alert(1);
+               },
+               show2:function(){
+                   alert(2);
+               }
+           }
+       });
+   }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;div id=&quot;box&quot;&gt;
+       &lt;div @click=&quot;show2();&quot;&gt;
+           &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @click.stop=&quot;show()&quot;&gt;
+       &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="2-2-默认行为-默认事件"><a href="#2-2-默认行为-默认事件" class="headerlink" title="2.2 默认行为(默认事件)"></a>2.2 默认行为(默认事件)</h5><p>默认行为(默认事件):contextmenu右击时候不仅弹出alert还弹出说明<br>阻止默认行为: a):event.preventDefault(); b):@contextmenu.prevent  推荐  </p>
+<p>a):event.preventDefault();   </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function (event) {
+                   alert(1);
+                   event.preventDefault();
+               }
+           }
+       });
+   }
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+           &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @contextmenu=&quot;show($event)&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>b):@contextmenu.prevent  推荐   </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+           },
+           methods:{
+               show:function () {
+                   alert(1);
+               }
+           }
+       });
+   }
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;&lt;div id=&quot;box&quot;&gt;
+           &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @contextmenu.prevent=&quot;show()&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="3-键盘事件"><a href="#3-键盘事件" class="headerlink" title="3.键盘事件"></a>3.键盘事件</h5><p>键盘事件:<br>@keydown    $event(事件)    ev.keyCode(事件码)  </p>
+<p>案例:按键为回车时候提示”您按回车了”<br>a):@keyup($event)  event.keyCode==13<br>b):@keyup.13<br>c):@keyup.enter   推荐  </p>
+<p>常用键简单简写方式:<br>回车  @keydown.enter<br>上   @keyup/down.up<br>下   @keyup/down.down<br>左   @keyup/down.left<br>右   @keyup/down.right  </p>
+<p>1.按下触发    </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function () {
+                   alert(1);
+               }
+           }
+       });
+   }
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+          &lt;input type=&quot;text&quot; @keydown=&quot;show()&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>2.获取按键码  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function (ev) {
+                   alert(ev.keyCode);
+               }
+           }
+       });
+   }
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+          &lt;input type=&quot;text&quot; @keydown=&quot;show($event)&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>3.回车按键  </p>
+<pre><code>&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;script&gt;
+   window.onload=function(){
+       var vm = new Vue({
+           el:&quot;#box&quot;,
+           data:{
+
+           },
+           methods:{
+               show:function (ev) {
+                   alert(ev.keyCode);
+               }
+           }
+       });
+   }
+
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt; &lt;div id=&quot;box&quot;&gt;
+          &lt;input type=&quot;text&quot; @keydown=&quot;show($event)&quot;&gt;
+  &lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/09/vue-8-事件/" class="archive-article-date">
+  	<time datetime="2017-08-09T15:23:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-09</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-bootstrap-vue简易留言板-todolist" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -784,70 +1117,9 @@ v-for=&quot;(k,v) in json&quot; 有时候我们需要输出key
 
 
   
-    <article id="post-Vue-1-MVVM" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/30/Vue-1-MVVM/">Vue(1)-MVVM</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h5><p>MVVM是Model-View-ViewModel的简写。微软的WPF带来了新的技术体验，如Silverlight、音频、视频、3D、动画……，这导致了软件UI层更加细节化、可定制化。同时，在技术层面，WPF也带来了 诸如Binding、Dependency Property、Routed Events、Command、DataTemplate、ControlTemplate等新特性。MVVM（Model-View-ViewModel）框架的由来便是MVP（Model-View-Presenter）模式与WPF结合的应用方式时发展演变过来的一种新型架构框架。它立足于原有MVP框架并且把WPF的新特性糅合进去，以应对客户日益复杂的需求变化。  </p>
-<h5 id="2-框架结构"><a href="#2-框架结构" class="headerlink" title="2.框架结构"></a>2.框架结构</h5><p>MVVM是Model-View-ViewModel<br>Model:数据部分,对应前端就是javascript对象<br>View:Dom部分<br>ViewModel:连接视图和数据的中间件  </p>
-<p>数据双向绑定:在MVVM框架下,视图和数据是不能访问的，通常是经过ViewModel中间键来访问,通常时间一个Observer观察者,当数据发生变化时候,ViewModel会观察到这种变化,通知到对应的视图自动变化,当用户操作视图发生变化时候,ViewModel也会监听到视图的变化，然后通知数据做改动<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/92.png" alt="">  </p>
-<h5 id="3-应用场景"><a href="#3-应用场景" class="headerlink" title="3.应用场景"></a>3.应用场景</h5><ol>
-<li>针对具有复杂交互逻辑的前端应用  </li>
-<li>提供了基础的架构抽象  </li>
-<li>通过Ajax数据持久化,保证前端用户体验  </li>
-</ol>
-<h5 id="4-好处"><a href="#4-好处" class="headerlink" title="4.好处"></a>4.好处</h5><ol>
-<li>好处就是当前后端进行一些数据交互的时候，前端可以通过Ajax请求对后端做数据持久化，不需要刷新整个页面，只需要改动DOM里需要改动的那部分数据和内容</li>
-<li>特别是对于移动端应用场景，刷新页面的代价太昂贵，会重新加载很多资源，虽然有些资源会被缓存，但是页面的DOM、JS、CSS都会被浏览器重新解析一遍，因此，移动端页面经常会做成SPA单页应用，在这个基础上就诞生了很多MVVM框架，如Angular、React、Vue<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/93.png" alt="">  </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/30/Vue-1-MVVM/" class="archive-article-date">
-  	<time datetime="2017-07-30T00:59:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/30/">30</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/4/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="page-number current">5</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="space">&hellip;</span><a class="page-number" href="/page/31/">31</a><a class="extend next" rel="next" href="/page/6/">Next &raquo;</a>
     </nav>
   
 
