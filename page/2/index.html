@@ -152,6 +152,92 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-25-改变自动扫描包路径" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/">SpringBoot(25)-改变自动扫描包路径</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>默认情况下SpringBoot会扫描启动类同包以及子包下的注解,但是有时候我们需要改变包的扫描方式,原理：@ComponentScan注解进行指定要扫描的包以及要扫描的类</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>以下我们编写测试类测试:<br>三步:<br>1)新建两个包<br>2）新建两个类<br>3)启动类进行注解指定扫描路径  </p>
+<h5 id="1-新建两个包"><a href="#1-新建两个包" class="headerlink" title="1.新建两个包"></a>1.新建两个包</h5><p> com.cn   com.org</p>
+<h5 id="2-新建两个类"><a href="#2-新建两个类" class="headerlink" title="2.新建两个类"></a>2.新建两个类</h5><p>在这里为了方便测试，我们让我们的类在启动的时候就进行执行，所以我们就编写两个类，实现接口CommandLineRunner，这样在启动的时候我们就可以看到打印信息了。<br>注：类上添加@Configuration注解<br>Cn类:</p>
+<pre><code>package com.cn;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Cn implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.cn 下类执行&quot;);
+}
+}
+</code></pre><p>Org类:</p>
+<pre><code>package com.org;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Org implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.org 下类执行&quot;);
+}
+}
+</code></pre><h5 id="3-启动类进行注解指定扫描路径"><a href="#3-启动类进行注解指定扫描路径" class="headerlink" title="3.启动类进行注解指定扫描路径"></a>3.启动类进行注解指定扫描路径</h5><p>在App.java类中加入如下注解：<br> @ComponentScan(basePackages={“com.cn”,”com.org”})</p>
+<pre><code>@SpringBootApplication
+@ComponentScan(basePackages={&quot;com.cn&quot;,&quot;com.org&quot;})
+public class App 
+{
+public static void main( String[] args )
+ {
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+    SpringApplication.run(App.class, args);
+ }
+}
+</code></pre><p>输出：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/" class="archive-article-date">
+  	<time datetime="2017-09-13T11:41:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-24-使用自定义的properties" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1405,79 +1491,6 @@ new Vue({
       
       <a href="/2017/09/03/vue-24-动画/" class="archive-article-date">
   	<time datetime="2017-09-03T14:01:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-23-监听数据变化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-23-监听数据变化/">vue(23)-监听数据变化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们经过a数据变化b也会跟着变化,使用的是计算属性:computed,我们可以通过监听数据变化实现:vm.$wactch();</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-监听数据变化"><a href="#1-监听数据变化" class="headerlink" title="1.监听数据变化"></a>1.监听数据变化</h5><p>vm.$watch(name,fnCb);其中name是Vue中data里面要变化属性，fnCb是回调函数  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-    a:{{a}}&lt;br&gt;
-    msg:{{msg}}
-
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-     el:&quot;#box&quot;,
-     data:{
-       a:&quot;a&quot;,
-         b:&apos;&apos;,
-         msg:&apos;&apos;
-     },
- });
-vm.$watch(&quot;a&quot;,function(){
-    this.msg=&quot;a数据发生变化&quot;+this.a;
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/6.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-23-监听数据变化/" class="archive-article-date">
-  	<time datetime="2017-09-02T13:01:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
 </a>
       
 	<div class="article-tag tagcloud">
