@@ -27,7 +27,10 @@ vue-router:路由:根据不同url地址,出现不同效果
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/9/17.gif">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/9/26.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2017/9/27.png">
-<meta property="og:updated_time" content="2017-09-19T15:59:38.171Z">
+<meta property="og:image" content="https://github.com/startshineye/30.png">
+<meta property="og:image" content="https://github.com/startshineye/28.png">
+<meta property="og:image" content="https://github.com/startshineye/29.png">
+<meta property="og:updated_time" content="2017-09-21T15:51:13.741Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="vue(28)-vue-router">
 <meta name="twitter:description" content="前言
@@ -241,9 +244,139 @@ vue-router:路由:根据不同url地址,出现不同效果
  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
 </code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/17.gif" alt=""></p>
 <h5 id="2-跳转"><a href="#2-跳转" class="headerlink" title="2.跳转"></a>2.跳转</h5><p>当我们一打开上面的文件时候,页面初始化时并没有跳转(页面没有任何跳转)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/26.png" alt="">  </p>
-<p>跳转:router.redirect({<br>    ‘/‘:’/home’<br> });</p>
+<p>跳转:router.redirect({<br>    ‘/‘:’/home’,<br>    ‘/aaa’:’/news’<br> });</p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/27.png" alt="">  </p>
+<h5 id="3-路由嵌套-多级"><a href="#3-路由嵌套-多级" class="headerlink" title="3.路由嵌套(多级)"></a>3.路由嵌套(多级)</h5><p>需求:实现以下需求<br><img src="30.png" alt=""></p>
+<p>1.为了简洁,我们将’home’变成模板<br>2.我们点击模板之后,会加入一个class<br><img src="28.png" alt="">    </p>
+<p>加入样式:  </p>
+<pre><code>&lt;style&gt;
+    .v-link-active{
+        font-size: 20px;
+        color: #985f0d;
+    }
+&lt;/style&gt;
+</code></pre><p><img src="29.png" alt="">  </p>
+<p>3.在模板下加入<a></a>  </p>
+<p>4.在home下面的模板下的路由的路径需要是:”/home/login”,”/home/reg”  </p>
+<pre><code>&lt;template id=&quot;home&quot;&gt;
+    &lt;h3&gt;我是主页&lt;/h3&gt;
+    &lt;div&gt;
+        &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
+        &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;router-view&gt;&lt;/router-view&gt;
+    &lt;/div&gt;
+&lt;/template&gt;   
+</code></pre><p>5.由于登录注册的路由都是基于home的所以路由关联也是写在相应的下面:subRoutes  </p>
+<pre><code>router.map({
+        &apos;home&apos;:{
+            component:Home,
+            subRoutes:{
+                &apos;login&apos;:{
+                    component:{
+                        template:&apos;&lt;strong&gt;我是登录信息&lt;/strong&gt;&apos;
+                    }
+                },
+                &apos;reg&apos;:{
+                    component:{
+                        template:&apos;&lt;strong&gt;我是注册信息&lt;/strong&gt;&apos;
+                    }
+                }
+            }
+        }
+    });
+</code></pre><p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../js/vue-router.js&quot;&gt;&lt;/script&gt;
+&lt;style&gt;
+    .v-link-active{
+        font-size: 20px;
+        color: #985f0d;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+&lt;!--点击部分 --&gt;
+&lt;ul&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
 
+&lt;!--展示视图--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;template id=&quot;home&quot;&gt;
+&lt;h3&gt;我是主页&lt;/h3&gt;
+&lt;!--其下路由应该在其模板之下--&gt;
+&lt;div&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
+&lt;/div&gt;
+&lt;!--显示其下的路由--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+&lt;template id=&quot;news&quot;&gt;
+  &lt;h3&gt;我是新闻&lt;/h3&gt;
+&lt;/template&gt;
+&lt;/body&gt;
+&lt;script&gt;
+  //1.准备根组件
+    var App = Vue.extend();
+  //2.Home,News组件
+  var Home = Vue.extend({
+      template:&quot;#home&quot;
+  });
+  var  News = Vue.extend({
+      template:&quot;#news&quot;
+  });
+  //3.准备路由
+  var router = new VueRouter();
+  //4.关联
+  router.map({
+      &apos;home&apos;:{
+          component:Home,
+          subRoutes:{
+              &apos;login&apos;:{
+                  component:{
+                      template:&quot;&lt;h3&gt;我是登录&lt;/h3&gt;&quot;
+                  }
+              },
+              &apos;reg&apos;:{
+                  component:{
+                      template:&apos;&lt;h3&gt;我是注册&lt;/h3&gt;&apos;
+                  }
+              }
+          }
+      },
+      &apos;news&apos;:{
+          component:News
+      }
+  });
+  //5.启动路由
+  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
+
+  //6.跳转
+  router.redirect({
+      &apos;/&apos;:&apos;home&apos;
+  })
+&lt;/script&gt;
+&lt;/html&gt;
+</code></pre>
       
     </div>
     <div class="article-info article-info-index">
