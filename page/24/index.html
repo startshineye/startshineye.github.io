@@ -152,6 +152,221 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十六-接收表单提交数据-javaServer14" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/">自己写一个apache服务器(十六)-接收表单提交数据-javaServer14</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="接收表单提交数据-javaServer14"><a href="#接收表单提交数据-javaServer14" class="headerlink" title="接收表单提交数据-javaServer14"></a>接收表单提交数据-javaServer14</h4><p>到目前为止，服务器端已经可以完成响应了。接下来我们解决什么问题呢？大家都知道当用户登录的时候会提交登录的用户名和密码，那么在服务器端的小Java程序中怎么去获取这些信息呢？显然需要Web服务器帮助我们将数据解析出来，放到某个对象中，然后WebApp的开发人员从该对象中直接获取数据使用。那么接下来我们的角色转变为Web服务器的开发人员，定义一个类专门完成数据的解析封装。提交的数据在哪里呢？看下图<br><img src="http://i1.piimg.com/576993/bdb78460774d2678.png" alt="Markdown"><br>其实我们有必要将请求协议的全部内容封装到某个对象当中，以便WebApp开发人员的使用，不过将请求协议全部内容封装到某个对象中，这将是一个非常繁琐的过程，我们这里就不再实现这个功能了，我们只将请求行上的URI部分的数据封装就行了。由于该对象中封装了请求协议，所以我们把这个对象叫做请求对象request。请求行上的URI部分提交的数据格式为uri?name=value&amp;name=value…，其中name是form表单控件的name属性，value是form表单控件的value属性，这个格式是W3C制定的HTTP协议的一部分。我们可以让表单提交的数据更复杂一些，来看一看提交了哪些数据？编写如下的html<br><img src="http://i1.piimg.com/576993/7a8ca244990558e7.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问Save.html，如下图所示<br><img src="http://i1.piimg.com/576993/3618b6d720385870.png" alt="Markdown"><br>填写表单，点击保存按钮提交数据，查看浏览器地址栏的地址，如下图所示<br><img src="http://p1.bqimg.com/576993/72b71c781db03306.png" alt="Markdown"><br><img src="http://p1.bpimg.com/576993/ad47a100f0a01269.png" alt="Markdown"><br>以上出现404错误是很正常的，因为底层/oa/user/save请求URI对应要执行的Servlet类并没有编写，也没有在web.xml文件中进行相关配置，所以访问的资源不存在。后面我们再解决这个404的错误。我们看到浏览器地址栏上提交了这样的数据<a href="http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示" target="_blank" rel="external">http://127.0.0.1:8080/oa/user/save?username=zhangsan&amp;sex=m&amp;interest=sport&amp;interest=music&amp;interest=travel，显然可以将这些提交的数据放到Map集合当中，如下图所示</a><br><img src="http://p1.bpimg.com/576993/a43f8b8f21c02753.png" alt="Markdown"><br>接下来我们的角色转变为Web服务器的开发人员，开始进行数据的解析与封装，达到上图的效果，我们单独定义一个负责请求协议封装的类，起名为RequestObject，并在该类中定义parameterMap属性表示以上的Map<string,string[]>，代码如下图所示<br><img src="http://p1.bpimg.com/576993/241ca1ff7a2d3b77.png" alt="Markdown"><br>对以上编写的RequestObject中的getParameter方法和getParameterValues方法进行单元测试，建立单元测试类，编写测试程序，测试结果如下图所示<br><img src="http://i1.piimg.com/576993/6581c3451ba19b50.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/5e02b2d72beec0c0.png" alt="Markdown"><br>测试通过之后，开始使用RequestObject，继续保持我们的角色Web服务器开发人员，在HandlerRequest中当截获到请求的URI之后，将请求的URI封装到RequestObject对象中，为了让WebApp的开发人员能够拿到表单的数据，将RequestObject传递给Servlet的service方法，代码如下所示<br><img src="http://i1.piimg.com/576993/3870a3fdbfe60f74.png" alt="Markdown"><br>角色转变为SUN公司，修改Servlet接口中的service方法，代码如下<br><img src="http://i1.piimg.com/576993/ff1cde55e5b889b0.png" alt="Markdown"><br>角色转变为WebApp开发人员，修改LoginServlet，解决编译错误，代码如下：<br><img src="http://i1.piimg.com/576993/d3fbc205bd2b13f6.png" alt="Markdown"><br>那么此时的问题又来了，Servlet是SUN公司的规范，但是为什么规范中出现了RequestObject类型，RequestObject类型是WEB服务器程序，看下图<br><img src="http://i1.piimg.com/576993/82cac017d60bf1d5.png" alt="Markdown"><br>怎么解决这个耦合呢？当然，和我们以前的解决思路是一样的，Servlet规范中service方法的第一个参数应该是一个接口，我们现在以SUN公司的角色制定接口，如下图所示：<br><img src="http://i1.piimg.com/576993/7c1af26c0cf82f62.png" alt="Markdown"><br>角色转变为Web服务器的开发人员，RequestObject类实现以上接口，如下图所示：<br><img src="http://i1.piimg.com/576993/c897bf4b920aaf6e.png" alt="Markdown"><br>角色转变为SUN公司，修改核心接口Servlet中的service方法，使之解耦合，如下图所示：<br><img src="http://i1.piimg.com/576993/dd66fa8e6e635502.png" alt="Markdown"><br>SUN将接口改动之后，该接口的实现类LoginServlet编译错误，角色转变为WebApp的开发人员，解决编译错误，如下图所示：<br><img src="http://i1.piimg.com/576993/81a77ee1e3dd2cf7.png" alt="Markdown"><br>那么接下来我们的角色转变为WebApp的开发人员，应该去解决如下图所示的404错误问题了：<br><img src="http://i1.piimg.com/576993/9245801d880ab4d5.png" alt="Markdown"><br>上图中显示的404错误表示访问的资源不存在，请求的URI是/oa/user/save，那么接下来整个的开发过程就交给WebApp的开发人员了，编写web.xml文件，然后编写对应的Servlet类，实现service方法，完成信息的保存，我们先来做第一步，编写web.xml，如下图所示：<br><img src="http://i1.piimg.com/576993/e69bee641b3307ea.png" alt="Markdown"></string,string[]></p>
+<p>第二步，编写SaveServlet，重写service方法，获取用户提交的信息，将用户提交的信息保存到数据库当中，保存成功或者失败，将最终的结果响应到浏览器，如下图所示：<br><img src="http://i1.piimg.com/576993/982e76dc1243c15b.png" alt="Markdown"><br>启动httpserver，打开浏览器，访问save.html，在表单上填写数据然后提交，效果如下图所示：<br><img src="http://i1.piimg.com/576993/20f641bcb12f3b8f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十六-接收表单提交数据-javaServer14/" class="archive-article-date">
+  	<time datetime="2016-12-14T11:27:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/">自己写一个apache服务器(十五)-ServletResponse接口引入-javaServer13</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="ServletResponse接口引入-javaServer13"><a href="#ServletResponse接口引入-javaServer13" class="headerlink" title="ServletResponse接口引入-javaServer13"></a>ServletResponse接口引入-javaServer13</h4><p>目前Servlet接口的service方法参数类型是PrintWriter，如图所示<br><img src="http://i1.piimg.com/576993/fd252e56b596b3b4.png" alt="Markdown"><br>PrintWriter参数属于负责响应的参数，将来可能还会有其它的参数也负责响应的，参数过多的时候，会让service方法变的特别的臃肿，我们在这里做一个小的设计，将所有负责响应的参数统一都封装到负责响应的对象中。那么这个负责响应的对象应该由谁来实现呢？当然是Web服务器的开发人员，角色转变为Web服务器开发人员，代码如下<br><img src="http://i1.piimg.com/576993/4ae601d053f04cc8.png" alt="Markdown"><br>既然负责响应的PrintWriter参数已经被封装到ResponseObject类型中了，9那么Servlet接口service方法的参数PrintWriter就需要修改为ResponseObject，以后所有负责响应的参数都会被封装到ResponseObject中（但是需要注意的是ResponseObject是Web服务器开发人员编写的）<br><img src="http://i1.piimg.com/576993/a05edcce5a794c03.png" alt="Markdown"><br>以上程序编译错误，显然是需要修改SUN的Servlet规范的，那么我们的角色转变为SUN公司，修改Servlet接口，代码如下<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>观察以上代码，Servlet是SUN公司编写的，但是在规范中却关联依赖了 ResponseObject，显然是不合理的，稍后我们再做调整。现在该去修改WebApp开发人员编写的LoginServlet了，因为LoginServlet实现了Servlet接口<br><img src="http://i1.piimg.com/576993/4912a1df660f538d.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求<br>因为本机8080被占用，修改conf下面的server.xml使用8088端口<br><img src="http://i1.piimg.com/576993/28a206aafd4c510a.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/bd1f51ce0b1ef553.png" alt="Markdown"><br>我们应该解决下图中的问题了<br><img src="http://i1.piimg.com/576993/134cdce82ee2dd6e.png" alt="Markdown"><br>怎么解决呢？Servlet接口是SUN公司制定的规范，而ResponseObject类型是具体的服务器中定义的类型，为了解耦合，SUN公司又制定了另一个接口ServletResponse，ResponseObject类实现该接口，该接口的调用者是WebApp的开发人员，代码如下<br><img src="http://i1.piimg.com/576993/9cb5d9fed71587ec.png" alt="Markdown"><br>Servlet核心接口service方法的参数类型ResponseObject修改为接口ServletResponse<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"><br>ResponseObject类型是Web服务器开发人员开发的，该类型实现ServletResponse接口<br><img src="http://i1.piimg.com/576993/92a6f6e678207b88.png" alt="Markdown"><br>对于WebApp的开发人员来说，Servlet的service方法参数类型也需要修改，代码如下<br><img src="http://i1.piimg.com/576993/8c415ac9c288a8ce.png" alt="Markdown"><br>启动httpserver，打开浏览器发送请求访问，执行结果如下<br><img src="http://i1.piimg.com/576993/1fc8fc7c5517cad6.png" alt="Markdown"><br>控制台输出<br><img src="http://i1.piimg.com/576993/1f3ddf002a46d64f.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十五-ServletResponse接口引入-javaServer13/" class="archive-article-date">
+  	<time datetime="2016-12-14T10:39:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12/">自己写一个apache服务器(十四)-小java输出html到浏览器-javaServer12</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="小java输出html到浏览器-javaServer12"><a href="#小java输出html到浏览器-javaServer12" class="headerlink" title="小java输出html到浏览器-javaServer12"></a>小java输出html到浏览器-javaServer12</h4><p>输出html的内容是由WebApp开发者决定的，所以对于Web服务器来说只需要将负责响应的标准输出流传递给Servlet即可<br><img src="http://p1.bqimg.com/576993/64b1a49128efe6fd.png" alt="Markdown"><br>以上程序编译失败，SUN提供的Servlet接口需要改进，改进Servlet接口中的service方法<br><img src="http://p1.bqimg.com/576993/267fa30f09c0a9c9.png" alt="Markdown"><br>此时LoginServlet（WebApp开发人员开发的）编译错误，因为LoginServlet实现了Servlet接口，所以对LoginServlet进行修改，并响应消息到浏览器<br><img src="http://p1.bqimg.com/576993/9e59dd71693c7acf.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求，运行结果<br><img src="http://p1.bqimg.com/576993/0ba830d5eb5621b2.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十四-小java输出html到浏览器-javaServer12/" class="archive-article-date">
+  	<time datetime="2016-12-14T04:58:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-十三-访问的小java不存在-javaServer11" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/14/自己写一个apache服务器-十三-访问的小java不存在-javaServer11/">自己写一个apache服务器(十三)-访问的小java不存在-javaServer11</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="访问的小java不存在-javaServer11"><a href="#访问的小java不存在-javaServer11" class="headerlink" title="访问的小java不存在-javaServer11"></a>访问的小java不存在-javaServer11</h4><p>在以上程序的基础之上我们需要考虑请求的URI是否不存在，如果不存在需要提示客户端404错误，代码如下<br><img src="http://p1.bpimg.com/576993/091094e95b498cc3.png" alt="Markdown"><br>启动httpserver，打开浏览器，发送请求访问<br><img src="http://p1.bpimg.com/576993/28ae2ce84dbe5961.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/14/自己写一个apache服务器-十三-访问的小java不存在-javaServer11/" class="archive-article-date">
+  	<time datetime="2016-12-13T16:21:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-jQuery对Json的遍历" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -583,237 +798,6 @@ alert(filterarray[key]);
       
       <a href="/2016/12/04/自己写一个apache服务器-十一-客户端访问java程序-javaServer09/" class="archive-article-date">
   	<time datetime="2016-12-04T13:49:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/">自己写一个apache服务器(十)-响应静态html资源到浏览器-javaServer08</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="响应静态html资源到浏览器-javaServer08"><a href="#响应静态html资源到浏览器-javaServer08" class="headerlink" title="响应静态html资源到浏览器-javaServer08"></a>响应静态html资源到浏览器-javaServer08</h4><ol>
-<li>截获到请求的URI之后，判断请求的是否为服务器中的html资源，如果是服务器中的某个webapp的html资源，服务器端程序应找到该文件，并且将该文件中的html代码读取到JVM内存中，然后再将内存中的html代码响应到浏览器页面上，如果客户端请求的资源在服务器端webapp中未找到，服务器应提示浏览器客户端“您访问的资源不存在”，这就是著名的404错误。404被称为HTTP状态码，属于HTTP协议的一部分。  </li>
-<li>webapp以及webapp中的html资源不是web服务器开发人员需要完成的，应该是webapp的开发人员负责开发的。web服务器只负责读取该html资源然后响应到浏览器页面上。所以此时我们的开发角色发生了改变，我们现在的角色变为webapp的开发人员。在javaServer的根目录下新建web应用起名oa（办公系统），在oa文件夹下新建index.html文件，并编写简单的html代码，如下图：<br><img src="http://p1.bqimg.com/576993/fc22be9e5296c6d3.png" alt="Markdown"><br>角色再次转回到服务器开发人员，在HandlerRequest中继续处理请求，目前已经截获到请求的URI，判断请求URI是否以html或htm结尾，如果是以html或htm结尾，服务器定位到该html文件，将其读取到JVM内存中，然后再将这些html代码响应到浏览器页面上，浏览器解释执行html代码展示效果：<br><img src="http://p1.bqimg.com/576993/9262992bab8f471f.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源存在的时候）<br><img src="http://p1.bqimg.com/576993/6869f6b883cac8d1.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源不存在的时候）<br><img src="http://p1.bqimg.com/576993/85446849d6d956bd.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:58:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-九-服务器拦截URI-javaServer07" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/">自己写一个apache服务器(九)-服务器拦截URI-javaServer07</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="服务器拦截URI-javaServer07"><a href="#服务器拦截URI-javaServer07" class="headerlink" title="服务器拦截URI-javaServer07"></a>服务器拦截URI-javaServer07</h4><ol>
-<li>开始处理客户端的请求，首先我们需要知道客户端访问的是哪一个资源，我们怎么才能知道客户端访问的哪个资源呢？答案当然是在服务器端获取客户端请求的URI，那么请求的URI在哪里呢？请求的URI在HTTP请求协议的请求行上。所以我们需要读取请求协议的第一行数据，然后从这些数据中解析出URI，从而得出客户要访问的是服务器端的哪个资源。  </li>
-<li>URL和URI是什么？它们之间是什么关系？URL是统一资源定位符，例如在浏览器地址栏上直接输入的请求路径:<a href="http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。</a>  </li>
-<li>HTTP协议请求协议的详细内容如下图所示，请求行由三部分组成：请求方式+URI+协议版本号，我们需要获取的就是请求行上的URI<br><img src="http://p1.bqimg.com/576993/53533ca077c5f0f2.png" alt="Markdown"><br>在HandlerRequest中编写程序读取请求行，并解析字符串，截获URI<br><img src="http://p1.bqimg.com/576993/6b22e093fda5080f.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL：<a href="http://127.0.0.1:8099/oa/index.html进行访问测试" target="_blank" rel="external">http://127.0.0.1:8099/oa/index.html进行访问测试</a><br><img src="http://p1.bqimg.com/576993/173dbe2952ffadd9.png" alt="Markdown"></li>
-</ol>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/" class="archive-article-date">
-  	<time datetime="2016-12-04T10:15:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-八-多线程处理请求-javaServer06" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-八-多线程处理请求-javaServer06/">自己写一个apache服务器(八)-多线程处理请求-javaServer06</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="多线程处理请求-javaServer06"><a href="#多线程处理请求-javaServer06" class="headerlink" title="多线程处理请求-javaServer06"></a>多线程处理请求-javaServer06</h4><p>当前服务器程序是单线程的，只有一个main方法，只有一个主线程在运行，只有一个栈在运行，当多个用户同时并发发送请求的时候，服务器在同一时间点只能处理一个请求，这样会导致用户排队等待的现象，为了让服务器能够同时处理多个请求，可以引入一个线程处理一个请求，多线程并发接收用户的请求，请求A和请求B之间互不干扰，互不等待，在内存角度来说，会有多个栈内存在同时运行<br><img src="http://p1.bqimg.com/576993/24f84ca00adef24c.png" alt="Markdown"><br>定义单独的线程处理请求，处理请求时需要客户端套接字对象（一个请求会对应一个客户端套接字对象），所以线程类需要含有客户端套接字对象的引用，定义HandlerRequest类实现Runnable接口，实现run方法，在run方法中处理当前请求<br><img src="http://p1.bqimg.com/576993/bb6f58b631585ffc.png" alt="Markdown"><br>在接收到客户端套接字对象之后，创建线程对象，将客户端套接字对象传递给该线程，并启动。修改BootStrap<br><img src="http://p1.bqimg.com/576993/12fdcc86928a06a9.png" alt="Markdown"><br>启动服务器，测试服务器是否支持多线程并发处理<br>注：目前只要用户发送一次请求，则创建一个新的线程，这其实是一种不太好的设计方案，大家有时间可以设计一个线程池，这样可以提高访问效率。</p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-八-多线程处理请求-javaServer06/" class="archive-article-date">
-  	<time datetime="2016-12-04T05:59:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-七-览器客户端发送请求-javaServer05" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-七-览器客户端发送请求-javaServer05/">自己写一个apache服务器(七)-览器客户端发送请求-javaServer05</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="览器客户端发送请求-javaServer05"><a href="#览器客户端发送请求-javaServer05" class="headerlink" title="览器客户端发送请求(javaServer05)"></a>览器客户端发送请求(javaServer05)</h4><p>服务器接收浏览器的请求，当浏览器发送请求后，服务器端会接收到客户端套接字对象<br><img src="http://i1.piimg.com/576993/d154a68a5a64f257.png" alt="Markdown"><br>接收到浏览器客户端套接字对象之后，从该套接字对象中获取输入流，从输入流中读取浏览器客户端发送的请求，将HTTP的请求协议全部内容读取到之后打印输出到控制台<br><img src="http://i1.piimg.com/576993/453b0cd86389ef66.png" alt="Markdown"><br>启动服务器<br><img src="http://i1.piimg.com/576993/aee83e4254689932.png" alt="Markdown"><br>打开FF浏览器客户端，在浏览器地址栏上输入下面的URL并敲回车发起访问<br><img src="http://i1.piimg.com/576993/4b65ba1cc7d20c99.png" alt="Markdown"><br>服务器端接收到客户端套接字对象并获取输入流将请求发送的数据读取到之后，输出到控制台<br><img src="http://i1.piimg.com/576993/46abeb05adec83e6.png" alt="Markdown"><br>目前服务器只能接收一次请求，我们可以加入循环语句，让服务器不断的接收客户端的请求<br><img src="http://i1.piimg.com/576993/2f3cab6b40eacc17.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/04/自己写一个apache服务器-七-览器客户端发送请求-javaServer05/" class="archive-article-date">
-  	<time datetime="2016-12-04T04:05:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
 </a>
       
 	<div class="article-tag tagcloud">

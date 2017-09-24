@@ -152,6 +152,406 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-17-computed计算属性" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/31/vue-17-computed计算属性/">vue(17)-computed计算属性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当一个数据发生变化时候,另一个数据也发生变化,比如下面数据:当改变a时候b的值会在a的值基础上加1</p>
+<pre><code> new Vue({
+    el:&apos;#box&apos;,
+    data:{
+        msg:&quot;hello&quot;
+        a:1,
+        b:1
+    }
+});
+</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-计算属性使用-computed"><a href="#1-计算属性使用-computed" class="headerlink" title="1.计算属性使用:computed"></a>1.计算属性使用:computed</h5><h6 id="1-1-最基本的形式"><a href="#1-1-最基本的形式" class="headerlink" title="1.1 最基本的形式"></a>1.1 最基本的形式</h6><pre><code>computed:{//默认调用get
+  b:function(){
+  return 值;   
+ }
+}
+</code></pre><p>computed里面是属性,它的值取决于return 后的结果  </p>
+<h6 id="1-2-复杂形式-computed里面是个对象-b里面也是一个对象"><a href="#1-2-复杂形式-computed里面是个对象-b里面也是一个对象" class="headerlink" title="1.2.复杂形式(computed里面是个对象,b里面也是一个对象)"></a>1.2.复杂形式(computed里面是个对象,b里面也是一个对象)</h6><pre><code>computed:{
+  b:{
+      get:function(){
+         return this.a+2;
+       },
+      set:function(val){
+         this.a = val;
+       }
+   }
+}
+</code></pre><p>计算属性其实最主要的用法是get,set方法,以上方法就是是get方法<br>假如执行如下方法</p>
+<pre><code>document.onclick=function(){
+    vm.b=101;
+} 
+</code></pre><p>其实就是调用set方法</p>
+<h6 id="1-3-对比"><a href="#1-3-对比" class="headerlink" title="1.3 对比"></a>1.3 对比</h6><p>computed里面放置业务代码,一定记得return,data里面是基本数据  </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+     a: {{a}}&lt;br&gt;
+     b:{{b}}
+&lt;/div&gt;
+
+&lt;script&gt;
+var vm = new Vue({
+    el:&apos;#box&apos;,
+    data:{
+        msg:&quot;hello&quot;,
+        a:1
+
+    },
+    computed:{
+        b:function () {
+            //业务逻辑代码
+            return this.a+1;
+        }
+    }
+});
+document.onclick=function(){
+    vm.a=10;
+};
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/4.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/31/vue-17-computed计算属性/" class="archive-article-date">
+  	<time datetime="2017-08-30T16:02:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-16-过滤html" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/30/vue-16-过滤html/">vue(16)-过滤html</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当我们输入的消息是:  </p>
+<pre><code>&lt;span&gt;welcome&lt;/span&gt;
+</code></pre><p>时候,我们需要将最终结束输出为:welcome  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-代码"><a href="#1-代码" class="headerlink" title="1.代码"></a>1.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+ &lt;div id=&quot;box&quot;&gt;
+   原样输出:&lt;span&gt;{{msg}}&lt;/span&gt;&lt;br&gt;
+   闪烁过滤输出:&lt;span&gt;{{{msg}}}&lt;/span&gt;&lt;br&gt;
+   不闪烁过滤输出:&lt;span v-html=&quot;msg&quot;&gt;&lt;/span&gt;
+  &lt;/div&gt;
+ &lt;script&gt;
+  new Vue({
+      el:&quot;#box&quot;,
+      data:{
+          msg:&apos;&lt;strong&gt;hello vue&lt;/strong&gt;&apos;
+      }
+  });
+ &lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/100.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/30/vue-16-过滤html/" class="archive-article-date">
+  	<time datetime="2017-08-30T15:43:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-15-防止刚加载时闪烁" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/30/vue-15-防止刚加载时闪烁/">vue(15)-防止刚加载时闪烁</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当网络慢时候，我们以</p>
+<pre><code>{{}}
+</code></pre><p>加载vue数据时候,会出现首先显示两大括号,此时就需要用到vue中标签</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-v-clock属性"><a href="#1-v-clock属性" class="headerlink" title="1.v-clock属性"></a>1.v-clock属性</h5><p>v-clock[属性]  防止闪烁  用在比较大的段落  </p>
+<pre><code> &lt;style&gt;
+    [v-clock]{
+       display: none;
+    }
+&lt;/style&gt;
+&lt;div class=&quot;reply&quot; v-for=&quot;item in msgData&quot; v-cloak&gt;
+            &lt;p class=&quot;replyContent&quot;&gt;{{item.content}}&lt;/p&gt;
+            &lt;p class=&quot;operation&quot;&gt;
+                &lt;span class=&quot;replyTime&quot;&gt;{{item.time}}&lt;/span&gt;
+                &lt;span class=&quot;handle&quot;&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;top&quot;&gt;{{item.acc}}&lt;/a&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;down_icon&quot;&gt;{{item.ref}}&lt;/a&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;cut&quot;&gt;删除&lt;/a&gt;
+                &lt;/span&gt;
+            &lt;/p&gt;
+        &lt;/div&gt;
+</code></pre><h5 id="2-v-text"><a href="#2-v-text" class="headerlink" title="2.v-text"></a>2.v-text</h5><p>以下实例:</p>
+<pre><code>&lt;span&gt;{{msg}}&lt;/span&gt;
+</code></pre><p>当网络慢的时候会出现双大括号显示,但是我们加载v-clock到上面就会比较浪费  </p>
+<pre><code>&lt;span&gt;{{msg}}&lt;/span&gt;
+</code></pre><p>对于小段落,我们可以使用v-text </p>
+<pre><code>&lt;span v-text=&quot;msg&quot;&gt;&lt;/span&gt;
+</code></pre><p>以上永远不会出现双大括号,因为本来就不存在双大括号  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;span&gt;{{msg}}&lt;/span&gt;&lt;br&gt;
+    &lt;span v-text=&quot;msg&quot;&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+new Vue({
+    el:&apos;#box&apos;,
+    data:{
+        msg:&quot;hello&quot;
+    }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/30/vue-15-防止刚加载时闪烁/" class="archive-article-date">
+  	<time datetime="2017-08-30T14:54:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-14-vue生存周期" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/25/vue-14-vue生存周期/">vue(14)-vue生存周期</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.当我们用vue做一个数据回显(也就是当打开或者刷新页面时候在vue方法里面就马上执行这个函数,而不是使用window.onload),我们需要用到vue的生命周期中的一些方法。<br>2.注意:在我们创建vue对象时候,如果不加</p>
+<pre><code>window.onload=function(){
+     new Vue({
+         el:&apos;#box&apos;,
+         data:{
+             msg:&quot;hello vue&quot;
+         }
+     });
+ }
+</code></pre><p>会报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/62.png" alt=""><br>原因就是box在其后面定义,而new Vue()先执行所以找不到,我们也可以将new Vue()放在box后面  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-vue生命周期"><a href="#1-vue生命周期" class="headerlink" title="1. vue生命周期"></a>1. vue生命周期</h5><p>要想在vue中实现类似于window.onload效果,我们需要知道vue生命周期:</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/vuelifecycle.png" alt=""></p>
+<p>1.new Vue()其实就是创建一个实例,实例什么时候创建完毕是有标志的钩子函数之一:created<br>2.将变成正真的数据(vue中的data中的msg中的well)需要进行编译：beforeCompile,Compiled<br>3.需要把编译好的数据添加到dom树上(文本节点插入到文档中:类似于window.onload)：ready<br>4.对象也可以销毁:beforeDestroy和destroyed(要想让beforeDestroy和destroyed执行,我们需要绑定事件执行vue里面自带的方法)<br>5.以上是基于vue1.0,,vue2.0将以上周期函数改名了</p>
+<h6 id="1-1钩子函数"><a href="#1-1钩子函数" class="headerlink" title="1.1钩子函数"></a>1.1钩子函数</h6><p>   created            -&gt; 实例已经创建<br>   boforeCompile      -&gt;编译之前<br>   compiled           -&gt;编译之后<br>   ready              -&gt;插入到文档中<br>   beforeDestroy      -&gt;销毁之前<br>   destroyed          -&gt;销毁之后  </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;vue生命周期&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;/head&gt;
+  &lt;body&gt;
+  &lt;div id=&quot;box&quot;&gt;
+   {{msg}}
+  &lt;/div&gt;
+
+  &lt;script&gt;
+  var vm = new Vue({
+       el:&apos;#box&apos;,
+       data:{
+           msg:&quot;well&quot;
+       },
+       created:function(){
+           alert(&quot;对象已经创建!&quot;);
+       },
+       beforeCompile:function(){
+           alert(&quot;编译之前!&quot;);
+       },
+       compiled:function(){
+           alert(&quot;编译之后&quot;);
+       },
+       ready:function(){
+           alert(&quot;插入到文档中&quot;);
+       },
+       beforeDestroy:function () {
+           alert(&quot;销毁前&quot;);
+       },
+       destroyed:function () {
+           alert(&quot;销毁后&quot;);
+       }
+   });
+
+   //点击文档之后销毁对象,对象的销毁并不会在浏览器里面自动执行,需要事件触发
+   document.onclick=function(){
+       vm.$destroy();
+   }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/lifecycledemo.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/25/vue-14-vue生存周期/" class="archive-article-date">
+  	<time datetime="2017-08-24T16:08:17.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-13-微博评论示例" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -671,548 +1071,6 @@
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-git-Template-render-error" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/18/git-Template-render-error/">git-Template render error</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>在用git提交自己搭建博客：hexo g 出现以下错误：  </p>
-<pre><code>$ hexo g
-INFO  Start processing
-FATAL Something&apos;s wrong. Maybe you can find the solution here: http://hexo.io/docs/troubleshooting.html
-Template render error: (unknown path) [Line 3, Column 156]
-expected variable end
-at Object.exports.prettifyError (F:\Hexo\node_modules\nunjucks\src\lib.js:34:15)
-at new_cls.render (F:\Hexo\node_modules\nunjucks\src\environment.js:469:27)
-at new_cls.renderString (F:\Hexo\node_modules\nunjucks\src\environment.js:327:21)
-at F:\Hexo\node_modules\hexo\lib\extend\tag.js:66:9
-at Promise._execute (F:\Hexo\node_modules\bluebird\js\release\debuggability.js:299:9)
-at Promise._resolveFromExecutor (F:\Hexo\node_modules\bluebird\js\release\promise.js:481:18)
-at new Promise (F:\Hexo\node_modules\bluebird\js\release\promise.js:77:14)
-at Tag.render (F:\Hexo\node_modules\hexo\lib\extend\tag.js:64:10)
-at Object.tagFilter [as onRenderEnd] (F:\Hexo\node_modules\hexo\lib\hexo\post.js:253:16)
-at F:\Hexo\node_modules\hexo\lib\hexo\render.js:65:19
-at tryCatcher (F:\Hexo\node_modules\bluebird\js\release\util.js:16:23)
-at Promise._settlePromiseFromHandler (F:\Hexo\node_modules\bluebird\js\release\promise.js:510:31)
-at Promise._settlePromise (F:\Hexo\node_modules\bluebird\js\release\promise.js:567:18)
-at Promise._settlePromise0 (F:\Hexo\node_modules\bluebird\js\release\promise.js:612:10)
-at Promise._settlePromises (F:\Hexo\node_modules\bluebird\js\release\promise.js:691:18)
-at Async._drainQueue (F:\Hexo\node_modules\bluebird\js\release\async.js:138:16)
-at Async._drainQueues (F:\Hexo\node_modules\bluebird\js\release\async.js:148:10)
-at Immediate.Async.drainQueues (F:\Hexo\node_modules\bluebird\js\release\async.js:17:14)
-at runCallback (timers.js:637:20)
-at tryOnImmediate (timers.js:610:5)
-at processImmediate [as _immediateCallback] (timers.js:582:5)
-FATAL (unknown path) [Line 3, Column 156]
-expected variable end
-Template render error: (unknown path) [Line 3, Column 156]
-expected variable end
-at Object.exports.prettifyError (F:\Hexo\node_modules\nunjucks\src\lib.js:34:15)
-at new_cls.render (F:\Hexo\node_modules\nunjucks\src\environment.js:469:27)
-at new_cls.renderString (F:\Hexo\node_modules\nunjucks\src\environment.js:327:21)
-at F:\Hexo\node_modules\hexo\lib\extend\tag.js:66:9
-at Promise._execute (F:\Hexo\node_modules\bluebird\js\release\debuggability.js:299:9)
-at Promise._resolveFromExecutor (F:\Hexo\node_modules\bluebird\js\release\promise.js:481:18)
-at new Promise (F:\Hexo\node_modules\bluebird\js\release\promise.js:77:14)
-at Tag.render (F:\Hexo\node_modules\hexo\lib\extend\tag.js:64:10)
-at Object.tagFilter [as onRenderEnd] (F:\Hexo\node_modules\hexo\lib\hexo\post.js:253:16)
-at F:\Hexo\node_modules\hexo\lib\hexo\render.js:65:19
-at tryCatcher (F:\Hexo\node_modules\bluebird\js\release\util.js:16:23)
-at Promise._settlePromiseFromHandler (F:\Hexo\node_modules\bluebird\js\release\promise.js:510:31)
-at Promise._settlePromise (F:\Hexo\node_modules\bluebird\js\release\promise.js:567:18)
-at Promise._settlePromise0 (F:\Hexo\node_modules\bluebird\js\release\promise.js:612:10)
-at Promise._settlePromises (F:\Hexo\node_modules\bluebird\js\release\promise.js:691:18)
-at Async._drainQueue (F:\Hexo\node_modules\bluebird\js\release\async.js:138:16)
-at Async._drainQueues (F:\Hexo\node_modules\bluebird\js\release\async.js:148:10)
-at Immediate.Async.drainQueues (F:\Hexo\node_modules\bluebird\js\release\async.js:17:14)
-at runCallback (timers.js:637:20)
-at tryOnImmediate (timers.js:610:5)
-at processImmediate [as _immediateCallback] (timers.js:582:5)
-</code></pre><h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>这个是hexo转义时候发生的错误，你文章中可能出现了</p>
-<pre><code>{{}}  {% %} 
-</code></pre><p>你可以将出现的代码，进行注释下就可以了。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/18/git-Template-render-error/" class="archive-article-date">
-  	<time datetime="2017-08-18T10:42:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Git/">Git</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-12-交互" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/13/vue-12-交互/">vue(12)-交互</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>vue本身框架是不支持交互的,如果vue交互需要通过引入库:vue-resource</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><ol>
-<li><p>引入vue-resource后，可以基于全局的Vue对象使用http，也可以基于某个Vue实例使用http。  </p>
-</li>
-<li><p>// 基于全局Vue对象使用http<br>Vue.http.get(‘/someUrl’, [options]).then(successCallback, errorCallback);<br>Vue.http.post(‘/someUrl’, [body], [options]).then(successCallback, errorCallback);  </p>
-</li>
-<li><p>// 在一个Vue实例内使用$http<br>this.$http.get(‘/someUrl’, [options]).then(successCallback, errorCallback);<br>this.$http.post(‘/someUrl’, [body], [options]).then(successCallback, errorCallback);  </p>
-</li>
-<li><p>在发送请求后，使用then方法来处理响应结果，then方法有两个参数，第一个参数是响应成功时的回调函数，第二个参数是响应失败时的回调函数。</p>
-</li>
-<li><p>then方法的回调函数也有两种写法，第一种是传统的函数写法，第二种是更为简洁的ES 6的Lambda写法：</p>
-</li>
-</ol>
-<p>1.传统写法  </p>
-<pre><code>this.$http.get(&apos;/someUrl&apos;, [options]).then(function(response){
-// 响应成功回调
-}, function(response){
-// 响应错误回调
-});
-</code></pre><p>2.Lambda写法 </p>
-<pre><code>this.$http.get(&apos;/someUrl&apos;, [options]).then((response) =&gt; {
-// 响应成功回调
-}, (response) =&gt; {
-// 响应错误回调
-});
-</code></pre><p>交互无非几种方式,如下:<br>1.get<br>2.post<br>3.jsonp  </p>
-<h5 id="1-get"><a href="#1-get" class="headerlink" title="1.get"></a>1.get</h5><h6 id="1-1-get请求普通文本"><a href="#1-1-get请求普通文本" class="headerlink" title="1.1 get请求普通文本"></a>1.1 get请求普通文本</h6><p>在html同级目录下新建a.txt  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;vue-resource.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&apos;body&apos;,
-            data:{
-
-            },
-            methods:{
-                get:function(){
-                    // 在一个Vue实例内使用$http
-                    this.$http.get(
-                        &quot;a.txt&quot;
-                    ).then(function(response){
-                        //输出状态码
-                        var status = response.status;
-                        alert(status);
-                        //内容
-                        var data = response.data;
-                        alert(data);
-                    },function(response){
-                        alert(response);
-                    });
-                }
-            }
-        });
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;!--点击按钮获取a.txt里面内容--&gt;
-&lt;input type=&quot;button&quot; value=&quot;get&quot; @click=&quot;get()&quot;&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h6 id="1-2-get请求服务器"><a href="#1-2-get请求服务器" class="headerlink" title="1.2 get请求服务器"></a>1.2 get请求服务器</h6><p>在同级目录下新建get.php  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;vue-resource.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&apos;body&apos;,
-            data:{
-
-            },
-            methods:{
-                get:function(){
-                    // 在一个Vue实例内使用$http
-                    this.$http.get(
-                        &quot;get.php&quot;,{
-                            a:1,
-                            b:2
-                        }
-                    ).then(function(response){
-                        //输出状态码
-                        var status = response.status;
-                        alert(status);
-                        //内容
-                        var data = response.data;
-                        alert(data);
-                    },function(response){
-                        alert(response);
-                    });
-                }
-            }
-        });
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;!--点击按钮获取a.txt里面内容--&gt;
-&lt;input type=&quot;button&quot; value=&quot;get&quot; @click=&quot;get()&quot;&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="2-post"><a href="#2-post" class="headerlink" title="2.post"></a>2.post</h5><p>post的时候,需要加上一个头,post请求时候需要加入一个参数:emulateJSON:true  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;vue-resource.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&apos;body&apos;,
-            data:{
-
-            },
-            methods:{
-                post:function(){
-                    // 在一个Vue实例内使用$http
-                    this.$http.post(
-                        &quot;post.php&quot;,{
-                            a:1,
-                            b:2
-                        },{
-                            //post请求时候需要添加
-                            emulateJSON:true
-                        }
-                    ).then(function(response){
-                        //输出状态码
-                        var status = response.status;
-                        alert(status);
-                        //内容
-                        var data = response.data;
-                        alert(data);
-                    },function(response){
-                        alert(response);
-                    });
-                }
-            }
-        });
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;!--点击按钮获取a.txt里面内容--&gt;
-&lt;input type=&quot;button&quot; value=&quot;post&quot; @click=&quot;post()&quot;&gt;
-&lt;/body&gt;
-&lt;/html&gt;    
-</code></pre><h5 id="3-jsonp"><a href="#3-jsonp" class="headerlink" title="3.jsonp"></a>3.jsonp</h5><p>1.由于jsonp是走的get请求,所以不需要加:emulateJSON:true<br>2.jsonp默认的返回参数是callback,如果需要更改：jsonp:”xx”</p>
-<h6 id="3-1-请求360数据"><a href="#3-1-请求360数据" class="headerlink" title="3.1 请求360数据"></a>3.1 请求360数据</h6><p>我们想获取本域之外的数据时候:比如获取360数据:<br>1.捕获接口:<br> <a href="https://sug.so.360.cn/suggest?callback=suggest_so&amp;word=a" target="_blank" rel="external">https://sug.so.360.cn/suggest?callback=suggest_so&amp;word=a</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/8.png" alt=""></p>
-<p>2.代码  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;vue-resource.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&apos;body&apos;,
-            data:{
-
-            },
-            methods:{
-                jsonp:function(){
-                    // 在一个Vue实例内使用$http
-                    //连接:https://sug.so.360.cn/suggest?callback=suggest_so&amp;word=a
-                    this.$http.jsonp(
-                        &quot;https://sug.so.360.cn/suggest&quot;,{
-                            word:&quot;a&quot;
-                        },{
-                            //post请求时候需要添加
-                            emulateJSON:true
-                        }
-                    ).then(function(response){
-                        //输出状态码
-                        var status = response.status;
-                        alert(status);
-                        //内容
-                        alert(response.data.s);
-                    },function(response){
-                        alert(response);
-                    });
-                }
-            }
-        });
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;!--请求360时候:默认jsonp是callback--&gt;
-&lt;input type=&quot;button&quot; value=&quot;jsonp&quot; @click=&quot;jsonp()&quot;&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h6 id="3-2-请求baidu数据"><a href="#3-2-请求baidu数据" class="headerlink" title="3.2 请求baidu数据"></a>3.2 请求baidu数据</h6><p>1.捕获百度接口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/9.png" alt=""><br><a href="https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=a&amp;json=1&amp;p=3&amp;sid=1440_19036_21108_17001_24094_20718&amp;req=2&amp;csor=1&amp;cb=jQuery110201012269767638645_1502617163804&amp;_=1502617163808" target="_blank" rel="external">https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=a&amp;json=1&amp;p=3&amp;sid=1440_19036_21108_17001_24094_20718&amp;req=2&amp;csor=1&amp;cb=jQuery110201012269767638645_1502617163804&amp;_=1502617163808</a><br>修改为:<br><a href="https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=a&amp;cb=jshow" target="_blank" rel="external">https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=a&amp;cb=jshow</a><br>请求为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/10.png" alt=""> </p>
-<p>2.代码  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;vue-resource.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&apos;body&apos;,
-            data:{
-
-            },
-            methods:{
-                jsonp:function(){
-                    // 在一个Vue实例内使用$http
-                    //连接:https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su?wd=a&amp;json=1
-                    this.$http.jsonp(
-                        &quot;https://sp0.baidu.com/5a1Fazu8AA54nxGko9WTAnF6hhy/su&quot;,{
-                            wd:&quot;a&quot;
-                        },{
-                            jsonp:&quot;cb&quot;
-                        }
-                    ).then(function(response){
-                        //输出状态码
-                        var status = response.status;
-                        alert(status);
-                        //内容
-                        alert(response.data.s);
-                    },function(response){
-                        alert(response);
-                    });
-                }
-            }
-        });
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;!--请求360时候:默认jsonp是callback--&gt;
-&lt;input type=&quot;button&quot; value=&quot;jsonp&quot; @click=&quot;jsonp()&quot;&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/13/vue-12-交互/" class="archive-article-date">
-  	<time datetime="2017-08-13T04:33:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-13</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-11-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/11/vue-11-过滤器/">vue(11)-过滤器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本文使用的vue.js版本是1.0.26<br>Vue.js 允许你自定义过滤器，被用作一些常见的文本格式化。由”管道符”指示, 格式如下：</p>
-<pre><code>&lt;!-- 在两个大括号中 --&gt;
-{{ message | capitalize }}
-
-&lt;!-- 在 v-bind 指令中 --&gt;
-&lt;div v-bind:id=&quot;rawId | formatId&quot;&gt;&lt;/div&gt;
-</code></pre><p>过滤器函数接受表达式的值作为第一个参数。<br>以下实例对输入的字符串第一个字母转为大写</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-过滤器"><a href="#1-过滤器" class="headerlink" title="1.过滤器:"></a>1.过滤器:</h5><pre><code>{{msg|filterA 参数|filterB 参数}}  
-</code></pre><p>1.uppercase  变大写<br>2.lowercase  变小写<br>3.capitalize  首字母大写<br>4.currency 钱 默认是$,我们可以自己在后面添加符号输出  </p>
-<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/11.png" alt=""></p>
-<h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/7.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/11/vue-11-过滤器/" class="archive-article-date">
-  	<time datetime="2017-08-10T16:04:08.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-11</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-10-模板" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/10/vue-10-模板/">vue(10)-模板</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Vue.js 使用了基于 HTML 的模版语法，允许开发者声明式地将 DOM 绑定至底层 Vue 实例的数据。<br>Vue.js 的核心是一个允许你采用简洁的模板语法来声明式的将数据渲染进 DOM 的系统。<br>结合响应系统，在应用状态改变时， Vue 能够智能地计算出重新渲染组件的最小代价并应用到 DOM 操作上。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>两个大括号模板   数据更新模板变化</p>
-<p>1.代码</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&quot;#box&quot;,
-            data:{
-                msg:&apos;abc&apos;
-            }
-        })
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   &lt;input type=&quot;text&quot; v-model=&quot;msg&quot;&gt;&lt;br&gt;
-   {{msg}}&lt;br&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>2.测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/1.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/10/vue-10-模板/" class="archive-article-date">
-  	<time datetime="2017-08-10T15:32:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
 	</div>
 
       

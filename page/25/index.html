@@ -152,6 +152,237 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/">自己写一个apache服务器(十)-响应静态html资源到浏览器-javaServer08</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="响应静态html资源到浏览器-javaServer08"><a href="#响应静态html资源到浏览器-javaServer08" class="headerlink" title="响应静态html资源到浏览器-javaServer08"></a>响应静态html资源到浏览器-javaServer08</h4><ol>
+<li>截获到请求的URI之后，判断请求的是否为服务器中的html资源，如果是服务器中的某个webapp的html资源，服务器端程序应找到该文件，并且将该文件中的html代码读取到JVM内存中，然后再将内存中的html代码响应到浏览器页面上，如果客户端请求的资源在服务器端webapp中未找到，服务器应提示浏览器客户端“您访问的资源不存在”，这就是著名的404错误。404被称为HTTP状态码，属于HTTP协议的一部分。  </li>
+<li>webapp以及webapp中的html资源不是web服务器开发人员需要完成的，应该是webapp的开发人员负责开发的。web服务器只负责读取该html资源然后响应到浏览器页面上。所以此时我们的开发角色发生了改变，我们现在的角色变为webapp的开发人员。在javaServer的根目录下新建web应用起名oa（办公系统），在oa文件夹下新建index.html文件，并编写简单的html代码，如下图：<br><img src="http://p1.bqimg.com/576993/fc22be9e5296c6d3.png" alt="Markdown"><br>角色再次转回到服务器开发人员，在HandlerRequest中继续处理请求，目前已经截获到请求的URI，判断请求URI是否以html或htm结尾，如果是以html或htm结尾，服务器定位到该html文件，将其读取到JVM内存中，然后再将这些html代码响应到浏览器页面上，浏览器解释执行html代码展示效果：<br><img src="http://p1.bqimg.com/576993/9262992bab8f471f.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源存在的时候）<br><img src="http://p1.bqimg.com/576993/6869f6b883cac8d1.png" alt="Markdown"><br>打开浏览器，输入URL访问（访问的资源不存在的时候）<br><img src="http://p1.bqimg.com/576993/85446849d6d956bd.png" alt="Markdown"></li>
+</ol>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/04/自己写一个apache服务器-十-响应静态html资源到浏览器-javaServer08/" class="archive-article-date">
+  	<time datetime="2016-12-04T10:58:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-九-服务器拦截URI-javaServer07" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/">自己写一个apache服务器(九)-服务器拦截URI-javaServer07</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="服务器拦截URI-javaServer07"><a href="#服务器拦截URI-javaServer07" class="headerlink" title="服务器拦截URI-javaServer07"></a>服务器拦截URI-javaServer07</h4><ol>
+<li>开始处理客户端的请求，首先我们需要知道客户端访问的是哪一个资源，我们怎么才能知道客户端访问的哪个资源呢？答案当然是在服务器端获取客户端请求的URI，那么请求的URI在哪里呢？请求的URI在HTTP请求协议的请求行上。所以我们需要读取请求协议的第一行数据，然后从这些数据中解析出URI，从而得出客户要访问的是服务器端的哪个资源。  </li>
+<li>URL和URI是什么？它们之间是什么关系？URL是统一资源定位符，例如在浏览器地址栏上直接输入的请求路径:<a href="http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。" target="_blank" rel="external">http://127.0.0.1:8080/oa/index.html就是一个URL，通过它可以定位网络中的某个资源。URI是统一资源标识符，只是代表网络中某个资源的名称，不具备定位功能，或者说URI是URL的一部分。例如上面的URL中/oa/index.html就是一个URI。</a>  </li>
+<li>HTTP协议请求协议的详细内容如下图所示，请求行由三部分组成：请求方式+URI+协议版本号，我们需要获取的就是请求行上的URI<br><img src="http://p1.bqimg.com/576993/53533ca077c5f0f2.png" alt="Markdown"><br>在HandlerRequest中编写程序读取请求行，并解析字符串，截获URI<br><img src="http://p1.bqimg.com/576993/6b22e093fda5080f.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL：<a href="http://127.0.0.1:8099/oa/index.html进行访问测试" target="_blank" rel="external">http://127.0.0.1:8099/oa/index.html进行访问测试</a><br><img src="http://p1.bqimg.com/576993/173dbe2952ffadd9.png" alt="Markdown"></li>
+</ol>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/04/自己写一个apache服务器-九-服务器拦截URI-javaServer07/" class="archive-article-date">
+  	<time datetime="2016-12-04T10:15:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-八-多线程处理请求-javaServer06" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-八-多线程处理请求-javaServer06/">自己写一个apache服务器(八)-多线程处理请求-javaServer06</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="多线程处理请求-javaServer06"><a href="#多线程处理请求-javaServer06" class="headerlink" title="多线程处理请求-javaServer06"></a>多线程处理请求-javaServer06</h4><p>当前服务器程序是单线程的，只有一个main方法，只有一个主线程在运行，只有一个栈在运行，当多个用户同时并发发送请求的时候，服务器在同一时间点只能处理一个请求，这样会导致用户排队等待的现象，为了让服务器能够同时处理多个请求，可以引入一个线程处理一个请求，多线程并发接收用户的请求，请求A和请求B之间互不干扰，互不等待，在内存角度来说，会有多个栈内存在同时运行<br><img src="http://p1.bqimg.com/576993/24f84ca00adef24c.png" alt="Markdown"><br>定义单独的线程处理请求，处理请求时需要客户端套接字对象（一个请求会对应一个客户端套接字对象），所以线程类需要含有客户端套接字对象的引用，定义HandlerRequest类实现Runnable接口，实现run方法，在run方法中处理当前请求<br><img src="http://p1.bqimg.com/576993/bb6f58b631585ffc.png" alt="Markdown"><br>在接收到客户端套接字对象之后，创建线程对象，将客户端套接字对象传递给该线程，并启动。修改BootStrap<br><img src="http://p1.bqimg.com/576993/12fdcc86928a06a9.png" alt="Markdown"><br>启动服务器，测试服务器是否支持多线程并发处理<br>注：目前只要用户发送一次请求，则创建一个新的线程，这其实是一种不太好的设计方案，大家有时间可以设计一个线程池，这样可以提高访问效率。</p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/04/自己写一个apache服务器-八-多线程处理请求-javaServer06/" class="archive-article-date">
+  	<time datetime="2016-12-04T05:59:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-自己写一个apache服务器-七-览器客户端发送请求-javaServer05" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/04/自己写一个apache服务器-七-览器客户端发送请求-javaServer05/">自己写一个apache服务器(七)-览器客户端发送请求-javaServer05</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="览器客户端发送请求-javaServer05"><a href="#览器客户端发送请求-javaServer05" class="headerlink" title="览器客户端发送请求(javaServer05)"></a>览器客户端发送请求(javaServer05)</h4><p>服务器接收浏览器的请求，当浏览器发送请求后，服务器端会接收到客户端套接字对象<br><img src="http://i1.piimg.com/576993/d154a68a5a64f257.png" alt="Markdown"><br>接收到浏览器客户端套接字对象之后，从该套接字对象中获取输入流，从输入流中读取浏览器客户端发送的请求，将HTTP的请求协议全部内容读取到之后打印输出到控制台<br><img src="http://i1.piimg.com/576993/453b0cd86389ef66.png" alt="Markdown"><br>启动服务器<br><img src="http://i1.piimg.com/576993/aee83e4254689932.png" alt="Markdown"><br>打开FF浏览器客户端，在浏览器地址栏上输入下面的URL并敲回车发起访问<br><img src="http://i1.piimg.com/576993/4b65ba1cc7d20c99.png" alt="Markdown"><br>服务器端接收到客户端套接字对象并获取输入流将请求发送的数据读取到之后，输出到控制台<br><img src="http://i1.piimg.com/576993/46abeb05adec83e6.png" alt="Markdown"><br>目前服务器只能接收一次请求，我们可以加入循环语句，让服务器不断的接收客户端的请求<br><img src="http://i1.piimg.com/576993/2f3cab6b40eacc17.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/04/自己写一个apache服务器-七-览器客户端发送请求-javaServer05/" class="archive-article-date">
+  	<time datetime="2016-12-04T04:05:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-六-端口号可配置-javaServer04" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -507,352 +738,6 @@
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
 	<a class="article-category-link" href="/categories/Web-Servlet/">Web Servlet</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-二-socket与多线程实现" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/27/自己写一个apache服务器-二-socket与多线程实现/">自己写一个apache服务器(二)-socket与多线程实现</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>上一篇简单用socket编程实现了客户端和服务器端的访问，下面使用socket和多线程实现服务器webserver-01:</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-步骤"><a href="#1-步骤" class="headerlink" title="1.步骤"></a>1.步骤</h6><ol>
-<li>目标:采用Socket和多线程技术，实现一个Java Web服务器，加深对HTTP协议的认识</li>
-<li>新建Java项目:webserver</li>
-<li>新建Java文件:WebServer.java和Processor.java<br><img src="http://i1.piimg.com/576993/d911b572097800dd.png" alt="Markdown"><h6 id="2-分析"><a href="#2-分析" class="headerlink" title="2.分析"></a>2.分析</h6></li>
-<li>WebServer.java:<br>包含两个主要方法：1.serverStart服务器启动方法 2.main方法程序的入口方法，处理具体业务交给Processor这个类处理<br><img src="http://i1.piimg.com/576993/faa55eacbc69449a.png" alt="Markdown"></li>
-<li>Processor.java：<br>说明：<br>1.此类继承 Thread从而实现多线程<br>2.带参构造方法用于创建socket对象，获取输入in输出out流<br>3.线程执行方法run:发送文件给请求方<br>4.解析输入流方法parse:解析socket得到的输入流in得到访问资源名称<br>5.资源请求失败SendErrorMessage：以HTTP协议形式打印出去<br>6.发送文件方法sendFile：将服务器里面特定文件读取发送给客户端<br><img src="http://p1.bqimg.com/576993/a49bfba6de032f99.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/fac5aebebdcc7f42.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/bee871cdaa5eb4fd.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/95d24a1fef761410.png" alt="Markdown"><br><img src="http://p1.bqimg.com/576993/f7f932c9464a0f4e.png" alt="Markdown"><h6 id="3-代码："><a href="#3-代码：" class="headerlink" title="3.代码："></a>3.代码：</h6><a href="https://github.com/startshineye/webserver">源码链接</a></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/27/自己写一个apache服务器-二-socket与多线程实现/" class="archive-article-date">
-  	<time datetime="2016-11-27T05:35:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-27</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-自己写一个apache服务器-一-socket编程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/27/自己写一个apache服务器-一-socket编程/">自己写一个apache服务器(一)-socket编程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Web服务器是web开发很重要的工具，用户资源的请求都是从服务器中获取，web服务器底层也是通过socket编程实现和Http协议.</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-什么是Socket编程"><a href="#1-什么是Socket编程" class="headerlink" title="1.什么是Socket编程"></a>1.什么是Socket编程</h6><p>网络上的两个程序通过一个双向的通信连接实现数据的交换，这个连接的一端称为一个Socket。。Socket的英文原义是“孔”或“插座”。通常也称作”套接字”，用于描述IP地址和端口，可以用来实现不同计算机之间的通信。在Internet上的主机一般运行了多个服务软件，同时提供几种服务。每种服务都打开一个Socket，并绑定到一个端口上，不同的端口对应于不同的服务。Socket正如其英文原意那样，像一个多孔插座。一台主机犹如布满各种插座的房间，每个插座有一个编号，有的插座提供220伏交流电， 有的提供110伏交流电，有的则提供有线电视节目。客户软件将插头插到不同编号的插座，就可以得到不同的服务。</p>
-<h6 id="2-连接过程"><a href="#2-连接过程" class="headerlink" title="2.连接过程"></a>2.连接过程</h6><p>根据连接启动的方式以及本地套接字要连接的目标，套接字之间的连接过程可以分为三个步骤：服务器监听，客户端请求，连接确认。  </p>
-<ol>
-<li>第一步：服务器监听：是服务器端套接字并不定位具体的客户端套接字，而是处于等待连接的状态，实时监控网络状态。</li>
-<li>第二步：客户端请求：是指由客户端的套接字提出连接请求，要连接的目标是服务器端的套接字。为此，客户端的套接字必须首先描述它要连接的服务器的套接字，指出服务器端套接字的地址和端口号，然后就向服务器端套接字提出连接请求。</li>
-<li>第三步：连接确认：是指当服务器端套接字监听到或者说接收到客户端套接字的连接请求，它就响应客户端套接字的请求，建立一个新的线程，把服务器端套接字的描述发给客户端，一旦客户端确认了此描述，连接就建立好了。而服务器端套接字继续处于监听状态，继续接收其他客户端套接字的连接请求。<h6 id="3-Java中如何实现Socket编程"><a href="#3-Java中如何实现Socket编程" class="headerlink" title="3.Java中如何实现Socket编程"></a>3.Java中如何实现Socket编程</h6>JavaSE中提供了实现Socket编程的API，让网络编程变的更简单，更加面向对象。实现两台计算机（两个服务）之间的通讯，至少编写以下的代码：</li>
-<li>server端：  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div></pre></td><td class="code"><pre><div class="line">package com.yxm.socket;</div><div class="line">import java.io.IOException;</div><div class="line">import java.io.InputStream;</div><div class="line">import java.io.OutputStream;</div><div class="line">import java.net.ServerSocket;</div><div class="line">import java.net.Socket;</div><div class="line">/**</div><div class="line"> * 服务端</div><div class="line"> * @author yxm</div><div class="line"> * @date 2016-11-27</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">	ServerSocket serverSocket = null;</div><div class="line">	try &#123;</div><div class="line">		//創建服務器套接字對象，表示創建一個對象，並且將該服務綁定到8080端口上</div><div class="line">		serverSocket = new ServerSocket(8080);</div><div class="line">		//开始监听网络,接受客户的请求，程序在此等待,当客户端发送请求后,接受客户端套接字</div><div class="line">		Socket clientSocket = serverSocket.accept();</div><div class="line">		</div><div class="line">		//通过客户端套接字获取输入流,从该输入流中读取客户端发送的消息</div><div class="line">		InputStream in = clientSocket.getInputStream();</div><div class="line">		byte[] bytes = new byte[in.available()];</div><div class="line">		in.read(bytes);//以bytes个字节读取字节流</div><div class="line">		String msgFromClient = new String(bytes);</div><div class="line">		System.out.println(msgFromClient);</div><div class="line">		</div><div class="line">		//通过套接字对象获取输出流,通过该输出流向客户端响应消息</div><div class="line">	    OutputStream out = clientSocket.getOutputStream();</div><div class="line">	    out.write(&quot;HelloWorld!&quot;.getBytes());//字节输出</div><div class="line">	    out.flush();</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;finally&#123;</div><div class="line">		if(serverSocket != null &amp;&amp; !serverSocket.isClosed())&#123;</div><div class="line">			try &#123;</div><div class="line">				serverSocket.close();</div><div class="line">			&#125; catch (IOException e) &#123;</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">2. client端：</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>package com.yxm.socket;<br>import java.io.IOException;<br>import java.io.InputStream;<br>import java.io.OutputStream;<br>import java.net.Socket;<br>/**</p>
-<ul>
-<li>客户端</li>
-<li></li>
-<li>@author yxm</li>
-<li>@date 2016-11-26<br>*/<br>public class Client {<br> public static void main(String[] args) {<pre><code>Socket clientSocket = null;
-String address = &quot;127.0.0.1&quot;;
-int port = 8080;
-try {
-    // 创建客户端套接字对象,指向某台计算机上的某个服务
-    clientSocket = new Socket(address, port);
-    //从该套接字对象上获取输出流,该输出流指向服务器上的某个服务
-    OutputStream out = clientSocket.getOutputStream();
-    //向服务器传输数据
-    out.write(&quot;hello server!&quot;.getBytes());
-    //刷新
-    out.flush();
-    //接收服务器端响应的消息
-    InputStream in = clientSocket.getInputStream();
-    byte[] bytes = new byte[in.available()];
-    in.read(bytes);
-    String msgFromServer = new String(bytes);
-    System.out.println(msgFromServer);
-} catch (Exception e) {
-    e.printStackTrace();
-}finally{
-    if(clientSocket!=null &amp;&amp; !clientSocket.isClosed()){
-        try {
-            clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-}
-</code></pre> }<br>}<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 4.读取HTTP请求协议</div><div class="line">上面的客户端不再使用java代码，我们尝试将“客户端程序”改为“浏览器客户端软件”，编写以下服务器端程序：</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>package com.yxm.socket;</p>
-<p>import java.io.IOException;<br>import java.io.InputStream;<br>import java.io.OutputStream;<br>import java.net.ServerSocket;<br>import java.net.Socket;<br>/**</p>
-<ul>
-<li>服务端</li>
-<li>@author yxm</li>
-<li>@date 2016-11-27<br>*/<br>public class Server {<br>public static void main(String[] args) {<br> ServerSocket serverSocket = null;<br> try {<pre><code>//創建服務器套接字對象，表示創建一個對象，並且將該服務綁定到8080端口上
-serverSocket = new ServerSocket(8080);
-//开始监听网络,接受客户的请求，程序在此等待,当客户端发送请求后,接受客户端套接字
-Socket clientSocket = serverSocket.accept();
-//通过客户端套接字获取输入流,从该输入流中读取客户端发送的消息
-InputStream in = clientSocket.getInputStream();
-byte[] bytes = new byte[in.available()];
-in.read(bytes);//以bytes个字节读取字节流
-String msgFromClient = new String(bytes);
-System.out.println(msgFromClient);
-//通过套接字对象获取输出流,通过该输出流向客户端响应消息
-OutputStream out = clientSocket.getOutputStream();
-out.write(&quot;HelloWorld!&quot;.getBytes());//字节输出
-out.flush();
-</code></pre> } catch (Exception e) {<pre><code>e.printStackTrace();
-</code></pre> }finally{<pre><code>if(serverSocket != null &amp;&amp; !serverSocket.isClosed()){
-    try {
-        serverSocket.close();
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-}
-</code></pre>  }<br>}}<br>```<br>打开火狐浏览器，在浏览器地址输入以下内容:<ol>
-<li>客户端：<br><img src="http://p1.bpimg.com/576993/b76de9ff64731e41.png" alt="Markdown"><br>回车：浏览器上会显示server的信息“HelloWorld!”</li>
-<li>服务端：<br><img src="http://p1.bpimg.com/576993/3f52a4928cd66375.png" alt="Markdown"><br>HTTP协议第一行(请求行)特别重要:它包括三部分：请求方式GET 请求资源 HTTP版本号<h6 id="5-源码"><a href="#5-源码" class="headerlink" title="5.源码"></a>5.源码</h6><a href="https://github.com/startshineye/webserver">源码链接</a></li>
-</ol>
-</li>
-</ul>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/27/自己写一个apache服务器-一-socket编程/" class="archive-article-date">
-  	<time datetime="2016-11-27T03:25:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-27</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/socket网络编程/">socket网络编程</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Servlet起源-三-Web动态编程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/27/Servlet起源-三-Web动态编程/">Servlet起源(三)-Web动态编程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://p1.bqimg.com/576993/d944c97a979111af.gif" alt="Markdown"></p>
-<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> Servlet起源讲解以下几个方面:  </p>
-<ol>
-<li>Internet的起源</li>
-<li>HTTP协议</li>
-<li>Web动态编程</li>
-<li>Servlet<h4 id="Web动态编程"><a href="#Web动态编程" class="headerlink" title="Web动态编程"></a>Web动态编程</h4><h6 id="Web动态编程技术"><a href="#Web动态编程技术" class="headerlink" title="Web动态编程技术"></a>Web动态编程技术</h6>早期的web动态编程技术是CGI</li>
-<li>有了www之后网络中应用就特别广了，很多服务器把自己可以让人看见的资源共享出来，别人通过网址就可以访问资源。在应用过程中发现一个问题，html文件显示到浏览器表示的是静态的内容，假如一个人想看一本书，也许就要做几百个页面麻烦。假如数据保存在数据库中，我们就相当于访问动态的资源，这就是引入早期的 web中CGI技术</li>
-<li>CGI（Common Gateway Interface）技术就是为了解决增加服务器扩展能力(浏览器可以访问动态资源)而产生的技术，缺点：CGI是基于进程运行，执行效率低，一旦一个应用被很多人访问，服务器负载高，崩溃</li>
-<li>1995年sun推出java以后，在1997年，sun看到了CGI的缺点，他希望推出一种高效率的CGI技术，于是Sun公司推出了CGI的Java版技术Servlet(java版的CGI技术)，servlet是基于线程的。是动态生成一个html的内容给浏览器（其实就是http协议和html的组装拼接，然后通过输出流打印到浏览器，浏览器再解析出来）<br><img src="http://p1.bqimg.com/576993/0c5338cc76f39ab8.png" alt="Markdown"><h6 id="编写Java-Socket程序的几种结构"><a href="#编写Java-Socket程序的几种结构" class="headerlink" title="编写Java Socket程序的几种结构"></a>编写Java Socket程序的几种结构</h6></li>
-<li>直接使用Socket编程实现:(单线程效率低)</li>
-<li>使用Socket，再结合Java的多线程编程</li>
-<li>使用NIO中的非阻塞（Non Blocking）Socket再结合Java的多线程编程</li>
-<li>使用JDK自带的或者第三方的线程池技术对线程进行管理，提高多线程的执行效率</li>
-<li>使用开源的Java Socket开发框架，例如：MINA和Cindy框架。使用这种框架的时候，可以非常方便简单开发高性能的网络应用</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/27/Servlet起源-三-Web动态编程/" class="archive-article-date">
-  	<time datetime="2016-11-27T02:59:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-27</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Servlet/">Servlet</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaWeb-Servlet/">javaWeb Servlet</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Servlet起源-二-HTTP协议" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/11/27/Servlet起源-二-HTTP协议/">Servlet起源(二)-HTTP协议</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p><img src="http://i1.piimg.com/576993/5ad38c37f134c398.jpg" alt="Markdown"></p>
-<h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> Servlet起源讲解以下几个方面:  </p>
-<ol>
-<li>Internet的起源</li>
-<li>HTTP协议</li>
-<li>Web动态编程</li>
-<li>Servlet<h4 id="WWW"><a href="#WWW" class="headerlink" title="WWW"></a>WWW</h4><h6 id="www"><a href="#www" class="headerlink" title="www"></a>www</h6></li>
-<li>含义：WWW，英文“World Wide Web”的缩写，描述的<br>是一个资料空间,虚拟的资源空间，把不同服务器资源虚拟的组合在一起然后能互相查找的的一个资源空间，所以我怕们能够访问比如www.alibaba.com  </li>
-<li>起源：1989年Tim Berners-Lee发明WWW，并且开发了<br>第一个WWW上的Web服务器，还开发了第一个<br>浏览器程序和编写了第一个HTML页面<h6 id="URL"><a href="#URL" class="headerlink" title="URL"></a>URL</h6></li>
-<li>一个URL的基本组成如下面这个例子:<br><a href="http://www.yxm.com/bbs/index.htm" target="_blank" rel="external">http://www.yxm.com/bbs/index.htm</a><br><img src="http://p1.bqimg.com/576993/34e4da2b16a4b47f.png" alt="Markdown">  <h6 id="超文本标记语言（HTML"><a href="#超文本标记语言（HTML" class="headerlink" title="超文本标记语言（HTML)"></a>超文本标记语言（HTML)</h6></li>
-<li>作用是定义超文本文档的结构和格式。</li>
-<li>HTML告诉浏览器如何把内容显示给用户看到。<h6 id="什么是协议"><a href="#什么是协议" class="headerlink" title="什么是协议"></a>什么是协议</h6></li>
-<li>计算机A和计算机B之间在传送数据的时候，提前制定好的一种数据传送格式，计算机A向计算机B发送一个数据包，计算机B必须提前知道该数据包的数据格式，才可以成功的将该数据包中有价值的数据解析出来。</li>
-<li>例如：小张和小王聊天，小张说：“你吃饭了吗？”，小王说：“吃了”。可见小张和小王可以正常沟通交流，他们为什么可以正常沟通交流呢？因为小张和小王都遵守同一套协议，该协议就是中国普通话协议，其实我们从幼儿园就开始学习这套协议了。<h6 id="HTTP协议"><a href="#HTTP协议" class="headerlink" title="HTTP协议"></a>HTTP协议</h6></li>
-<li>HTTP协议(Hyper Text Transfer Protocol，超文本传输协议)超文本表示不仅可以传送普通的文本，还可以传送一些二进制数据，例如：图片、声音、视频、流媒体等数据。  </li>
-<li>HTTP是用于从Web服务器传输HTML文件到本地浏览器的通信协议。  </li>
-<li>该协议是基于请求/响应形式的结构(相当于客户机/服务器结构)  </li>
-<li>HTTP协议是无状态的协议</li>
-<li>还有一个HTTP的安全版本称为HTTPS </li>
-<li>HTTP协议是W3C（万维网联盟组织）制定的，该协议规定了浏览器软件和web服务器软件之间在传送数据的时候采用什么样的格式。这样就可以做到不同类型的浏览器访问不同类型的Web服务器。浏览器和Web服务器之间解耦合。</li>
-<li>浏览器Browser向Web服务器发送数据，称为请求request，Web服务器向浏览器发送数据，称为响应response。<h6 id="HTTP协议例子"><a href="#HTTP协议例子" class="headerlink" title="HTTP协议例子"></a>HTTP协议例子</h6></li>
-<li>请求协议包括的主要部分<br>请求行<br>消息报头<br>空白行<br>请求体  </li>
-<li>请求协议详细内容<br><img src="http://p1.bqimg.com/576993/ee8b81765df46c3f.png" alt="Markdown"></li>
-<li>HTTP协议之响应协议<br>状态行<br>响应报头<br>空白行<br>响应体  </li>
-<li>响应协议详细内容<br><img src="http://p1.bqimg.com/576993/383f0c8f18fa5711.png" alt="Markdown"></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/11/27/Servlet起源-二-HTTP协议/" class="archive-article-date">
-  	<time datetime="2016-11-27T01:56:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-11-27</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Servlet/">Servlet</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaWeb-Servlet/">javaWeb Servlet</a>
 	</div>
 
 
