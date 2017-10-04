@@ -152,6 +152,159 @@
       <div class="body-wrap">
         
   
+    <article id="post-Sppring-Boot-十八-Spring-Boot普通类中使用bean" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/23/Sppring-Boot-十八-Spring-Boot普通类中使用bean/">Sppring Boot(十八)-Spring Boot普通类中使用bean</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们要在一个类使用spring提供的bean对象，需要把这个类注入到spring容器中，交给spring容器进行管理，但是在实际当中，我们往往会碰到在一个普通的Java类中，想直接使用spring提供的其他对象或者说有一些不需要交给spring管理，但是需要用到spring里的一些对象。如果这是spring框架的独立应用程序，我们通过</p>
+<pre><code>ApplicationContext ac = new FileSystemXmlApplicationContext(&quot;applicationContext.xml&quot;);
+ac.getBean(&quot;beanId&quot;);
+</code></pre><p>就可以很轻易的获取我们所需要的对象。<br>但是往往我们所做的都是Web Application，这时我们启动spring容器是通过在web.xml文件中配置，这样就不适合使用上面的方式在普通类去获取对象了，因为这样做就相当于加载了两次spring容器，而我们想是否可以通过在启动web服务器的时候，就把Application放在某一个类中，我们通过这个类在获取，这样就可以在普通类获取spring bean对象了，让我们接着往下看。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>针对于以上内容我们可以用三种方式:<br>1.Spring Boot可以扫描的包下<br>2.不在Spring Boot的扫描包下方式一<br>3.不在Spring Boot的扫描包下方式二  </p>
+<h6 id="1-Spring-Boot可以扫描的包下"><a href="#1-Spring-Boot可以扫描的包下" class="headerlink" title="1.Spring Boot可以扫描的包下"></a>1.Spring Boot可以扫描的包下</h6><p>我们编写的SpringUtil在Spring Boot可以扫描的包下或者使用@ComponentScan引入自定义的包了，那么原理很简单，只需要使得SpringUtil实现接口：ApplicationContextAware，然后加上@Component 注解即可，具体编码如下：</p>
+<pre><code>package com.yxm.util;
+</code></pre><p>import org.springframework.beans.BeansException;<br>import org.springframework.context.ApplicationContext;<br>import org.springframework.context.ApplicationContextAware;<br>import org.springframework.stereotype.Component;<br>/**</p>
+<ul>
+<li>普通类调用Spring bean对象：</li>
+<li>说明：</li>
+<li>1、此类需要放到App.java同包或者子包下才能被扫描，否则失效。</li>
+<li><p>@author Administrator<br><em>
+</em>/<br>@Component<br>public class BeanUtil implements ApplicationContextAware{</p>
+<p> private static ApplicationContext  applicationContext;</p>
+<p> public void setApplicationContext(ApplicationContext applicationContext)</p>
+<pre><code>throws BeansException {
+</code></pre><p> if(BeanUtil.applicationContext==null)</p>
+<pre><code> BeanUtil.applicationContext=applicationContext;
+System.out.println(&quot;---------------------------------------------------------------------&quot;);
+System.out.println(&quot;========ApplicationContext配置成功,在普通类可以通过调用BeanUtil.getAppContext()获取applicationContext对象,applicationContext=&quot;+BeanUtil.applicationContext+&quot;========&quot;);
+</code></pre><p>   System.out.println(“———————————————————————“);<br> }</p>
+<p> public static ApplicationContext getApplicationContext(){<br>   return applicationContext;<br> }</p>
+<p> //通过name获取bean<br> public static Object getBean(String name){</p>
+<pre><code>return getApplicationContext().getBean(name);
+</code></pre><p> }</p>
+<p> //通过class获取bean<br> public static <t> Object getBean(Class<t> clazz){</t></t></p>
+<pre><code>return getApplicationContext().getBean(clazz);
+</code></pre><p> }</p>
+<p> //通过name和class获取bean<br> public static <t> Object getBean(String name,Class<t> clazz){</t></t></p>
+<pre><code>return getApplicationContext().getBean(name, clazz);
+</code></pre><p> }<br> }</p>
+</li>
+</ul>
+<p>启动应用，查看控制台的打印信息是否有：</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/31.png" alt=""></p>
+<h6 id="2-不在Spring-Boot的扫描包下方式一"><a href="#2-不在Spring-Boot的扫描包下方式一" class="headerlink" title="2.不在Spring Boot的扫描包下方式一"></a>2.不在Spring Boot的扫描包下方式一</h6><p>1.实现接口:ApplicationContextAware,不用注解:@Component<br>2.使用@Bean注解，在App.java类中将BeanUtil注解进来 </p>
+<p>1.接口</p>
+<pre><code>public class BeanUtil implements ApplicationContextAware{
+
+private static ApplicationContext  applicationContext;
+
+public void setApplicationContext(ApplicationContext applicationContext)
+        throws BeansException {
+if(BeanUtil.applicationContext==null)
+    BeanUtil.applicationContext=applicationContext;
+   System.out.println(&quot;---------------------------------------------------------------------&quot;);
+   System.out.println(&quot;========ApplicationContext配置成功,在普通类可以通过调用BeanUtil.getAppContext()获取applicationContext对象,applicationContext=&quot;+BeanUtil.applicationContext+&quot;========&quot;);
+  System.out.println(&quot;---------------------------------------------------------------------&quot;);
+}
+
+public static ApplicationContext getApplicationContext(){
+  return applicationContext;
+}
+
+//通过name获取bean
+public static Object getBean(String name){
+    return getApplicationContext().getBean(name);
+}
+
+//通过class获取bean
+public static &lt;T&gt; Object getBean(Class&lt;T&gt; clazz){
+    return getApplicationContext().getBean(clazz);
+}
+
+//通过name和class获取bean
+public static &lt;T&gt; Object getBean(String name,Class&lt;T&gt; clazz){
+    return getApplicationContext().getBean(name, clazz);
+}
+}    
+</code></pre><p>2.注入  </p>
+<pre><code>//其中@SpringBootApplication申明让spring boot自动给程序进行必要的配置，等价于以默认属性使用@Configuration，@EnableAutoConfiguration和@ComponentScan
+@SpringBootApplication
+@ServletComponentScan
+
+public class App {
+
+   /**注册Spring Util
+    * 这里为了和上一个冲突，所以方面名为：BeanUtil2
+    * 实际中使用BeanUtil
+    */
+   @Bean
+   public BeanUtil beanUtil2(){return new BeanUtil();}
+
+   /**
+    *
+  参数里VM参数设置为：
+   -javaagent:.\lib\springloaded-1.2.4.RELEASE.jar -noverify
+    * @param args
+    */
+   public static void main(String[] args) {
+          SpringApplication.run(App.class, args);
+   }
+</code></pre><p>}</p>
+<h6 id="3-不在Spring-Boot的扫描包下方式二"><a href="#3-不在Spring-Boot的扫描包下方式二" class="headerlink" title="3.不在Spring Boot的扫描包下方式二"></a>3.不在Spring Boot的扫描包下方式二</h6><p>代码基本和上面都是相同的，主要是在App.java中使用@Import进行导入<br>而且在BeanUtil是不需要添加@Component注解</p>
+<pre><code>@SpringBootApplication
+@ServletComponentScan
+@Import(value={SpringUtil.class})
+publicclass App {
+
+    //省略其它代码.
+
+}
+</code></pre><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>说明以上3中方式都生效了，这3中方式根据实际情况选择一种方式就可以了。<br>那么这样子在普通类既可以使用:<br>BeanUtil.getBean() 获取到Spring IOC容器中的bean。<br>当然也可以在Spring管理的类中使用：<br>@Resouce或者@Autowired 进行注入使用，当然我们这个类的核心是普通类可以调用spring的bean进行使用了</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/23/Sppring-Boot-十八-Spring-Boot普通类中使用bean/" class="archive-article-date">
+  	<time datetime="2017-07-23T03:00:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Spring-Boot-十七-Spring-Boot定时任务使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1086,90 +1239,6 @@ public Cat findByJdbcTemplate(String catName){
       
       <a href="/2017/07/18/Spring-Boot-九-Spring-Boot-JdbcTemplate/" class="archive-article-date">
   	<time datetime="2017-07-18T15:44:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/18/Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍/">Spring Boot(八)-Spring Boot Spring Data JPA介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>从我们定义的Repository继承CrudRepository,并且@NoRepositoryBean<br>public interface CrudRepository<t, id="" extends="" serializable=""> extends Repository<t, id="">知道,我们需要了解Repository接口即可， Spring Data 的一个核心接口Repository为我们提供了常用的接口，在这节我们就来简单介绍下。</t,></t,></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Repository接口"><a href="#1-Repository接口" class="headerlink" title="1.Repository接口"></a>1.Repository接口</h5><h6 id="1-1特征"><a href="#1-1特征" class="headerlink" title="1.1特征"></a>1.1特征</h6><p>Repository 接口是 Spring Data 的一个核心接口，它不提供任何方法，开发者需要在自己定义的接口中声明需要的方法 ：<br>public interface Repository<t, id="" extends="" serializable=""> { }<br>有这么几点需要强调下：</t,></p>
-<ol>
-<li>Repository是一个空接口，即是一个标记接口；</li>
-<li>若我们定义的接口继承了Repository，则该接口会被IOC容器识别为一个Repository Bean纳入到IOC容器中，进而可以在该接口中定义满足一定规范的方法。</li>
-<li>实际上也可以通过@RepositoryDefinition,注解来替代继承Repository接口。</li>
-<li>查询方法以find | read | get开头；</li>
-<li>涉及查询条件时，条件的属性用条件关键字连接，要注意的是条件属性以首字母大写。如：findByNameAndId(String name,String id),name,id就是属性,在查询方法名中大写<br>6.使用@Query注解可以自定义JPQL语句实现更灵活的查询。<h6 id="1-2实例"><a href="#1-2实例" class="headerlink" title="1.2实例"></a>1.2实例</h6>在现实中我们很少去继承Repository接口,因为其未添加默认的方法<br>dao层:   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">   package com.kfit.demo.repository;</div><div class="line">import org.springframework.data.jpa.repository.Query;</div><div class="line">import org.springframework.data.repository.Repository;</div><div class="line">import org.springframework.data.repository.query.Param;</div><div class="line">import com.kfit.demo.bean.Cat;</div><div class="line">public interface Cat2Repository extends Repository&lt;Cat, Integer&gt;&#123;</div><div class="line">  /**</div><div class="line">   * 1.查询方法以: get | find | read 开头</div><div class="line">   * 2.涉及查询条件时，条件的属性用条件关键字连接，要注意的是条件属性以首字母大写</div><div class="line">   */</div><div class="line">//根据catName进行查询</div><div class="line">Cat findByCatName(String  catName);</div><div class="line">/**</div><div class="line"> * 如何编写JPQL语句:使用@query注解</div><div class="line">  * Hibernate  -- HQL语句.</div><div class="line"> * JPQL 语句 和HQL语句是类似的.</div><div class="line"> */</div><div class="line">@Query(&quot;from Cat where catName=:cn&quot;)</div><div class="line">public Cat findMyCatName(@Param(&quot;cn&quot;)String catName);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>service:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">   @Service</div><div class="line">   public class CatService &#123;</div><div class="line">@Resource</div><div class="line">private CatRepository catRepository;</div><div class="line"></div><div class="line"></div><div class="line">@Resource</div><div class="line">private Cat2Repository cat2Repository;</div><div class="line"></div><div class="line">/**</div><div class="line"> * save,update ,delete 方法需要绑定事务.</div><div class="line"> * </div><div class="line"> * 使用@Transactional进行事务的绑定.</div><div class="line"> * </div><div class="line"> * @param cat</div><div class="line"> */</div><div class="line"></div><div class="line">//保存数据.</div><div class="line">@Transactional</div><div class="line">public void save(Cat cat)&#123;</div><div class="line">	catRepository.save(cat);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//删除数据》</div><div class="line">@Transactional</div><div class="line">public void delete(int id)&#123;</div><div class="line">	catRepository.delete(id);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//查询数据.</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catRepository.findAll();</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Cat findByCatName(String catName)&#123;</div><div class="line">	return cat2Repository.findByCatName(catName);</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Cat findMyCat(String catName)&#123;</div><div class="line">   return cat2Repository.findMyCatName(catName);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>controller:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">   @RestController</div><div class="line">@RequestMapping(&quot;/cat&quot;)</div><div class="line">public class CatController &#123;</div><div class="line"></div><div class="line">@Resource</div><div class="line">private CatService catService;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/save&quot;)</div><div class="line">public String save()&#123;</div><div class="line">	Cat cat = new Cat();</div><div class="line">	cat.setCatName(&quot;jack&quot;);</div><div class="line">	cat.setCatAge(3);</div><div class="line">	catService.save(cat);</div><div class="line">	return &quot;save ok.&quot;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/delete&quot;)</div><div class="line">public String delete()&#123;</div><div class="line">	catService.delete(1);</div><div class="line">	return &quot;delete ok&quot;;</div><div class="line">&#125;</div><div class="line">@RequestMapping(&quot;/getAll&quot;)</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catService.getAll();</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/catName&quot;)</div><div class="line">public Cat findByCatName(String catName)&#123;</div><div class="line">	return catService.findByCatName(catName);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/myName&quot;)</div><div class="line">public Cat findMyCat(String catName)&#123;</div><div class="line">	return catService.findMyCat(catName);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>前端访问：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/15.png" alt=""></p>
-<h5 id="2-CrudRepository接口"><a href="#2-CrudRepository接口" class="headerlink" title="2.CrudRepository接口"></a>2.CrudRepository接口</h5><h6 id="2-1基本特性"><a href="#2-1基本特性" class="headerlink" title="2.1基本特性"></a>2.1基本特性</h6><p>CrudRepository 接口提供了最基本的对实体类的添删改查操作  </p>
-<ol>
-<li>T save(T entity);//保存单个实体       </li>
-<li>Iterable<t> save(Iterable&lt;? extends T&gt; entities);//保存集合           </t></li>
-<li>T findOne(ID id);//根据id查找实体          </li>
-<li>boolean exists(ID id);//根据id判断实体是否存在          </li>
-<li>Iterable<t> findAll();//查询所有实体,不用或慎用!          </t></li>
-<li>long count();//查询实体数量          </li>
-<li>void delete(ID id);//根据Id删除实体          </li>
-<li>void delete(T entity);//删除一个实体   </li>
-<li>void delete(Iterable&lt;? extends T&gt; entities);//删除一个实体的集合          </li>
-<li>void deleteAll();//删除所有实体,不用或慎用!  <h6 id="2-2实例"><a href="#2-2实例" class="headerlink" title="2.2实例"></a>2.2实例</h6>一般我们是不用Repository的，用CrudRepository接口已经提供了很多现成方法，当然我们在CrudRepository接口也可以定义自己的方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/16.png" alt=""><br>测试：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/15.png" alt=""></li>
-</ol>
-<h5 id="3-PagingAndSortingRepository接口"><a href="#3-PagingAndSortingRepository接口" class="headerlink" title="3.PagingAndSortingRepository接口"></a>3.PagingAndSortingRepository接口</h5><p>PagingAndSortingRepository接口继承CrudRepository接口,所以其有CrudRepository接口所有的方法,但是它又多了自己的排序和分页方法<br>该接口提供了分页与排序功能     </p>
-<ol>
-<li>Iterable<t> findAll(Sort sort); //排序    </t></li>
-<li>Page<t> findAll(Pageable pageable); //分页查询（含排序功能）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/17.png" alt=""><h5 id="4-其它接口"><a href="#4-其它接口" class="headerlink" title="4.其它接口"></a>4.其它接口</h5><h6 id="4-1-JpaRepository"><a href="#4-1-JpaRepository" class="headerlink" title="4.1.JpaRepository"></a>4.1.JpaRepository</h6>查找所有实体，排序、查找所有实体，执行缓存与数据库同步</t></li>
-</ol>
-<h6 id="4-2-JpaSpecificationExecutor"><a href="#4-2-JpaSpecificationExecutor" class="headerlink" title="4.2 JpaSpecificationExecutor"></a>4.2 JpaSpecificationExecutor</h6><p>不属于Repository体系，实现一组 JPA Criteria 查询相关的方法，封装  JPA Criteria 查询条件。通常使用匿名内部类的方式来创建该接口的对象。</p>
-<h6 id="4-3-自定义-Repository"><a href="#4-3-自定义-Repository" class="headerlink" title="4.3 自定义 Repository"></a>4.3 自定义 Repository</h6><p>可以自己定义一个MyRepository接口。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/18/Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍/" class="archive-article-date">
-  	<time datetime="2017-07-18T14:17:43.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-18</time>
 </a>
       
 	<div class="article-tag tagcloud">

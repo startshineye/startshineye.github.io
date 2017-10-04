@@ -152,6 +152,90 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/18/Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍/">Spring Boot(八)-Spring Boot Spring Data JPA介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>从我们定义的Repository继承CrudRepository,并且@NoRepositoryBean<br>public interface CrudRepository<t, id="" extends="" serializable=""> extends Repository<t, id="">知道,我们需要了解Repository接口即可， Spring Data 的一个核心接口Repository为我们提供了常用的接口，在这节我们就来简单介绍下。</t,></t,></p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Repository接口"><a href="#1-Repository接口" class="headerlink" title="1.Repository接口"></a>1.Repository接口</h5><h6 id="1-1特征"><a href="#1-1特征" class="headerlink" title="1.1特征"></a>1.1特征</h6><p>Repository 接口是 Spring Data 的一个核心接口，它不提供任何方法，开发者需要在自己定义的接口中声明需要的方法 ：<br>public interface Repository<t, id="" extends="" serializable=""> { }<br>有这么几点需要强调下：</t,></p>
+<ol>
+<li>Repository是一个空接口，即是一个标记接口；</li>
+<li>若我们定义的接口继承了Repository，则该接口会被IOC容器识别为一个Repository Bean纳入到IOC容器中，进而可以在该接口中定义满足一定规范的方法。</li>
+<li>实际上也可以通过@RepositoryDefinition,注解来替代继承Repository接口。</li>
+<li>查询方法以find | read | get开头；</li>
+<li>涉及查询条件时，条件的属性用条件关键字连接，要注意的是条件属性以首字母大写。如：findByNameAndId(String name,String id),name,id就是属性,在查询方法名中大写<br>6.使用@Query注解可以自定义JPQL语句实现更灵活的查询。<h6 id="1-2实例"><a href="#1-2实例" class="headerlink" title="1.2实例"></a>1.2实例</h6>在现实中我们很少去继承Repository接口,因为其未添加默认的方法<br>dao层:   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">   package com.kfit.demo.repository;</div><div class="line">import org.springframework.data.jpa.repository.Query;</div><div class="line">import org.springframework.data.repository.Repository;</div><div class="line">import org.springframework.data.repository.query.Param;</div><div class="line">import com.kfit.demo.bean.Cat;</div><div class="line">public interface Cat2Repository extends Repository&lt;Cat, Integer&gt;&#123;</div><div class="line">  /**</div><div class="line">   * 1.查询方法以: get | find | read 开头</div><div class="line">   * 2.涉及查询条件时，条件的属性用条件关键字连接，要注意的是条件属性以首字母大写</div><div class="line">   */</div><div class="line">//根据catName进行查询</div><div class="line">Cat findByCatName(String  catName);</div><div class="line">/**</div><div class="line"> * 如何编写JPQL语句:使用@query注解</div><div class="line">  * Hibernate  -- HQL语句.</div><div class="line"> * JPQL 语句 和HQL语句是类似的.</div><div class="line"> */</div><div class="line">@Query(&quot;from Cat where catName=:cn&quot;)</div><div class="line">public Cat findMyCatName(@Param(&quot;cn&quot;)String catName);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>service:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div></pre></td><td class="code"><pre><div class="line">   @Service</div><div class="line">   public class CatService &#123;</div><div class="line">@Resource</div><div class="line">private CatRepository catRepository;</div><div class="line"></div><div class="line"></div><div class="line">@Resource</div><div class="line">private Cat2Repository cat2Repository;</div><div class="line"></div><div class="line">/**</div><div class="line"> * save,update ,delete 方法需要绑定事务.</div><div class="line"> * </div><div class="line"> * 使用@Transactional进行事务的绑定.</div><div class="line"> * </div><div class="line"> * @param cat</div><div class="line"> */</div><div class="line"></div><div class="line">//保存数据.</div><div class="line">@Transactional</div><div class="line">public void save(Cat cat)&#123;</div><div class="line">	catRepository.save(cat);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//删除数据》</div><div class="line">@Transactional</div><div class="line">public void delete(int id)&#123;</div><div class="line">	catRepository.delete(id);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//查询数据.</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catRepository.findAll();</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Cat findByCatName(String catName)&#123;</div><div class="line">	return cat2Repository.findByCatName(catName);</div><div class="line">&#125;</div><div class="line"></div><div class="line">public Cat findMyCat(String catName)&#123;</div><div class="line">   return cat2Repository.findMyCatName(catName);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>controller:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div></pre></td><td class="code"><pre><div class="line">   @RestController</div><div class="line">@RequestMapping(&quot;/cat&quot;)</div><div class="line">public class CatController &#123;</div><div class="line"></div><div class="line">@Resource</div><div class="line">private CatService catService;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/save&quot;)</div><div class="line">public String save()&#123;</div><div class="line">	Cat cat = new Cat();</div><div class="line">	cat.setCatName(&quot;jack&quot;);</div><div class="line">	cat.setCatAge(3);</div><div class="line">	catService.save(cat);</div><div class="line">	return &quot;save ok.&quot;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/delete&quot;)</div><div class="line">public String delete()&#123;</div><div class="line">	catService.delete(1);</div><div class="line">	return &quot;delete ok&quot;;</div><div class="line">&#125;</div><div class="line">@RequestMapping(&quot;/getAll&quot;)</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catService.getAll();</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/catName&quot;)</div><div class="line">public Cat findByCatName(String catName)&#123;</div><div class="line">	return catService.findByCatName(catName);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/myName&quot;)</div><div class="line">public Cat findMyCat(String catName)&#123;</div><div class="line">	return catService.findMyCat(catName);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>前端访问：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/15.png" alt=""></p>
+<h5 id="2-CrudRepository接口"><a href="#2-CrudRepository接口" class="headerlink" title="2.CrudRepository接口"></a>2.CrudRepository接口</h5><h6 id="2-1基本特性"><a href="#2-1基本特性" class="headerlink" title="2.1基本特性"></a>2.1基本特性</h6><p>CrudRepository 接口提供了最基本的对实体类的添删改查操作  </p>
+<ol>
+<li>T save(T entity);//保存单个实体       </li>
+<li>Iterable<t> save(Iterable&lt;? extends T&gt; entities);//保存集合           </t></li>
+<li>T findOne(ID id);//根据id查找实体          </li>
+<li>boolean exists(ID id);//根据id判断实体是否存在          </li>
+<li>Iterable<t> findAll();//查询所有实体,不用或慎用!          </t></li>
+<li>long count();//查询实体数量          </li>
+<li>void delete(ID id);//根据Id删除实体          </li>
+<li>void delete(T entity);//删除一个实体   </li>
+<li>void delete(Iterable&lt;? extends T&gt; entities);//删除一个实体的集合          </li>
+<li>void deleteAll();//删除所有实体,不用或慎用!  <h6 id="2-2实例"><a href="#2-2实例" class="headerlink" title="2.2实例"></a>2.2实例</h6>一般我们是不用Repository的，用CrudRepository接口已经提供了很多现成方法，当然我们在CrudRepository接口也可以定义自己的方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/16.png" alt=""><br>测试：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/15.png" alt=""></li>
+</ol>
+<h5 id="3-PagingAndSortingRepository接口"><a href="#3-PagingAndSortingRepository接口" class="headerlink" title="3.PagingAndSortingRepository接口"></a>3.PagingAndSortingRepository接口</h5><p>PagingAndSortingRepository接口继承CrudRepository接口,所以其有CrudRepository接口所有的方法,但是它又多了自己的排序和分页方法<br>该接口提供了分页与排序功能     </p>
+<ol>
+<li>Iterable<t> findAll(Sort sort); //排序    </t></li>
+<li>Page<t> findAll(Pageable pageable); //分页查询（含排序功能）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/17.png" alt=""><h5 id="4-其它接口"><a href="#4-其它接口" class="headerlink" title="4.其它接口"></a>4.其它接口</h5><h6 id="4-1-JpaRepository"><a href="#4-1-JpaRepository" class="headerlink" title="4.1.JpaRepository"></a>4.1.JpaRepository</h6>查找所有实体，排序、查找所有实体，执行缓存与数据库同步</t></li>
+</ol>
+<h6 id="4-2-JpaSpecificationExecutor"><a href="#4-2-JpaSpecificationExecutor" class="headerlink" title="4.2 JpaSpecificationExecutor"></a>4.2 JpaSpecificationExecutor</h6><p>不属于Repository体系，实现一组 JPA Criteria 查询相关的方法，封装  JPA Criteria 查询条件。通常使用匿名内部类的方式来创建该接口的对象。</p>
+<h6 id="4-3-自定义-Repository"><a href="#4-3-自定义-Repository" class="headerlink" title="4.3 自定义 Repository"></a>4.3 自定义 Repository</h6><p>可以自己定义一个MyRepository接口。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/18/Spring-Boot-八-Spring-Boot-Spring-Data-JPA介绍/" class="archive-article-date">
+  	<time datetime="2017-07-18T14:17:43.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Spring-Bott-Cannot-determine-embedded-database-driver-class-for-database-type-NONE" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -680,59 +764,6 @@
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Maven/">Maven</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-JVM-五-GC参数" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/06/19/JVM-五-GC参数/">JVM(五)-GC参数</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本节主要讲解以下部分：<br>1.堆回顾<br>2.JVM中三种垃圾回收机制:串行收集器,并行收集器,CMS收集器<br>3.Tomcat实际演示  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h4 id="1-堆回顾"><a href="#1-堆回顾" class="headerlink" title="1.堆回顾"></a>1.堆回顾</h4><p>1.在前面章节可以知道,堆主要分为2类：新生代(eden)，老年代。绝大多数对象一分配就在新生代中,当然也有一些例外：比如栈上分配(对象是分配到栈上)，大对象有时候是分配到老年代中<br>2.对象在新生代收集之后,如果对象能够幸存,则对象会放到幸存带,即survive区,如图的s0,s1区，也可以叫做from,to<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/41.png" alt=""><br>3.当对象在内存中经历无数次垃圾收集之后,对象年龄到达一定之后会变成老年代  </p>
-<h4 id="2-JVM中三种垃圾回收机制"><a href="#2-JVM中三种垃圾回收机制" class="headerlink" title="2.JVM中三种垃圾回收机制"></a>2.JVM中三种垃圾回收机制</h4><h5 id="2-1串行收集器"><a href="#2-1串行收集器" class="headerlink" title="2.1串行收集器"></a>2.1串行收集器</h5><p>1.最古老，最稳定（年代久远,但是历经考验最稳定）<br>2.效率高<br>3.最大缺点:可能会产生较长停顿（因为串行使用一个线程，是用一个串行队列）,所以在多和下是不具有优势的<br>4.-XX:+UseSerialGC<br>新生代,老年代使用串行回收<br>新生代复制算法<br>老年代标记-压缩法<br>5.如图：<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/42.png" alt=""><br>应用程序线程之中,应用程序线程可能是有很多个的,一旦回收开始，应用程序全部暂停,串行回收器中GC线程只有把1个,当GC完成之后,应用程序开始恢复运行</p>
-<h5 id="2-2并行收集器"><a href="#2-2并行收集器" class="headerlink" title="2.2并行收集器"></a>2.2并行收集器</h5><h6 id="2-2-1-ParNew"><a href="#2-2-1-ParNew" class="headerlink" title="2.2.1 ParNew"></a>2.2.1 ParNew</h6><p>1.ParNew是一种并行收集器：par-parallel  New-指代新生代<br>从以上可以知道这是一个新生代的并行收集器,老年代串行回收<br>2.-XX:+UseParNewGC<br>新生代并行<br>老年代串行<br>Serial收集器新生代的并行版本<br>复制算法<br>多线程，需要多核支持<br>-XX:ParallelGCThreads 限制线程数量<br>3.如图：<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/43.png" alt=""><br>他是多个线程负责回收。</p>
-<h6 id="2-2-2-Parallel收集器"><a href="#2-2-2-Parallel收集器" class="headerlink" title="2.2.2 Parallel收集器"></a>2.2.2 Parallel收集器</h6><h5 id="2-3"><a href="#2-3" class="headerlink" title="2.3"></a>2.3</h5>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/06/19/JVM-五-GC参数/" class="archive-article-date">
-  	<time datetime="2017-06-19T15:25:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
 	</div>
 
       
