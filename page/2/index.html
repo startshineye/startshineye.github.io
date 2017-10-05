@@ -152,6 +152,351 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-28-vue-router" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/19/vue-28-vue-router/">vue(28)-vue-router</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>vue是MVVP框架,vue是SPA应用(单页面应用)</li>
+<li>vue-router:路由:根据不同url地址,出现不同效果</li>
+<li>使用vue-router需要下载:vue-router.js </li>
+<li>路由是基于:0.7.13   </li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.单应用页面为:主页 home 新闻页 news<br>2.对于<a></a>属性href在vue时候是不可用了,vue-router提供了v-link<br>3.v-link={path:url}<br>4.点击v-link所在标签时候,跳转显示的页面用<router-view></router-view><br>5.转转的连接：v-link 展示内容<router-view></router-view><br>6.必须要一个根组件:以上home和news本身也是一个组件</p>
+<h5 id="1-简单入门"><a href="#1-简单入门" class="headerlink" title="1.简单入门"></a>1.简单入门</h5><p>需求：准备两个组件 主页 新闻 点击主页 新闻时候跳转到对应的主页和新闻的view(单页面应用)  </p>
+<p>view:  </p>
+<pre><code>&lt;div id=&quot;box&quot;&gt;
+&lt;!--点击部分 --&gt;
+&lt;ul&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--展示视图--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+</code></pre><p>model:</p>
+<pre><code>//1.准备根组件
+   var App = Vue.extend();
+ //2.Home,News组件
+ var Home = Vue.extend({
+     template:&quot;&lt;h3&gt;我是主页&lt;/h3&gt;&quot;
+ });
+ var  News = Vue.extend({
+     template:&quot;&lt;h3&gt;我是新闻&lt;/h3&gt;&quot;
+ });
+ //3.准备路由
+ var router = new VueRouter();
+ //4.关联
+ router.map({
+     &apos;home&apos;:{
+         component:Home
+     },
+     &apos;news&apos;:{
+         component:News
+     }
+ });
+ //5.启动路由
+ router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
+</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/17.gif" alt=""></p>
+<h5 id="2-跳转"><a href="#2-跳转" class="headerlink" title="2.跳转"></a>2.跳转</h5><p>当我们一打开上面的文件时候,页面初始化时并没有跳转(页面没有任何跳转)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/26.png" alt="">  </p>
+<p>跳转:router.redirect({<br>    ‘/‘:’/home’,<br>    ‘/aaa’:’/news’<br> });</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/27.png" alt="">  </p>
+<h5 id="3-路由嵌套-多级"><a href="#3-路由嵌套-多级" class="headerlink" title="3.路由嵌套(多级)"></a>3.路由嵌套(多级)</h5><h6 id="3-1-主页嵌套"><a href="#3-1-主页嵌套" class="headerlink" title="3.1 主页嵌套"></a>3.1 主页嵌套</h6><p>需求:实现以下需求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/30.png" alt=""></p>
+<p>1.为了简洁,我们将’home’变成模板<br>2.我们点击模板之后,会加入一个class<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/28.png" alt="">    </p>
+<p>加入样式:  </p>
+<pre><code>&lt;style&gt;
+    .v-link-active{
+        font-size: 20px;
+        color: #985f0d;
+    }
+&lt;/style&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/29.png" alt="">  </p>
+<p>3.在模板下加入<a></a>  </p>
+<p>4.在home下面的模板下的路由的路径需要是:”/home/login”,”/home/reg”  </p>
+<pre><code>&lt;template id=&quot;home&quot;&gt;
+    &lt;h3&gt;我是主页&lt;/h3&gt;
+    &lt;div&gt;
+        &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
+        &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
+    &lt;/div&gt;
+    &lt;div&gt;
+        &lt;router-view&gt;&lt;/router-view&gt;
+    &lt;/div&gt;
+&lt;/template&gt;   
+</code></pre><p>5.由于登录注册的路由都是基于home的所以路由关联也是写在相应的下面:subRoutes  </p>
+<pre><code>router.map({
+        &apos;home&apos;:{
+            component:Home,
+            subRoutes:{
+                &apos;login&apos;:{
+                    component:{
+                        template:&apos;&lt;strong&gt;我是登录信息&lt;/strong&gt;&apos;
+                    }
+                },
+                &apos;reg&apos;:{
+                    component:{
+                        template:&apos;&lt;strong&gt;我是注册信息&lt;/strong&gt;&apos;
+                    }
+                }
+            }
+        }
+    });
+</code></pre><p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../js/vue-router.js&quot;&gt;&lt;/script&gt;
+&lt;style&gt;
+    .v-link-active{
+        font-size: 20px;
+        color: #985f0d;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+&lt;!--点击部分 --&gt;
+&lt;ul&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--展示视图--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;template id=&quot;home&quot;&gt;
+&lt;h3&gt;我是主页&lt;/h3&gt;
+&lt;!--其下路由应该在其模板之下--&gt;
+&lt;div&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
+&lt;/div&gt;
+&lt;!--显示其下的路由--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+&lt;template id=&quot;news&quot;&gt;
+  &lt;h3&gt;我是新闻&lt;/h3&gt;
+&lt;/template&gt;
+&lt;/body&gt;
+&lt;script&gt;
+  //1.准备根组件
+    var App = Vue.extend();
+  //2.Home,News组件
+  var Home = Vue.extend({
+      template:&quot;#home&quot;
+  });
+  var  News = Vue.extend({
+      template:&quot;#news&quot;
+  });
+  //3.准备路由
+  var router = new VueRouter();
+  //4.关联
+  router.map({
+      &apos;home&apos;:{
+          component:Home,
+          subRoutes:{
+              &apos;login&apos;:{
+                  component:{
+                      template:&quot;&lt;h3&gt;我是登录&lt;/h3&gt;&quot;
+                  }
+              },
+              &apos;reg&apos;:{
+                  component:{
+                      template:&apos;&lt;h3&gt;我是注册&lt;/h3&gt;&apos;
+                  }
+              }
+          }
+      },
+      &apos;news&apos;:{
+          component:News
+      }
+  });
+  //5.启动路由
+  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
+
+  //6.跳转
+  router.redirect({
+      &apos;/&apos;:&apos;home&apos;
+  })
+&lt;/script&gt;
+&lt;/html&gt;
+</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/18.gif" alt="">  </p>
+<h6 id="3-2-新闻嵌套"><a href="#3-2-新闻嵌套" class="headerlink" title="3.2 新闻嵌套"></a>3.2 新闻嵌套</h6><pre><code>{{$route.params | json}} -&gt; 当前参数
+{{$route.path}} -&gt;当前路径
+{{$route.query | json}} -数据
+</code></pre><p>代码:</p>
+<pre><code>head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../js/vue-router.js&quot;&gt;&lt;/script&gt;
+&lt;style&gt;
+    .v-link-active{
+        font-size: 20px;
+        color: #985f0d;
+    }
+&lt;/style&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+&lt;!--点击部分 --&gt;
+&lt;ul&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
+    &lt;/li&gt;
+    &lt;li&gt;
+        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
+    &lt;/li&gt;
+&lt;/ul&gt;
+
+&lt;!--展示视图--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;template id=&quot;home&quot;&gt;
+&lt;h3&gt;我是主页&lt;/h3&gt;
+&lt;!--其下路由应该在其模板之下--&gt;
+&lt;div&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
+    &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
+&lt;/div&gt;
+&lt;!--显示其下的路由--&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+&lt;template id=&quot;news&quot;&gt;
+&lt;h3&gt;我是新闻&lt;/h3&gt;
+&lt;div&gt;
+    &lt;a v-link=&quot;{path:&apos;/news/detail/001&apos;}&quot;&gt;新闻001&lt;/a&gt;
+    &lt;a v-link=&quot;{path:&apos;/news/detail/002&apos;}&quot;&gt;新闻002&lt;/a&gt;
+&lt;/div&gt;
+&lt;div&gt;
+    &lt;router-view&gt;&lt;/router-view&gt;
+&lt;/div&gt;
+&lt;/template&gt;
+&lt;template id=&quot;detail&quot;&gt;
+&lt;!--id参数输出 json过滤--&gt;
+{{$route.params | json}}&lt;br&gt;
+{{$route.path}}
+&lt;/template&gt;
+&lt;/body&gt;
+&lt;script&gt;
+  //1.准备根组件
+    var App = Vue.extend();
+  //2.Home,News组件
+  var Home = Vue.extend({
+      template:&quot;#home&quot;
+  });
+  var  News = Vue.extend({
+      template:&quot;#news&quot;
+  });
+
+ var Detail =  Vue.extend({
+     template:&quot;#detail&quot;
+  });
+  //3.准备路由
+  var router = new VueRouter();
+  //4.关联
+  router.map({
+      &apos;home&apos;:{
+          component:Home,
+          subRoutes:{
+              &apos;login&apos;:{
+                  component:{
+                      template:&quot;&lt;h3&gt;我是登录&lt;/h3&gt;&quot;
+                  }
+              },
+              &apos;reg&apos;:{
+                  component:{
+                      template:&apos;&lt;h3&gt;我是注册&lt;/h3&gt;&apos;
+                  }
+              }
+          }
+      },
+      &apos;news&apos;:{
+          component:News,
+          subRoutes:{
+              &apos;/detail/:id&apos;:{
+                  component:Detail
+              }
+          }
+      }
+  });
+  //5.启动路由
+  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
+
+  //6.跳转
+  router.redirect({
+      &apos;/&apos;:&apos;home&apos;
+  })
+ &lt;/script&gt;
+&lt;/html&gt;
+</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/19.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/19/vue-28-vue-router/" class="archive-article-date">
+  	<time datetime="2017-09-19T14:43:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-34-Spring自带缓存" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1481,92 +1826,6 @@ public void testPrintHello(){
 
 
   
-    <article id="post-SpringBoot-25-改变自动扫描包路径" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/">SpringBoot(25)-改变自动扫描包路径</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>默认情况下SpringBoot会扫描启动类同包以及子包下的注解,但是有时候我们需要改变包的扫描方式,原理：@ComponentScan注解进行指定要扫描的包以及要扫描的类</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>以下我们编写测试类测试:<br>三步:<br>1)新建两个包<br>2）新建两个类<br>3)启动类进行注解指定扫描路径  </p>
-<h5 id="1-新建两个包"><a href="#1-新建两个包" class="headerlink" title="1.新建两个包"></a>1.新建两个包</h5><p> com.cn   com.org</p>
-<h5 id="2-新建两个类"><a href="#2-新建两个类" class="headerlink" title="2.新建两个类"></a>2.新建两个类</h5><p>在这里为了方便测试，我们让我们的类在启动的时候就进行执行，所以我们就编写两个类，实现接口CommandLineRunner，这样在启动的时候我们就可以看到打印信息了。<br>注：类上添加@Configuration注解<br>Cn类:</p>
-<pre><code>package com.cn;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
-@Configuration
-public class Cn implements CommandLineRunner{
-public void run(String... arg0) throws Exception {
-    System.out.println(&quot;com.cn 下类执行&quot;);
-}
-}
-</code></pre><p>Org类:</p>
-<pre><code>package com.org;
-import org.springframework.boot.CommandLineRunner;
-import org.springframework.context.annotation.Configuration;
-@Configuration
-public class Org implements CommandLineRunner{
-public void run(String... arg0) throws Exception {
-    System.out.println(&quot;com.org 下类执行&quot;);
-}
-}
-</code></pre><h5 id="3-启动类进行注解指定扫描路径"><a href="#3-启动类进行注解指定扫描路径" class="headerlink" title="3.启动类进行注解指定扫描路径"></a>3.启动类进行注解指定扫描路径</h5><p>在App.java类中加入如下注解：<br> @ComponentScan(basePackages={“com.cn”,”com.org”})</p>
-<pre><code>@SpringBootApplication
-@ComponentScan(basePackages={&quot;com.cn&quot;,&quot;com.org&quot;})
-public class App 
-{
-public static void main( String[] args )
- {
-    /**
-     * 使用SpringApplication.run启动应用
-     */
-    SpringApplication.run(App.class, args);
- }
-}
-</code></pre><p>输出：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/" class="archive-article-date">
-  	<time datetime="2017-09-13T11:41:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-13</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -1632,7 +1891,7 @@ public static void main( String[] args )
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 16.67px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 18.67px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 17.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.33px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
