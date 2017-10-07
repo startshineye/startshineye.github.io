@@ -530,7 +530,7 @@ public static void main( String[] args )
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/">Spring Boot(19)-Spring Boot Servlet</a>
+      <a class="article-title" href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/">SpringBoot(19)-SpringBoot Servlet</a>
     </h1>
   
 
@@ -672,7 +672,7 @@ public static void main( String[] args )
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -692,7 +692,7 @@ public static void main( String[] args )
 
 
   
-    <article id="post-Sppring-Boot-十八-Spring-Boot普通类中使用bean" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-SpringBoot-十八-SpringBoot普通类中使用bean" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -702,7 +702,7 @@ public static void main( String[] args )
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/23/Sppring-Boot-十八-Spring-Boot普通类中使用bean/">Sppring Boot(十八)-Spring Boot普通类中使用bean</a>
+      <a class="article-title" href="/2017/07/23/SpringBoot-十八-SpringBoot普通类中使用bean/">SpringBoot(十八)-SpringBoot普通类中使用bean</a>
     </h1>
   
 
@@ -819,13 +819,13 @@ publicclass App {
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/07/23/Sppring-Boot-十八-Spring-Boot普通类中使用bean/" class="archive-article-date">
+      <a href="/2017/07/23/SpringBoot-十八-SpringBoot普通类中使用bean/" class="archive-article-date">
   	<time datetime="2017-07-23T03:00:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -845,7 +845,7 @@ publicclass App {
 
 
   
-    <article id="post-Spring-Boot-十七-Spring-Boot定时任务使用" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-SppringBoot-十八-SpringBoot普通类中使用bean" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -855,7 +855,160 @@ publicclass App {
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/23/Spring-Boot-十七-Spring-Boot定时任务使用/">Spring Boot(十七)-Spring Boot定时任务使用</a>
+      <a class="article-title" href="/2017/07/23/SppringBoot-十八-SpringBoot普通类中使用bean/">SpringBoot(十八)-SpringBoot普通类中使用bean</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们要在一个类使用spring提供的bean对象，需要把这个类注入到spring容器中，交给spring容器进行管理，但是在实际当中，我们往往会碰到在一个普通的Java类中，想直接使用spring提供的其他对象或者说有一些不需要交给spring管理，但是需要用到spring里的一些对象。如果这是spring框架的独立应用程序，我们通过</p>
+<pre><code>ApplicationContext ac = new FileSystemXmlApplicationContext(&quot;applicationContext.xml&quot;);
+ac.getBean(&quot;beanId&quot;);
+</code></pre><p>就可以很轻易的获取我们所需要的对象。<br>但是往往我们所做的都是Web Application，这时我们启动spring容器是通过在web.xml文件中配置，这样就不适合使用上面的方式在普通类去获取对象了，因为这样做就相当于加载了两次spring容器，而我们想是否可以通过在启动web服务器的时候，就把Application放在某一个类中，我们通过这个类在获取，这样就可以在普通类获取spring bean对象了，让我们接着往下看。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>针对于以上内容我们可以用三种方式:<br>1.Spring Boot可以扫描的包下<br>2.不在Spring Boot的扫描包下方式一<br>3.不在Spring Boot的扫描包下方式二  </p>
+<h6 id="1-Spring-Boot可以扫描的包下"><a href="#1-Spring-Boot可以扫描的包下" class="headerlink" title="1.Spring Boot可以扫描的包下"></a>1.Spring Boot可以扫描的包下</h6><p>我们编写的SpringUtil在Spring Boot可以扫描的包下或者使用@ComponentScan引入自定义的包了，那么原理很简单，只需要使得SpringUtil实现接口：ApplicationContextAware，然后加上@Component 注解即可，具体编码如下：</p>
+<pre><code>package com.yxm.util;
+</code></pre><p>import org.springframework.beans.BeansException;<br>import org.springframework.context.ApplicationContext;<br>import org.springframework.context.ApplicationContextAware;<br>import org.springframework.stereotype.Component;<br>/**</p>
+<ul>
+<li>普通类调用Spring bean对象：</li>
+<li>说明：</li>
+<li>1、此类需要放到App.java同包或者子包下才能被扫描，否则失效。</li>
+<li><p>@author Administrator<br><em>
+</em>/<br>@Component<br>public class BeanUtil implements ApplicationContextAware{</p>
+<p> private static ApplicationContext  applicationContext;</p>
+<p> public void setApplicationContext(ApplicationContext applicationContext)</p>
+<pre><code>throws BeansException {
+</code></pre><p> if(BeanUtil.applicationContext==null)</p>
+<pre><code> BeanUtil.applicationContext=applicationContext;
+System.out.println(&quot;---------------------------------------------------------------------&quot;);
+System.out.println(&quot;========ApplicationContext配置成功,在普通类可以通过调用BeanUtil.getAppContext()获取applicationContext对象,applicationContext=&quot;+BeanUtil.applicationContext+&quot;========&quot;);
+</code></pre><p>   System.out.println(“———————————————————————“);<br> }</p>
+<p> public static ApplicationContext getApplicationContext(){<br>   return applicationContext;<br> }</p>
+<p> //通过name获取bean<br> public static Object getBean(String name){</p>
+<pre><code>return getApplicationContext().getBean(name);
+</code></pre><p> }</p>
+<p> //通过class获取bean<br> public static <t> Object getBean(Class<t> clazz){</t></t></p>
+<pre><code>return getApplicationContext().getBean(clazz);
+</code></pre><p> }</p>
+<p> //通过name和class获取bean<br> public static <t> Object getBean(String name,Class<t> clazz){</t></t></p>
+<pre><code>return getApplicationContext().getBean(name, clazz);
+</code></pre><p> }<br> }</p>
+</li>
+</ul>
+<p>启动应用，查看控制台的打印信息是否有：</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/31.png" alt=""></p>
+<h6 id="2-不在Spring-Boot的扫描包下方式一"><a href="#2-不在Spring-Boot的扫描包下方式一" class="headerlink" title="2.不在Spring Boot的扫描包下方式一"></a>2.不在Spring Boot的扫描包下方式一</h6><p>1.实现接口:ApplicationContextAware,不用注解:@Component<br>2.使用@Bean注解，在App.java类中将BeanUtil注解进来 </p>
+<p>1.接口</p>
+<pre><code>public class BeanUtil implements ApplicationContextAware{
+
+private static ApplicationContext  applicationContext;
+
+public void setApplicationContext(ApplicationContext applicationContext)
+        throws BeansException {
+if(BeanUtil.applicationContext==null)
+    BeanUtil.applicationContext=applicationContext;
+   System.out.println(&quot;---------------------------------------------------------------------&quot;);
+   System.out.println(&quot;========ApplicationContext配置成功,在普通类可以通过调用BeanUtil.getAppContext()获取applicationContext对象,applicationContext=&quot;+BeanUtil.applicationContext+&quot;========&quot;);
+  System.out.println(&quot;---------------------------------------------------------------------&quot;);
+}
+
+public static ApplicationContext getApplicationContext(){
+  return applicationContext;
+}
+
+//通过name获取bean
+public static Object getBean(String name){
+    return getApplicationContext().getBean(name);
+}
+
+//通过class获取bean
+public static &lt;T&gt; Object getBean(Class&lt;T&gt; clazz){
+    return getApplicationContext().getBean(clazz);
+}
+
+//通过name和class获取bean
+public static &lt;T&gt; Object getBean(String name,Class&lt;T&gt; clazz){
+    return getApplicationContext().getBean(name, clazz);
+}
+}    
+</code></pre><p>2.注入  </p>
+<pre><code>//其中@SpringBootApplication申明让spring boot自动给程序进行必要的配置，等价于以默认属性使用@Configuration，@EnableAutoConfiguration和@ComponentScan
+@SpringBootApplication
+@ServletComponentScan
+
+public class App {
+
+   /**注册Spring Util
+    * 这里为了和上一个冲突，所以方面名为：BeanUtil2
+    * 实际中使用BeanUtil
+    */
+   @Bean
+   public BeanUtil beanUtil2(){return new BeanUtil();}
+
+   /**
+    *
+  参数里VM参数设置为：
+   -javaagent:.\lib\springloaded-1.2.4.RELEASE.jar -noverify
+    * @param args
+    */
+   public static void main(String[] args) {
+          SpringApplication.run(App.class, args);
+   }
+</code></pre><p>}</p>
+<h6 id="3-不在Spring-Boot的扫描包下方式二"><a href="#3-不在Spring-Boot的扫描包下方式二" class="headerlink" title="3.不在Spring Boot的扫描包下方式二"></a>3.不在Spring Boot的扫描包下方式二</h6><p>代码基本和上面都是相同的，主要是在App.java中使用@Import进行导入<br>而且在BeanUtil是不需要添加@Component注解</p>
+<pre><code>@SpringBootApplication
+@ServletComponentScan
+@Import(value={SpringUtil.class})
+publicclass App {
+
+    //省略其它代码.
+
+}
+</code></pre><h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4><p>说明以上3中方式都生效了，这3中方式根据实际情况选择一种方式就可以了。<br>那么这样子在普通类既可以使用:<br>BeanUtil.getBean() 获取到Spring IOC容器中的bean。<br>当然也可以在Spring管理的类中使用：<br>@Resouce或者@Autowired 进行注入使用，当然我们这个类的核心是普通类可以调用spring的bean进行使用了</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/23/SppringBoot-十八-SpringBoot普通类中使用bean/" class="archive-article-date">
+  	<time datetime="2017-07-23T03:00:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-十七-SpringBoot定时任务使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/23/SpringBoot-十七-SpringBoot定时任务使用/">SpringBoot(十七)-SpringBoot定时任务使用</a>
     </h1>
   
 
@@ -889,13 +1042,13 @@ public void schedule(){
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/07/23/Spring-Boot-十七-Spring-Boot定时任务使用/" class="archive-article-date">
+      <a href="/2017/07/23/SpringBoot-十七-SpringBoot定时任务使用/" class="archive-article-date">
   	<time datetime="2017-07-23T02:04:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -915,7 +1068,7 @@ public void schedule(){
 
 
   
-    <article id="post-Spring-Boot-十六-Spring-Boot之Hello-World访问404" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-SpringBoot-十六-SpringBoot之Hello-World访问404" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -925,7 +1078,7 @@ public void schedule(){
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/23/Spring-Boot-十六-Spring-Boot之Hello-World访问404/">Spring Boot(十六)-Spring Boot之Hello World访问404</a>
+      <a class="article-title" href="/2017/07/23/SpringBoot-十六-SpringBoot之Hello-World访问404/">SpringBoot(十六)-SpringBoot之Hello World访问404</a>
     </h1>
   
 
@@ -942,13 +1095,13 @@ public void schedule(){
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/07/23/Spring-Boot-十六-Spring-Boot之Hello-World访问404/" class="archive-article-date">
+      <a href="/2017/07/23/SpringBoot-十六-SpringBoot之Hello-World访问404/" class="archive-article-date">
   	<time datetime="2017-07-22T17:09:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -968,7 +1121,7 @@ public void schedule(){
 
 
   
-    <article id="post-Spring-Boot-十五-Spring-Boot集成MyBatis" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-SpringBoot-十五-SpringBoot集成MyBatis" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -978,7 +1131,7 @@ public void schedule(){
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/22/Spring-Boot-十五-Spring-Boot集成MyBatis/">Spring Boot(十五)-Spring Boot集成MyBatis</a>
+      <a class="article-title" href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/">SpringBoot(十五)-SpringBoot集成MyBatis</a>
     </h1>
   
 
@@ -1230,132 +1383,13 @@ public long save(Demo name);
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/07/22/Spring-Boot-十五-Spring-Boot集成MyBatis/" class="archive-article-date">
+      <a href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/" class="archive-article-date">
   	<time datetime="2017-07-22T15:19:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Sppring-Boot-十四-Spring-Boot添加JSP支持" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/22/Sppring-Boot-十四-Spring-Boot添加JSP支持/">Sppring Boot(十四)-Spring Boot添加JSP支持</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Spring Boot添加JSP支持分为六部执行<br>1.创建Maven web project;<br>2.pom.xml文件添加依赖<br>3.配置application.properties支持jsp<br>4.编写Controller<br>5.编写jsp页面<br>6.编写启动类App.java  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-创建Maven-web-project"><a href="#1-创建Maven-web-project" class="headerlink" title="1.创建Maven web project;"></a>1.创建Maven web project;</h5><p>使用MyEclipse新建一个Maven Web Project ，项目取名为：<br>spring-boot-jsp</p>
-<h5 id="2-pom-xml文件添加依赖"><a href="#2-pom-xml文件添加依赖" class="headerlink" title="2.pom.xml文件添加依赖"></a>2.pom.xml文件添加依赖</h5><p>主要添加一下依赖节点:<br>1.spring boot parent节点<br>2.jdk的版本<br>3.web支持<br>4.servlet 依赖<br>5.JSTL<br>6.tomcat 的支持  </p>
-<h6 id="1-1-spring-boot-parent节点"><a href="#1-1-spring-boot-parent节点" class="headerlink" title="1.1.spring boot parent节点"></a>1.1.spring boot parent节点</h6><pre><code>&lt;!-- spring boot parent节点，引入这个之后，在下面和spring boot相关的就不需要引入版本了; --&gt;
-&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
-&lt;/parent&gt;
-</code></pre><h6 id="1-2-jdk的版本"><a href="#1-2-jdk的版本" class="headerlink" title="1.2.jdk的版本"></a>1.2.jdk的版本</h6><pre><code> &lt;!-- 指定一下jdk的版本 ，这里我们使用jdk 1.8 ,默认是1.6 --&gt;
-&lt;properties&gt;
-&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
- &lt;java.version&gt;1.8&lt;/java.version&gt;
-&lt;/properties&gt;
-</code></pre><h6 id="1-3-web支持"><a href="#1-3-web支持" class="headerlink" title="1.3.web支持"></a>1.3.web支持</h6><pre><code>&lt;!-- web支持: 1、web mvc; 2、restful; 3、jackjson支持; 4、aop ........ --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-</code></pre><h6 id="1-4-servlet-依赖"><a href="#1-4-servlet-依赖" class="headerlink" title="1.4.servlet 依赖"></a>1.4.servlet 依赖</h6><pre><code>&lt;!-- servlet 依赖. --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-</code></pre><h6 id="1-5-JSTL"><a href="#1-5-JSTL" class="headerlink" title="1.5.JSTL"></a>1.5.JSTL</h6><pre><code> &lt;!-- JSTL（JSP Standard Tag Library，JSP标准标签库)是一个不断完善的开放源代码的JSP标签库，是由apache的jakarta小组来维护的。 --&gt; 
-  &lt;dependency&gt;
-        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-        &lt;artifactId&gt;jstl&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h6 id="1-6-tomcat-的支持"><a href="#1-6-tomcat-的支持" class="headerlink" title="1.6.tomcat 的支持"></a>1.6.tomcat 的支持</h6><pre><code>&lt;!-- tomcat 的支持.--&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.apache.tomcat.embed&lt;/groupId&gt;
-        &lt;artifactId&gt;tomcat-embed-jasper&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-    &lt;/dependency&gt;
-</code></pre><h5 id="3-配置application-properties支持jsp"><a href="#3-配置application-properties支持jsp" class="headerlink" title="3.配置application.properties支持jsp"></a>3.配置application.properties支持jsp</h5><p>添加src/main/resources/application.properties：</p>
-<pre><code>#页面默认前缀目录
-spring.mvc.view.prefix=/WEB-INF/jsp/
-#响应页面默认后缀
-spring.mvc.view.suffix=.jsp
-#自定义属性，可以在Controller中读取
-application.hello=Hello Angel From application
-</code></pre><h5 id="4-编写Controller"><a href="#4-编写Controller" class="headerlink" title="4.编写Controller"></a>4.编写Controller</h5><pre><code>@Controller
-public class HelloController {
-@RequestMapping(&quot;hello&quot;)
-public String hello(Map&lt;String,Object&gt; map){
-    map.put(&quot;hello&quot;,&quot;Hello JSP&quot;);
-    return &quot;hello&quot;;
-}
-}
-</code></pre><h5 id="5-编写jsp页面"><a href="#5-编写jsp页面" class="headerlink" title="5.编写jsp页面"></a>5.编写jsp页面</h5><pre><code>&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=ISO-8859-1&quot;
-pageEncoding=&quot;ISO-8859-1&quot;%&gt;
-&lt;!DOCTYPE html PUBLIC &quot;-//W3C//DTD HTML 4.01 Transitional//EN&quot; &quot;http://www.w3.org/TR/html4/loose.dtd&quot;&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=ISO-8859-1&quot;&gt;
-&lt;title&gt;Spring Boot JSP&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-  ${hello}
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="6-编写启动类App-java"><a href="#6-编写启动类App-java" class="headerlink" title="6.编写启动类App.java"></a>6.编写启动类App.java</h5><p>访问:<a href="http://localhost:8081/hello" target="_blank" rel="external">http://localhost:8081/hello</a> 输出结果:Hello JSP</p>
-<p>特别说明：针对el表达式，类似${hello}这个对于servlet的版本是有限制的，2.4版本版本以下是不支持的，是无法进行识别的，请注意。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/22/Sppring-Boot-十四-Spring-Boot添加JSP支持/" class="archive-article-date">
-  	<time datetime="2017-07-22T13:52:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -1440,7 +1474,7 @@ pageEncoding=&quot;ISO-8859-1&quot;%&gt;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 17.86px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 18.57px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.29px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 14.29px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
