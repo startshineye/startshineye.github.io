@@ -152,6 +152,134 @@
       <div class="body-wrap">
         
   
+    <article id="post-Redis-三-Redis字符串" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/27/Redis-三-Redis字符串/">Redis(三)-Redis字符串</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="字符串"><a href="#字符串" class="headerlink" title="字符串"></a>字符串</h4><h5 id="1-理论"><a href="#1-理论" class="headerlink" title="1.理论"></a>1.理论</h5><p>1.字符串是Redis中最简单的数据结构,它既可以存储文字(比如:”hello word”),又可以储存数字(比如整数10086和浮点数3.14),还可以存储二进制数据(比如10010100)。<br>2.Redis为这几种类型的值分别设置了相应的操作命令,让用户可以针对不同的值做不同的处理。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/44.png" alt=""></p>
+<h5 id="2-基本操作"><a href="#2-基本操作" class="headerlink" title="2.基本操作"></a>2.基本操作</h5><h6 id="2-1-SET-key-value"><a href="#2-1-SET-key-value" class="headerlink" title="2.1 SET key value"></a>2.1 SET key value</h6><p>首先启动redis服务:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/45.png" alt=""><br>打开客户端:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/46.png" alt=""><br>1.命令：SET key value<br>将字符串键key的值设置为value,命令返回OK表示设置成功。<br>如果字符串键key已经存在,那么用新值覆盖原来的旧值。<br>复杂度O(1)。<br>键key相同时候将会覆盖掉原来的value<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/47.png" alt=""></p>
+<h5 id="2-2-SET-key-value-NX-XX"><a href="#2-2-SET-key-value-NX-XX" class="headerlink" title="2.2 SET key value[NX|XX]"></a>2.2 SET key value[NX|XX]</h5><p>SET 命令还支持可选的NX选项和XX选项:  </p>
+<ol>
+<li>如果给定NX选项,那么命令仅在键key不存在的情况下,才进行设置操作,如果键key已经存在,那么SET…NX命令不做动作(不会覆盖旧值)。</li>
+<li>如果给定XX选项,那么命令仅在键key存在的情况下,才进行设置操作,如果键key不存在,那么SET…XX命令不做动作(一定会覆盖旧值)。</li>
+</ol>
+<p>在给定NX选项和XX选项的情况下,SET命令在设置成功时候返回OK,设置失败时返回nil(返回为null,类似于null)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/48.png" alt=""></p>
+<h5 id="2-3-获取字符串的值-GET-key"><a href="#2-3-获取字符串的值-GET-key" class="headerlink" title="2.3 获取字符串的值:GET key"></a>2.3 获取字符串的值:GET key</h5><p>GET key<br>返回字符串key储存的值<br>复杂度O(1)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/49.png" alt=""></p>
+<h5 id="2-4-示例-使用Redis来进行缓存"><a href="#2-4-示例-使用Redis来进行缓存" class="headerlink" title="2.4 示例:使用Redis来进行缓存"></a>2.4 示例:使用Redis来进行缓存</h5><p>我们可以使用Redis来缓存一些经常会被用到,或者需要消耗大量资源的内容,通过将这些内容放到Redis里面(也即是内存里面),程序可以以极快的速度取得这些内容。  </p>
+<p>举个例子,对于一个网站来说,如果某个页面经常会被访问到,或者创建页面时候消耗的资源比较多(比如需要多次访问数据库,生成时间比较长,等等),那么我们可以使用Redis将这个页面缓存起来,减轻网站的负担,降低网站的延迟值。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/50.png" alt="">  </p>
+<h5 id="2-5-缓存程序的API及其实现"><a href="#2-5-缓存程序的API及其实现" class="headerlink" title="2.5 缓存程序的API及其实现"></a>2.5 缓存程序的API及其实现</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/51.png" alt="">  </p>
+<h5 id="2-6-仅在键不存在的情况下进行设置-SETNX-key-value"><a href="#2-6-仅在键不存在的情况下进行设置-SETNX-key-value" class="headerlink" title="2.6 仅在键不存在的情况下进行设置 SETNX key value"></a>2.6 仅在键不存在的情况下进行设置 SETNX key value</h5><p>SETNX key value  </p>
+<p>仅在键key不存在的情况下,将键key的值设置为value,效果和SET key value NX一样。NX的意思为”Not eXists”(不存在)  </p>
+<p>键不存在并且设置成功时,命令返回1；因为键已经存在而导致设置失败时,命令返回0。  </p>
+<p>复杂度O(1)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/52.png" alt="">  </p>
+<h5 id="2-7-同时设置或者获取多个字符串的值"><a href="#2-7-同时设置或者获取多个字符串的值" class="headerlink" title="2.7 同时设置或者获取多个字符串的值"></a>2.7 同时设置或者获取多个字符串的值</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/53.png" alt="">  </p>
+<h5 id="2-8-示例-设置或获取个人信息"><a href="#2-8-示例-设置或获取个人信息" class="headerlink" title="2.8 示例:设置或获取个人信息"></a>2.8 示例:设置或获取个人信息</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/54.png" alt=""> </p>
+<h5 id="2-9-键的命名"><a href="#2-9-键的命名" class="headerlink" title="2.9 键的命名"></a>2.9 键的命名</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/55.png" alt=""></p>
+<h5 id="3-0-一次设置多个不存在的键"><a href="#3-0-一次设置多个不存在的键" class="headerlink" title="3.0 一次设置多个不存在的键"></a>3.0 一次设置多个不存在的键</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/56.png" alt=""></p>
+<h5 id="3-1-设置新值返回旧值"><a href="#3-1-设置新值返回旧值" class="headerlink" title="3.1 设置新值返回旧值"></a>3.1 设置新值返回旧值</h5><p>GETSET key new-value  </p>
+<p>将字符串键的值设置为new-value,并返回字符串键在设置新值之前存储的旧值(old-value)  </p>
+<p>复杂度为O(1)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/57.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/58.png" alt="">  </p>
+<h5 id="3-2-追加内容到字符串末尾"><a href="#3-2-追加内容到字符串末尾" class="headerlink" title="3.2 追加内容到字符串末尾"></a>3.2 追加内容到字符串末尾</h5><p>APPEND key value  </p>
+<p>将值value推入到字符串键key已存储内容的末尾。  </p>
+<p>O(N),其中N为被推入值的长度。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/59.png" alt=""></p>
+<h5 id="3-3-返回值的长度"><a href="#3-3-返回值的长度" class="headerlink" title="3.3 返回值的长度"></a>3.3 返回值的长度</h5><p>STRLEN key  </p>
+<p>返回字符串键key存储的值的长度  </p>
+<p>因为redis会记录每个字符串值的长度,所以获取该值的复杂度为O(1)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/60.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/27/Redis-三-Redis字符串/" class="archive-article-date">
+  	<time datetime="2017-07-27T15:01:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-27</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Myeclispe-MyEclipse中不能输入搜狗中文" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/27/Myeclispe-MyEclipse中不能输入搜狗中文/">Myeclispe-MyEclipse中不能输入搜狗中文</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在开发中,有时候出现在ide中不能输入中文情况,应该确切说是搜狗输入法隐藏,为了让其显示出来,我们只需要在Myeclipse中按快捷键:Shift+Alt输入法就会再现,此时就能够输入中文。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/27/Myeclispe-MyEclipse中不能输入搜狗中文/" class="archive-article-date">
+  	<time datetime="2017-07-27T02:26:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-27</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Redis-2-Redis特色" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -990,347 +1118,6 @@ public void schedule(){
 
 
   
-    <article id="post-SpringBoot-十六-SpringBoot之Hello-World访问404" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/23/SpringBoot-十六-SpringBoot之Hello-World访问404/">SpringBoot(十六)-SpringBoot之Hello World访问404</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.确定地址是否输入正确，，此路径非彼路径<br>2.是否用对注解，此注解非彼注解<br>3.包路径是否正确，此包非彼包<br>4.确认类包是否正确，此类包非彼类包  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-确认访问地址是否正确"><a href="#1-确认访问地址是否正确" class="headerlink" title="1.确认访问地址是否正确"></a>1.确认访问地址是否正确</h5><p>1.确认端口号,默认端口号:8080，这个可以可以在启动的控制台上查看<br>2.确认访问的url地址是否填写正确,这个在启动的控制台查看是否被映射了。<br>以下含有很多映射<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/30.png" alt="">但是没有hello映射</p>
-<h5 id="2-确认注解是否正确"><a href="#2-确认注解是否正确" class="headerlink" title="2.确认注解是否正确"></a>2.确认注解是否正确</h5><p>1.使用@RestController而不是@Controler另外@RestController等价于@Controler和@ResponseBody</p>
-<h5 id="3-确定包的路径是否正确"><a href="#3-确定包的路径是否正确" class="headerlink" title="3.确定包的路径是否正确"></a>3.确定包的路径是否正确</h5><p>我们需要知道的是：Spring Boot默认情况下扫描到的是:<br>@SpringBootApplication所在类的同包和自包<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/27.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/28.png" alt=""><br>映射错误<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/29.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/23/SpringBoot-十六-SpringBoot之Hello-World访问404/" class="archive-article-date">
-  	<time datetime="2017-07-22T17:09:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringBoot-十五-SpringBoot集成MyBatis" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/">SpringBoot(十五)-SpringBoot集成MyBatis</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Spring Boot集成MyBatis分为以下步骤:<br>1.新建maven project;<br>2.在pom.xml文件中引入相关依赖；<br>3.创建启动类App.java<br>4.在application.properties添加配置文件；<br>5.编写Demo测试类;<br>6.编写DemoMapper；<br>7.编写DemoService<br>8.编写DemoController;<br>9.加入PageHelper<br>10.获取自增长ID;  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-新建maven-project"><a href="#1-新建maven-project" class="headerlink" title="1.新建maven project;"></a>1.新建maven project;</h5><p>新建一个maven project,取名为：spring-boot-mybatis</p>
-<h5 id="2-在pom-xml文件中引入相关依赖；"><a href="#2-在pom-xml文件中引入相关依赖；" class="headerlink" title="2.在pom.xml文件中引入相关依赖；"></a>2.在pom.xml文件中引入相关依赖；</h5><p>1.基本依赖：parent,web<br>2.jdk版本号；<br>3.mysql驱动，<br>4.mybatis依赖包，<br>5.mysql分页PageHelper:</p>
-<pre><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
-&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-
-&lt;groupId&gt;com.yxm&lt;/groupId&gt;
-&lt;artifactId&gt;spring-boot-mybatis&lt;/artifactId&gt;
-&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
-&lt;packaging&gt;jar&lt;/packaging&gt;
-
-&lt;name&gt;spring-boot-mybatis&lt;/name&gt;
-&lt;url&gt;http://maven.apache.org&lt;/url&gt;
-
-&lt;!-- spring boot parent节点，引入这个之后，在下面和spring boot相关的就不需要引入版本了; --&gt;
-&lt;parent&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-    &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
-&lt;/parent&gt;
-
-&lt;properties&gt;
-&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
-&lt;!-- 指定一下jdk的版本 ，这里我们使用jdk 1.8 ,默认是1.6 --&gt;
-&lt;java.version&gt;1.8&lt;/java.version&gt;
-&lt;/properties&gt;
-
-&lt;dependencies&gt;
- &lt;!-- web支持: 1、web mvc; 2、restful; 3、jackjson支持; 4、aop ........ --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-
- &lt;!-- mysql 数据库驱动. --&gt;
-    &lt;dependency&gt;
-            &lt;groupId&gt;mysql&lt;/groupId&gt;
-            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-
-        &lt;!--     
-        spring-boot mybatis依赖：
-
-        请不要使用1.0.0版本，因为还不支持拦截器插件，
-        1.1.1 是博主写帖子时候的版本，大家使用最新版本即可
-     --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
-        &lt;version&gt;1.1.1&lt;/version&gt;
-    &lt;/dependency&gt;
-
-    &lt;!-- 
-    MyBatis提供了拦截器接口，我们可以实现自己的拦截器，
-    将其作为一个plugin装入到SqlSessionFactory中。 
-    Github上有位开发者写了一个分页插件，我觉得使用起来还可以，挺方便的。 
-    Github项目地址： https://github.com/pagehelper/Mybatis-PageHelper
-  --&gt;    
-    &lt;dependency&gt;
-        &lt;groupId&gt;com.github.pagehelper&lt;/groupId&gt;
-        &lt;artifactId&gt;pagehelper&lt;/artifactId&gt;
-        &lt;version&gt;4.1.0&lt;/version&gt;
-    &lt;/dependency&gt;    
-
-&lt;/dependencies&gt;
-&lt;/project&gt;
-</code></pre><h5 id="3-创建启动类App-java"><a href="#3-创建启动类App-java" class="headerlink" title="3.创建启动类App.java"></a>3.创建启动类App.java</h5><h5 id="4-在application-properties添加配置文件；"><a href="#4-在application-properties添加配置文件；" class="headerlink" title="4.在application.properties添加配置文件；"></a>4.在application.properties添加配置文件；</h5><pre><code>########################################################
-###datasource
-########################################################
-spring.datasource.url = jdbc:mysql://localhost:3306/test
-spring.datasource.username = root
-spring.datasource.password = root
-spring.datasource.driverClassName = com.mysql.jdbc.Driver
-spring.datasource.max-active=20
-spring.datasource.max-idle=8
-spring.datasource.min-idle=8
-spring.datasource.initial-size=10
-</code></pre><h5 id="5-编写Demo测试类"><a href="#5-编写Demo测试类" class="headerlink" title="5.编写Demo测试类;"></a>5.编写Demo测试类;</h5><pre><code>public class Demo {
-private int id;
-private String name;
-
-public int getId() {
-    return id;
-}
-
-public void setId(int id) {
-    this.id = id;
-}
-
-public String getName() {
-    return name;
-}
-
-public void setName(String name) {
-    this.name = name;
-}
-}
-</code></pre><h5 id="6-编写DemoMapper；"><a href="#6-编写DemoMapper；" class="headerlink" title="6.编写DemoMapper；"></a>6.编写DemoMapper；</h5><p>运用mybatis时候需要首先在数据库建立实体类对应的表:<br>书写三个方法:通过name获取实体,通过id获取实体,通过id获取name</p>
-<pre><code>package com.yxm.dao;
-
-import java.util.List;
-
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Options;
-import org.apache.ibatis.annotations.Select;
-
-import com.yxm.entity.Demo;
-
-public interface DemoMapper {
-
-@Select(&quot;select * from demo where name = #{name}&quot;)
-public Demo getByName(String name);
-
-@Select(&quot;select * from demo where id = #{id}&quot;)
-public Demo getById(String id);
-
-@Select(&quot;select name from demo where id = #{id}&quot;)
-public String getNameById(String id);
-
-@Select(&quot;select * from demo&quot;)
-public List&lt;Demo&gt; get();
-
-/**
- * 保存数据.
- */
-@Insert(&quot;insert into Demo(name) values(#{name})&quot;)
-@Options(useGeneratedKeys=true,keyProperty=&quot;id&quot;,keyColumn=&quot;id&quot;)
-public void save(Demo demo);
-}
-</code></pre><h5 id="7-编写DemoService"><a href="#7-编写DemoService" class="headerlink" title="7.编写DemoService"></a>7.编写DemoService</h5><pre><code>package com.yxm.service;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
-import com.yxm.dao.DemoMapper;
-import com.yxm.entity.Demo;
-
-@Service
-public class DemoService {
-
-@Autowired
-private DemoMapper demoMappper;
-
-public Demo getByName(String name){
-    return demoMappper.getByName(name);
-};
-
-public Demo getById(String id){
-    return demoMappper.getById(id);
-};
-
-public String getNameById(String id){
-    return demoMappper.getNameById(id);
-}; 
-
-public List&lt;Demo&gt; get(){
-    return demoMappper.get();
-};
-
-@Transactional//添加事务.
-public void save(Demo demo){
-    demoMappper.save(demo);
-}
-}
-</code></pre><h5 id="8-编写DemoController"><a href="#8-编写DemoController" class="headerlink" title="8.编写DemoController;"></a>8.编写DemoController;</h5><pre><code>package com.yxm.controller;
-
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.github.pagehelper.PageHelper;
-import com.yxm.entity.Demo;
-import com.yxm.service.DemoService;
-
-@RestController
-public class DemoController {
-
-@Autowired
-private DemoService demoService;
-
-@RequestMapping(&quot;/test&quot;)
-public Demo test(){
-    Demo demo = new Demo();
-    demo.setId(1);
-    demo.setName(&quot;zs&quot;);
-    return demo;
-}
-@RequestMapping(&quot;/name&quot;)
-public Demo getByName(String name){
-    return demoService.getByName(name);
-};
-
-@RequestMapping(&quot;/id&quot;)
-public Demo getById(String id){
-    return demoService.getById(id);
-};
-@RequestMapping(&quot;/getNameById&quot;)
-public String getNameById(String id){
-    return demoService.getNameById(id);
-}; 
-
-@RequestMapping(&quot;/getByPage&quot;)
-public List&lt;Demo&gt; getByPage(){
-     PageHelper.startPage(1,2);
-     return demoService.get();
-}
-
-@RequestMapping(&quot;/save&quot;)
-public Demo save(){
-    Demo demo = new Demo();
-    demo.setName(&quot;张三&quot;);
-    demoService.save(demo);
-    return demo;
-}
-}    
-</code></pre><h5 id="9-加入PageHelper"><a href="#9-加入PageHelper" class="headerlink" title="9.加入PageHelper"></a>9.加入PageHelper</h5><pre><code>@Configuration
-public class MyBatisConfiguration {
-@Bean
-public PageHelper pageHelper() {
-    System.out.println(&quot;MyBatisConfiguration.pageHelper()&quot;);
-    PageHelper pageHelper = new PageHelper();
-    Properties p = new Properties();
-    p.setProperty(&quot;offsetAsPageNum&quot;, &quot;true&quot;);
-    p.setProperty(&quot;rowBoundsWithCount&quot;, &quot;true&quot;);
-    p.setProperty(&quot;reasonable&quot;, &quot;true&quot;);
-    pageHelper.setProperties(p);
-    return pageHelper;
-}
-}
-</code></pre><h5 id="10-获取自增长ID"><a href="#10-获取自增长ID" class="headerlink" title="10.获取自增长ID;"></a>10.获取自增长ID;</h5><pre><code>@Insert(&quot;insert into Demo(name,password) values(#{name},#{password})&quot;)
-public long save(Demo name);
-</code></pre><h5 id="11-测试"><a href="#11-测试" class="headerlink" title="11.测试"></a>11.测试</h5><p>数据如图:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/26.png" alt=""><br>访问:<a href="http://localhost:8081/test/" target="_blank" rel="external">http://localhost:8081/test/</a> 输出结果:{“id”:1,”name”:”zs”}<br>访问:<a href="http://localhost:8081/name?name=zs" target="_blank" rel="external">http://localhost:8081/name?name=zs</a> 输出结果:{“id”:1,”name”:”zs”}<br>访问:<a href="http://localhost:8081/id?id=2" target="_blank" rel="external">http://localhost:8081/id?id=2</a> 输出结果:{“id”:2,”name”:”lisi”}<br>访问:<a href="http://localhost:8081/getNameById?id=3" target="_blank" rel="external">http://localhost:8081/getNameById?id=3</a> 输出结果:we<br>访问:<a href="http://localhost:8081/getByPage" target="_blank" rel="external">http://localhost:8081/getByPage</a> 输出结果:[{“id”:1,”name”:”zs”},{“id”:2,”name”:”lisi”}] </p>
-<h5 id="12-源码地址"><a href="#12-源码地址" class="headerlink" title="12 源码地址"></a>12 源码地址</h5><p><a href="https://github.com/startshineye/Spring-Boot/tree/master/spring-boot-mybatis">源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/" class="archive-article-date">
-  	<time datetime="2017-07-22T15:19:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -1396,7 +1183,7 @@ public long save(Demo name);
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     

@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>SpringBoot(39)-SpringBoot集成jsp补充 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringBoot(39)-SpringBoot集成jsp补充">
+<meta property="og:url" content="https://github.com/startshineye/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="前言之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：">
+<meta property="og:updated_time" content="2017-10-22T12:37:53.262Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringBoot(39)-SpringBoot集成jsp补充">
+<meta name="twitter:description" content="前言之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-SpringBoot-39-SpringBoot集成jsp补充" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringBoot(39)-SpringBoot集成jsp补充
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?<br>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？<br>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？<br>例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：  </p>
+<pre><code>&lt;!-- springmvc.xml 资源映射 --&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/css/&quot; mapping=&quot;/css/**&quot;/&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/js/&quot; mapping=&quot;/js/**&quot;/&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/image/&quot; mapping=&quot;/image/**&quot;/&gt;  
+</code></pre><p>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？  </p>
+<pre><code>&lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+       &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？"><a href="#1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？" class="headerlink" title="1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？"></a>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？</h5><p> 针对第一个问题，答案是不可以的:  </p>
+<p>我们先看一段英文描述，如下：</p>
+<p>When running a Spring Boot application that uses an embedded servlet container (and is packaged as an executable archive), there are some limitations in the JSP support.</p>
+<p>With Tomcat it should work if you use war packaging, i.e. an executable war will work, and will also be deployable to a standard container (not limited to, but including Tomcat). An executable jar will not work because of a hard coded file pattern in Tomcat.<br>Jetty does not currently work as an embedded container with JSPs.<br>Undertow does not support JSPs.</p>
+<p>原文的大体意思就是：Tomcat支持war的打包方式，spring boot支持war打包方式。Jetty现在不支持JSP嵌入容器。Undertow根本就不支持JSP。</p>
+<p>所以答案就是打包成war，jsp会自然按照servlet的标准部署。但也就意味着你不可以用嵌入式的方式运行，而是Tomcat Server + war的部署方式。</p>
+<p>看到这里有些网友肯定会有疑问那什么是嵌入式的web服务器？我们这边就拿jetty来说明下。</p>
+<p>Jetty 可以非常容易的嵌入到应用程序当中而不需要程序为了使用 Jetty 做修改。</p>
+<p>从某种程度上，你也可以把 Jetty 理解为一个嵌入式的Web服务器。所以我们经常会说嵌入式jetty。</p>
+<p>Jetty有一个口号：不要把你的应用部署到Jetty中，把Jetty部署到你的应用中。Jetty可以在Java应用程序中向其他POJO一样被实例化，换句话说，以嵌入式的模式运行Jetty是指将Http模块放入你的应用程序中，而非部署你的程序到一个HTTP服务器。这就是所谓的嵌入式jetty。</p>
+<p>另外在说明一点就是JSP解析是需要JSP引擎处理的，tomcat就提供了JSP处理引擎。所以很显然JSP是依赖容器而存在的，不然就没法访问了。那么既然是依赖于tomcat的话。好了第一个问题就解说到这里，不知道是否对你有帮助？留言评论！</p>
+<p>出了这篇文章之后，有一网友找到一支持打成jar包运行的插件：</p>
+<h5 id="2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？"><a href="#2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？" class="headerlink" title="2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？"></a>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？</h5><p>只需要在src/main/resouces下新建一个static目录，然后在static下新建子目录：css,images,js目录，在images放入一张test.jpg图片，那么访问路径是：<a href="http://127.0.0.1:8080/images/test.jpg" target="_blank" rel="external">http://127.0.0.1:8080/images/test.jpg</a>  </p>
+<p>当前目录结构应该是这样子的：  </p>
+<pre><code>(1)--src/java/resources  
+  (2)--static
+     (3)--css
+     (3)--images
+     (3)--js
+</code></pre><p>那么有人会有疑问这个，打包的时候能打上嘛，答案是可以的，请看实际打包解压图：  </p>
+<h5 id="3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"><a href="#3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？" class="headerlink" title="3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"></a>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？</h5><p>如果没有这个配置的话，那么打包出来会包含tomcat的jar包，整个war文件都会变大，第二就是如果版本是一样的，比如我这里是8.0的，那么是不会报错的，如果是7.0的tomcat的话，那么就启动报错了。有另外一种配置方式如下：  </p>
+<pre><code>&lt;dependency&gt;   
+ &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;   
+ &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;    
+&lt;exclusions&gt;   
+ &lt;exclusion&gt;   
+     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;    
+     &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;   
+ &lt;/exclusion&gt;   
+&lt;/exclusions&gt;    
+&lt;/dependency&gt; 
+</code></pre><h5 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a>4.总结</h5><p>（a） 第一就是：Spring Boot使用jsp的话，是不可以打包成jar包的，需要打包成war成文件。</p>
+<p>（b）第二就是：静态资源存放在resources的static下，新建images,js,css目录即可，当然出了static还可以是resources下创建resources文件存放资源，还有就是public。具体看我的第13篇博客文章。</p>
+<p>（c）第三就是：spring-boot-starter-tomcat是必须添加的嘛，我只能说在我的这个demo中我的这个是必须添加的，不然第一占导出包大小，其次就是可能tomcat jar包会冲突，导致无法启动程序。另外要说明的就是还有别的方式使用tomcat的方式</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/" class="archive-article-date">
+  	<time datetime="2017-10-21T05:32:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-21</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2017/10/21/Myeclipse查找文件及文件中的字符/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          Myeclipse查找文件及文件中的字符
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2017/10/11/work-ie8和ie9下项目不能正常运行-打开F12开发者工具后项目正常运行/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">work-ie8和ie9下项目不能正常运行,打开F12开发者工具后项目正常运行</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringBoot-39-SpringBoot集成jsp补充" data-title="SpringBoot(39)-SpringBoot集成jsp补充" data-url="https://github.com/startshineye/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2017 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
