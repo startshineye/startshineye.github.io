@@ -152,6 +152,78 @@
       <div class="body-wrap">
         
   
+    <article id="post-jeecg-2-使用DOM自带的confirm方法" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/11/jeecg-2-使用DOM自带的confirm方法/">jeecg(2)-使用DOM自带的confirm方法</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>开发中,我们需要使用DOM自带的confirm方法,但是由于项目是基于jeecg框架,使用confirm方法老是得不到预期效果</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>查看jeecg封装的js文件可以知道,目录WebRoot/plug-in/tools/curdtools_zh-cn.js下.confirm已经被其覆盖了，</p>
+<pre><code>// 普通询问操作调用函数
+function confirm(url, content,name) {
+ createdialog(&apos;提示信息 &apos;, content, url,name);
+}
+
+/**
+* 创建询问窗口
+* 
+* @param title
+* @param content
+* @param url
+*/
+function createdialog(title, content, url,name) {
+ $.dialog.setting.zIndex = getzIndex(true);
+ $.dialog.confirm(content, function(){
+    doSubmit(url,name);
+    rowid = &apos;&apos;;
+ }, function(){
+ });
+}
+</code></pre><p>我们可以通过将其名字改为：jeecgconfirm来避免以上情况  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/11/jeecg-2-使用DOM自带的confirm方法/" class="archive-article-date">
+  	<time datetime="2017-09-11T04:01:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-11</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-jeecg-1-js方法存放文件" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1475,122 +1547,6 @@ var vm = new Vue({
       
       <a href="/2017/09/02/vue-20-过滤器/" class="archive-article-date">
   	<time datetime="2017-09-02T03:47:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-19-vue循环-去除重复数据" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-19-vue循环-去除重复数据/">vue(19)-vue循环(去除重复数据)</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们一般在vue数组中添加数据时候第一次添加可以但是第二次,第三次添加不可以  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-实例"><a href="#1-实例" class="headerlink" title="1.实例"></a>1.实例</h5><h6 id="1-1-问题"><a href="#1-1-问题" class="headerlink" title="1.1 问题"></a>1.1 问题</h6><pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;button&quot; value=&quot;添加&quot; @click=&quot;add&quot;&gt;
-    &lt;li v-for=&quot;item in arr&quot;&gt;
-        {{item}}
-    &lt;/li&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-       a:1,
-        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;]
-    },
-    methods:{
-        add:function(){
-            this.arr.push(&quot;tomato&quot;);
-        }
-    }
-}).$mount(&quot;#box&quot;);
-
-
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;  
-</code></pre><p>效果：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/5.gif" alt=""><br>错误:vue.js:991 [Vue warn]: Duplicate value found in v-for=”item in arr”: “tomato”. Use track-by=”$index” if you are expecting duplicate values.  </p>
-<h6 id="1-2-去重"><a href="#1-2-去重" class="headerlink" title="1.2 去重"></a>1.2 去重</h6><p>track-by=”索引”  </p>
-<p>代码:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;button&quot; value=&quot;添加&quot; @click=&quot;add&quot;&gt;
-    &lt;li v-for=&quot;item in arr&quot; track-by=&quot;$index&quot;&gt;
-        {{item}}
-    &lt;/li&gt;
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-       a:1,
-        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;]
-    },
-    methods:{
-        add:function(){
-            this.arr.push(&quot;tomato&quot;);
-        }
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>测试:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/6.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-19-vue循环-去除重复数据/" class="archive-article-date">
-  	<time datetime="2017-09-01T16:26:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
 </a>
       
 	<div class="article-tag tagcloud">
