@@ -152,6 +152,120 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-3-数据绑定" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/28/vue-3-数据绑定/">vue(3)-数据绑定</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>Vue.js 作为数据驱动视图的框架，我们首先要知道的就是如何将数据在视图中展示出来，传统的Web 项目中，这一过程往往是通过后端模板引擎来进行数据和视图的渲染，例如PHP的smarty，Java 的velocity 和freemarker。但这样导致的情况是前后端语法会交杂在一起，前端HTML 文件中需要包含后端模板引擎的语法，而且渲染完成后如果需要再次修改视图，就只能通过获取DOM 的方法进行修改，并手动维持数据和视图的一致。</li>
+<li>Vue.js 的核心是一个响应式的数据绑定系统，建立绑定后，DOM 将和数据保持同步，这样就无需手动维<br>护DOM，使代码能够更加简洁易懂、提升效率。</li>
+</ol>
+<h5 id="数据绑定语法"><a href="#数据绑定语法" class="headerlink" title="数据绑定语法"></a>数据绑定语法</h5><p>出现的例子会基于以下js 代码：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"> &lt;script&gt;</div><div class="line"> var  vm = new Vue(&#123;</div><div class="line">        el:&quot;#app&quot;,</div><div class="line">        data:&#123;</div><div class="line">            id:1,</div><div class="line">            index:0,</div><div class="line">            name:&apos;Vue&apos;,</div><div class="line">            avatar:&apos;http://...&apos;,</div><div class="line">            count:[1,2,3,4,5],</div><div class="line">            names:[&apos;Vue1.0&apos;,&apos;Vue2.0&apos;],</div><div class="line">            items:[</div><div class="line">                &#123;name:&apos;Vue1.0&apos;,version:&apos;1.0&apos;&#125;,</div><div class="line">                &#123;name:&apos;Vue2.0&apos;,version:&apos;2.0&apos;&#125;</div><div class="line">            ]</div><div class="line">        &#125;</div><div class="line">    &#125;);</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="1文本插值"><a href="#1文本插值" class="headerlink" title="1文本插值"></a>1文本插值</h6><p>数据绑定最基础的形式就是文本插值，使用的是双大括号标签</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"> &#123;&#123;&#125;&#125;</div><div class="line">`</div></pre></td></tr></table></figure>
+</code></pre><p>为“Mustache”语<br>法（源自前端模板引擎Mustache.js）  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;span&gt;Hello &#123;&#123;name&#125;&#125;&lt;/span&gt;</div></pre></td></tr></table></figure>
+</code></pre><ol>
+<li><p>Vue.js实例vm 中name 属性的值将会替换Mustache 标签中的name，并且修改数据对<br>象中的name 属性，DOM 也会随之更新。在浏览器console 中运行 vm.name = ‘Vue 1.0’， 输<br>出结果为Hello Vue 1.0。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/20.png" alt="">  </p>
+</li>
+<li><p>模板语法同时也支持单次插值，即首次赋值后再更改vm 实例属性值不会引起DOM 变化,<br>例如以下模板在运行vm.name = ‘Vue 1.0’ 后，依旧会输出Hello Vue ：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;span&gt;Hello &#123;&#123;*name&#125;&#125;&lt;/span&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/21.png" alt=""><br>Vue.js 2.0 去除了</p>
+<pre><code>{{*}}
+</code></pre><p> 这种写法，采用v-once 代替。以上模板需要改写为</p>
+<pre><code>&lt;span v-once=”name”&gt;{{name}}&lt;/span&gt;。
+</code></pre><h5 id="2-HTML属性"><a href="#2-HTML属性" class="headerlink" title="2.HTML属性"></a>2.HTML属性</h5><p>Mustache 标签也同样适用于HTML 属性中，例如：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;div id=&quot;id-&#123;&#123;id&#125;&#125;&quot;&gt;</div><div class="line">       hello world</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/22.png" alt=""><br>Vue.js 2.0 中废弃了这种写法，用v-bind 指令代替，<div v-bind:id="'id-' + id">&lt;/<br>div&gt; 代替，或简写为<div :id="'id-' + id"></div></div></p>
+<h5 id="3-绑定表达式"><a href="#3-绑定表达式" class="headerlink" title="3.绑定表达式"></a>3.绑定表达式</h5><p>放在 Mustache 标签内的文本内容称为绑定表达式。除了直接输出属性值之外，一段绑<br>定表达式可以由一个简单的 JavaScript 表达式和可选的一个或多个过滤器构成。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; index + 1 &#125;&#125;　// 1</div><div class="line">&#123;&#123; index == 0 ? &apos;a&apos; : &apos;b&apos;&#125;&#125; // a</div><div class="line">&#123;&#123; name.split(&apos;&apos;).join(&apos;|&apos;) &#125;&#125;　// V|u|e</div></pre></td></tr></table></figure>
+</code></pre><ol>
+<li><p>每个绑定中只能包含单个表达式，并不支持JavaScript 语句，否则Vue.js 就会抛出<br>warning 异常。并且绑定表达式里不支持正则表达式，如果需要进行复杂的转换，可以使用过<br>滤器或者计算属性来进行处理，以下的例子即为无效的表达式：</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; var a = 1 &#125;&#125; 　// 无效</div><div class="line">&#123;&#123; if (ok) &#123; return name &#125; &#125;&#125; // 无效，但可以写成 ok ? name : &apos;&apos; 或者 ok &amp;&amp; name 这样的写法</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="4-过滤器"><a href="#4-过滤器" class="headerlink" title="4.过滤器"></a>4.过滤器</h5><p>Vue.js 允许在表达式后添加可选的过滤器，以管道符“|”指示。示例:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;span&gt;&#123;&#123;name | uppercase&#125;&#125;&lt;/span&gt;  //VUE</div></pre></td></tr></table></figure>
+</code></pre><p>Vue.js 将name 的值传入给uppercase 这个内置的过滤器中（本质是一个函数），返回<br>字符串的大写值。同时也允许多个过滤器链式使用，例如：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; name | filterA | filterB &#125;&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>也允许传入多个参数，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; name | filterA arg1 arg2&#125;&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>此时，filterA 将name 的值做为第一个参数，arg1，arg2 做为第二、第三个参数传入过<br>滤器函数中。最终函数的返回值即为输出结果。arg1，arg2 可以使用表达式，也可以加上单<br>引号，直接传入字符串。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; name.split(&apos;&apos;) | limitBy 3 1 &#125;&#125; // -&gt;u,e</div></pre></td></tr></table></figure>
+</code></pre><p>过滤器limitBy 可以接受两个参数，第一个参数是设置显示个数，第二个参数为可选，<br>指从开始元素的数组下标。</p>
+<h6 id="4-1vue内置10个过滤器"><a href="#4-1vue内置10个过滤器" class="headerlink" title="4.1vue内置10个过滤器"></a>4.1vue内置10个过滤器</h6><p>1.capitalize ：字符串首字符转化成大写<br>2.uppercase ：字符串转化成大写<br>3.lowercase ：字符串转化成小写<br>4.currency 参数为{String}[ 货币符号] ,{Number} [ 小数位]，将数字转化成货币符号，<br>并且会自动添加数字分节号。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&#123;&#123; amount | currency &apos; ￥&apos; 2 &#125;&#125; // -&gt; 若amount 值为10000，则输出￥10,000.00</div></pre></td></tr></table></figure>
+</code></pre><p>5.pluralize 参数为{String} single, [double, triple]，字符串复数化。如果接收的是一<br>个参数，那复数形式就是在字符串末尾直接加一个“s”。如果接收多个参数，则会被当成数组<br>处理，字符串会添加对应数组下标的值。如果字符串的个数多于参数个数，多出部分会都添加<br>最后一个参数的值。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;p v-for=&quot;c in count&quot;&gt;&#123;&#123; c | pluralize &apos;item&apos; &#125;&#125;　 &#123;&#123; c | pluralize &apos;st&apos;</div><div class="line">&apos;nd&apos; &apos;rd&apos; &apos;th&apos; &#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/23.png" alt=""></p>
+<p>6.json 参数为{Number}[indent] 空格缩进数，与JSON.stringify() 作用相同，将json<br>对象数据输出成符合json 格式的字符串。<br>7.debounce 传入值必须是函数，参数可选，为{Number}[wait]，即延时时长。作用是<br>当调用函数n 毫秒后，才会执行该动作，若在这n 毫秒内又调用此动作则将重新计算执行时<br>间。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;input v-on:keyup =&quot;onKeyup | debounce 500&quot;&gt; // input元素上监听了keyup事件，</div><div class="line">并且延迟500ms 触发</div></pre></td></tr></table></figure>
+</code></pre><p>8.limitBy 传入值必须是数组，参数为{Number}limit，{Number}[offset], limit 为显<br>示个数，offset 为开始显示数组下标。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;div v-for=&quot;item in items | limitBy 10&quot;&gt;&lt;/div&gt;　// items 为数组，且只显示数</div><div class="line">组中的前十个元素</div></pre></td></tr></table></figure>
+</code></pre><p>9.filterBy 传入值必须是数组，参数为{String | Function} targetStringOrFunction，<br>即需要匹配的字符串或函数（通过函数返回值为 true 或 false 来判断匹配结果）；“in”（ 可选<br>分隔符）；{String}[…searchKeys]，为检索的属性区域。示例:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;p v-for=&quot;name in names | filterBy &apos;1.0&apos;&quot;&gt;&#123;&#123;name&#125;&#125;&lt;/p&gt;　// 检索name数组中</div><div class="line">值包含1.0 的元素</div><div class="line">&lt;p v-for=&quot;item in items | filterBy &apos;1.0&apos; in &apos;name&apos;&quot;&gt;&#123;&#123; item | json&#125;&#125;&lt;/p&gt;</div><div class="line">// 检索items 数组中元素属性name 值为1.0 的元素输出。检索区域也可以为数组，即in [name,</div><div class="line">version]，在多个属性中进行检索</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/24.png" alt="">  </p>
+<p>⑩ orderBy 传入值必须是数组，参数为{String|Array|Function}sortKeys，即指定排序<br>策略。这里可以使用单个键名，也可以传入包含多个排序键名的数组。也可以像Array.Sort()<br>那样传入自己的排序策略函数。第二个参数为可选参数{String}[order]，即选择升序或降序，<br>order&gt;=0 为升序，order&lt;0 为降序。下面以三种不同的参数例子来说明具体的用法：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">单个键名：&lt;p v-for=&quot;item in items | orderBy &apos;name&apos; -1&quot;&gt;&#123;&#123;item.name&#125;&#125;&lt;/p&gt;</div><div class="line">// items 数组中以键名name 进行降序排列</div><div class="line">多个键名：&lt;p v-for=&quot;item in items | orderBy [name,version] &quot;&gt;&#123;&#123;item.name&#125;&#125;&lt;/p&gt; //</div><div class="line">使用items 里的两个键名进行排序</div><div class="line">自定义排序函数: &lt;p v-for=&quot;item in items | orderBy customOrder&quot;&gt;&#123;&#123;item.name&#125;&#125;</div><div class="line">&lt;/p&gt;</div><div class="line">methods: &#123;</div><div class="line">　customOrder: function (a, b) &#123; return parseFloat(a.version) &gt; parseFloat(b.version)　// 对比item 中</div><div class="line">version 的值的大小进行排序&#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>注:，Vue.js 2.0 中已经去除了内置的过滤器  </p>
+<h5 id="指令"><a href="#指令" class="headerlink" title="指令"></a>指令</h5><ol>
+<li>指令（Directives）:理解为当表达式的值发生改变时，会有些特殊行为作用到绑定的DOM 上。</li>
+<li>指令通常会直接书写在模板的HTML 元素中，而为了有别于普通的属性，Vue.js 指令是带有前缀的v- 的属性。  </li>
+<li><p>写法上来说，指令的值限定为绑定表达式。<br>① 参数  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;img v-bind:src=&quot;avatar&quot; /&gt;</div><div class="line">//指令v-bind 可以在后面带一个参数，用冒号（:）隔开，src 即为参数。此时img 标签</div><div class="line">中的src 会与vm 实例中的avatar 绑定，等同于:&lt;img src=&quot;&#123;&#123;avatar&#125;&#125;&quot; /&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>② 修饰符<br>修饰符（Modifiers）是以半角句号. 开始的特殊后缀，用于表示指令应该以特殊方式绑定。  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;button v-on:click.stop=&quot;doClick&quot;&gt;&lt;/button&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>v-on 的作用是在对应的DOM 元素上绑定事件监听器，doClick 为函数名，而stop 即为<br>修饰符，作用是停止冒泡，相当于调用了e. stopPropagation()。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/28/vue-3-数据绑定/" class="archive-article-date">
+  	<time datetime="2017-10-28T02:40:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-28</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-0-前言" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -930,217 +1044,6 @@ public int update(int id,String name){
 
 
   
-    <article id="post-SpringBoot-35-SpringBoot-mybatis-xml" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/04/SpringBoot-35-SpringBoot-mybatis-xml/">SpringBoot(35)-SpringBoot-mybatis-xml</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>基于mybatis-xml配置方式在开发中经常用到<br>1.MyBatis介绍<br>2.思路<br>3.新建project以及添加依赖包<br>4.创建启动类App.java<br>5.编写实体类Demo<br>6.编写application配置文件，指定xml路径<br>7.编写映射接口DemoMapper和XML<br>8.编写service类DemoService<br>9.编写控制类DemoController<br>10.测试  </p>
-<p>项目结构:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/2.png" alt=""></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-MyBatis介绍"><a href="#1-MyBatis介绍" class="headerlink" title="1.MyBatis介绍"></a>1.MyBatis介绍</h5><p>MyBatis 是支持普通 SQL查询，存储过程和高级映射的优秀持久层框架。MyBatis 消除了几乎所有的JDBC代码和参数的手工设置以及结果集的检索。MyBatis 使用简单的 XML或注解用于配置和原始映射，将接口和 Java 的POJOs（Plain Ordinary Java Objects，普通的 Java对象）映射成数据库中的记录。</p>
-<h5 id="2-思路"><a href="#2-思路" class="headerlink" title="2.思路"></a>2.思路</h5><p>在Spring Boot中使用xml集成MyBatis的话，那么核心的文件就是实体类和SQL的映射类，比如DemoMapper，在此类当中就是普通的接口即可，那么对应SQL配置文件在Demo.xml中，那么要怎么能够识别到DemoMapper类呢，使用@MapperScan()；在Demo.xml中使用<mapper> 的 namespace属性进行指定指定xml文件和mapper的对应关系，那么现在的问题就是如何识别到Demo.xml配置文件呢，这个就很简单了，在application.properties文件中配置mapper的位置即可，形如：mybatis.mapper-locations=classpath:mybatis/mapper/*.xml。</mapper></p>
-<h5 id="3-新建project以及添加依赖包"><a href="#3-新建project以及添加依赖包" class="headerlink" title="3.新建project以及添加依赖包"></a>3.新建project以及添加依赖包</h5><p>依赖:  </p>
-<pre><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
-&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
-
-&lt;groupId&gt;com.yxm&lt;/groupId&gt;
-&lt;artifactId&gt;spring-boot-mybatis-xml&lt;/artifactId&gt;
-&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
-&lt;packaging&gt;jar&lt;/packaging&gt;
-
-&lt;name&gt;spring-boot-mybatis-xml&lt;/name&gt;
-&lt;url&gt;http://maven.apache.org&lt;/url&gt;
-
-&lt;properties&gt;
-&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
-&lt;java.version&gt;1.8&lt;/java.version&gt;
-&lt;/properties&gt;
-
-&lt;!-- spring boot parent节点，引入这个之后，在下面和spring boot相关的就不需要引入版本了; --&gt;
-&lt;parent&gt;
-&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-&lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
-&lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
-&lt;/parent&gt;
-
- &lt;dependencies&gt;
- &lt;!-- web支持: 1、web mvc; 2、restful; 3、jackjson支持; 4、aop ........ --&gt;
-    &lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
-    &lt;/dependency&gt;
-
- &lt;!-- mysql 数据库驱动. --&gt;  
-&lt;dependency&gt;  
-       &lt;groupId&gt;mysql&lt;/groupId&gt;  
-       &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;  
-&lt;/dependency&gt;
-
-  &lt;!-- spring-boot mybatis依赖：  
-   请不要使用1.0.0版本，因为还不支持拦截器插件，  
- --&gt;  
-&lt;dependency&gt;  
-    &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;  
-    &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;  
-    &lt;version&gt;1.3.0&lt;/version&gt;  
-&lt;/dependency&gt;  
-
-&lt;dependency&gt;
-  &lt;groupId&gt;junit&lt;/groupId&gt;
-  &lt;artifactId&gt;junit&lt;/artifactId&gt;
-  &lt;version&gt;3.8.1&lt;/version&gt;
-  &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-&lt;/dependencies&gt;
-&lt;/project&gt;
-</code></pre><h5 id="4-创建启动类App-java"><a href="#4-创建启动类App-java" class="headerlink" title="4.创建启动类App.java"></a>4.创建启动类App.java</h5><p>编写启动类，注意，添加了 @MapperScan(“com.yxm.web.dao”)，扫描mapper接口：</p>
-<pre><code>@SpringBootApplication
-@MapperScan(&quot;com.yxm.web.dao&quot;)
-public class App 
-{
-public static void main( String[] args )
-{
-    System.out.println(args);
-    SpringApplication.run(App.class, args);
-}
-}
-</code></pre><h5 id="5-编写实体类Demo"><a href="#5-编写实体类Demo" class="headerlink" title="5.编写实体类Demo"></a>5.编写实体类Demo</h5><pre><code>public class Demo {
-private Integer id;
-private String name;
-
-public Integer getId() {
-    return id;
-}
-
-public void setId(Integer id) {
-    this.id = id;
-}
-
-public String getName() {
-    return name;
-}
-
-public void setName(String name) {
-    this.name = name;
-}
-}
-</code></pre><h5 id="6-编写application配置文件，指定xml路径"><a href="#6-编写application配置文件，指定xml路径" class="headerlink" title="6.编写application配置文件，指定xml路径"></a>6.编写application配置文件，指定xml路径</h5><pre><code>spring.datasource.url = jdbc:mysql://localhost:3306/test
-spring.datasource.username = root
-spring.datasource.password = root
-spring.datasource.driverClassName = com.mysql.jdbc.Driver
-spring.datasource.max-active=20
-spring.datasource.max-idle=8
-spring.datasource.min-idle=8
-spring.datasource.initial-size=10
-
-server.port=8048
-
-mybatis.mapper-locations=classpath\:com/yxm/web/dao/*/*.xml
-</code></pre><h5 id="7-编写映射接口DemoMapper和XML"><a href="#7-编写映射接口DemoMapper和XML" class="headerlink" title="7.编写映射接口DemoMapper和XML"></a>7.编写映射接口DemoMapper和XML</h5><p>编写XML文件，Demo.xml：</p>
-<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot; ?&gt;
-&lt;!DOCTYPE mapper
-PUBLIC &quot;-//mybatis.org//DTD Mapper 3.0//EN&quot;
-&quot;http://mybatis.org/dtd/mybatis-3-mapper.dtd&quot;&gt;
-&lt;mapper namespace=&quot;com.yxm.web.dao.DemoMapper&quot;&gt;
-&lt;insert id=&quot;save&quot; useGeneratedKeys=&quot;true&quot; keyProperty=&quot;id&quot;&gt;
-    insert into demo (name) values(#{name})
- &lt;/insert&gt;
-
-&lt;select id=&quot;getById&quot; resultType=&quot;com.yxm.web.bean.Demo&quot;&gt;
- select * from demo where id = #{0}
-&lt;/select&gt;
-&lt;/mapper&gt;
-</code></pre><p>编写DemoMapper接口：  </p>
-<pre><code>public interface DemoMapper {
-  void save(Demo demo);
-  Demo getById(Integer id);
-}
-</code></pre><h5 id="8-编写service类DemoService"><a href="#8-编写service类DemoService" class="headerlink" title="8.编写service类DemoService"></a>8.编写service类DemoService</h5><p>Service:</p>
-<pre><code>public interface DemoService {
-     void save(Demo demo);
-     Demo getById(Integer id);
-}
-</code></pre><p>ServiceImpl:</p>
-<pre><code>@Service
-public class DemoServiceImpl implements DemoService{
-@Autowired
-private DemoMapper demoMapper;
-
-public void save(Demo demo) {
-    demoMapper.save(demo);
-}
-public Demo getById(Integer id) {
-    return demoMapper.getById(id);
-}
-}
-</code></pre><h5 id="9-编写控制类DemoController"><a href="#9-编写控制类DemoController" class="headerlink" title="9.编写控制类DemoController"></a>9.编写控制类DemoController</h5><pre><code>@Controller
-@RequestMapping(&quot;/demo&quot;)
-public class DemoController {
-@Autowired
-private DemoService demoService;
-
-@RequestMapping(&quot;/save&quot;)
-@ResponseBody
-public Demo save(){
-   Demo demo = new Demo();
-   demo.setId(1);
-   demo.setName(&quot;zs&quot;);
-    demoService.save(demo);
-    return demo;
-}
-
-@RequestMapping(&quot;/get&quot;)
-@ResponseBody
-public Demo get(Integer id){
-    return demoService.getById(id);
-}
-}
-</code></pre><h5 id="10-测试"><a href="#10-测试" class="headerlink" title="10.测试"></a>10.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/0.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/1.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/04/SpringBoot-35-SpringBoot-mybatis-xml/" class="archive-article-date">
-  	<time datetime="2017-10-04T10:43:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/32/">32</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1206,7 +1109,7 @@ public Demo get(Integer id){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 10px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
