@@ -152,6 +152,87 @@
       <div class="body-wrap">
         
   
+    <article id="post-泛型-三-泛型中的通配符" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/04/泛型-三-泛型中的通配符/">泛型(三)-泛型中的通配符</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="泛型-通配符"><a href="#泛型-通配符" class="headerlink" title="泛型?通配符"></a>泛型?通配符</h4><h6 id="1-问题"><a href="#1-问题" class="headerlink" title="1.问题"></a>1.问题</h6><ol>
+<li><p>定义一个方法,该方法用于打印出任意参数化类型的集合中的所有数据,该方法如何定义呢？</p>
+<h6 id="2-错误方式"><a href="#2-错误方式" class="headerlink" title="2.错误方式"></a>2.错误方式</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static void printCollection1(Collection&lt;Object&gt; cols)&#123;</div><div class="line">	  for (Object obj : cols) &#123;</div><div class="line">		System.out.println(obj);</div><div class="line">	  &#125;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	  //打印出任意参数化类型的集合中所有数据</div><div class="line">	  Collection&lt;Object&gt; cols = new ArrayList&lt;Object&gt;();</div><div class="line">	  cols.add(&quot;abc&quot;);</div><div class="line">	  printCollection1(cols);//正确：printCollection1要求参数化类型是Object，而String是</div><div class="line">	  </div><div class="line">	  Collection&lt;Date&gt; colse = new ArrayList&lt;Date&gt;();</div><div class="line">	  colse.add(new Date());</div><div class="line">	  printCollection1(colse);//错误:Date不是Object</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>printCollection1(cols);//正确：printCollection1要求参数化类型是Object，而String是</p>
+</li>
+<li>printCollection1(colse);//错误:Date不是Object，属于不同的包<h6 id="3-正确方式"><a href="#3-正确方式" class="headerlink" title="3.正确方式"></a>3.正确方式</h6></li>
+<li>引用通配符“？”,“？”表示指向任意类型的，不能拿具体某种类型来代替。<h6 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h6></li>
+<li>使用?通配符可以引用其他各种参数化类型,?通配符定义的变量主要用作引用,可以调用与参数化无关的方法,不能调用与参数化有关的方法</li>
+</ol>
+<h4 id="泛型-通配符的扩展"><a href="#泛型-通配符的扩展" class="headerlink" title="泛型?通配符的扩展"></a>泛型?通配符的扩展</h4><h6 id="1-限定通配符上边界"><a href="#1-限定通配符上边界" class="headerlink" title="1.限定通配符上边界"></a>1.限定通配符上边界</h6><ol>
+<li>例如，假设我们有很多箱子，每个箱子里都装有不同的水果，我们需要找到一种方法能够通用的处理任何一箱水果。更通俗的说法，A是B的子类型，我们需要找到一种方法能够将C<a>类型的实例赋给一个C<b>类型的声明</b></a></li>
+<li><p>为了完成这种操作，我们需要使用带有通配符的扩展声明，就像下面的例子里那样  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">List&lt;Apple&gt; apples = new ArrayList&lt;Apple&gt;();</div><div class="line">List&lt;? extends Fruit&gt; fruits = apples</div></pre></td></tr></table></figure>
+</li>
+<li><p>“? extends”是泛型类型的子类型相关性成为现实：Apple是Fruit的子类型，List<apple> 是 List&lt;? extends Fruit&gt; 的子类型。</apple></p>
+</li>
+<li>正确:Vector&lt;? extends Number&gt; x = new Vector<integer>();”? extends Number”表示仅限于number和number的子类,而Integer就是满足</integer></li>
+<li>错误:Vector&lt;? extends Number&gt; x = new Vector<string><h6 id="2-限定通配符下边界"><a href="#2-限定通配符下边界" class="headerlink" title="2.限定通配符下边界"></a>2.限定通配符下边界</h6></string></li>
+<li>现在我来介绍另外一种通配符：? super。如果类型B是类型A的超类型(父类型)，那么C<b> 是 C&lt;? super A&gt; 的子类型：</b></li>
+<li><p>例子：</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">List&lt;Fruit&gt; fruits = new ArrayList&lt;Fruit&gt;();  </div><div class="line">List&lt;? super Apple&gt; = fruits;</div></pre></td></tr></table></figure>
+</li>
+<li><p>正确:Vector&lt;? super Integer&gt; x = new Vector<number>();”? super Integer”表示仅限于Integer和Integer的父类,而Number就是满足，最低要求是Integer</number></p>
+</li>
+<li>错误:Vector&lt;? super Integer&gt; x = new Vector<byte>,Byte不是Integer父类</byte></li>
+</ol>
+<h6 id="3-提示"><a href="#3-提示" class="headerlink" title="3.提示"></a>3.提示</h6>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/04/泛型-三-泛型中的通配符/" class="archive-article-date">
+  	<time datetime="2017-01-04T14:19:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-泛型-二-泛型的内部原理及深层应用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -788,72 +869,6 @@
 
 
   
-    <article id="post-java反射-十-ArrayLis与hashSet比较及hashcode分析" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/23/java反射-十-ArrayLis与hashSet比较及hashcode分析/">java反射-十-ArrayLis与hashSet比较及hashcode分析</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="ArrayLis与hashSet比较及hashcode分析"><a href="#ArrayLis与hashSet比较及hashcode分析" class="headerlink" title="ArrayLis与hashSet比较及hashcode分析"></a>ArrayLis与hashSet比较及hashcode分析</h4><h6 id="1-ArrayLis与hashSet比较"><a href="#1-ArrayLis与hashSet比较" class="headerlink" title="1.ArrayLis与hashSet比较"></a>1.ArrayLis与hashSet比较</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">	private int x;</div><div class="line">	private int y;</div><div class="line">	</div><div class="line">	public ReflectPoint(int x,int y)&#123;</div><div class="line">		this.x = x;</div><div class="line">		this.y = y;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	public static void main(String[] args) throws Exception&#123;</div><div class="line">		//定义3个对象</div><div class="line">		ReflectPoint p1 = new ReflectPoint(3,3);</div><div class="line">		ReflectPoint p2 = new ReflectPoint(5, 5);</div><div class="line">		ReflectPoint p3 = new ReflectPoint(3, 3);</div><div class="line">		</div><div class="line">		//定义集合</div><div class="line">		Collection collections = new ArrayList();</div><div class="line">		collections.add(p1);</div><div class="line">		collections.add(p2);</div><div class="line">		collections.add(p3);</div><div class="line">		collections.add(p1);</div><div class="line">		System.out.println(collections.size());// 4 </div><div class="line">		</div><div class="line">		Collection collection =  new HashSet();</div><div class="line">		collection.add(p1);</div><div class="line">		collection.add(p2);</div><div class="line">		collection.add(p3);</div><div class="line">	    collection.add(p1);	</div><div class="line">	</div><div class="line">		System.out.println(collection.size());// 3</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>分析ArrayLis是有序可重复，hashSet不可重复，底层是一旦含有就不添加  </p>
-<h6 id="1-hashcode分析"><a href="#1-hashcode分析" class="headerlink" title="1.hashcode分析"></a>1.hashcode分析</h6><p>我们一般要求是指p1和p3是指同一个，内容相等，我们覆盖hashcode和equals方法<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">	private int x;</div><div class="line">	private int y;</div><div class="line">	public ReflectPoint(int x,int y)&#123;</div><div class="line">		this.x = x;</div><div class="line">		this.y = y;</div><div class="line">	&#125;</div><div class="line">	@Override</div><div class="line">	public int hashCode() &#123;</div><div class="line">		final int prime = 31;</div><div class="line">		int result = 1;</div><div class="line">		result = prime * result + x;</div><div class="line">		result = prime * result + y;</div><div class="line">		return result;</div><div class="line">	&#125;</div><div class="line">	@Override</div><div class="line">	public boolean equals(Object obj) &#123;</div><div class="line">		if (this == obj)</div><div class="line">			return true;</div><div class="line">		if (obj == null)</div><div class="line">			return false;</div><div class="line">		if (getClass() != obj.getClass())</div><div class="line">			return false;</div><div class="line">		ReflectPoint other = (ReflectPoint) obj;</div><div class="line">		if (x != other.x)</div><div class="line">			return false;</div><div class="line">		if (y != other.y)</div><div class="line">			return false;</div><div class="line">		return true;</div><div class="line">	&#125;</div><div class="line">	public static void main(String[] args) throws Exception&#123;</div><div class="line">		//定义3个对象</div><div class="line">		ReflectPoint p1 = new ReflectPoint(3,3);</div><div class="line">		ReflectPoint p2 = new ReflectPoint(5, 5);</div><div class="line">		ReflectPoint p3 = new ReflectPoint(3, 3);</div><div class="line">		</div><div class="line">		Collection collection =  new HashSet();</div><div class="line">		collection.add(p1);</div><div class="line">		collection.add(p2);</div><div class="line">		collection.add(p3);</div><div class="line">	    collection.add(p1);	</div><div class="line">	</div><div class="line">		System.out.println(collection.size());// 3</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>分析运行输出为2此时比较的是内容</p>
-<ol>
-<li>面试题：hashcode作用<br><img src="43" alt=""><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">public class ReflectPoint &#123;</div><div class="line">	private int x;</div><div class="line">	private int y;</div><div class="line">	</div><div class="line">	public ReflectPoint(int x,int y)&#123;</div><div class="line">		this.x = x;</div><div class="line">		this.y = y;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public boolean equals(Object obj) &#123;</div><div class="line">		if (this == obj)</div><div class="line">			return true;</div><div class="line">		if (obj == null)</div><div class="line">			return false;</div><div class="line">		if (getClass() != obj.getClass())</div><div class="line">			return false;</div><div class="line">		ReflectPoint other = (ReflectPoint) obj;</div><div class="line">		if (x != other.x)</div><div class="line">			return false;</div><div class="line">		if (y != other.y)</div><div class="line">			return false;</div><div class="line">		return true;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public static void main(String[] args) throws Exception&#123;</div><div class="line">		//定义3个对象</div><div class="line">		ReflectPoint p1 = new ReflectPoint(3,3);</div><div class="line">		ReflectPoint p2 = new ReflectPoint(5, 5);</div><div class="line">		ReflectPoint p3 = new ReflectPoint(3, 3);</div><div class="line">		</div><div class="line">		Collection collection =  new HashSet();</div><div class="line">		collection.add(p1);</div><div class="line">		collection.add(p2);</div><div class="line">		collection.add(p3);</div><div class="line">	    collection.add(p1);	</div><div class="line">	</div><div class="line">		System.out.println(collection.size());// 3</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>去掉hashcode方法输出以上方法，输出结果是3<br>虽然equals方法相同但是根据内存算出的hashcode是不同的，对象被存放到不同区域中，存在不同位置中，但hashset找这个元素时候是在不同位置，所以可以放进去。<br>在hash算法中，hashcode才会有用，arraylist的hashcode是没有用的。</p>
-<ol>
-<li>hashcode作用是当在hash算法的集合中要比较两个对象的equals是否相等必须首先重写equals方法。<br><img src="44" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/23/java反射-十-ArrayLis与hashSet比较及hashcode分析/" class="archive-article-date">
-  	<time datetime="2016-12-23T15:53:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/22/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/24/">Next &raquo;</a>
@@ -919,7 +934,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 11.43px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 12.14px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
