@@ -152,6 +152,73 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-39-Android下主线程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/04/02/Android-39-Android下主线程/">Android(39)-Android下主线程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当我们在Android(38)源码查看器下输入<a href="http://www.google.com会报以下错误" target="_blank" rel="external">http://www.google.com会报以下错误</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br>此时后台会打印出ANR异常:  </p>
+<ol>
+<li>1。ANR: Application Not Resource 应用无响应</li>
+<li>2.原因:造成上面的原因是因为:由于在主线程中进行了耗时操作</li>
+<li>3.耗时操作包括:比如连接网络,拷贝大数据,所以主线程不能阻塞。</li>
+<li>4.避免anr 可以把耗时的操作 放到子线程中 自己在创建一个线程 </li>
+<li>5，在4.0之后谷歌强制要求连接网络不能在主线程进行访问<br>规则:不管你是什么版本的手机,只要做耗时的操作(比如:连接网络 拷贝大的数据 等等)就自己开一个子线程。获取数据后想要更新ui,就使用Handler就可以了 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在主线程中耗时5秒以上实例"><a href="#1-在主线程中耗时5秒以上实例" class="headerlink" title="1.在主线程中耗时5秒以上实例"></a>1.在主线程中耗时5秒以上实例</h5></li>
+<li>1.ui<br>略(参照Android(38))</li>
+<li>2.逻辑<br>点击按钮是一个联网操作,我们应该开启资格子线程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/4.png" alt=""></li>
+<li>3.测试<br>重新部署项目:输入<a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a><br>报以下异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/2.png" alt=""><br>以上总结:只有主线程(UI线程才可以更新ui)<br>但是我们怎样去主线程更改ui呢?也就是怎样把数据从子线程传递到主线程中去,引出handler消息机制。<h5 id="2-消息机制-handler"><a href="#2-消息机制-handler" class="headerlink" title="2.消息机制(handler)"></a>2.消息机制(handler)</h5><h6 id="1-消息机制使用"><a href="#1-消息机制使用" class="headerlink" title="1.消息机制使用"></a>1.消息机制使用</h6></li>
+<li>1.使用步骤<br>【1】在主线程中定义一个Handler<br>private Handler handler = new Handler();<br>【2】使用handler会重写handler的里面的handlemessage方法<br>public void handemessage(Message msg){};<br>【3】拿着我们在主线程创建的handler去子线程发消息<br>handler.sendMessage(msg);<br>【4】handlermessage方法就会执行 在这个方法里面去更新ui</li>
+<li>2.使用<br>在主线程中定义一个handler,并写一个大括号(表示重写此类里面的方法)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/6.png" alt=""><br>在子线程中发消息,我们先定义一个message<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/5.png" alt=""><br>当一执行完sendMessage则会在主线程中的handleMessage中获取消息,更新ui<h6 id="2-消息机制原理"><a href="#2-消息机制原理" class="headerlink" title="2.消息机制原理"></a>2.消息机制原理</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/7.png" alt=""><br>当我们想要更改ui时候,我们的耗时操作是在子线程的,但是子线程手机不能更改ui的,所以交给了主线程</li>
+<li>1.在子线程中发送消息（比如更改ui），消息是存放在messagequeue</li>
+<li>2.Looper的作用是从messagequeue中取消息,</li>
+<li>3.handler作用是发消息,处理消息</li>
+<li>4.只要不在代码里面创建子线程,任何地方都属于主线程</li>
+</ol>
+<h6 id="3-替代handler"><a href="#3-替代handler" class="headerlink" title="3.替代handler"></a>3.替代handler</h6><p>在主线程中更改ui时候,我们用到了handler.发送消息给主线程,在主线程中获取消息,然后更改Ui,但是我们也有另一种方法就是不用再主线程更改ui，直接调用runOnUiThread()来替代handler来更改ui.</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/04/02/Android-39-Android下主线程/" class="archive-article-date">
+  	<time datetime="2017-04-02T15:16:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-55-Android的GET和POST方式提交数据" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -706,62 +773,6 @@
 
 
   
-    <article id="post-Android-31-listview展示数据原理及奇怪现象" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/18/Android-31-listview展示数据原理及奇怪现象/">Android(31)-listview展示数据原理及奇怪现象</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="listview展示数据源里"><a href="#listview展示数据源里" class="headerlink" title="listview展示数据源里"></a>listview展示数据源里</h4><p>listview展示数据源里就是mvc模式和java web中mvc类似  </p>
-<p>java web中的mvc<br>m:model 数据<br>v:view 视图<br>c:controller 控制  </p>
-<p>android中mvc<br>m:mode 数据(javabean)<br>v:view listview<br>c:adapter<br>adapter负责把数据显示到listview中  </p>
-<h4 id="ListView的奇怪现象值优化"><a href="#ListView的奇怪现象值优化" class="headerlink" title="ListView的奇怪现象值优化"></a>ListView的奇怪现象值优化</h4><h6 id="1-listview-高使用match-parent"><a href="#1-listview-高使用match-parent" class="headerlink" title="1.listview 高使用match_parent"></a>1.listview 高使用match_parent</h6><p>假如我们屏幕宽为480，每一个listview为60，此时会生成480/60=8个这样系统就能够确定的算出展示的个数<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;ListView </div><div class="line">        android:id=&quot;@+id/lv&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;</div><div class="line">        android:fastScrollEnabled=&quot;true&quot;</div><div class="line">        android:layout_width=&quot;match_parent&quot;</div><div class="line">        &gt;   </div><div class="line">    &lt;/ListView&gt;</div></pre></td></tr></table></figure></p>
-<h6 id="2-listview-高使用wrap-content"><a href="#2-listview-高使用wrap-content" class="headerlink" title="2.listview 高使用wrap_content"></a>2.listview 高使用wrap_content</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;ListView </div><div class="line">        android:id=&quot;@+id/lv&quot;</div><div class="line">        android:layout_height=&quot;match_parent&quot;</div><div class="line">        android:fastScrollEnabled=&quot;true&quot;</div><div class="line">        android:layout_width=&quot;wrap_content&quot;</div><div class="line">        &gt;   </div><div class="line">    &lt;/ListView&gt;</div></pre></td></tr></table></figure>
-<p>假如我们屏幕宽为480，每一个listview为60，此时会生成480/60=8个这样系统就能够确定的不能够算出展示的个数,就会进行多次的校验.</p>
-<h6 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h6><p>以后我们用listview都是用match_parent</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/18/Android-31-listview展示数据原理及奇怪现象/" class="archive-article-date">
-  	<time datetime="2017-03-18T10:20:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
@@ -827,7 +838,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.33px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 14.67px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.33px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 15px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     

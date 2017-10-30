@@ -152,6 +152,68 @@
       <div class="body-wrap">
         
   
+    <article id="post-自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/">自己写一个apache服务器(十二)-Web服务器代码和WebApp代码解耦合(javaServer-10)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="Web服务器代码和WebApp代码解耦合-javaServer-10"><a href="#Web服务器代码和WebApp代码解耦合-javaServer-10" class="headerlink" title="Web服务器代码和WebApp代码解耦合(javaServer-10)"></a>Web服务器代码和WebApp代码解耦合(javaServer-10)</h4><p><img src="http://p1.bqimg.com/576993/256358dbc34a0c7f.png" alt="Markdown"></p>
+<ol>
+<li>分析以上代码，LoginServlet类是JavaWeb程序员开发的，而HandlerRequest类是服务器开发人员开发的，在服务器中的代码关心了具体的Servlet类，显然服务器的程序和JavaWeb程序产生了依赖，具有高强度的耦合，实际上对于Web服务器来说，根本就不知道Web应用中有一个LoginServlet类，上面的程序中还使用了“new LoginServlet();”，这显然是错误的。另外在上面的Web服务器程序中编写了具体的请求路径/oa/login，这显然是不合理的，对于Web服务器来说浏览器客户端发送的请求是未知的。但是我们知道浏览器发送的请求路径/oa/login是和底层WebApp中的LoginServlet存在映射关系/绑定关系的。而这种关系的指定必须由WebApp的开发人员来指定，我相信大家此时应该想到了“配置文件”，在配置文件中指定请求URI和对应要执行的Servlet。该配置文件的编写由WebApp程序员来完成，但是该文件由Web服务器开发人员读取并解析，所以该文件的名字、该文件的存放位置、该文件中所编写的配置元素都不能随意编写，必须提前制定好一个规范，那么这个规范由谁来制定呢？当然是由SUN公司来负责制定。  </li>
+<li>接下来我们的角色再次发生了转变，我们现在是规范的制定者SUN。制定规范如下所示，规范就是规定，没有为什么，以后服务器开发人员和WebApp的开发人员只要严格按照规范开发即可。下面这段规范是这样制定的：<br><img src="http://p1.bqimg.com/576993/07b5f9d2cc56d6be.png" alt="Markdown"><br>以上配置文件规定了什么呢？第一：配置文件的名字；第二：配置文件存放位置；第三：配置文件中编写哪些标签。接下来我们的角色转变为WebApp的开发人员，按照规范新建web.xml文件，并将其存放到规范中要求的路径下，在该文件中编写规范中规定的标签，如下图所示<br><img src="http://p1.bqimg.com/576993/0974c3b46539d61d.png" alt="Markdown"></li>
+</ol>
+<p>接下来我们的角色再次转变为Web服务器的开发人员，服务器开发者负责解析web.xml文件，那么这个文件在什么时候解析呢？解析出来的数据存放到哪里呢？这些问题由服务器开发者决定，SUN的规范中并没有特殊的要求。web.xml文件中主要配置了请求URI和对应的Servlet完整类名，请求URI更像一个Map集合的key，对应的Servlet完整类名更像一个Map集合的value，所以我们决定采用一个Map集合存储解析出来的数据。在浏览器发送请求的时候再去解析web.xml文件时有点晚了，所以我们决定在Web服务器启动阶段解析web.xml文件，以下是Web服务器开发人员编写的解析web.xml文件的代码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">package com.yxm.javaserver.core;</div><div class="line"></div><div class="line">import java.util.HashMap;</div><div class="line">import java.util.List;</div><div class="line">import java.util.Map;</div><div class="line">import java.util.Set;</div><div class="line"></div><div class="line">import org.dom4j.Document;</div><div class="line">import org.dom4j.DocumentException;</div><div class="line">import org.dom4j.Element;</div><div class="line">import org.dom4j.io.SAXReader;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 解析每个WebApp的web.xml</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class WebParse &#123;</div><div class="line">     public static Map&lt;String,Map&lt;String,String&gt;&gt; servletMaps=new HashMap&lt;String,Map&lt;String,String&gt;&gt;();</div><div class="line">     public void parse(String[] webAppNames) throws DocumentException&#123;</div><div class="line">    	 for(String webAppName:webAppNames)&#123;</div><div class="line">    		 Map&lt;String,String&gt; servletMap = parse(webAppName);</div><div class="line">    		 servletMaps.put(webAppName, servletMap);</div><div class="line">    	 &#125;</div><div class="line">     &#125;</div><div class="line">     private static Map&lt;String,String&gt; parse(String webAppName) throws DocumentException&#123;</div><div class="line">    	String webFilePath = webAppName + &quot;/WEB-INF/web.xml&quot;;</div><div class="line">    	SAXReader reader = new SAXReader();</div><div class="line">    	Document document = reader.read(webFilePath);</div><div class="line">    	List&lt;Element&gt; servletNodes = document.selectNodes(&quot;/web-app/servlet&quot;);</div><div class="line">    	Map&lt;String, String&gt; servletInfoMap = new HashMap&lt;String,String&gt;();</div><div class="line">        for (Element servletNode : servletNodes) &#123;</div><div class="line">        	Element servletNameNode = (Element)servletNode.selectSingleNode(&quot;servlet-name&quot;);</div><div class="line">        	String servletName = servletNameNode.getTextTrim();</div><div class="line">        	</div><div class="line">        	Element servletClassNode = (Element)servletNode.selectSingleNode(&quot;servlet-class&quot;);</div><div class="line">        	String servletClass = servletClassNode.getTextTrim();</div><div class="line">        	servletInfoMap.put(servletName, servletClass);</div><div class="line">        &#125;</div><div class="line">        List&lt;Element&gt; servletMappingNodes = document.selectNodes(&quot;/web-app/servlet-mapping&quot;);</div><div class="line">    	Map&lt;String, String&gt; servletMappingInfoMap = new HashMap&lt;String,String&gt;();</div><div class="line">        for (Element servletMappingNode : servletMappingNodes) &#123;</div><div class="line">        	Element servletNameNode = (Element)servletMappingNode.selectSingleNode(&quot;servlet-name&quot;);</div><div class="line">        	String servletName = servletNameNode.getTextTrim();</div><div class="line">        	</div><div class="line">        	Element servletPathNode = (Element)servletMappingNode.selectSingleNode(&quot;url-pattern&quot;);</div><div class="line">        	String servletPath = servletPathNode.getTextTrim();</div><div class="line">        	servletMappingInfoMap.put(servletName, servletPath);</div><div class="line">        &#125;</div><div class="line">         Map&lt;String,String&gt; servletMap = new HashMap&lt;String,String&gt;();</div><div class="line">         Set&lt;String&gt; servletNames = servletMappingInfoMap.keySet();</div><div class="line">          for (String servletName : servletNames) &#123;</div><div class="line">        	  String servletPath = servletMappingInfoMap.get(servletName);</div><div class="line">        	  String servletClassName = servletInfoMap.get(servletName);</div><div class="line">        	  servletMap.put(servletPath, servletClassName);</div><div class="line">          &#125;</div><div class="line">          return servletMap;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>在服务器启动阶段解析每个WebApp的web.xml文件，在BootStrap中加入如下代码<br><img src="http://p1.bqimg.com/576993/b445fe64e3dd544b.png" alt="Markdown"><br>以上代码在服务器启动阶段解析每个WebApp的web.xml文件，其中WebApp的名字oa写死到服务器程序中了，其实对于Web服务器来说根本就不知道该Web服务器下有哪些WebApp。这个问题怎么解决呢？我们可以规定一个目录，例如该目录的名字叫做webapps，让所有的WebApp都放到我们所指定的webapps目录下，这样我们就可以在Web服务器中动态获取所有WebApp的名字了，这个功能大家自己完成，这里不再实现这个功能了。<br>现在我们的角色还是Web服务器开发人员，web.xml文件已经在服务器启动阶段解析了，用户的请求路径已经和对应的Servlet完整类名绑定在一起了，分析以下程序应该如何修改<br><img src="http://p1.bqimg.com/576993/87b158a4db6c0e6e.png" alt="Markdown"><br>我们在服务器端程序中可以获取到请求URI，我们通过请求URI获取对应的Servlet完整类名，通过反射机制，调用该Servlet类的无参数构造方法，完成Servlet对象的创建，代码如下所示<br><img src="http://p1.bqimg.com/576993/4f6870dc7b41db1c.png" alt="Markdown"><br>Web服务器的开发人员又遇到了新的问题，虽然我们在服务器端根据请求URI找到了对应的Servlet完整类名，也通过反射机制将Servlet对象创建成功了，但是对于Web服务器的开发人员来说并不知道该Servlet对象中有什么方法，这个时候只有SUN再次出面制定规范了。接下来我们的角色发生了改变，我们现在是SUN公司，制定一个Servlet接口，该接口的实现者是WebApp，调用者Web服务器，以下是SUN公司制定的Servlet规范的核心接口<br><img src="http://p1.bqimg.com/576993/d763dd51cae70e48.png" alt="Markdown"><br>接下来我们的角色转变为WebApp的开发人员，让LoginServlet实现该接口<br><img src="http://p1.bqimg.com/576993/3aa7b98c5fbdc0e0.png" alt="Markdown"><br>接下来我们的角色转变为Web服务器的开发人员，在HandlerRequest类中面向Servlet接口调用service方法即可<br><img src="http://p1.bqimg.com/576993/801e24ef4849eff5.png" alt="Markdown"><br>启动服务器，打开浏览器，输入URL，发送请求<br><img src="http://p1.bqimg.com/576993/51071cbb6ba513d6.png" alt="Markdown"><br>控制台输出：<br><img src="http://p1.bqimg.com/576993/1df182faf6223e80.png" alt="Markdown"></p>
+<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/05/自己写一个apache服务器-十二-Web服务器代码和WebApp代码解耦合-javaServer-10/" class="archive-article-date">
+  	<time datetime="2016-12-05T15:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/web/">web</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-自己写一个apache服务器-十一-客户端访问java程序-javaServer09" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -688,50 +750,6 @@
 
 
   
-    <article id="post-web服务器开发准备" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/03/web服务器开发准备/">web服务器开发准备</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/03/web服务器开发准备/" class="archive-article-date">
-  	<time datetime="2016-12-03T02:50:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-03</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/26/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="extend next" rel="next" href="/page/28/">Next &raquo;</a>
@@ -797,7 +815,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 16px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.33px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 14.67px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 15.33px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 15px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
