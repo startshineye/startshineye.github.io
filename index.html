@@ -152,6 +152,66 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-19-组件-组件选项" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/04/vue-19-组件-组件选项/">vue(19)-组件-组件选项</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>  组件接受的选项大部分与Vue 实例一样，相同的部分本章就不赘述了，要说明一下两<br>者的区别和组件选项中的props，用于接受父组件传递的参数。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-组件选项中与Vue选项的区别"><a href="#1-组件选项中与Vue选项的区别" class="headerlink" title="1.组件选项中与Vue选项的区别"></a>1.组件选项中与Vue选项的区别</h5><p>组件选项中的el 和data 与Vue 构造器选项中这两个属性的赋值会稍微有些不同。在<br>Vue 构造器中是直接赋值：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">var vm = new Vue(&#123;</div><div class="line">   el : &apos;#app&apos;,</div><div class="line">   data : &#123;name : &apos;Vue&apos;</div><div class="line">     &#125;</div><div class="line"> &#125;)</div></pre></td></tr></table></figure>
+</code></pre><p>而在组件中需要这么定义:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">var MyComponent = Vue.extend(&#123;</div><div class="line">   data:function()&#123;</div><div class="line">   return&#123;</div><div class="line">    name:&apos;component&apos;</div><div class="line">    &#125;</div><div class="line">   &#125;</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+</code></pre><p>这是因为MyComponent可能会拥有多个实例，例如在某个组件模板中多次使用<mycomponent>&lt;/<br>my-component&gt;。如果将对象data 直接传递给了Vue.extend({})，那所有MyComponent 的实例会共享一个data 对象，所以需要通过函数来返回一个新对象。同样，el 也是这么处理，只不过在组件中通过el 来直接设定挂载元素的情况比较少见，自然避免了这种情况。</mycomponent></p>
+<h5 id="2-组件Props"><a href="#2-组件Props" class="headerlink" title="2.组件Props"></a>2.组件Props</h5><p>选项props 是组件中非常重要的一个选项，起到了父子组件间桥梁的作用。<br>首先，需要明确的是，组件实例的作用域是孤立的，也就是说子组件的模板和模块中是<br>无法直接调用父组件的数据，所以通过props 将父组件的数据传递给子组件，子组件在接受数<br>据时需要显式声明props，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">Vue.component(&apos;my-child&apos;,&#123;</div><div class="line">    props:[&apos;parent&apos;],</div><div class="line">    template:&apos;&lt;p&gt;&#123;&#123;parent&#125;&#125; is from parent&lt;/p&gt;&apos;</div><div class="line">&#125;);</div><div class="line">   </div><div class="line">&lt;my-child parent=&quot;This data&quot;&gt;&lt;/my-child&gt;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-1-驼峰命名"><a href="#2-1-驼峰命名" class="headerlink" title="2.1.驼峰命名"></a>2.1.驼峰命名</h6><p>同指令等情况相同，由于HTML 属性不区分大小写，如果我们在<my-child> 中的<br>属性使用驼峰式myParam 命名，即<my-child myparam="…">，那在props 中的命名即<br>为props: [‘myparam’]。所以如果需要使用驼峰式命名的话，我们需要在标签中使用myparam，<br>用“-”的方式隔开，这样在props 中就可以使用props: [‘myParam’] 的形式进行<br>声明。</my-child></my-child></p>
+<h6 id="2-2动态Props"><a href="#2-2动态Props" class="headerlink" title="2.2动态Props"></a>2.2动态Props</h6><p>除了上述例子中传递静态数据的方式外，我们也可以通过v-bind 的方式将父组件的data 数据传递给子组件，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"> </div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/04/vue-19-组件-组件选项/" class="archive-article-date">
+  	<time datetime="2017-11-04T15:24:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-18-组件-注册组件" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -834,57 +894,6 @@ var vm = new Vue({
       
       <a href="/2017/10/29/vue-10-指令-内置指令/" class="archive-article-date">
   	<time datetime="2017-10-29T08:16:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-29</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-9-Vue-extend" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/29/vue-9-Vue-extend/">vue(9)-Vue.extend()</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>组件化开发也是Vue.js 中非常重要的一个特性，我们可以将一个页面看成一个大的根组<br>件，里面包含的元素就是不同的子组件，子组件也可以在不同的根组件里被调用。在上述例子<br>中，可以看到在一个页面中通常会声明一个Vue 的实例new Vue({}) 作为根组件，那么如何<br>生成可被重复使用的子组件呢？ Vue.js 提供了Vue.extend(options) 方法，创建基础Vue 构<br>造器的“子类”，参数options 对象和直接声明Vue 实例参数对象基本一致，使用方法如下：</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">var Child = Vue.extend(&#123;</div><div class="line">   template : &apos;#child&apos;,</div><div class="line">   // 不同的是，el 和data 选项需要通过函数返回值赋值，避免多个组件实例共用一个数据</div><div class="line">	　 data : function() &#123;</div><div class="line">	　　 return &#123;</div><div class="line">	　　　 ….</div><div class="line">	　　 &#125;</div><div class="line">	　 &#125;</div><div class="line">     ….</div><div class="line"> &#125;)</div><div class="line"></div><div class="line"></div><div class="line">Vue.component(&apos;child&apos;, Child)　// 全局注册子组件</div><div class="line">&lt;child ….&gt;&lt;/child&gt;　// 子组件在其他组件内的调用方式</div></pre></td></tr></table></figure>
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/29/vue-9-Vue-extend/" class="archive-article-date">
-  	<time datetime="2017-10-29T06:04:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-29</time>
 </a>
       
 	<div class="article-tag tagcloud">
