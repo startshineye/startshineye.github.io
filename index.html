@@ -152,6 +152,144 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-23-vue工程实例-准备" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/10/vue-23-vue工程实例-准备/">vue(23)-vue工程实例-准备</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-webpack"><a href="#1-webpack" class="headerlink" title="1.webpack"></a>1.webpack</h5><ol>
+<li>webpack 是一款模块加载及处理工具，它能把各种资源，例如JS（含JSX）、coffee、样式（含less/sass）、图片等都作为模块来使用和处理</li>
+<li>webpack 可以把ES6 语法的js 文件，sass 样式等无法直接在浏览器中使用的语言编译成浏览器支持的形式，也可以把需要的文件进行合并、压缩混淆。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/5.png" alt=""></li>
+</ol>
+<h6 id="1-1-安装webpack"><a href="#1-1-安装webpack" class="headerlink" title="1.1 安装webpack"></a>1.1 安装webpack</h6><p>在安装 Webpack 前，你本地环境需要支持 node.js。<br>由于 npm 安装速度慢,使用淘宝的镜像及其命令 cnpm</p>
+<pre><code>cnpm install webpack -g
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/6.png" alt="">  </p>
+<h6 id="1-2-创建项目"><a href="#1-2-创建项目" class="headerlink" title="1.2 创建项目"></a>1.2 创建项目</h6><p>1.创建一个目录 app<br>2.app下创建app.js文件,内容为:  </p>
+<pre><code>document.write(&quot;It works.&quot;);
+</code></pre><p>3.app下创建index.html文件,内容如下:</p>
+<pre><code>&lt;html&gt;
+  &lt;head&gt;
+ &lt;meta charset = &quot;utf-8&quot;&gt;
+ &lt;script src=&quot;bundle.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+ &lt;body&gt;&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>4.接下来我们使用 webpack 命令来打包<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/7.png" alt=""></p>
+<p>5.浏览器中访问<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/8.png" alt=""></p>
+<h6 id="1-3-创建第二个JS文件"><a href="#1-3-创建第二个JS文件" class="headerlink" title="1.3 创建第二个JS文件"></a>1.3 创建第二个JS文件</h6><p>接下来我们创建另外一个js文件app2.js，代码如下：  </p>
+<pre><code>module.exports=&quot;It works from app2.js&quot;
+</code></pre><p>更新app.js文件，代码如下：  </p>
+<pre><code>document.write(require(&quot;./app2.js&quot;));  
+</code></pre><p>接下来我们使用 webpack 命令来打包：</p>
+<pre><code>webpack app.js bundle..js  
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/9.png" alt="">  </p>
+<p>exports和module.exports指向同一块内存，但require()返回的是module.exports而不是exports。</p>
+<p>在浏览器访问，输出结果如下所示：  </p>
+<p> It works from app2.js</p>
+<p>webpack 根据模块的依赖关系进行静态分析，这些文件(模块)会被包含到 bundle.js 文件中。Webpack 会给每个模块分配一个唯一的 id 并通过这个 id 索引和访问模块。 在页面启动时，会先执行app.js 中的代码，其它模块会在运行 require 的时候再执行。</p>
+<h6 id="1-4-loader"><a href="#1-4-loader" class="headerlink" title="1.4 loader"></a>1.4 loader</h6><p>1.Webpack本身只能处理JavaScript模块，如果要处理其他类型的文件，就需要使用loader进行转换。<br>2.如果我们需要在应用中添加 css 文件，就需要使用到 css-loader 和 style-loader，他们做两件不同的事情，css-loader 会遍历 CSS 文件，然后找到 url() 表达式然后处理他们，style-loader 会把原来的 CSS 代码插入页面中的一个 style 标签中。  </p>
+<p>使用以下命令来安装 css-loader 和 style-loader(全局安装需要参数 -g):  </p>
+<p>执行以上命令后，会再当前目录生成 node_modules 目录，它就是 css-loader 和 style-loader 的安装目录。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/10.png" alt="">    </p>
+<p>接下来创建一个 style.css 文件，代码如下：  </p>
+<pre><code>body{
+  background:yellow;
+}
+</code></pre><p>修改app.js文件,代码如下:  </p>
+<pre><code>require(&quot;!style-loader!css-loader!./style.css&quot;);
+document.write(require(&quot;./app2.js&quot;));
+</code></pre><p>接下来我们使用 webpack 命令来打包：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/11.png" alt=""></p>
+<p>在浏览器访问，输出结果如下所示：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/12.png" alt=""></p>
+<p>require CSS 文件的时候都要写 loader 前缀 !style-loader!css-loader!，当然我们可以根据模块类型（扩展名）来自动绑定需要的 loader。 将app.js 中的 require(“!style-loader!css-loader!./style.css”) 修改为 require(“./style.css”)，效果一样</p>
+<h6 id="1-5-配置文件"><a href="#1-5-配置文件" class="headerlink" title="1.5 配置文件"></a>1.5 配置文件</h6><p>我们可以将一些编译选项放在配置文件中，以便于统一管理：<br>创建webpack.config.js文件,代码如下:  </p>
+<pre><code>module.exports={
+entry:&quot;./app.js&quot;,
+output:{
+    path:__dirname,//注意此处是两个下划线
+    filename:&quot;bundle.js&quot;
+},
+module:{
+    loaders:[
+    { test: /\.css$/, loader: &quot;style-loader!css-loader&quot; }
+    ]
+}
+}
+</code></pre><p>接下来我们只需要执行 webpack 命令即可生成 bundle.js 文件：  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/13.png" alt=""><br>webpack 命令执行后，会默认载入当前目录的 webpack.config.js 文件。</p>
+<h6 id="1-6-插件"><a href="#1-6-插件" class="headerlink" title="1.6 插件"></a>1.6 插件</h6><p>插件在 webpack 的配置信息 plugins 选项中指定，用于完成一些 loader 不能完成的工。webpack 自带一些插件，你可以通过 cnpm 安装一些插件。使用内置插件需要通过以下命令来安装：</p>
+<p>使用内置插件需要通过以下命令来安装：</p>
+<pre><code>cnpm install webpack --save-dev
+</code></pre><p>比如我们可以安装内置的 BannerPlugin 插件，用于在文件头部输出一些注释信息。  </p>
+<p>修改 webpack.config.js，代码如下：</p>
+<pre><code>var webpack=require(&apos;webpack&apos;);
+module.exports = {
+entry: &quot;./runoob1.js&quot;,
+output: {
+    path: __dirname,
+    filename: &quot;bundle.js&quot;
+},
+module: {
+    loaders: [
+        { test: /\.css$/, loader: &quot;style-loader!css-loader&quot; }
+    ]
+},
+plugins:[
+new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
+]
+};
+</code></pre><p>然后运行:  </p>
+<p>webpack  </p>
+<p>当项目逐渐变大，webpack 的编译时间会变长，可以通过参数让编译的输出内容带有进度和颜色。  </p>
+<pre><code>webpack --progress --colors
+</code></pre><p>如果不想每次修改模块后都重新编译，那么可以启动监听模式。开启监听模式后，没有变化的模块会在编译后缓存到内存中，而不会每次都被重新编译，所以监听模式的整体速度是很快的。</p>
+<pre><code>webpack --progress --colors --watch
+</code></pre><p>当然，我们可以使用 webpack-dev-server 开发服务，这样我们就能通过 localhost:8080 启动一个 express 静态资源 web 服务器，并且会以监听模式自动运行 webpack，在浏览器打开 <a href="http://localhost:8080/" target="_blank" rel="external">http://localhost:8080/</a> 或 <a href="http://localhost:8080/webpack-dev-server/" target="_blank" rel="external">http://localhost:8080/webpack-dev-server/</a> 可以浏览项目中的页面和编译后的资源输出，并且通过一个 socket.io 服务实时监听它们的变化并自动刷新页面。</p>
+<p>1、安装<br>cnpm install webpack-dev-server -g</p>
+<p>2、运行<br>webpack-dev-server –progress –colors</p>
+<p>在浏览器打开 <a href="http://localhost:8080/" target="_blank" rel="external">http://localhost:8080/</a> </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/10/vue-23-vue工程实例-准备/" class="archive-article-date">
+  	<time datetime="2017-11-10T09:17:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-22-组件-动态组件" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -858,50 +996,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-13-指令-Vue2-0中指令变化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/30/vue-13-指令-Vue2-0中指令变化/">vue(13)-指令-Vue2.0中指令变化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/30/vue-13-指令-Vue2-0中指令变化/" class="archive-article-date">
-  	<time datetime="2017-10-30T14:22:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-30</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -967,7 +1061,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.14px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.33px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
     			</div>
     	</section>
     
