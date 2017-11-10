@@ -152,6 +152,63 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-21-生成xml第一种方式" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-21-生成xml第一种方式/">Android(21)-生成xml第一种方式</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <ol>
+<li>1.以下我们生成如下内容的.xml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/76.png" alt=""></li>
+<li>2.应用:一般我们需要备份短信(把短信文件备份到.xml中) </li>
+<li>3.步骤:<br>1.初始化数据<br>2.生成函数(用StringBuffer拼接生成,生成.xml并保存到SD卡中,往SD卡写数据需要加权限)</li>
+</ol>
+<h4 id="代码实现"><a href="#代码实现" class="headerlink" title="代码实现"></a>代码实现</h4><h6 id="1-生成ui"><a href="#1-生成ui" class="headerlink" title="1.生成ui"></a>1.生成ui</h6><p>略</p>
+<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><p>写逻辑函数<br>1.构造初始化数据dataList(用javaBean)<br>2.StringBuffer拼接xml头信息<br>3.拼接根节点<br>4.子节点是有序多个,遍历拼接<br>5.保存到sd卡文件中<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">  public class MainActivity extends Activity &#123;</div><div class="line">  @Override</div><div class="line">  protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">      super.onCreate(savedInstanceState);</div><div class="line">      setContentView(R.layout.activity_main);</div><div class="line">  &#125;</div><div class="line">  //生成xml</div><div class="line">  public void click()&#123;</div><div class="line">  	//1.构造初始化数据dataList(用javaBean)  </div><div class="line">       List&lt;Sms&gt; dataList = new ArrayList&lt;Sms&gt;();	</div><div class="line">       for (int i = 0; i &lt; 2; i++) &#123;</div><div class="line">      	 Sms sms = new Sms();</div><div class="line">		     sms.setAddress(&quot;110&quot;);</div><div class="line">		     sms.setBody(&quot;nihaoa&quot;);</div><div class="line">		     sms.setDate(&quot;2015&quot;);</div><div class="line">		     dataList.add(sms);</div><div class="line"> &#125;</div><div class="line">       </div><div class="line">  	//2.StringBuffer拼接xml头信息  </div><div class="line">       StringBuffer br = new StringBuffer();</div><div class="line">       br.append(&quot;&lt;?xml version=\&quot;1.0\&quot; encoding=\&quot;utf-8\&quot;?&gt;&quot;);</div><div class="line">  	//3.拼接根节点</div><div class="line">       br.append(&quot;&lt;smss&gt;&quot;);</div><div class="line">  	//4.子节点是有序多个,遍历拼接  </div><div class="line">       for (Sms sms : dataList) &#123;</div><div class="line">	br.append(&quot;&lt;sms&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;address&gt;&quot;);</div><div class="line">	br.append(sms.getAddress());</div><div class="line">	br.append(&quot;&lt;/address&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;body&gt;&quot;);</div><div class="line">	br.append(sms.getBody());</div><div class="line">	br.append(&quot;&lt;/body&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;date&gt;&quot;);</div><div class="line">	br.append(sms.getDate());</div><div class="line">	br.append(&quot;&lt;/date&gt;&quot;);</div><div class="line">	br.append(&quot;&lt;/sms&gt;&quot;);</div><div class="line"> &#125;</div><div class="line">       </div><div class="line">       br.append(&quot;&lt;/smss&gt;&quot;);</div><div class="line">  	</div><div class="line">       try &#123;</div><div class="line">	//保存到sd卡文件中</div><div class="line">	 File file = new File(Environment.getExternalStorageDirectory().getPath(),&quot;sms.xml&quot;);</div><div class="line">	 FileOutputStream fos = new FileOutputStream(file);</div><div class="line">	 fos.write(br.toString().getBytes());</div><div class="line">	 fos.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>增加权限<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;uses-permission android:name=&quot;android.permission.WRITE_EXTERNAL_STORAGE&quot;/&gt;</div></pre></td></tr></table></figure></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-21-生成xml第一种方式/" class="archive-article-date">
+  	<time datetime="2017-03-12T08:06:19.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-20-使用chmod修改文件权限" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -700,59 +757,6 @@
 
 
   
-    <article id="post-Android-12-Android中单位" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/05/Android-12-Android中单位/">Android(12)-Android中单位</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Android中常用单位有:px(像素),dp,sp</p>
-<h6 id="1-px"><a href="#1-px" class="headerlink" title="1.px"></a>1.px</h6><p>px:pixels(像素). 不同设备显示效果相同，一般我们HVGA代表320x480像素，这个用的比较多。如下把应用部署到两个不同的模拟器中:出现在左右两边的宽度下是相同的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/38.png" alt=""></p>
-<h6 id="2-dp"><a href="#2-dp" class="headerlink" title="2.dp"></a>2.dp</h6><p>dp:device independent pixels(设备独立像素). 不同设备有不同的显示效果,这个和设备硬件有关，一般我们为了支持WVGA、HVGA和QVGA 推荐使用这个，不依赖像素。如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/39.png" alt=""></p>
-<h6 id="3-sp"><a href="#3-sp" class="headerlink" title="3.sp"></a>3.sp</h6><p>sp:scaled pixels(放大像素). 主要用于字体显示best for textsize。<br>由此，根据 google 的建议，TextView 的字号最好使用 sp 做单位，而且查看TextView的源码可知 Android 默认使用 sp 作为字号单位。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/40.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/05/Android-12-Android中单位/" class="archive-article-date">
-  	<time datetime="2017-03-05T13:42:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
@@ -818,7 +822,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.67px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 18px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 16px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.33px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 18px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.43px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.71px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.86px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.43px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12.14px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.86px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.86px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12.14px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.71px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.29px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.43px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.57px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 16.43px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.86px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.71px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.71px;">hibernate</a> <a href="/tags/im/" style="font-size: 15px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.86px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.71px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12.14px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.71px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12.14px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/redis/" style="font-size: 13.57px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.71px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.43px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.71px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.43px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.43px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12.14px;">代理</a> <a href="/tags/前端/" style="font-size: 10.71px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.86px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.14px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14.29px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.43px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14.29px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.86px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.86px;">转载</a> <a href="/tags/集合/" style="font-size: 12.86px;">集合</a>
     			</div>
     	</section>
     
