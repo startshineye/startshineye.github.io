@@ -152,6 +152,94 @@
       <div class="body-wrap">
         
   
+    <article id="post-代理-一-代理及AOP" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/14/代理-一-代理及AOP/">代理(一)-代理及AOP</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="代理概念及作用"><a href="#代理概念及作用" class="headerlink" title="代理概念及作用"></a>代理概念及作用</h4><h6 id="1-生活中的代理"><a href="#1-生活中的代理" class="headerlink" title="1.生活中的代理"></a>1.生活中的代理</h6><ol>
+<li>长沙人从长沙代理商手中买联想电脑和直接从联想总部买电脑，觉得最终主体业务目标有什么区别吗？基本上一样吧,都解决了核心问题,但是,一点区别都没有吗？从代理那里买难道就没有好处吗？代理可以节约一些成本吧</li>
+<li>由上面分析知道:代理其实就是做了和目标对象相同的事情，所以程序中代理类中的方法也是和被代理类的方法相同。<h6 id="2-程序中的代理"><a href="#2-程序中的代理" class="headerlink" title="2.程序中的代理"></a>2.程序中的代理</h6></li>
+<li><p>要为已存在的多个具有相同接口的目标类的各个方法增加一些系统功能,例如:异常处理,日志,计算方法的运行时间,事物管理,等等.你该怎么做?</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">class X</div><div class="line">&#123;</div><div class="line">  void sayHello()&#123;</div><div class="line">   System.out.println(&quot;Hello world&quot;);</div><div class="line"> &#125;</div><div class="line">&#125;</div><div class="line">//X类如果想要再加入执行方法所需要时间该怎么办呢？这个类的源代码没有给你，你又要往里面加入其他功能，我们定义一个代理XProxy,既然是代理则和X具有相同的方法声明,只是在代理方法中添加额外的功能</div><div class="line">XProxy</div><div class="line">&#123;</div><div class="line">  void sayHello()&#123;</div><div class="line">  startTime();</div><div class="line">   X.sayHello();</div><div class="line">   endTime();</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>编写一个与目标类具有相同接口的代理类,代理类的每个方法调用目标类的相同方法,并在调用方法时候加上系统功能的代码,原理框图如下:<br><img src="https://github.com/startshineye/img/raw/master/2017/79.png" alt=""><br>分析:<br>1.Client原来直接调用Target，现在不让其直接调用Target,而是调用Proxy代理类来代理Target<br>2.代理类和目标类实现相同的接口,就是说对外提供相同的方法<br>3.Client去引用目标不是直接去引用目标也不是直接去引用代理,而是通过引用相同的那个接口<br>4.代理类中一定要调用目标类的方法,但是在其目标类方法的前面后面可以加上系统功能代理</p>
+</li>
+<li>如果采用工厂模式和配置文件的方式进行管理,则不需要修改客户端程序,只需要在配置文件中配置是使用目标类,还是代理类,这样以后很容易切换,譬如,想要日志功能时候就配置代理类,否则配置目标类,这样,增加系统功能很容易,以后运行一段时间后,又想去掉系统功能也是很容易。</li>
+</ol>
+<h4 id="AOP"><a href="#AOP" class="headerlink" title="AOP"></a>AOP</h4><ol>
+<li>系统中存在交叉业务,一个交叉业务就是要切入到系统中的一个方面,如下所示:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">                    安全      事物    日志</div><div class="line">StudentService-------l---------l-------l----</div><div class="line">CourseService--------l---------l-------l-----</div><div class="line">MiscService----------l---------l-------l------</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>安全,事务,日志等功能要贯穿到好多个模块中,所以他就是交叉业务</p>
+<ol>
+<li>用具体的程序代码描述交叉业务:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">method1      method2     method3</div><div class="line">&#123;</div><div class="line">================================切面</div><div class="line">---          ---         ---</div><div class="line">================================切面</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>我们不可能深入到目标的方法内部修改，我们使用代理</p>
+<ol>
+<li><p>交叉业务的编程问题即为面向方面的编程(Aspect oriented program,简称AOP),AOP的目标就是使交叉业务模块化。可以采用将面向切面代码移动到原始方法的周围,这与直接在方法中编写切面代码的运行效果是一样的。我们不可能深入到目标的方法内部修改，而上面是使用了方内部,我们可以在方法前后进行操作，让用户感觉我们是在方法内部前后做了修改  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">================================切面</div><div class="line">method1      method2     method3</div><div class="line">&#123;</div><div class="line">---          ---         ---</div><div class="line">&#125;</div><div class="line">================================切面</div></pre></td></tr></table></figure>
+</li>
+<li><p>将切面方法转移到方法的周围来，让运行效果放到方法内部的头尾一样，使用代理技术正好解决这种问题,代理实现AOP功能的核心和关键技术。</p>
+</li>
+</ol>
+<h4 id="动态代理技术"><a href="#动态代理技术" class="headerlink" title="动态代理技术"></a>动态代理技术</h4><ol>
+<li>要为系统中的各个接口的类增加代理功能,那将需要太多的代理类,全部采用静态代理方式,将是一件非常麻烦的事情!写成百上千个代理类,是不是太累!</li>
+<li>JVM可以在运行期动态生成出类的字节码(你不需要自己写那个类,只需要将那个方法调用即可),这种动态生成的类往往被用作代理类,即动态代理类。</li>
+<li>委托JVM要动态生成一个类，肯定JVM要问你生成的类有什么方法？生成的类连方法都没有基本上是没有意义的，如果告诉那些方法比较麻烦，直接告诉一个直接，实现这个接口就会实现里面的全部方法。JVM生成的动态类必须实现一个或者多个接口,所以,JVM生成的动态类只能用作具有相同接口的目标类的代理  </li>
+<li>假如一个类没有接口,你告诉JVM动态生成这个类是不现实的。JVM也干不了，则出现CGLIB库可以动态生成一个类的子类,一个类的子类也可以用作该类的代理,所以,如果要为一个没有实现接口的类生成动态代理类,那么可以使用CGLIB库.</li>
+<li>代理类的各个方法中通常除了要调用目标类的相应方法和对外返回目标返回的结果外，还可以在代理方法中的如下四个位置加上系统功能代码:<br>1.在调用目标方法之前<br>2.在调用目标方法之后<br>3.在调用目标方法前后<br>4.在处理目标方法异常的catch块中  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/14/代理-一-代理及AOP/" class="archive-article-date">
+  	<time datetime="2017-01-14T07:31:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-代理及AOP" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -730,68 +818,6 @@
 
 
   
-    <article id="post-泛型-九-通过反射获取泛型实际类型" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/07/泛型-九-通过反射获取泛型实际类型/">泛型(九)-通过反射获取泛型实际类型</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="引入"><a href="#引入" class="headerlink" title="引入"></a>引入</h4><h6 id="1-思考"><a href="#1-思考" class="headerlink" title="1.思考"></a>1.思考</h6><ol>
-<li>定义一个Vector泛型,Vector<date> v1 = new Vector<date>();在webservice中我们通常通过一个方法获取某个对象，然后把这个对象转化成目标对象，我们就需要指定类型。比如：public Set<person> find(){};通过限定set里面类型，我们调用此方法时候就知道我们取出来的是set<person>进而我们做个转化，假如我们不知道的话，该怎么做了，没发做了。</person></person></date></date></li>
-<li>框架一般都是按照以上那么做的，但是，我们好奇的是框架是如何知道那种类型(Person)的呢？</li>
-<li>Vector<date> v1 = new Vector<date>();我们通过反射v1.getClass()字节码能拿到vector对象v1中所装的类型吗？<br>分析：以上是不可能的，因为java编译器编译成字节码后泛型类型和原型类型的字节码是一样的，我们也根本不知道泛型的类型（擦拭掉了），但是以上的应用确实存在，那别人是怎么做到的了<h4 id="反射获取集合中泛型类型"><a href="#反射获取集合中泛型类型" class="headerlink" title="反射获取集合中泛型类型"></a>反射获取集合中泛型类型</h4><h6 id="1-解决"><a href="#1-解决" class="headerlink" title="1.解决"></a>1.解决</h6></date></date></li>
-<li>字节码不能获取，但是那种应用确实存在，特别是在框架中。</li>
-<li>通过泛型的变量是没法知道变量的类型的，但是当把这个变量当做某一个方法的参数去使用时候，我们是可以通过这个方法去得到这个变量类型的。因为方法中存在得到泛型参数类型的方法<br><img src="60" alt="jietu"><h6 id="2-实例"><a href="#2-实例" class="headerlink" title="2.实例"></a>2.实例</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	 //定义一个v1变量，我们如何知道v1的类型呢？</div><div class="line">	 Vector&lt;Date&gt; v1 = new Vector&lt;Date&gt;();</div><div class="line">	 </div><div class="line">	 //把v1作为applay方法的参数传递</div><div class="line">	 //获取类的方法类</div><div class="line">	 Method method = GenericTest.class.getMethod(&quot;applyVector&quot;,Vector.class);</div><div class="line">	 Type[] types = method.getGenericParameterTypes();//得到所有参数数组</div><div class="line">	 </div><div class="line">	 ParameterizedType pType = (ParameterizedType) types[0];//得到参数化类型</div><div class="line">	 System.out.println(pType.getRawType());//得到原始类型        输出：class java.util.Vector</div><div class="line">	 System.out.println(pType.getActualTypeArguments()[0]);//得到实际类型   输出：class java.util.Date</div><div class="line">   &#125;</div><div class="line">  public static void applyVector(Vector&lt;Date&gt; v1)&#123;//必须是public的</div><div class="line">	  </div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/07/泛型-九-通过反射获取泛型实际类型/" class="archive-article-date">
-  	<time datetime="2017-01-07T11:55:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/23/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="page-number current">24</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="space">&hellip;</span><a class="page-number" href="/page/35/">35</a><a class="extend next" rel="next" href="/page/25/">Next &raquo;</a>
@@ -857,7 +883,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.33px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.67px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.67px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 12px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.33px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.33px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.33px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.67px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 12px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.67px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.33px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.33px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.67px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.67px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.67px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.67px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.67px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.67px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.67px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.67px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 12px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.67px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 12px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.33px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.67px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.33px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.67px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.33px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.33px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 12px;">代理</a> <a href="/tags/前端/" style="font-size: 10.67px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.67px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.67px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 14px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.33px;">注解</a> <a href="/tags/类加载器/" style="font-size: 14px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.33px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.67px;">转载</a> <a href="/tags/集合/" style="font-size: 12.67px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
