@@ -152,6 +152,289 @@
       <div class="body-wrap">
         
   
+    <article id="post-java并发编程-二-脏读" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/04/java并发编程-二-脏读/">java并发编程(二)-脏读</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="脏读"><a href="#脏读" class="headerlink" title="脏读"></a>脏读</h4><p>对于对象的同步和异步的方法,我们在设计的时候,一定要考虑问题的整体,不然就会出现数据不一致性的错误,很经典的错误就是脏读</p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">   public class DirtyRead &#123;</div><div class="line">   private String name=&quot;zs&quot;;</div><div class="line">   private int age = 23;</div><div class="line">   public synchronized void setValue(String name,int age)&#123;</div><div class="line">  try &#123;</div><div class="line">	Thread.sleep(3000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  this.name=name;</div><div class="line">  this.age=age;</div><div class="line">   System.out.println(&quot;setValue最终结果:name= &quot;+this.name+&quot; age=&quot;+this.age);</div><div class="line">   &#125;</div><div class="line">    public void getValue()&#123;</div><div class="line">  System.out.println(&quot;getValue最终结果:name= &quot;+this.name+&quot; age=&quot;+this.age);</div><div class="line">   &#125;</div><div class="line">   public static void main(String[] args) throws Exception &#123;</div><div class="line">final DirtyRead dr = new DirtyRead();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		dr.setValue(&quot;ls&quot;,24);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line">t1.start();</div><div class="line">Thread.sleep(1000);</div><div class="line">dr.getValue();</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>结果:<br>getValue最终结果:name= zs age=23<br>setValue最终结果:name= ls age=24</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">   public class DirtyRead &#123;</div><div class="line">   private String name=&quot;zs&quot;;</div><div class="line">   private int age = 23;</div><div class="line">   public synchronized void setValue(String name,int age)&#123;</div><div class="line">  try &#123;</div><div class="line">	Thread.sleep(3000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  this.name=name;</div><div class="line">  this.age=age;</div><div class="line">   System.out.println(&quot;setValue最终结果:name= &quot;+this.name+&quot; age=&quot;+this.age);</div><div class="line">    &#125;</div><div class="line">    public synchronized void getValue()&#123;</div><div class="line">  System.out.println(&quot;getValue最终结果:name= &quot;+this.name+&quot; age=&quot;+this.age);</div><div class="line">   &#125;</div><div class="line">   public static void main(String[] args) throws Exception &#123;</div><div class="line">final DirtyRead dr = new DirtyRead();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		dr.setValue(&quot;ls&quot;,24);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line">t1.start();</div><div class="line">Thread.sleep(1000);</div><div class="line">dr.getValue();</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>结果:<br>setValue最终结果:name= ls age=24<br>getValue最终结果:name= ls age=24</p>
+<h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5><ol>
+<li>在setValue的时候不希望其它线程去getValue</li>
+<li>分析:建立一个类,添加set(同步),get方法,set方法中设值后延时2秒,在主线程中创建一个对象并调用set，延时一秒在get</li>
+<li>代码有两个线程:主线程和t1线程,主线程一直往下面执行,t1线程执行后延时2秒</li>
+<li>以上t1在设值的时候有主线程打扰,以上是一个对象,一把锁,t1先拿了那把锁,操作对象,此时主线程也要访问加了锁的柜子,所以要等到t1释放那把锁    </li>
+<li>在我们对一个对象的方法加锁的时候,需要考虑业务的整体性,即为setvalue/getvalue方法同时加上synchronzied同步关键字,保证业务的原子性,不然就会出现业务错误</li>
+</ol>
+<h4 id="Oracle数据库"><a href="#Oracle数据库" class="headerlink" title="Oracle数据库"></a>Oracle数据库</h4><p>场景:A在9:00时候我们全盘扫描查询数据库里面值,我们在9:10时候才查询相互值100,B在9:05时候进行DML操作修改值为:200,问在9:10时候查询出的值是多少?<br>答案：是100,这是由于Oracle的”一致性读”有一个”undo”原理,在进行修改时候,会把100传入undo里面,然后9:10取出来的值也是100<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/10.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/04/java并发编程-二-脏读/" class="archive-article-date">
+  	<time datetime="2017-06-04T04:22:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-04</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-java并发编程-一-线程基础" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/03/java并发编程-一-线程基础/">java并发编程(一)-线程基础</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h4><h5 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>线程安全：当多个线程访问某一个类(对象或方法)时,这个类始终都能表现出正确的行为,那么这个类(对象或方法)就是线程安全的</li>
+<li>synchronized:可以在任意对象及方法上枷锁,而枷锁的这段代码称为”互斥区”或”临界区”</li>
+<li><p>java里面线程是继承Thread类或者实现Runnable接口  </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">public class MyThread extends Thread&#123;</div><div class="line">private int count=5;</div><div class="line">public synchronized  void run()&#123;</div><div class="line">count--;</div><div class="line">System.out.println(this.currentThread().getName()+&quot; count=&quot;+count);</div><div class="line">&#125;</div><div class="line"> public static void main(String[] args) &#123;</div><div class="line">/**</div><div class="line"> * 分析:当多个线程访问myThread的run方法时候,以排队的方式进行处理(这里排队是按照cpu分配的先后顺序定的),</div><div class="line"> * 一个线程想要执行synchronized修饰的方法里的代码:</div><div class="line"> * 1.首先是尝试获取锁,</div><div class="line"> * 2.如果拿到锁,执行synchronized代码体内容:拿不到锁,这个线程就会不断的尝试获取这把锁,直到拿到为止</div><div class="line"> * 而且是多个线程同时去竞争这把锁(也就是会有锁竞争的问题)。</div><div class="line"> */</div><div class="line">MyThread myThread = new MyThread();</div><div class="line">Thread t1 = new Thread(myThread, &quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(myThread, &quot;t2&quot;);</div><div class="line">Thread t3 = new Thread(myThread, &quot;t3&quot;);</div><div class="line">Thread t4 = new Thread(myThread, &quot;t4&quot;);</div><div class="line">Thread t5 = new Thread(myThread, &quot;t5&quot;);</div><div class="line"></div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">t3.start();</div><div class="line">t4.start();</div><div class="line">t5.start();</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h5><p>实例总结<br>1、当多个线程访问myThread的run方法时候,以排队的方式进行处理(这里排队是按照cpu分配的先后顺序定的),一个线程想要执行synchronized修饰的方法里的代码,首先是尝试获取锁,如果拿到锁,执行synchronized代码体内容:拿不到锁,这个线程就会不断的尝试获取这把锁,直到拿到为止,而且是多个线程同时去竞争这把锁(也就是会有锁竞争的问题)。<br>2、以上不加锁时候表现出正常行为是:4 3 2 1 0<br>3、不加锁执行结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/0.png" alt="不加锁"><br>加锁执行结果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/1.png" alt="加锁"><br>效果就像以下5个人上厕所<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/2.png" alt=""></p>
+<h4 id="多个线程多个锁"><a href="#多个线程多个锁" class="headerlink" title="多个线程多个锁"></a>多个线程多个锁</h4><h5 id="1-概念-1"><a href="#1-概念-1" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>多个线程多个锁:多个线程,每个线程都可以拿到自己指定的锁,分别获得锁之后,执行synchronized方法体的内容<h5 id="2-代码-1"><a href="#2-代码-1" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 创建一个类,一个方法,多个线程去执行这个方法</div><div class="line">   * @author yxm</div><div class="line">    */</div><div class="line">    public class MutilThread &#123;</div><div class="line">    private static int num=0;</div><div class="line">    public static synchronized void printNum(String flag)&#123;</div><div class="line">  try &#123;</div><div class="line">	if(&quot;a&quot;.equals(flag))&#123;</div><div class="line">		  num=100;</div><div class="line">		  System.out.println(&quot;flag a,set num&quot;);</div><div class="line">		  Thread.sleep(1000);</div><div class="line">	&#125;else &#123;</div><div class="line">		num=200;</div><div class="line">		System.out.println(&quot;flag b,set num&quot;);</div><div class="line">	&#125;</div><div class="line">	System.out.println(&quot;flag &quot;+flag+&quot;, num &quot;+num);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;</div><div class="line">   //注意run方法执行顺序</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">  //1.两个不同对象</div><div class="line">  final MutilThread m1 = new MutilThread();</div><div class="line">  final MutilThread m2 = new MutilThread();</div><div class="line">  </div><div class="line">  //2.创建两个线程对象</div><div class="line">  Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		m1.printNum(&quot;a&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"> Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		m2.printNum(&quot;b&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"> //3.线程执行</div><div class="line">  t1.start();</div><div class="line">  t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-结论-1"><a href="#3-结论-1" class="headerlink" title="3.结论"></a>3.结论</h5><ol>
+<li>不加static <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE08.png" alt=""></li>
+<li>加static <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE09.png" alt=""></li>
+<li>两个线程获取的分别是m1,m2对象的锁,执行时候不会有同步的效果,因为拿的是各自对象的锁    </li>
+<li>如果想要让一个线程执行printNum方法时候,其他线程不执行此方法,这个时候加“static”给这方法,方法加上static后被修改的成员变量也得加上static</li>
+<li>static表示在静态的方法上去加上synchronized修饰的话,这个锁就是这个类级别的锁</li>
+<li>关键字synchronized获得的锁都是对象锁,而不是把一段代码(方法)当做锁,所以示例代码中那个线程先执行synchronized关键字的方法,那个线程就持有该方法所属对象的锁(Lock),两个对象,线程获得的就是两个不通的锁,他们互不影响。有一种情况则是相同的锁,即在静态方法上加synchronized关键字,表示锁定class类,类一级别的锁(独占.class类)</li>
+</ol>
+<h4 id="对象锁的同步和异步"><a href="#对象锁的同步和异步" class="headerlink" title="对象锁的同步和异步"></a>对象锁的同步和异步</h4><h5 id="1-概念-2"><a href="#1-概念-2" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>同步：同步的概念就是共享,牢牢记住”共享”,如果不是共享资源,就没有必要进行同步。同步的目的是为了线程安全，满足两个特性:1.原子性 2.可见性</li>
+<li>异步:异步的概念就是独立,相互之间不受到任何限制,就好像我们学习http时候,在页面发起的ajax请求,我们还可以继续浏览或操作页面内容,二者之间没有任何关系.<h5 id="2-代码-2"><a href="#2-代码-2" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line">   public class MyObject &#123;</div><div class="line">   public synchronized void method1()&#123;</div><div class="line">   try &#123;</div><div class="line">	System.out.println(Thread.currentThread().getName());</div><div class="line">	Thread.sleep(4000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;;</div><div class="line">   public void method2()&#123;</div><div class="line">   System.out.println(Thread.currentThread().getName());</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">final MyObject my= new MyObject();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method1();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method2();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t2&quot;);</div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div><div class="line">   结果:t1 t2几乎同时打印</div><div class="line">   public class MyObject &#123;</div><div class="line">   public synchronized void method1()&#123;</div><div class="line">   try &#123;</div><div class="line">	System.out.println(Thread.currentThread().getName());</div><div class="line">	Thread.sleep(4000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;;</div><div class="line">   public synchronized void method2()&#123;</div><div class="line">   System.out.println(Thread.currentThread().getName());</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">final MyObject my= new MyObject();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method1();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method2();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t2&quot;);</div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125; </div><div class="line">   结果:t1打印后4s打印t2</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5><ol>
+<li>A线程先持有object对象的Lock锁,B线程如果在这个时候调用对象中的同步(synchronizes)方法则需要等待,也就是同步（正如:上面都枷锁情况）</li>
+<li>A线程先持有object对象的Lock锁,,B线程如果在这个时候调用对象中的非同步(synchronizes)方法则不需要等待（如上：method1加锁,method2不加锁）</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/03/java并发编程-一-线程基础/" class="archive-article-date">
+  	<time datetime="2017-06-03T10:53:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-03</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-netty实践-九-protocol-buff使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/01/netty实践-九-protocol-buff使用/">netty实践(九)-protocol buff使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-准备"><a href="#1-准备" class="headerlink" title="1.准备"></a>1.准备</h4><p>在使用protobuf时候我们需要两个东西。<br>1.protobuf-java.jar文件<br>2.protoc.exe文件帮我们生成java代码,帮我们生成代码是要写protobuf配置文件  </p>
+<h4 id="2-书写protobuf配置文件"><a href="#2-书写protobuf配置文件" class="headerlink" title="2.书写protobuf配置文件"></a>2.书写protobuf配置文件</h4><p>1.在java中我们写一个类使用class,而在protobuf中没有这个class而是一个message替代，这里用message替代class<br>2.protobuf数据类型可以参考其数据类型<br>3.protobuf属性必须加上required,表示必须的,其中需要一个key值,且是不能重复的  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">//java代码</div><div class="line">class Player&#123;</div><div class="line">  int age;</div><div class="line">  Long playerId;</div><div class="line">  String name;</div><div class="line">  List skills;</div><div class="line"> &#125;</div><div class="line"></div><div class="line">//protobuf代码--player.proto</div><div class="line">option java_package = &quot;com.proto&quot;;//建立包</div><div class="line">option java_outer_classname = &quot;PlayerModule&quot;;//新建模块</div><div class="line">message PBPlayer&#123;</div><div class="line">  required int64 playerId=1;//playerId的key为:1</div><div class="line">  required int32 age=2;</div><div class="line">  required String name=3;</div><div class="line">  required int32 skills = 4;</div><div class="line">&#125;</div><div class="line"></div><div class="line">message PBResource&#123;</div><div class="line">  required int64 gold = 1;</div><div class="line">  required int32 energy = 2;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h4 id="3-使用protoc-exe生成java代码"><a href="#3-使用protoc-exe生成java代码" class="headerlink" title="3.使用protoc.exe生成java代码"></a>3.使用protoc.exe生成java代码</h4><p>1.新建builder.bat<br>2.书写命令<br>  protoc ./player.proto –java_out=./</p>
+<p>  pasue<br>3..注意:  </p>
+<ol>
+<li>./player.proto   指代执行当前文件下面的player.proto文件</li>
+<li>–java_out=./  表示生成java文件在本目录下  <h4 id="4-点击bat文件"><a href="#4-点击bat文件" class="headerlink" title="4.点击bat文件"></a>4.点击bat文件</h4>具体目录结构如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE06.png" alt=""><br>点击bat文件后生成如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE07.png" alt=""></li>
+</ol>
+<h4 id="实例"><a href="#实例" class="headerlink" title="实例"></a>实例</h4><ol>
+<li>新建java工程,并将protoc.exe文件 builder.bat文件 player.proto文件拷贝到项目根目录,并将.jar放到lib下面,将.proto文件放到proto文件夹下,修改 builder.bat文件内容,生成.java文件到src下,结果如下:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/11.png" alt=""></li>
+<li>builder.bat文件内容如下：protoc ./proto/*.proto –java_out=./src  </li>
+<li><p>用PlayerModule.java怎样序列化对象</p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">  public class PB2Bytes &#123;</div><div class="line">  /**</div><div class="line">    * 序列化</div><div class="line">    * @return</div><div class="line">   */</div><div class="line">  public static byte[] toBytes()&#123;</div><div class="line"> //创建一个PBPlayer的构造器</div><div class="line"> Builder builder = PlayerModule.PBPlayer.newBuilder();</div><div class="line"> //设置数据</div><div class="line"> builder.setPlayerId(101).setAge(20).setName(&quot;zs&quot;).addSkills(1101);</div><div class="line"> //构造出对象</div><div class="line"> PBPlayer player = builder.build();</div><div class="line"> //序列化成字节数组</div><div class="line"> byte[] byteArray = player.toByteArray();</div><div class="line"> </div><div class="line"> System.out.println(Arrays.toString(byteArray));</div><div class="line"> return byteArray;</div><div class="line">  &#125;</div><div class="line">   /**</div><div class="line">   * 反序列化</div><div class="line">   * @param bs</div><div class="line">   * @throws InvalidProtocolBufferException </div><div class="line">   */</div><div class="line">  public static void toPlayer(byte[] bs) throws InvalidProtocolBufferException&#123;</div><div class="line"> PBPlayer player = PlayerModule.PBPlayer.parseFrom(bs);</div><div class="line"> System.out.println(&quot;palyerId:&quot;+player.getPlayerId());</div><div class="line"> System.out.println(&quot;age:&quot;+player.getAge());</div><div class="line"> System.out.println(&quot;name:&quot;+player.getName());</div><div class="line"> System.out.println(&quot;skills:&quot;+player.getSkillsList());</div><div class="line">  &#125;</div><div class="line">   public static void main(String[] args) throws  Exception &#123;</div><div class="line">byte[] bytes = toBytes();</div><div class="line">toPlayer(bytes);</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="protobuf序列化好处"><a href="#protobuf序列化好处" class="headerlink" title="protobuf序列化好处"></a>protobuf序列化好处</h4><p>为什么protobuf好呢？优点呢？</p>
+<h5 id="1-java序列化"><a href="#1-java序列化" class="headerlink" title="1.java序列化"></a>1.java序列化</h5><p>1.javaBean</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">   public class Player implements Serializable&#123;			</div><div class="line">/**</div><div class="line"> * </div><div class="line"> */</div><div class="line">private static final long serialVersionUID = -5248069984631225347L;	</div><div class="line">private long playerId;	</div><div class="line">private int age;	</div><div class="line">private String name;	</div><div class="line">private List&lt;Integer&gt; skills = new ArrayList&lt;&gt;();</div><div class="line"></div><div class="line">public Player(long playerId,  int age, String name) &#123;</div><div class="line">	this.playerId = playerId;</div><div class="line">	this.age = age;</div><div class="line">	this.name = name;</div><div class="line">&#125;</div><div class="line">public long getPlayerId() &#123;</div><div class="line">	return playerId;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setPlayerId(long playerId) &#123;</div><div class="line">	this.playerId = playerId;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public int getAge() &#123;</div><div class="line">	return age;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setAge(int age) &#123;</div><div class="line">	this.age = age;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public String getName() &#123;</div><div class="line">	return name;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setName(String name) &#123;</div><div class="line">	this.name = name;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public List&lt;Integer&gt; getSkills() &#123;</div><div class="line">	return skills;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setSkills(List&lt;Integer&gt; skills) &#123;</div><div class="line">	this.skills = skills;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>2.序列化类  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">   public class JAVA2Bytes &#123;</div><div class="line"></div><div class="line">public static void main(String[] args) throws Exception &#123;</div><div class="line">	byte[] bytes = toBytes();</div><div class="line">	toPlayer(bytes);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 序列化</div><div class="line"> * @throws IOException </div><div class="line"> */</div><div class="line">public static byte[] toBytes() throws IOException&#123;</div><div class="line">	</div><div class="line">	Player player = new Player(101, 20, &quot;peter&quot;);</div><div class="line">	player.getSkills().add(1001);</div><div class="line">	</div><div class="line">	ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();</div><div class="line">	ObjectOutputStream objectOutputStream = new ObjectOutputStream(byteArrayOutputStream);</div><div class="line">	</div><div class="line">	//写入对象</div><div class="line">	objectOutputStream.writeObject(player);</div><div class="line">	</div><div class="line">	//获取 字节数组</div><div class="line">	byte[] byteArray = byteArrayOutputStream.toByteArray();</div><div class="line">	System.out.println(Arrays.toString(byteArray));</div><div class="line">	return byteArray;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">/**</div><div class="line"> * 反序列化</div><div class="line"> * @param bs</div><div class="line"> * @throws Exception </div><div class="line"> */</div><div class="line">public static void toPlayer(byte[] bs) throws Exception&#123;</div><div class="line">	</div><div class="line">	ObjectInputStream inputStream = new ObjectInputStream(new ByteArrayInputStream(bs));</div><div class="line">	Player player = (Player)inputStream.readObject();</div><div class="line">	</div><div class="line">	//打印</div><div class="line">	 System.out.println(&quot;playerId:&quot; + player.getPlayerId());</div><div class="line">	 System.out.println(&quot;age:&quot; + player.getAge());</div><div class="line">	 System.out.println(&quot;name:&quot; + player.getName());</div><div class="line">	 System.out.println(&quot;skills:&quot; + (Arrays.toString(player.getSkills().toArray())));</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>java序列化执行结果:<br>[-84, -19, 0, 5, 115, 114, 0, 16, 99, 111, 109, 46, 112, 114, 111, 116, 111, 46, 80, 108, 97, 121, 101, 114, -73, 43, 28, 39, -119, -86, -125, -3, 2, 0, 4, 73, 0, 3, 97, 103, 101, 74, 0, 8, 112, 108, 97, 121, 101, 114, 73, 100, 76, 0, 4, 110, 97, 109, 101, 116, 0, 18, 76, 106, 97, 118, 97, 47, 108, 97, 110, 103, 47, 83, 116, 114, 105, 110, 103, 59, 76, 0, 6, 115, 107, 105, 108, 108, 115, 116, 0, 16, 76, 106, 97, 118, 97, 47, 117, 116, 105, 108, 47, 76, 105, 115, 116, 59, 120, 112, 0, 0, 0, 20, 0, 0, 0, 0, 0, 0, 0, 101, 116, 0, 5, 112, 101, 116, 101, 114, 115, 114, 0, 19, 106, 97, 118, 97, 46, 117, 116, 105, 108, 46, 65, 114, 114, 97, 121, 76, 105, 115, 116, 120, -127, -46, 29, -103, -57, 97, -99, 3, 0, 1, 73, 0, 4, 115, 105, 122, 101, 120, 112, 0, 0, 0, 1, 119, 4, 0, 0, 0, 10, 115, 114, 0, 17, 106, 97, 118, 97, 46, 108, 97, 110, 103, 46, 73, 110, 116, 101, 103, 101, 114, 18, -30, -96, -92, -9, -127, -121, 56, 2, 0, 1, 73, 0, 5, 118, 97, 108, 117, 101, 120, 114, 0, 16, 106, 97, 118, 97, 46, 108, 97, 110, 103, 46, 78, 117, 109, 98, 101, 114, -122, -84, -107, 29, 11, -108, -32, -117, 2, 0, 0, 120, 112, 0, 0, 3, -23, 120]<br>playerId:101<br>age:20<br>name:peter<br>skills:[1001] </p>
+<p>protobuf序列化结果:<br>[8, 101, 16, 20, 26, 2, 122, 115, 32, -51, 8]<br>palyerId:101<br>age:20<br>name:zs<br>skills:[1101]  </p>
+<h5 id="2-结论"><a href="#2-结论" class="headerlink" title="2.结论"></a>2.结论</h5><ol>
+<li>从结果可以知道:protobuf序列化结果小,说明我们的传输量就小,传输量小的话意味着节省了很多带宽 </li>
+<li>可以传输很多的信息量   </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/01/netty实践-九-protocol-buff使用/" class="archive-article-date">
+  	<time datetime="2017-06-01T15:03:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-netty实践-八-netty心跳" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/31/netty实践-八-netty心跳/">netty实践(八)-netty心跳</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li><p>netty给我们提供了检测会话状态的工具类:idleStateHandler.<br>假如一个用户长时间没有读写数据时候,我们需要断开此链接。我们怎样去检测这个状态呢？<br>我们自己可以写一个定时器,定时检测,其实netty也提供了实现用户检测的工具类idleStateHandler.  </p>
+</li>
+<li><p>心跳其实就是一个普通的请求，特点数据简单，业务也简单<br>心跳对于服务端来说，定时清除闲置会话inactive(netty5) channelclose(netty3)</p>
+</li>
+<li><p>心跳对客户端来说，用来检测会话是否断开，是否重连！ 用来检测网络延时！</p>
+</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>我们直接在handler里面继承idleStateAwareChannelHandler.实现里面检测的方法  </p>
+<ol>
+<li>IdleStateEvent通过getState方法捕获状态  </li>
+<li>给管道添加一个处理器时候,我们通过pipeline.addLast(“idle”,new IdleStateHandler(hashedWheelTimer,5,5,10));其中第一个参数是一个定时器,第二个参数是读超时时间,第二个参数写超时时间,第三个参数可读写超时时间  </li>
+<li>我们不需要继承idleStateAwareChannelHandler,直接继承SimpleChannelHandler,因为idleStateAwareChannelHandler直接继承SimpleChannelHandler。重写handleUpstream方法</li>
+</ol>
+<h4 id="netty心跳实现"><a href="#netty心跳实现" class="headerlink" title="netty心跳实现"></a>netty心跳实现</h4><h5 id="netty3"><a href="#netty3" class="headerlink" title="netty3"></a>netty3</h5><h6 id="1-服务端"><a href="#1-服务端" class="headerlink" title="1.服务端"></a>1.服务端</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div></pre></td><td class="code"><pre><div class="line">   import java.net.InetSocketAddress;</div><div class="line">import java.util.concurrent.ExecutorService;</div><div class="line">import java.util.concurrent.Executors;</div><div class="line"></div><div class="line">import org.jboss.netty.bootstrap.ServerBootstrap;</div><div class="line">import org.jboss.netty.channel.ChannelPipeline;</div><div class="line">import org.jboss.netty.channel.ChannelPipelineFactory;</div><div class="line">import org.jboss.netty.channel.Channels;</div><div class="line">import org.jboss.netty.channel.socket.nio.NioServerSocketChannelFactory;</div><div class="line">import org.jboss.netty.handler.codec.string.StringDecoder;</div><div class="line">import org.jboss.netty.handler.codec.string.StringEncoder;</div><div class="line">import org.jboss.netty.handler.timeout.IdleStateHandler;</div><div class="line">import org.jboss.netty.util.HashedWheelTimer;</div><div class="line">/**</div><div class="line"> * netty服务端入门</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line"></div><div class="line">	//服务类</div><div class="line">	ServerBootstrap bootstrap = new ServerBootstrap();</div><div class="line">	</div><div class="line">	//boss线程监听端口，worker线程负责数据读写</div><div class="line">	ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line">	ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line">	</div><div class="line">	//设置niosocket工厂</div><div class="line">	bootstrap.setFactory(new NioServerSocketChannelFactory(boss, worker));</div><div class="line">	</div><div class="line">	final HashedWheelTimer hashedWheelTimer = new HashedWheelTimer();</div><div class="line">	//设置管道的工厂</div><div class="line">	bootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">		</div><div class="line">		@Override</div><div class="line">		public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line"></div><div class="line">			ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">			pipeline.addLast(&quot;idle&quot;, new IdleStateHandler(hashedWheelTimer, 5, 5, 10));</div><div class="line">			pipeline.addLast(&quot;decoder&quot;, new StringDecoder());</div><div class="line">			pipeline.addLast(&quot;encoder&quot;, new StringEncoder());</div><div class="line">			pipeline.addLast(&quot;helloHandler&quot;, new HelloHandler());</div><div class="line">			return pipeline;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	</div><div class="line">	bootstrap.bind(new InetSocketAddress(10101));</div><div class="line">	</div><div class="line">	System.out.println(&quot;start!!!&quot;);</div><div class="line">	</div><div class="line">&#125;</div><div class="line"></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-处理器"><a href="#2-处理器" class="headerlink" title="2.处理器"></a>2.处理器</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">   import org.jboss.netty.channel.ChannelEvent;</div><div class="line">import org.jboss.netty.channel.ChannelFuture;</div><div class="line">import org.jboss.netty.channel.ChannelFutureListener;</div><div class="line">import org.jboss.netty.channel.ChannelHandlerContext;</div><div class="line">import org.jboss.netty.channel.MessageEvent;</div><div class="line">import org.jboss.netty.channel.SimpleChannelHandler;</div><div class="line">import org.jboss.netty.handler.timeout.IdleState;</div><div class="line">import org.jboss.netty.handler.timeout.IdleStateEvent;</div><div class="line"></div><div class="line">public class HelloHandler extends SimpleChannelHandler &#123;</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line">	System.out.println(e.getMessage());</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void handleUpstream(final ChannelHandlerContext ctx, ChannelEvent e) throws Exception &#123;</div><div class="line">	if (e instanceof IdleStateEvent) &#123;</div><div class="line">		if(((IdleStateEvent)e).getState() == IdleState.ALL_IDLE)&#123;</div><div class="line">			System.out.println(&quot;提玩家下线&quot;);</div><div class="line">			//关闭会话,踢玩家下线</div><div class="line">			ChannelFuture write = ctx.getChannel().write(&quot;time out, you will close&quot;);</div><div class="line">			write.addListener(new ChannelFutureListener() &#123;</div><div class="line">				</div><div class="line">				@Override</div><div class="line">				public void operationComplete(ChannelFuture future) throws Exception &#123;</div><div class="line">					 ctx.getChannel().close();</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">	&#125; else &#123;</div><div class="line">		super.handleUpstream(ctx, e);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="netty5"><a href="#netty5" class="headerlink" title="netty5"></a>netty5</h5><h6 id="1-服务端-1"><a href="#1-服务端-1" class="headerlink" title="1.服务端"></a>1.服务端</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div></pre></td><td class="code"><pre><div class="line">   import io.netty.bootstrap.ServerBootstrap;</div><div class="line">import io.netty.channel.Channel;</div><div class="line">import io.netty.channel.ChannelFuture;</div><div class="line">import io.netty.channel.ChannelInitializer;</div><div class="line">import io.netty.channel.ChannelOption;</div><div class="line">import io.netty.channel.EventLoopGroup;</div><div class="line">import io.netty.channel.nio.NioEventLoopGroup;</div><div class="line">import io.netty.channel.socket.nio.NioServerSocketChannel;</div><div class="line">import io.netty.handler.codec.string.StringDecoder;</div><div class="line">import io.netty.handler.codec.string.StringEncoder;</div><div class="line">import io.netty.handler.timeout.IdleStateHandler;</div><div class="line">/**</div><div class="line"> * netty5服务端</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	//服务类</div><div class="line">	ServerBootstrap bootstrap = new ServerBootstrap();</div><div class="line">	</div><div class="line">	//boss和worker</div><div class="line">	EventLoopGroup boss = new NioEventLoopGroup();</div><div class="line">	EventLoopGroup worker = new NioEventLoopGroup();</div><div class="line">	</div><div class="line">	try &#123;</div><div class="line">		//设置线程池</div><div class="line">		bootstrap.group(boss, worker);</div><div class="line">		</div><div class="line">		//设置socket工厂、</div><div class="line">		bootstrap.channel(NioServerSocketChannel.class);</div><div class="line">		</div><div class="line">		//设置管道工厂</div><div class="line">		bootstrap.childHandler(new ChannelInitializer&lt;Channel&gt;() &#123;</div><div class="line"></div><div class="line">			@Override</div><div class="line">			protected void initChannel(Channel ch) throws Exception &#123;</div><div class="line">				ch.pipeline().addLast(new IdleStateHandler(5, 5, 10));</div><div class="line">				ch.pipeline().addLast(new StringDecoder());</div><div class="line">				ch.pipeline().addLast(new StringEncoder());</div><div class="line">				ch.pipeline().addLast(new ServerHandler());</div><div class="line">			&#125;</div><div class="line">		&#125;);</div><div class="line">		</div><div class="line">		//netty3中对应设置如下</div><div class="line">		//bootstrap.setOption(&quot;backlog&quot;, 1024);</div><div class="line">		//bootstrap.setOption(&quot;tcpNoDelay&quot;, true);</div><div class="line">		//bootstrap.setOption(&quot;keepAlive&quot;, true);</div><div class="line">		//设置参数，TCP参数</div><div class="line">		bootstrap.option(ChannelOption.SO_BACKLOG, 2048);//serverSocketchannel的设置，链接缓冲池的大小</div><div class="line">		bootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);//socketchannel的设置,维持链接的活跃，清除死链接</div><div class="line">		bootstrap.childOption(ChannelOption.TCP_NODELAY, true);//socketchannel的设置,关闭延迟发送</div><div class="line">		</div><div class="line">		//绑定端口</div><div class="line">		ChannelFuture future = bootstrap.bind(10101);</div><div class="line">		System.out.println(&quot;start&quot;);</div><div class="line">		//等待服务端关闭</div><div class="line">		future.channel().closeFuture().sync();</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125; finally&#123;</div><div class="line">		//释放资源</div><div class="line">		boss.shutdownGracefully();</div><div class="line">		worker.shutdownGracefully();</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-处理器-1"><a href="#2-处理器-1" class="headerlink" title="2.处理器"></a>2.处理器</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line">   import io.netty.channel.ChannelFuture;</div><div class="line">import io.netty.channel.ChannelFutureListener;</div><div class="line">import io.netty.channel.ChannelHandlerContext;</div><div class="line">import io.netty.channel.SimpleChannelInboundHandler;</div><div class="line">import io.netty.handler.timeout.IdleState;</div><div class="line">import io.netty.handler.timeout.IdleStateEvent;</div><div class="line">/**</div><div class="line"> * 服务端消息处理</div><div class="line"> */</div><div class="line">public class ServerHandler extends SimpleChannelInboundHandler&lt;String&gt; &#123;</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void messageReceived(ChannelHandlerContext ctx, String msg) throws Exception &#123;</div><div class="line"></div><div class="line">	System.out.println(msg);</div><div class="line">	</div><div class="line">	ctx.channel().writeAndFlush(&quot;hi&quot;);</div><div class="line">	ctx.writeAndFlush(&quot;hi&quot;);</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public void userEventTriggered(final ChannelHandlerContext ctx, Object evt) throws Exception &#123;</div><div class="line">	if(evt instanceof IdleStateEvent)&#123;</div><div class="line">		IdleStateEvent event = (IdleStateEvent)evt;</div><div class="line">		if(event.state() == IdleState.ALL_IDLE)&#123;</div><div class="line">			</div><div class="line">			//清除超时会话</div><div class="line">			ChannelFuture writeAndFlush = ctx.writeAndFlush(&quot;you will close&quot;);</div><div class="line">			writeAndFlush.addListener(new ChannelFutureListener() &#123;</div><div class="line">				</div><div class="line">				@Override</div><div class="line">				public void operationComplete(ChannelFuture future) throws Exception &#123;</div><div class="line">					ctx.channel().close();</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">	&#125;else&#123;</div><div class="line">		super.userEventTriggered(ctx, evt);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 新客户端接入</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelActive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelActive&quot;);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 客户端断开</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelInactive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelInactive&quot;);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 异常</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception &#123;</div><div class="line">	cause.printStackTrace();</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/05/31/netty实践-八-netty心跳/" class="archive-article-date">
+  	<time datetime="2017-05-31T14:56:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-七-单客户端多连接" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -587,224 +870,9 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 
 
   
-    <article id="post-netty实践-一-传统IO" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/20/netty实践-一-传统IO/">netty实践(一)-传统IO</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="传统单线程IO"><a href="#传统单线程IO" class="headerlink" title="传统单线程IO"></a>传统单线程IO</h4><p>传统socket是基于oio,阻塞io的编程</p>
-<h6 id="1-代码如下："><a href="#1-代码如下：" class="headerlink" title="1.代码如下："></a>1.代码如下：</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">/*** </div><div class="line"> * 传统socket服务器</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class OioServer &#123;</div><div class="line">   /***********</div><div class="line">    * 1.开始服务</div><div class="line">    * 2.监听端口</div><div class="line">    * 3.读取数据</div><div class="line">    * ****************/</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	  try &#123;</div><div class="line">		ServerSocket serverSocket = new ServerSocket(8000);</div><div class="line">		System.out.println(&quot;服务端启动!&quot;);</div><div class="line">		while (true) &#123;//死循环永久监听</div><div class="line">			Socket socket = serverSocket.accept();//断点在此处就已经阻塞了,</div><div class="line">			handle(socket);</div><div class="line">		&#125;</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/****</div><div class="line"> * 读取数据</div><div class="line"> * @param socket</div><div class="line"> */</div><div class="line">private static void handle(Socket socket) &#123;</div><div class="line">   try &#123;</div><div class="line">   	while(true)&#123;//循环读取,不然客户端输入一个字符就会结束</div><div class="line">   		InputStream in = socket.getInputStream();</div><div class="line">   		byte[] bytes=new byte[1024];</div><div class="line">   		//读取数据（阻塞）</div><div class="line">   		int read = in.read(bytes);</div><div class="line">   		if(read!=-1)&#123;</div><div class="line">   			System.out.println(new String(bytes, 0,read));</div><div class="line">   		&#125;else&#123;</div><div class="line">   			break;</div><div class="line">   		&#125;</div><div class="line">   	&#125;</div><div class="line">&#125; catch (IOException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;finally&#123;</div><div class="line">	try &#123;</div><div class="line">		System.out.println(&quot;socket关闭&quot;);</div><div class="line">		socket.close();</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-测试"><a href="#2-测试" class="headerlink" title="2.测试"></a>2.测试</h6><ol>
-<li>开启一个客户端 telnet 127.0.0.1 8000  输入数据 后台也会输出数据</li>
-<li>另外再开启一个客户端, telnet 127.0.0.1 8000 输入数据,后台没有反应<h6 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h6>传送IO特点：<br>阻塞点：1.server.accept()  2.inputStream.read()<br>当线程下只能有一个客户端,OIO是阻塞的，传输是并行的。</li>
-</ol>
-<h6 id="4-思考"><a href="#4-思考" class="headerlink" title="4.思考"></a>4.思考</h6><p>在以上代码中我们是只能有一个客户端访问,其他客户端不能访问,但是我们想要其他客户端也访问,我们改怎么做呢？我们可以定义一个线程池,把每个客户端的访问看成是一个线程处理。</p>
-<h4 id="传统多线程IO"><a href="#传统多线程IO" class="headerlink" title="传统多线程IO"></a>传统多线程IO</h4><h6 id="1-代码"><a href="#1-代码" class="headerlink" title="1.代码"></a>1.代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div></pre></td><td class="code"><pre><div class="line">   /*** </div><div class="line"> * 传统socket服务器</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class OioServer &#123;</div><div class="line">   /***********</div><div class="line">    * 1.开始服务</div><div class="line">    * 2.监听端口</div><div class="line">    * 3.读取数据</div><div class="line">    * ****************/</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	  try &#123;</div><div class="line">		//定义一个线程池</div><div class="line">		ExecutorService newCachedThreadPool = Executors.newCachedThreadPool();</div><div class="line">		ServerSocket serverSocket = new ServerSocket(8000);</div><div class="line">		System.out.println(&quot;服务端启动!&quot;);</div><div class="line"></div><div class="line">		while (true) &#123;//死循环永久监听</div><div class="line">			final Socket socket = serverSocket.accept();//断点在此处就已经阻塞了,</div><div class="line">			System.out.println(&quot;新的客户端来临&quot;);</div><div class="line">			//线程池中执行每个线程</div><div class="line">			newCachedThreadPool.execute(new Runnable() &#123;</div><div class="line">				@Override</div><div class="line">				public void run() &#123;</div><div class="line">					handle(socket);</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/****</div><div class="line"> * 读取数据</div><div class="line"> * @param socket</div><div class="line"> */</div><div class="line">private static void handle(Socket socket) &#123;</div><div class="line">   try &#123;</div><div class="line">   	while(true)&#123;//循环读取,不然客户端输入一个字符就会结束</div><div class="line">   		InputStream in = socket.getInputStream();</div><div class="line">   		byte[] bytes=new byte[1024];</div><div class="line">   		//读取数据（阻塞）</div><div class="line">   		int read = in.read(bytes);</div><div class="line">   		if(read!=-1)&#123;</div><div class="line">   			System.out.println(new String(bytes, 0,read));</div><div class="line">   		&#125;else&#123;</div><div class="line">   			break;</div><div class="line">   		&#125;</div><div class="line">   	&#125;</div><div class="line">&#125; catch (IOException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;finally&#123;</div><div class="line">	try &#123;</div><div class="line">		System.out.println(&quot;socket关闭&quot;);</div><div class="line">		socket.close();</div><div class="line">	&#125; catch (IOException e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">	&#125;</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-测试-1"><a href="#2-测试-1" class="headerlink" title="2.测试"></a>2.测试</h6><ol>
-<li>开启一个客户端 telnet 127.0.0.1 8000  输入数据 后台也会输出数据</li>
-<li>另外再开启一个客户端, telnet 127.0.0.1 8000 输入数据,后台有反应</li>
-</ol>
-<p>######3.总结</p>
-<ol>
-<li>用线程池可以有多个客户端连接，但是非常消耗性能</li>
-<li>缺点:开启一个线程需要为其调用栈都分配内存,其默认值大小区间为：64kb到1MB</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/20/netty实践-一-传统IO/" class="archive-article-date">
-  	<time datetime="2017-05-20T08:07:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/26/new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化/">new Date(str)返回 Invalid date问题——javascript(js)时间初始化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在做im过程中，聊天信息表中保存的日期格式是 2017-4-26 16:49:23，但是图片是按照年/月/日文件夹格式保存到硬盘,所以显示图片时候需要转换格式<br>第一种方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var oldTime = (new Date(msg.messageTime)).getTime();</div><div class="line">var curTime=new Date(oldTime).Format(&quot;yyyy/MM/dd&quot;);</div></pre></td></tr></table></figure></p>
-<p>在火狐谷歌下没有错误，但是在ie下会报一下错误：“invalid date”<br>new Date(strDate);返回的是无效的时间格式</p>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><h6 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">    解决 ie，火狐浏览器不兼容new Date(s)</div><div class="line">   @param strDate</div><div class="line">   返回 date对象</div><div class="line">   /</div><div class="line">   function getDateForStringDate(strDate)&#123;</div><div class="line">//切割年月日与时分秒称为数组</div><div class="line">var s = strDate.split(&quot; &quot;); </div><div class="line">var s1 = s[0].split(&quot;-&quot;); </div><div class="line">var s2 = s[1].split(&quot;:&quot;);</div><div class="line">if(s2.length==2)&#123;</div><div class="line">	s2.push(&quot;00&quot;);</div><div class="line">&#125;</div><div class="line">return new Date(s1[0],s1[1]-1,s1[2],s2[0],s2[1],s2[2]);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var date = new Date(strDate.replace(&quot;-&quot;, &quot;/&quot;).replace(&quot;-&quot;, &quot;/&quot;));</div></pre></td></tr></table></figure>
-<h6 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var oldTime = (new Date(msg.messageTime.replace(&quot;-&quot;, &quot;/&quot;).replace(&quot;-&quot;, &quot;/&quot;))).getTime();</div><div class="line"> var curTime=new Date(oldTime).Format(&quot;yyyy/MM/dd&quot;);</div></pre></td></tr></table></figure>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/26/new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化/" class="archive-article-date">
-  	<time datetime="2017-04-26T06:58:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-ORA-01480-STR绑定值的结尾Null字符缺失" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/20/ORA-01480-STR绑定值的结尾Null字符缺失/">ORA-01480:STR绑定值的结尾Null字符缺失</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h4><p>在im聊天中发送文字长度验证时候，出现以上错误</p>
-<h4 id="原因"><a href="#原因" class="headerlink" title="原因"></a>原因</h4><p>原来是Oracle报表中sql定义的最大长度是varchar2(3000)，在sql中如果字节个数大于3000的话,在Oracle数据库采用UTF-8编码时候。<br>一个字符占三个字节1000，否则将会报那样的错误</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/20/ORA-01480-STR绑定值的结尾Null字符缺失/" class="archive-article-date">
-  	<time datetime="2017-04-20T07:11:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Windows环境下Android-Studio-v1-0安装教程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/10/Windows环境下Android-Studio-v1-0安装教程/">Windows环境下Android Studio v1.0安装教程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/10/Windows环境下Android-Studio-v1-0安装教程/" class="archive-article-date">
-  	<time datetime="2017-04-10T14:11:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-10</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/14/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/35/">35</a><a class="extend next" rel="next" href="/page/16/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/14/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/16/">Next &raquo;</a>
     </nav>
   
 
@@ -867,7 +935,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.25px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
