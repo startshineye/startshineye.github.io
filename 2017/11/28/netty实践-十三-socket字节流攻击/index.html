@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="前言之前我们为了防止粘包和分包为题,我们通过定义:长度+数据 来解包，正常情况下(客户端数据没有发错情况下)是没有问题的,但是在一些特殊情况下:1.比如客户端发送的数据不对,本来数据长度是10字节,但是它实际发的长度只有8个字节,后面的数据就会混乱了。2.假如别人知道了你数据包长度,恶意发送Intger.max最大整数长度，我们读取的数据长度length就会很大,
 12345   if(buffe">
-<meta property="og:updated_time" content="2017-11-28T16:03:41.633Z">
+<meta property="og:updated_time" content="2017-11-28T16:08:47.527Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="netty实践(十三)-socket字节流攻击">
 <meta name="twitter:description" content="前言之前我们为了防止粘包和分包为题,我们通过定义:长度+数据 来解包，正常情况下(客户端数据没有发错情况下)是没有问题的,但是在一些特殊情况下:1.比如客户端发送的数据不对,本来数据长度是10字节,但是它实际发的长度只有8个字节,后面的数据就会混乱了。2.假如别人知道了你数据包长度,恶意发送Intger.max最大整数长度，我们读取的数据长度length就会很大,
@@ -176,7 +176,8 @@
 <pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">   if(buffer.readableBytes()&lt;length)&#123;</div><div class="line">			buffer.resetReaderIndex();</div><div class="line">			//缓存当前剩余的buffer数据,等待剩下数据包到来</div><div class="line">			return null;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 </code></pre><p>每次都放到缓存中,所以我们每次都会等待数据包到来,最后缓存的数据将会很大个字节,导致内存不够用。</p>
 <p>把长度定义的很大，这种数据包，通常被称为socket攻击，字节流式攻击。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>为了避免以上socket攻击,我们需要加上包头:防止读的过多,防止读的不够。</p>
+
       
     </div>
     <div class="article-info article-info-index">
