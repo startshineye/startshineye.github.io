@@ -152,6 +152,188 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-27-slot" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/10/vue-27-slot/">vue(27)-slot</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>slot:位置,槽口 作用:占个位置</p>
+<h5 id="1-单个slot"><a href="#1-单个slot" class="headerlink" title="1.单个slot"></a>1.单个slot</h5><p>实例:<br>  在用<aaa>组件时候我们往组件里面添加其他标签是没有作用的(因为这些标签在组件中并没有使用)</aaa></p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;
+    &lt;ul&gt;
+        &lt;li&gt;111&lt;/li&gt;
+        &lt;li&gt;222&lt;/li&gt;
+        &lt;li&gt;333&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;&lt;h1&gt;组件aaa&lt;/h1&gt;&quot;
+
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p>输出:组件aaa  </p>
+<p>从以上知道,我们添加的<ul>标签里面很多内容已经不存在了,可以理解为组件内容覆盖了其内容</ul></p>
+<p>如果我没想要在定义的组件里面添加其他标签时候就需要用到slot：<br>使用slot注意:如果组件里面没有其他标签时候使用<slot>这是默认情况</slot>则会输出：这是默认情况  </p>
+<pre><code>&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;
+&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;template id=&quot;aaa&quot;&gt;
+ &lt;h1&gt;组件aaa&lt;/h1&gt;
+  &lt;slot&gt;这是默认情况&lt;/slot&gt;
+&lt;/template&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;#aaa&quot;
+
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/8.png" alt=""></p>
+<p>如果<slot>标签里面含有其他元素时候,此时会被覆盖  </slot></p>
+<pre><code>body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;
+    &lt;ul&gt;
+        &lt;li&gt;111&lt;/li&gt;
+        &lt;li&gt;222&lt;/li&gt;
+        &lt;li&gt;333&lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/aaa&gt;
+&lt;/div&gt;
+&lt;template id=&quot;aaa&quot;&gt;
+ &lt;h1&gt;组件aaa&lt;/h1&gt;
+  &lt;slot&gt;这是默认情况&lt;/slot&gt;
+&lt;/template&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;#aaa&quot;
+
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/8.png" alt=""></p>
+<h5 id="2-多个slot可以给定名字"><a href="#2-多个slot可以给定名字" class="headerlink" title="2.多个slot可以给定名字"></a>2.多个slot可以给定名字</h5><p>要求:<br>1.在模板template里面定义<br>2.在标签里面用属性 slot引入  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id = &quot;box&quot;&gt;
+&lt;aaa&gt;
+    &lt;ul slot=&quot;ul&quot;&gt;
+        &lt;li&gt;111&lt;/li&gt;
+        &lt;li&gt;222&lt;/li&gt;
+        &lt;li&gt;333&lt;/li&gt;
+    &lt;/ul&gt;
+    &lt;ol slot=&quot;ol&quot;&gt;
+        &lt;li&gt;111&lt;/li&gt;
+        &lt;li&gt;222&lt;/li&gt;
+        &lt;li&gt;333&lt;/li&gt;
+    &lt;/ol&gt;
+&lt;/aaa&gt;
+  &lt;aaa&gt;
+  &lt;/aaa&gt;
+&lt;/div&gt;
+&lt;template id=&quot;aaa&quot;&gt;
+ &lt;h1&gt;组件aaa&lt;/h1&gt;
+  &lt;slot name=&quot;ul&quot;&gt;这是默认情况&lt;/slot&gt;
+  &lt;slot name=&quot;ol&quot;&gt;这是默认情况2&lt;/slot&gt;
+&lt;/template&gt;
+&lt;script&gt;
+var vm = new Vue({
+  el:&quot;#box&quot;,
+   data:{
+      a:&quot;aaa&quot;//指代组件名
+   },
+   components:{
+      &quot;aaa&quot;:{
+          template:&quot;#aaa&quot;
+
+      }
+   }
+});
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/25.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/10/vue-27-slot/" class="archive-article-date">
+  	<time datetime="2017-09-10T14:04:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-26-模板" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1425,121 +1607,6 @@ var vm = new Vue(
 
 
   
-    <article id="post-vue-17-computed计算属性" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/31/vue-17-computed计算属性/">vue(17)-computed计算属性</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当一个数据发生变化时候,另一个数据也发生变化,比如下面数据:当改变a时候b的值会在a的值基础上加1</p>
-<pre><code> new Vue({
-    el:&apos;#box&apos;,
-    data:{
-        msg:&quot;hello&quot;
-        a:1,
-        b:1
-    }
-});
-</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-计算属性使用-computed"><a href="#1-计算属性使用-computed" class="headerlink" title="1.计算属性使用:computed"></a>1.计算属性使用:computed</h5><h6 id="1-1-最基本的形式"><a href="#1-1-最基本的形式" class="headerlink" title="1.1 最基本的形式"></a>1.1 最基本的形式</h6><pre><code>computed:{//默认调用get
-  b:function(){
-  return 值;   
- }
-}
-</code></pre><p>computed里面是属性,它的值取决于return 后的结果  </p>
-<h6 id="1-2-复杂形式-computed里面是个对象-b里面也是一个对象"><a href="#1-2-复杂形式-computed里面是个对象-b里面也是一个对象" class="headerlink" title="1.2.复杂形式(computed里面是个对象,b里面也是一个对象)"></a>1.2.复杂形式(computed里面是个对象,b里面也是一个对象)</h6><pre><code>computed:{
-  b:{
-      get:function(){
-         return this.a+2;
-       },
-      set:function(val){
-         this.a = val;
-       }
-   }
-}
-</code></pre><p>计算属性其实最主要的用法是get,set方法,以上方法就是是get方法<br>假如执行如下方法</p>
-<pre><code>document.onclick=function(){
-    vm.b=101;
-} 
-</code></pre><p>其实就是调用set方法</p>
-<h6 id="1-3-对比"><a href="#1-3-对比" class="headerlink" title="1.3 对比"></a>1.3 对比</h6><p>computed里面放置业务代码,一定记得return,data里面是基本数据  </p>
-<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-     a: {{a}}&lt;br&gt;
-     b:{{b}}
-&lt;/div&gt;
-
-&lt;script&gt;
-var vm = new Vue({
-    el:&apos;#box&apos;,
-    data:{
-        msg:&quot;hello&quot;,
-        a:1
-
-    },
-    computed:{
-        b:function () {
-            //业务逻辑代码
-            return this.a+1;
-        }
-    }
-});
-document.onclick=function(){
-    vm.a=10;
-};
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/4.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/31/vue-17-computed计算属性/" class="archive-article-date">
-  	<time datetime="2017-08-30T16:02:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -1605,7 +1672,7 @@ document.onclick=function(){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 10px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     

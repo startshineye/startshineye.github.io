@@ -152,6 +152,140 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-10-指令-内置指令" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/29/vue-10-指令-内置指令/">vue(10)-指令-内置指令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>指令是Vue.js 中一个重要的特性，提供了一种机制将数据的变化映射为DOM 行为。</li>
+<li><p>那什么叫数据的变化映射为DOM 行为？前文中阐述过Vue.js 是通过数据驱动的，所以我们不会直接去修改DOM 结构，不会出现类似于</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">$(&apos;ul&apos;).append(&apos;&lt;li&gt;one&lt;/li&gt;&apos;)</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>这样的操作。</p>
+<ol>
+<li>当数据变化时，指令会依据设定好的操作对DOM进行修改，这样就可以只关注数据的变化，而不用去管理DOM 的变化和状态，使得逻辑更加清晰，可维护性更好。</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>本节主要介绍部分常见指令的使用及场景以及自定义指令的开发和指令相关的参数。  </p>
+<h5 id="1-内置指令"><a href="#1-内置指令" class="headerlink" title="1.内置指令"></a>1.内置指令</h5><h6 id="1-1-v-bind"><a href="#1-1-v-bind" class="headerlink" title="1.1 v-bind"></a>1.1 v-bind</h6><p>v-bind 主要用于动态绑定DOM 元素属性（attribute），即元素属性实际的值是由vm<br>实例中的data属性提供的,例如:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;img v-bind:src=&quot;avatar&quot;&gt;//等同于&lt;img :src=&quot;avatar&quot;&gt;</div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        avatar:&apos;../imgs/GIF.gif&apos;,</div><div class="line">        msg:&quot;Hello world&quot;</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>v-bind 可以简写为：，上述例子即可简写为:</p>
+<pre><code>&lt;img :src=&apos;avatar&apos; /&gt;。
+</code></pre><h6 id="1-2-v-model"><a href="#1-2-v-model" class="headerlink" title="1.2 v-model"></a>1.2 v-model</h6><p>该指令主要用于input、select、textarea 标签中，具有lazy、number、debounce（2.0 废除）、trim（2.0 新增）这些修饰符。</p>
+<h6 id="1-3-v-if-v-else-v-show"><a href="#1-3-v-if-v-else-v-show" class="headerlink" title="1.3 v-if/v-else/v-show"></a>1.3 v-if/v-else/v-show</h6><ol>
+<li>v-if/v-else/v-show 这三个指令主要用于根据条件展示对应的模板内容  </li>
+<li>v-if 和v-show 的主要区别就在于，v-if 在条件为false 的情况下并不进行模板的编译，而v-show 则会在模板编译好之后将元素隐藏<br>掉。</li>
+<li>v-if 的切换消耗要比v-show 高，但初始条件为false 的情况下，v-if 的初始渲染要<br>稍快。</li>
+</ol>
+<h6 id="1-4-v-for"><a href="#1-4-v-for" class="headerlink" title="1.4 v-for"></a>1.4 v-for</h6><p>v-for 也是用于模板渲染的指令，前面已经叙述。  </p>
+<pre><code>&lt;ul&gt;
+ &lt;li v-for=&apos;(index, item) in items&apos;&gt;
+ &lt;p&gt;{{ item.name }}&lt;/p&gt;
+  …..
+  &lt;/li&gt;
+&lt;/ul&gt;
+</code></pre><p>v-for 指令用法在Vue.js 2.0 中做了些细微的调整，大致包含以下几个方面：<br>1．参数顺序变化<br>当包含参数index 或key 时，对象参数修改为（item, index）或（value, key），这样<br>与JS Array 对象的新方法forEach 和map，以及一些对象迭代器（例如lodash）的参数能保<br>持一致。<br>2．v-bind:key<br>属性track-by 被v-bind ：key 代替，<div v-for="item in items" tranck-by="id"> 需要改写成<div v-for="item in items" v-bind:key="item.id">。<br>３．n in 10<br>v-for=”n in 10” 中的n 由原来的0 ～ 9 迭代变成1 ～ 10 迭代。  </div></div></p>
+<h6 id="1-5-v-on"><a href="#1-5-v-on" class="headerlink" title="1.5 v-on"></a>1.5 v-on</h6><p>v-on 指令主要用于事件绑定<br>修饰符包括.stop、.prevent、.capture、.self 以及指定按键.{</p>
+<pre><code>keyCode|keyAlias}。
+</code></pre><p>在Vue.js 2.0 中，在组件上使用v-on 指令只监听自定义事件，即使用$emit 触发的<br>事件；如果要监听原生事件，需要使用修饰符.native，例如<my-component v-on:click.="" native="onClick"></my-component>。</p>
+<h6 id="1-6-v-text"><a href="#1-6-v-text" class="headerlink" title="1.6 v-text"></a>1.6 v-text</h6><p>v-text，参数类型为String，作用是更新元素的textContent。</p>
+<pre><code>{{}} 
+</code></pre><p>文本插值本身也会被编译成textNode 的一个v-text 指令。而与直接使用</p>
+<pre><code>{{}} 
+</code></pre><p>不同的是，v-text 需要绑定在某个元素上，能避免未编译前的闪现问题。</p>
+<pre><code>&lt;span v-text=&quot;msg&quot;&gt;&lt;/span&gt;
+</code></pre><p>如果直接使用</p>
+<pre><code>&lt;span&gt;{{msg}}&lt;/span&gt;
+</code></pre><p>在生命周期beforeCompile期间，此刻msg数据尚未编译至</p>
+<pre><code>{{msg}} 
+</code></pre><p>中，用户能看到一瞬间的</p>
+<pre><code>{{msg}}
+</code></pre><p>然后闪现为There is a message,而用v-text 的话则不会有这个问题<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/38.png" alt=""></p>
+<h6 id="1-7-v-HTML"><a href="#1-7-v-HTML" class="headerlink" title="1.7 v-HTML"></a>1.7 v-HTML</h6><p>v-HTML, 参数类型为String， 作用为更新元素的innerHTML，接受的字符串不会进行<br>编译等操作，按普通HTML 处理。同v-text 类似，</p>
+<pre><code>{{{}}} 
+</code></pre><p>插值也会编译为节点的v-HTML指令,v-HTML也需要绑定在某个元素上且能避免编译前闪现问题。例如：</p>
+<pre><code>&lt;div&gt;{{{HTML}}}&lt;/div&gt;
+&lt;div v-HTML=&quot;HTML&quot;&gt;&lt;/div&gt;
+</code></pre><h6 id="1-8-v-el"><a href="#1-8-v-el" class="headerlink" title="1.8 v-el"></a>1.8 v-el</h6><p>v-el指令为DOM元素注册了一个索引，使得我们可以直接访问DOM元素。语法上说，<br>可以通过所属实例的$els属性调用。例如：</p>
+<pre><code>&lt;div v-el:demo&gt;there is a el demo&lt;/div&gt;
+vm.$els.demo.innerText // -&gt; there is a el demo
+</code></pre><p>或者在vm 内部通过this 进行调用。<br>另外，由于HMTL 不区分大小写，在v-el 中如果使用了驼峰式命名，系统会自动转成<br>小写。但可以使用“-”来连接你期望大写的字母。例如：  </p>
+<pre><code>&lt;div v-el:camelCase&gt;There is a camelcase&lt;/div&gt;
+&lt;div v-el:camel-case&gt;There is a camelCase&lt;/div&gt;
+vm.$els.camelcase.innerText // -&gt; There is a camelcase
+vm.$els.camelCase.innerText // -&gt; There is a camelCase
+</code></pre><h6 id="1-9-v-ref"><a href="#1-9-v-ref" class="headerlink" title="1.9 v-ref"></a>1.9 v-ref</h6><p>v-ref 指令与v-el 类似，只不过v-ref 作用于子组件上，实例可以通过$refs 访问子组<br>件。命名方式也类似，想使用驼峰式命名的话用“-”来做连接。例如：  </p>
+<pre><code>&lt;message v-ref:title content=&quot;title&quot;&gt;&lt;/message&gt;
+&lt;message v-ref:sub-title content=&quot;subTitle&quot;&gt;&lt;/message&gt;
+var Message = Vue.extend({
+   props : [&apos;content&apos;],
+   template : &apos;&lt;h1&gt;{{content}}&lt;/h1&gt;&apos;
+});
+Vue.component(&apos;message&apos;, Message);
+</code></pre><p>我们最终将vm.$refs.title 和vm.$refs.subTitle 用console.log 的方式打印到控制台中，结果为：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/39.png" alt="">  </p>
+<h6 id="1-10-v-pre"><a href="#1-10-v-pre" class="headerlink" title="1.10 v-pre"></a>1.10 v-pre</h6><p>v-pre 指令相对简单，就是跳过编译这个元素和子元素，显示原始的</p>
+<pre><code>{{}}
+</code></pre><p>Mustache 标签，用来减少编译时间。例如：</p>
+<pre><code>&lt;div v-pre&gt;{{ uncompiled}}&lt;/div&gt;
+var vm = new Vue({
+　 el : &apos;#app&apos;,
+　 data: {
+　　 uncompiled : &apos;Thers is an uncompiled element&apos;
+　 }
+});
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/40.png" alt="">   </p>
+<h6 id="1-11-v-cloak"><a href="#1-11-v-cloak" class="headerlink" title="1.11 v-cloak"></a>1.11 v-cloak</h6><p>v-cloak 指令相当于在元素上添加了一个[v-cloak] 的属性，直到关联的实例结束编译。<br>官方推荐可以和css 规则</p>
+<pre><code>[v-cloak]{ display :none }
+</code></pre><p> 一起使用，可以隐藏未编译的Mustache标签直到实例准备完毕。例如：  </p>
+<pre><code>&lt;div v-cloak&gt;{{ msg }}&lt;/div&gt;
+</code></pre><h6 id="1-12-v-once"><a href="#1-12-v-once" class="headerlink" title="1.12 v-once"></a>1.12 v-once</h6><p>v-once 指令是Vue.js 2.0 中新增的内置指令，用于标明元素或组件只渲染一次，即使随<br>后发生绑定数据的变化或更新，该元素或组件及包含的子元素都不会再次被编译和渲染。这样<br>就相当于我们明确标注了这些元素不需要被更新，所以v-once 的作用是最大程度地提升了更<br>新行为中页面的性能，可以略过一些明确不需要变化的步骤。使用方式如下：  </p>
+<pre><code>&lt;span v-once&gt;{{msg}}&lt;/span&gt;
+&lt;my-component v-once :msg=&apos;msg&apos;&gt;&lt;/my-component&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/29/vue-10-指令-内置指令/" class="archive-article-date">
+  	<time datetime="2017-10-29T08:16:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-9-Vue-extend" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -799,100 +933,6 @@
 
 
   
-    <article id="post-SpringBoot-39-SpringBoot集成jsp补充" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/">SpringBoot(39)-SpringBoot集成jsp补充</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?<br>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？<br>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？<br>例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：  </p>
-<pre><code>&lt;!-- springmvc.xml 资源映射 --&gt;  
-&lt;mvc:resources location=&quot;/WEB-INF/css/&quot; mapping=&quot;/css/**&quot;/&gt;  
-&lt;mvc:resources location=&quot;/WEB-INF/js/&quot; mapping=&quot;/js/**&quot;/&gt;  
-&lt;mvc:resources location=&quot;/WEB-INF/image/&quot; mapping=&quot;/image/**&quot;/&gt;  
-</code></pre><p>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？  </p>
-<pre><code>&lt;dependency&gt;
-       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-       &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
-       &lt;scope&gt;provided&lt;/scope&gt;
-&lt;/dependency&gt;
-</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？"><a href="#1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？" class="headerlink" title="1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？"></a>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？</h5><p> 针对第一个问题，答案是不可以的:  </p>
-<p>我们先看一段英文描述，如下：</p>
-<p>When running a Spring Boot application that uses an embedded servlet container (and is packaged as an executable archive), there are some limitations in the JSP support.</p>
-<p>With Tomcat it should work if you use war packaging, i.e. an executable war will work, and will also be deployable to a standard container (not limited to, but including Tomcat). An executable jar will not work because of a hard coded file pattern in Tomcat.<br>Jetty does not currently work as an embedded container with JSPs.<br>Undertow does not support JSPs.</p>
-<p>原文的大体意思就是：Tomcat支持war的打包方式，spring boot支持war打包方式。Jetty现在不支持JSP嵌入容器。Undertow根本就不支持JSP。</p>
-<p>所以答案就是打包成war，jsp会自然按照servlet的标准部署。但也就意味着你不可以用嵌入式的方式运行，而是Tomcat Server + war的部署方式。</p>
-<p>看到这里有些网友肯定会有疑问那什么是嵌入式的web服务器？我们这边就拿jetty来说明下。</p>
-<p>Jetty 可以非常容易的嵌入到应用程序当中而不需要程序为了使用 Jetty 做修改。</p>
-<p>从某种程度上，你也可以把 Jetty 理解为一个嵌入式的Web服务器。所以我们经常会说嵌入式jetty。</p>
-<p>Jetty有一个口号：不要把你的应用部署到Jetty中，把Jetty部署到你的应用中。Jetty可以在Java应用程序中向其他POJO一样被实例化，换句话说，以嵌入式的模式运行Jetty是指将Http模块放入你的应用程序中，而非部署你的程序到一个HTTP服务器。这就是所谓的嵌入式jetty。</p>
-<p>另外在说明一点就是JSP解析是需要JSP引擎处理的，tomcat就提供了JSP处理引擎。所以很显然JSP是依赖容器而存在的，不然就没法访问了。那么既然是依赖于tomcat的话。好了第一个问题就解说到这里，不知道是否对你有帮助？留言评论！</p>
-<p>出了这篇文章之后，有一网友找到一支持打成jar包运行的插件：</p>
-<h5 id="2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？"><a href="#2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？" class="headerlink" title="2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？"></a>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？</h5><p>只需要在src/main/resouces下新建一个static目录，然后在static下新建子目录：css,images,js目录，在images放入一张test.jpg图片，那么访问路径是：<a href="http://127.0.0.1:8080/images/test.jpg" target="_blank" rel="external">http://127.0.0.1:8080/images/test.jpg</a>  </p>
-<p>当前目录结构应该是这样子的：  </p>
-<pre><code>(1)--src/java/resources  
-  (2)--static
-     (3)--css
-     (3)--images
-     (3)--js
-</code></pre><p>那么有人会有疑问这个，打包的时候能打上嘛，答案是可以的，请看实际打包解压图：  </p>
-<h5 id="3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"><a href="#3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？" class="headerlink" title="3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"></a>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？</h5><p>如果没有这个配置的话，那么打包出来会包含tomcat的jar包，整个war文件都会变大，第二就是如果版本是一样的，比如我这里是8.0的，那么是不会报错的，如果是7.0的tomcat的话，那么就启动报错了。有另外一种配置方式如下：  </p>
-<pre><code>&lt;dependency&gt;   
- &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;   
- &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;    
-&lt;exclusions&gt;   
- &lt;exclusion&gt;   
-     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;    
-     &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;   
- &lt;/exclusion&gt;   
-&lt;/exclusions&gt;    
-&lt;/dependency&gt; 
-</code></pre><h5 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a>4.总结</h5><p>（a） 第一就是：Spring Boot使用jsp的话，是不可以打包成jar包的，需要打包成war成文件。</p>
-<p>（b）第二就是：静态资源存放在resources的static下，新建images,js,css目录即可，当然出了static还可以是resources下创建resources文件存放资源，还有就是public。具体看我的第13篇博客文章。</p>
-<p>（c）第三就是：spring-boot-starter-tomcat是必须添加的嘛，我只能说在我的这个demo中我的这个是必须添加的，不然第一占导出包大小，其次就是可能tomcat jar包会冲突，导致无法启动程序。另外要说明的就是还有别的方式使用tomcat的方式</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/" class="archive-article-date">
-  	<time datetime="2017-10-21T05:32:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -958,7 +998,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 10px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 10.63px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
