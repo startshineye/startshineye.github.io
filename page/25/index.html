@@ -152,6 +152,79 @@
       <div class="body-wrap">
         
   
+    <article id="post-代理-二-创建动态类及查看其方法列表" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/14/代理-二-创建动态类及查看其方法列表/">代理(二)-创建动态类及查看其方法列表</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="目标"><a href="#目标" class="headerlink" title="目标"></a>目标</h5><ol>
+<li>利用java提供的API来生成动态的类</li>
+<li>用JVM生成的动态类一定要给出他一个接口<h5 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h5><h6 id="1-原理分析"><a href="#1-原理分析" class="headerlink" title="1.原理分析"></a>1.原理分析</h6></li>
+<li>运动java提供的Proxy  API其有一个getProxyClass()从而造出一个字节码,但是造出字节码的时候需要告诉这个字节码实现了哪些接口<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">getProxyClass(ClassLoader loader, Class&lt;?&gt;... interfaces) </div><div class="line">//返回代理类的 java.lang.Class 对象，并向其提供类加载器和接口数组。</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>此方法是得到一个类的类加载器,某一个类都是通过类加载器把它从硬盘加入到内存的。就像某一个人都是有一个妈妈。而getProxyClass(ClassLoader loader, Class&lt;?&gt;… interfaces) 在JVM内存中操作的字节码是没有classLoder,虽然是内存中出来的但是还是需要给他指定一个类加载器,不然以后别人说一个类竟然没有类加载器,这是说不过去的,就像没有妈妈一样。</p>
+<h6 id="2-创建动态类"><a href="#2-创建动态类" class="headerlink" title="2.创建动态类"></a>2.创建动态类</h6><ol>
+<li>实例代码<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public class ProxyTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//调用Proxy得到一个类的类加载器，类加载器通常用接口参数相同的类加载器参数</div><div class="line">	Class proxyClass = Proxy.getProxyClass(Collection.class.getClassLoader(), Collection.class);</div><div class="line">	System.out.println(proxyClass.getName());//com.sun.proxy.$Proxy0</div><div class="line">	</div><div class="line">	System.out.println(&quot;----------begin constructor------------------------&quot;);</div><div class="line">	//找出这个类上的所有构造方法</div><div class="line">	Constructor[] constructors = proxyClass.getConstructors();</div><div class="line">	for(Constructor constructor:constructors)&#123;</div><div class="line">		String name = constructor.getName();</div><div class="line">		StringBuilder sb = new StringBuilder();//当线程条件下使用</div><div class="line">		sb.append(&quot;&#123;&quot;);</div><div class="line">		Class[] params = constructor.getParameterTypes();</div><div class="line">		for(Class param:params)&#123;</div><div class="line">			sb.append(param.getName()).append(&quot;,&quot;);</div><div class="line">			System.out.println();</div><div class="line">		&#125;</div><div class="line">		//如果没有参数就不用去掉最后一个&quot;,&quot;</div><div class="line">		if(params!=null &amp;&amp; params.length!=0)&#123;</div><div class="line">			sb.deleteCharAt(sb.length()-1);</div><div class="line">		&#125;</div><div class="line">		sb.append(&quot;&#125;&quot;);</div><div class="line">		System.out.println(sb);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="创建动态类实例对象及调用其方法"><a href="#创建动态类实例对象及调用其方法" class="headerlink" title="创建动态类实例对象及调用其方法"></a>创建动态类实例对象及调用其方法</h4><ol>
+<li>proxyClass.newInstance();由上面知道，其没有不带参数的构造方法，所以不能调用newInstance()方法,我们得到那个带参构造方法<br>Constructor constructor = proxyClass.getConstructor(InvocationHandler.class);constructor.newInstance(initargs)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/80.png" alt="">,必须传递一个InvocationHandler参数，但是又是因为其为接口,不能new所以new实现类,多态<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/81.png" alt=""></li>
+<li><p>代码示例</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div></pre></td><td class="code"><pre><div class="line">public class ProxyTest &#123;</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	//调用Proxy得到一个类的类加载器，类加载器通常用接口参数相同的类加载器参数</div><div class="line">	Class proxyClass = Proxy.getProxyClass(Collection.class.getClassLoader(), Collection.class);</div><div class="line">	System.out.println(proxyClass.getName());//com.sun.proxy.$Proxy0</div><div class="line">	</div><div class="line">	</div><div class="line">	System.out.println(&quot;----------begin constructor------------------------&quot;);</div><div class="line">	//找出这个类上的所有构造方法</div><div class="line">	Constructor[] constructors = proxyClass.getConstructors();</div><div class="line">	for(Constructor constructor:constructors)&#123;</div><div class="line">		String name = constructor.getName();</div><div class="line">		StringBuilder sb = new StringBuilder();//当线程条件下使用</div><div class="line">		sb.append(&quot;&#123;&quot;);</div><div class="line">		Class[] params = constructor.getParameterTypes();</div><div class="line">		for(Class param:params)&#123;</div><div class="line">			sb.append(param.getName()).append(&quot;,&quot;);</div><div class="line">			System.out.println();</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">		//如果没有参数就不用去掉最后一个&quot;,&quot;</div><div class="line">		if(params!=null &amp;&amp; params.length!=0)&#123;</div><div class="line">			sb.deleteCharAt(sb.length()-1);</div><div class="line">		&#125;</div><div class="line">		sb.append(&quot;&#125;&quot;);</div><div class="line">		System.out.println(sb);</div><div class="line">	&#125;</div><div class="line">  </div><div class="line">	//创建实例对象</div><div class="line">	System.out.println(&quot;--------begin create instance--------------------&quot;);</div><div class="line">    //注意此处不能创建对象,不能用newInstance</div><div class="line">	//proxyClass.newInstance();//由上面知道，其没有不带参数的构造方法，所以不能调用newInstance()方法</div><div class="line">    //我们得到那个带参构造方法</div><div class="line">	Constructor constructor = proxyClass.getConstructor(InvocationHandler.class);</div><div class="line">	</div><div class="line">	//创建实现了接口InvocationHandler的实现类</div><div class="line">	class MyInvocationHandler implements InvocationHandler&#123;</div><div class="line">		@Override</div><div class="line">		public Object invoke(Object proxy, Method method, Object[] args)</div><div class="line">				throws Throwable &#123;</div><div class="line">			// TODO Auto-generated method stub</div><div class="line">			return null;</div><div class="line">		&#125; </div><div class="line">	&#125;</div><div class="line">	Collection proxy1 = (Collection)constructor.newInstance(new MyInvocationHandler());//必须传递一个InvocationHandler参数，但是又是因为其为接口,不能new所以new实现类,多态</div><div class="line">	proxy1.clear();//无返回值,正常</div><div class="line">	proxy1.size();//有返回值:Exception in thread &quot;main&quot; java.lang.NullPointerException at com.sun.proxy.$Proxy0.size(Unknown Source)</div><div class="line">  </div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>以上已经成功的获得一个动态(代理)类,并且用这个动态类创建了一个对象,那个动态类的构造方法需要接受一个InvocationHander的对象,所以构造一个InvocationHander的子类对象,打印出的对象的toString()方法为null，我们调用这个类的没有返回值的方法clear()就成功,而调用有返回值的方法size()则出错。</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/14/代理-二-创建动态类及查看其方法列表/" class="archive-article-date">
+  	<time datetime="2017-01-14T13:20:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-代理-一-代理及AOP" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -743,81 +816,6 @@
 
 
   
-    <article id="post-类加载器-一-类加载器及委托机制" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/08/类加载器-一-类加载器及委托机制/">类加载器(一)-类加载器及委托机制</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="类加载器"><a href="#类加载器" class="headerlink" title="类加载器"></a>类加载器</h4><h6 id="1-简要介绍类加载器及作用"><a href="#1-简要介绍类加载器及作用" class="headerlink" title="1.简要介绍类加载器及作用"></a>1.简要介绍类加载器及作用</h6><ol>
-<li>类加载器：就是加载类的工具，在java程序中用到一个类首先是把这个类的字节码加载到内存中,通常这个字节码放在classpath硬盘指定的目录下。</li>
-<li>类加载器作用：加载类到内存中<h6 id="2-类加载器其他介绍"><a href="#2-类加载器其他介绍" class="headerlink" title="2.类加载器其他介绍"></a>2.类加载器其他介绍</h6></li>
-<li>java虚拟机中可以安装多个类加载器,系统默认三个主要的类加载器,每个类加载器负责加载特定位置的类:BootStrap,ExtClassLoader,AppClassLoader</li>
-<li><p>类加载器也是java类，由于类加载器的类本身也要被加载,显然必须有第一个类加载器不是java类,这正是BootStrap(用c++写的二进制代码).</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//1.获得ClassLoaderTest类的类加载器(反射)</div><div class="line">	  String name = ClassLoaderTest.class.getClassLoader().getClass().getName();</div><div class="line">	  System.out.println(name);//输出：sun.misc.Launcher$AppClassLoader</div><div class="line">	  </div><div class="line">	//2.获取System类的类加载器</div><div class="line">	 ClassLoader sysClassLoader = System.class.getClassLoader();</div><div class="line">	  System.out.println(sysClassLoader);//输出：null,说明System类没有类加载器，它由BootStrap加载</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织,在实例化每个类加载器对象的时候,需要为其指定一个父级类加载器对象或者默认采用系统类装载器为其父级类加载。</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//3.java虚拟机中的所有类装载器采用具有父子关系的树形结构进行组织</div><div class="line">	  ClassLoader classLoader = ClassLoaderTest.class.getClassLoader();</div><div class="line">	  while(classLoader != null)&#123;//循环获取父类</div><div class="line">		  System.out.println(classLoader.getClass().getName());</div><div class="line">		  classLoader = classLoader.getParent();</div><div class="line">	  &#125;</div><div class="line">	  System.out.println(classLoader);//最后输出的是最上层根</div><div class="line">	  /**</div><div class="line">	   * 输出结果为:</div><div class="line">	   * sun.misc.Launcher$AppClassLoader</div><div class="line">         sun.misc.Launcher$ExtClassLoader</div><div class="line">         null</div><div class="line">	   */</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="3-类加载器之间的父子关系和管辖范围图"><a href="#3-类加载器之间的父子关系和管辖范围图" class="headerlink" title="3.类加载器之间的父子关系和管辖范围图"></a>3.类加载器之间的父子关系和管辖范围图</h6><ol>
-<li>图<br><img src="http://p1.bqimg.com/576993/95f6f9a54d7f0d25.png" alt="Markdown"></li>
-<li>总结：<br>BootStrap加载rt.jar里面的类,System类就是rt.jar里面的<br>我们一般写的类是用AppClassLoader.</li>
-</ol>
-<h4 id="类加载器的委托机制"><a href="#类加载器的委托机制" class="headerlink" title="类加载器的委托机制"></a>类加载器的委托机制</h4><h6 id="1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？"><a href="#1-当java虚拟机要加载一个类时候-到底派出哪个类加载器去加载呢？" class="headerlink" title="1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？"></a>1.当java虚拟机要加载一个类时候,到底派出哪个类加载器去加载呢？</h6><ol>
-<li>首先当前线程的类加载器去加载线程中的第一个类</li>
-<li>如果类A中引用了类B，java虚拟机将使用加载类A的类装载器来加载类B</li>
-<li>还可以直接调用ClassLoader.loadClass()方法来指定某个类加载器去加载某个类</li>
-<li>每个类加载器加载类时，又先委托给其上级类加载器</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/08/类加载器-一-类加载器及委托机制/" class="archive-article-date">
-  	<time datetime="2017-01-08T04:05:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-08</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/24/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/26/">Next &raquo;</a>
@@ -883,7 +881,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 11.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
