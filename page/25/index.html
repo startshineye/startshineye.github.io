@@ -152,6 +152,67 @@
       <div class="body-wrap">
         
   
+    <article id="post-代理-三-InvocationHander对象内部功能" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/14/代理-三-InvocationHander对象内部功能/">代理(三)-InvocationHander对象内部功能</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="在创建动态代理类的时候用到了一个InvocationHander我们改动如下"><a href="#在创建动态代理类的时候用到了一个InvocationHander我们改动如下" class="headerlink" title="在创建动态代理类的时候用到了一个InvocationHander我们改动如下"></a>在创建动态代理类的时候用到了一个InvocationHander我们改动如下</h4><ol>
+<li><p>子类实现InvocationHander作为参数的另一种方式改动如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">//另一种方式</div><div class="line">constructor.newInstance(new InvocationHandler()&#123;</div><div class="line">	@Override</div><div class="line">	public Object invoke(Object proxy, Method method, Object[] args)throws Throwable &#123;</div><div class="line">		return null;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div></pre></td></tr></table></figure>
+</li>
+<li><p>总结思考:让JVM创建动态类及其实例对象,需要给他提供哪些消息?<br>三个方面<br>1.生成的类中有哪些方法,通过让其实现哪些接口的方式进行告知<br>2.产生的类字节码必须有一个关联的类加载器对象<br>3.生成的类中的方法代码是怎样的，也得有我们提供。把我们的代码在一个约定好了接口对象的方法中,把对象传给它,它调用我的方法，即相当于插入了我的代码。提供执行代码的对象就是那个InvocationHandler对象,他是在创建动态类的实例对象的构造方法时传递进去的。在上面的InvocationHandler对象的invoke方法中加一点代码,就可以看到这些代码被调用执行了。</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/14/代理-三-InvocationHander对象内部功能/" class="archive-article-date">
+  	<time datetime="2017-01-14T15:39:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-代理-二-创建动态类及查看其方法列表" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -756,66 +817,6 @@
 
 
   
-    <article id="post-类加载器-二-自定义类加载器的原理分析" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/10/类加载器-二-自定义类加载器的原理分析/">类加载器(二)-自定义类加载器的原理分析</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><ol>
-<li>自定义的类加载器必须继承ClassLoader<br>自己写的类加载器必须继承一个抽象类ClassLoader,</li>
-<li>loadClass方法和findClass方法<br>ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用findClass。也就是说loaderClass首先找爸爸,找到后调用findClass。如果直接覆盖loaderClass就会直接自己干,不会去找爸爸。或者找爸爸还要自己写代码去找没比较难以实现。<br>父类–&gt;loaderClass/findClass/得到class文件的转换成字节码–&gt;defineClass()</li>
-<li>defineClass方法<br>defineClass方法将二进制变成字节码</li>
-<li>例子<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">class NetworkClassLoader extends ClassLoader &#123;</div><div class="line">        String host;</div><div class="line">        int port;</div><div class="line">        public Class findClass(String name) &#123;</div><div class="line">            byte[] b = loadClassData(name);</div><div class="line">            return defineClass(name, b, 0, b.length);</div><div class="line">        &#125;</div><div class="line">        private byte[] loadClassData(String name) &#123;</div><div class="line">            // load the class data from the connection</div><div class="line">             . . .</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/10/类加载器-二-自定义类加载器的原理分析/" class="archive-article-date">
-  	<time datetime="2017-01-10T13:26:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/24/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/26/">Next &raquo;</a>
@@ -881,7 +882,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 11.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 11.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
