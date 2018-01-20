@@ -152,6 +152,138 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-21-指令-自定义指令" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/02/vue-21-指令-自定义指令/">vue(21)-指令-自定义指令</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>例如:v-text,v-for,v-html这些都是vue自带的指令,但是有时候也许自带指令不够时候我们需要自定义指令</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>自定义指令运用类的方法:Vue.directive()  </p>
+<pre><code>Vue.directive(指令名称,function(){
+
+});
+</code></pre><p>调用指令名称:在指令名称前面加上’v-‘  比如：red指令 则调用时候为:v-red  </p>
+<h5 id="1-改变背景"><a href="#1-改变背景" class="headerlink" title="1.改变背景"></a>1.改变背景</h5><p>1.指令无参  </p>
+<pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+   &lt;span v-red&gt;
+       {{msg}}
+   &lt;/span&gt;
+&lt;/div&gt;
+&lt;script&gt;
+Vue.directive(&quot;red&quot;,function(){
+    this.el.style.background=&quot;red&quot;;
+});
+ new Vue({
+     el:&quot;#box&quot;,
+     data:{
+         msg:&quot;hello&quot;
+     }
+ });
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.png" alt="">  </p>
+<p>2.指令传参  </p>
+<pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
+   &lt;span v-red=&quot;a&quot;&gt;
+       {{msg}}
+   &lt;/span&gt;
+&lt;/div&gt;
+&lt;script&gt;
+Vue.directive(&quot;red&quot;,function(val){
+    this.el.style.background=val;
+});
+ new Vue({
+     el:&quot;#box&quot;,
+     data:{
+         a:&quot;blue&quot;,
+         msg:&quot;hello world&quot;
+
+     }
+ });
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.gif" alt=""></p>
+<h5 id="2-拖拽"><a href="#2-拖拽" class="headerlink" title="2.拖拽"></a>2.拖拽</h5><pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;div v-drag :style=&quot;{width:&apos;100px&apos;,height:&apos;100px&apos;,background:&apos;yellow&apos;,position:&apos;absolute&apos;,right:0,top:0}&quot;&gt;
+
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;script&gt;
+Vue.directive(&quot;drag&quot;,function(){
+    var oDiv = this.el;
+    oDiv.onmousedown=function(ev){
+        var disX = ev.clientX-oDiv.offsetLeft;
+        var disY = ev.clientY-oDiv.offsetTop;
+
+        document.onmousemove=function(ev){
+            var l = ev.clientX-disX;
+            var t = ev.clientY-disY;
+            oDiv.style.left=l+&apos;px&apos;;
+            oDiv.style.top=t+&apos;px&apos;;
+        };
+        document.onmouseup=function(){
+            document.onmousemove=null;
+            document.onmouseup=null;
+        }
+    }
+});
+ new Vue({
+     el:&quot;#box&quot;,
+     data:{
+         msg:&quot;hello&quot;
+     }
+ });
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/02/vue-21-指令-自定义指令/" class="archive-article-date">
+  	<time datetime="2017-09-02T08:08:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-20-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1153,80 +1285,9 @@ new Vue({
 
 
   
-    <article id="post-redis-9-列表中" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/21/redis-9-列表中/">redis(9)-列表中</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>redis的插入和删除操作：LSET,LINSERT,LREM,LTRIM</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-设置指定索引上的列表项"><a href="#1-设置指定索引上的列表项" class="headerlink" title="1.设置指定索引上的列表项"></a>1.设置指定索引上的列表项</h5><p>LSET key index value  </p>
-<p>将列表键key索引index上的列表项设置为value,设置成功时命令返回OK。<br>如果index参数超过了列表的索引 范围,那么命令返回一个错误。  </p>
-<p>针对表头和表尾节点进行处理时(index为0或者-1)，命令复杂度为O(1);其他情况下,命令的复杂度为O(N),N为列表长度。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/46.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/47.png" alt="">  </p>
-<h5 id="2-在指定位置插入列表项"><a href="#2-在指定位置插入列表项" class="headerlink" title="2.在指定位置插入列表项"></a>2.在指定位置插入列表项</h5><p>LINSERT key BEFORE|AFTER pivot value  </p>
-<p>根据命令调用时传递的是BEFORE选项还是AFTER选项,将值value插入到指定列表项pivot的之前或者之后。当pivot不存在于列表key时,不执行任何操作。  </p>
-<p>返回-1表示pivot不存在;返回0表示键key不存在;插入成功时候则返回列表当前的 长度。  </p>
-<p>复杂度为O(N),N为列表长度。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/48.png" alt="">  </p>
-<h5 id="3-从列表中删除指定的值"><a href="#3-从列表中删除指定的值" class="headerlink" title="3.从列表中删除指定的值"></a>3.从列表中删除指定的值</h5><p>LREM key count value  </p>
-<p>根据参数count的值,移除列表中与参数value相等的列表项。  </p>
-<ol>
-<li>如果count&gt;0,那么从表头开始向表尾搜索,移除最多count个值为value的列表项。  </li>
-<li>如果count&lt;0,那么从表尾开始向表头搜索,移除最多count个值为value的列表项。</li>
-<li>如果count=0,那么移除列表中所有值为value的列表项。  </li>
-</ol>
-<p>命令返回被移除列表项的数量。  </p>
-<p>命令复杂度为O(N),N为列表的长度。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/49.png" alt="">  </p>
-<h5 id="4-修建列表"><a href="#4-修建列表" class="headerlink" title="4.修建列表"></a>4.修建列表</h5><p>LTRIM key start stop  </p>
-<p>对一个列表进行修剪(trim),让列表只保留指定索引范围内的列表项,而将不在范围内的其他列表项全部删除。两个索引都可以是正数或者负数。  </p>
-<p>命令执行成功时返回OK,复杂度O(N),N为被移除列表项的数量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/50.png" alt=""></p>
-<p>实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/51.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/52.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/53.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/54.png" alt="">  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/21/redis-9-列表中/" class="archive-article-date">
-  	<time datetime="2017-08-21T14:21:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/36/">36</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
     </nav>
   
 
@@ -1289,7 +1350,7 @@ new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 11.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 12.5px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
