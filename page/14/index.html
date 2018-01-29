@@ -152,6 +152,178 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-19-SpringBoot-Servlet" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/">SpringBoot(19)-SpringBoot Servlet</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.Web开发使用 Controller 基本上可以完成大部分需求，但是我们还可能会用到 Servlet、Filter、Listener、Interceptor 等等。<br>2.当使用Spring-Boot时，嵌入式Servlet容器通过扫描注解的方式注册Servlet、Filter和Servlet规范的所有监听器（如HttpSessionListener监听器）。<br>3.Spring boot 的主 Servlet 为 DispatcherServlet，其默认的url-pattern为“/”。也许我们在应用中还需要定义更多的Servlet，该如何使用SpringBoot来完成呢？两种方式:1.代码注册Servlet 2.注解自动注册  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>首先引入servlet的依赖:</p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+        &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;    
+</code></pre><h5 id="1-代码注册Servlet"><a href="#1-代码注册Servlet" class="headerlink" title="1.代码注册Servlet"></a>1.代码注册Servlet</h5><h6 id="1-1说明"><a href="#1-1说明" class="headerlink" title="1.1说明"></a>1.1说明</h6><p>1.代码注册Servlet需要通过注册bean：ServletRegistrationBean、 FilterRegistrationBean 和 ServletListenerRegistrationBean 获得控制。也可以通过实现 ServletContextInitializer 接口直接注册<br>2.步骤:(1).自己实现一个servlet[继承HttpServlet类] (2).通过ServletRegistrationBean注册[在应用启动中App.java] </p>
+<h6 id="1-2代码"><a href="#1-2代码" class="headerlink" title="1.2代码"></a>1.2代码</h6><p>MyServlet.java  </p>
+<pre><code>public class MyServlet extends HttpServlet{
+
+/**
+ * 
+ */
+private static final long serialVersionUID = 1L;
+
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+    System.out.println(&quot;*********doPost Method***********&quot;);
+     System.out.println(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;doPost()&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;);
+        resp.setContentType(&quot;text/html&quot;); 
+        resp.setCharacterEncoding(&quot;UTF-8&quot;);
+        PrintWriter out = resp.getWriter(); 
+        out.println(&quot;&lt;html&gt;&quot;); 
+        out.println(&quot;&lt;head&gt;&quot;); 
+        out.println(&quot;&lt;title&gt;Hello World&lt;/title&gt;&quot;); 
+        out.println(&quot;&lt;/head&gt;&quot;); 
+        out.println(&quot;&lt;body&gt;&quot;); 
+        out.println(&quot;&lt;h1&gt;自定义Servlet是：MyServlet&lt;/h1&gt;&quot;); 
+        out.println(&quot;&lt;/body&gt;&quot;); 
+        out.println(&quot;&lt;/html&gt;&quot;);
+}
+
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+    System.out.println(&quot;***********doGet Method*****************&quot;);
+    doPost(req, resp);
+}
+}
+</code></pre><p>App.java </p>
+<pre><code>import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.boot.context.embedded.ServletRegistrationBean;
+import org.springframework.context.annotation.Bean;
+import com.yxm.other.servlet.MyServlet;
+
+/** 大家也许会看到有些demo使用了3个注解： @Configuration @EnableAutoConfiguration @ComponentScan
+ * 其实：@SpringBootApplication申明让spring boot自动给程序进行必要的配置，等价于使用三个注解
+ *@SpringBootApplication声明应用启动类
+ */
+@SuppressWarnings(&quot;deprecation&quot;)
+@SpringBootApplication
+public class App 
+{
+
+/**
+ * 注册Servlet.不需要添加注解：@ServletComponentScan
+ * @param args
+ */
+public static void main( String[] args )
+{
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+  SpringApplication.run(App.class, args);
+}
+
+@Bean
+public  ServletRegistrationBean MySerlet(){
+    return new ServletRegistrationBean(new MyServlet(),&quot;/myServlet/*&quot;); 
+}
+} 
+</code></pre><p>浏览器中访问:<a href="http://localhost:8081/myServlet" target="_blank" rel="external">http://localhost:8081/myServlet</a>  输出:自定义Servlet是：MyServlet</p>
+<h5 id="2-注解自动注册"><a href="#2-注解自动注册" class="headerlink" title="2.注解自动注册"></a>2.注解自动注册</h5><h6 id="2-1说明"><a href="#2-1说明" class="headerlink" title="2.1说明"></a>2.1说明</h6><p>1.在 SpringBootApplication 上使用@ServletComponentScan注解<br>2.Servlet、Filter、Listener 可以直接通过 @WebServlet、@WebFilter、@WebListener 注解自动注册，无需其他代码。</p>
+<h6 id="2-2-代码"><a href="#2-2-代码" class="headerlink" title="2.2 代码"></a>2.2 代码</h6><p>MyServlet2.java  </p>
+<pre><code>@WebServlet(urlPatterns=&quot;/myServlet2/*&quot;, description=&quot;Servlet的说明&quot;)
+public class MyServlet2 extends HttpServlet{
+
+/**
+ * 
+ */
+private static final long serialVersionUID = 1L;
+
+
+@Override
+protected void doGet(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+    // TODO Auto-generated method stub
+    super.doPost(req, resp);
+}
+
+@Override
+protected void doPost(HttpServletRequest req, HttpServletResponse resp)
+        throws ServletException, IOException {
+        resp.setContentType(&quot;text/html&quot;); 
+        resp.setCharacterEncoding(&quot;UTF-8&quot;);
+        PrintWriter out = resp.getWriter(); 
+        out.println(&quot;&lt;html&gt;&quot;); 
+        out.println(&quot;&lt;head&gt;&quot;); 
+        out.println(&quot;&lt;title&gt;Hello World&lt;/title&gt;&quot;); 
+        out.println(&quot;&lt;/head&gt;&quot;); 
+        out.println(&quot;&lt;body&gt;&quot;); 
+        out.println(&quot;&lt;h1&gt;自定义Servlet2是：MyServlet2&lt;/h1&gt;&quot;); 
+        out.println(&quot;&lt;/body&gt;&quot;); 
+        out.println(&quot;&lt;/html&gt;&quot;);
+}
+}
+</code></pre><p>App.java  </p>
+<pre><code>@SpringBootApplication
+@ServletComponentScan
+public class App 
+{
+public static void main( String[] args )
+{
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+  SpringApplication.run(App.class, args);
+}
+}
+</code></pre><p>浏览器中访问:<a href="http://localhost:8081/myServlet" target="_blank" rel="external">http://localhost:8081/myServlet</a> 输出:自定义Servlet2是：MyServlet2</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/" class="archive-article-date">
+  	<time datetime="2017-07-25T01:07:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-十八-SpringBoot普通类中使用bean" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1106,60 +1278,6 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
 
 
   
-    <article id="post-SpringBoot-十-第10节全局异常捕捉 (2)" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/">SpringBoot(十)-第10节全局异常捕捉</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在一个项目中,我们通常会把异常统一进行处理,在Spring Boot中如何进行统一处理异常呢？<br>步骤:<br>1.新建一个类GlobalDefaultExceptionHandler<br>2.在class注解上@ControllerAdvice<br>3.在方法上注解上@ExceptionHandler(value = Exception.class)</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-问题"><a href="#1-问题" class="headerlink" title="1.问题"></a>1.问题</h5><p>我们先来看一个实例,使用jdbcTemplate根据cat_name查询数据库信息<br>数据库中<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/19.png" alt=""><br>在前端访问,错误:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/20.png" alt=""><br>在后台出错<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/21.png" alt="">说明其实期望返回一个结果,但是出现了2个结果</p>
-<h5 id="2-建立类"><a href="#2-建立类" class="headerlink" title="2.建立类"></a>2.建立类</h5><p>正对于以上情况,我们新建一个包下的一个类:GlobalDefaultExceptionHandle</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 1、新建一个Class,这里取名为GlobalDefaultExceptionHandler</div><div class="line">   * 2、在class上添加注解，@ControllerAdvice;</div><div class="line">   * 3、在class中添加一个方法</div><div class="line">   * 4、在方法上添加@ExcetionHandler拦截相应的异常信息；</div><div class="line">   * 5、如果返回的是View -- 方法的返回值是ModelAndView;</div><div class="line">   * 6、如果返回的是String或者是Json数据，那么需要在方法上添加@ResponseBody注解.</div><div class="line">   */</div><div class="line">   @ControllerAdvice</div><div class="line">   public class GlobalDefaultExceptionHandler &#123;</div><div class="line"></div><div class="line">@ExceptionHandler(value = Exception.class)</div><div class="line">@ResponseBody</div><div class="line">public String defaultErrorHandler(HttpServletRequest req, Exception e)  &#123;</div><div class="line">	//返回String</div><div class="line">	return &quot;the Server is busy,please wait a moment&quot;;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/22.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/" class="archive-article-date">
-  	<time datetime="2017-07-19T14:29:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
     <article id="post-SpringBoot-十-第10节全局异常捕捉" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1216,7 +1334,7 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
   
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/38/">38</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
     </nav>
   
 
@@ -1279,7 +1397,7 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.47px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.18px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.06px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.47px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 10px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.18px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.06px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
