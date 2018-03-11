@@ -152,6 +152,84 @@
       <div class="body-wrap">
         
   
+    <article id="post-java并发编程-一-线程基础" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/03/java并发编程-一-线程基础/">java并发编程(一)-线程基础</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="线程安全"><a href="#线程安全" class="headerlink" title="线程安全"></a>线程安全</h4><h5 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>线程安全：当多个线程访问某一个类(对象或方法)时,这个类始终都能表现出正确的行为,那么这个类(对象或方法)就是线程安全的</li>
+<li>synchronized:可以在任意对象及方法上枷锁,而枷锁的这段代码称为”互斥区”或”临界区”</li>
+<li><p>java里面线程是继承Thread类或者实现Runnable接口  </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">public class MyThread extends Thread&#123;</div><div class="line">private int count=5;</div><div class="line">public synchronized  void run()&#123;</div><div class="line">count--;</div><div class="line">System.out.println(this.currentThread().getName()+&quot; count=&quot;+count);</div><div class="line">&#125;</div><div class="line"> public static void main(String[] args) &#123;</div><div class="line">/**</div><div class="line"> * 分析:当多个线程访问myThread的run方法时候,以排队的方式进行处理(这里排队是按照cpu分配的先后顺序定的),</div><div class="line"> * 一个线程想要执行synchronized修饰的方法里的代码:</div><div class="line"> * 1.首先是尝试获取锁,</div><div class="line"> * 2.如果拿到锁,执行synchronized代码体内容:拿不到锁,这个线程就会不断的尝试获取这把锁,直到拿到为止</div><div class="line"> * 而且是多个线程同时去竞争这把锁(也就是会有锁竞争的问题)。</div><div class="line"> */</div><div class="line">MyThread myThread = new MyThread();</div><div class="line">Thread t1 = new Thread(myThread, &quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(myThread, &quot;t2&quot;);</div><div class="line">Thread t3 = new Thread(myThread, &quot;t3&quot;);</div><div class="line">Thread t4 = new Thread(myThread, &quot;t4&quot;);</div><div class="line">Thread t5 = new Thread(myThread, &quot;t5&quot;);</div><div class="line"></div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">t3.start();</div><div class="line">t4.start();</div><div class="line">t5.start();</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h5><p>实例总结<br>1、当多个线程访问myThread的run方法时候,以排队的方式进行处理(这里排队是按照cpu分配的先后顺序定的),一个线程想要执行synchronized修饰的方法里的代码,首先是尝试获取锁,如果拿到锁,执行synchronized代码体内容:拿不到锁,这个线程就会不断的尝试获取这把锁,直到拿到为止,而且是多个线程同时去竞争这把锁(也就是会有锁竞争的问题)。<br>2、以上不加锁时候表现出正常行为是:4 3 2 1 0<br>3、不加锁执行结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/0.png" alt="不加锁"><br>加锁执行结果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/1.png" alt="加锁"><br>效果就像以下5个人上厕所<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/2.png" alt=""></p>
+<h4 id="多个线程多个锁"><a href="#多个线程多个锁" class="headerlink" title="多个线程多个锁"></a>多个线程多个锁</h4><h5 id="1-概念-1"><a href="#1-概念-1" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>多个线程多个锁:多个线程,每个线程都可以拿到自己指定的锁,分别获得锁之后,执行synchronized方法体的内容<h5 id="2-代码-1"><a href="#2-代码-1" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 创建一个类,一个方法,多个线程去执行这个方法</div><div class="line">   * @author yxm</div><div class="line">    */</div><div class="line">    public class MutilThread &#123;</div><div class="line">    private static int num=0;</div><div class="line">    public static synchronized void printNum(String flag)&#123;</div><div class="line">  try &#123;</div><div class="line">	if(&quot;a&quot;.equals(flag))&#123;</div><div class="line">		  num=100;</div><div class="line">		  System.out.println(&quot;flag a,set num&quot;);</div><div class="line">		  Thread.sleep(1000);</div><div class="line">	&#125;else &#123;</div><div class="line">		num=200;</div><div class="line">		System.out.println(&quot;flag b,set num&quot;);</div><div class="line">	&#125;</div><div class="line">	System.out.println(&quot;flag &quot;+flag+&quot;, num &quot;+num);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;</div><div class="line">   //注意run方法执行顺序</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">  //1.两个不同对象</div><div class="line">  final MutilThread m1 = new MutilThread();</div><div class="line">  final MutilThread m2 = new MutilThread();</div><div class="line">  </div><div class="line">  //2.创建两个线程对象</div><div class="line">  Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		m1.printNum(&quot;a&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"> Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		m2.printNum(&quot;b&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"> //3.线程执行</div><div class="line">  t1.start();</div><div class="line">  t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-结论-1"><a href="#3-结论-1" class="headerlink" title="3.结论"></a>3.结论</h5><ol>
+<li>不加static <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE08.png" alt=""></li>
+<li>加static <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/%E6%88%AA%E5%9B%BE09.png" alt=""></li>
+<li>两个线程获取的分别是m1,m2对象的锁,执行时候不会有同步的效果,因为拿的是各自对象的锁    </li>
+<li>如果想要让一个线程执行printNum方法时候,其他线程不执行此方法,这个时候加“static”给这方法,方法加上static后被修改的成员变量也得加上static</li>
+<li>static表示在静态的方法上去加上synchronized修饰的话,这个锁就是这个类级别的锁</li>
+<li>关键字synchronized获得的锁都是对象锁,而不是把一段代码(方法)当做锁,所以示例代码中那个线程先执行synchronized关键字的方法,那个线程就持有该方法所属对象的锁(Lock),两个对象,线程获得的就是两个不通的锁,他们互不影响。有一种情况则是相同的锁,即在静态方法上加synchronized关键字,表示锁定class类,类一级别的锁(独占.class类)</li>
+</ol>
+<h4 id="对象锁的同步和异步"><a href="#对象锁的同步和异步" class="headerlink" title="对象锁的同步和异步"></a>对象锁的同步和异步</h4><h5 id="1-概念-2"><a href="#1-概念-2" class="headerlink" title="1.概念"></a>1.概念</h5><ol>
+<li>同步：同步的概念就是共享,牢牢记住”共享”,如果不是共享资源,就没有必要进行同步。同步的目的是为了线程安全，满足两个特性:1.原子性 2.可见性</li>
+<li>异步:异步的概念就是独立,相互之间不受到任何限制,就好像我们学习http时候,在页面发起的ajax请求,我们还可以继续浏览或操作页面内容,二者之间没有任何关系.<h5 id="2-代码-2"><a href="#2-代码-2" class="headerlink" title="2.代码"></a>2.代码</h5> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line">   public class MyObject &#123;</div><div class="line">   public synchronized void method1()&#123;</div><div class="line">   try &#123;</div><div class="line">	System.out.println(Thread.currentThread().getName());</div><div class="line">	Thread.sleep(4000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;;</div><div class="line">   public void method2()&#123;</div><div class="line">   System.out.println(Thread.currentThread().getName());</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">final MyObject my= new MyObject();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method1();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method2();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t2&quot;);</div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125;</div><div class="line">   结果:t1 t2几乎同时打印</div><div class="line">   public class MyObject &#123;</div><div class="line">   public synchronized void method1()&#123;</div><div class="line">   try &#123;</div><div class="line">	System.out.println(Thread.currentThread().getName());</div><div class="line">	Thread.sleep(4000);</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;;</div><div class="line">   public synchronized void method2()&#123;</div><div class="line">   System.out.println(Thread.currentThread().getName());</div><div class="line">   &#125;;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">final MyObject my= new MyObject();</div><div class="line">Thread t1 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method1();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t1&quot;);</div><div class="line">Thread t2 = new Thread(new Runnable() &#123;</div><div class="line">	@Override</div><div class="line">	public void run() &#123;</div><div class="line">		my.method2();			</div><div class="line">	&#125;</div><div class="line">&#125;,&quot;t2&quot;);</div><div class="line">t1.start();</div><div class="line">t2.start();</div><div class="line">   &#125;</div><div class="line">   &#125; </div><div class="line">   结果:t1打印后4s打印t2</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5><ol>
+<li>A线程先持有object对象的Lock锁,B线程如果在这个时候调用对象中的同步(synchronizes)方法则需要等待,也就是同步（正如:上面都枷锁情况）</li>
+<li>A线程先持有object对象的Lock锁,,B线程如果在这个时候调用对象中的非同步(synchronizes)方法则不需要等待（如上：method1加锁,method2不加锁）</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/03/java并发编程-一-线程基础/" class="archive-article-date">
+  	<time datetime="2017-06-03T10:53:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-03</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-九-protocol-buff使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -803,63 +881,9 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 
 
   
-    <article id="post-new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/26/new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化/">new Date(str)返回 Invalid date问题——javascript(js)时间初始化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在做im过程中，聊天信息表中保存的日期格式是 2017-4-26 16:49:23，但是图片是按照年/月/日文件夹格式保存到硬盘,所以显示图片时候需要转换格式<br>第一种方式：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var oldTime = (new Date(msg.messageTime)).getTime();</div><div class="line">var curTime=new Date(oldTime).Format(&quot;yyyy/MM/dd&quot;);</div></pre></td></tr></table></figure></p>
-<p>在火狐谷歌下没有错误，但是在ie下会报一下错误：“invalid date”<br>new Date(strDate);返回的是无效的时间格式</p>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><h6 id="方法一："><a href="#方法一：" class="headerlink" title="方法一："></a>方法一：</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">    解决 ie，火狐浏览器不兼容new Date(s)</div><div class="line">   @param strDate</div><div class="line">   返回 date对象</div><div class="line">   /</div><div class="line">   function getDateForStringDate(strDate)&#123;</div><div class="line">//切割年月日与时分秒称为数组</div><div class="line">var s = strDate.split(&quot; &quot;); </div><div class="line">var s1 = s[0].split(&quot;-&quot;); </div><div class="line">var s2 = s[1].split(&quot;:&quot;);</div><div class="line">if(s2.length==2)&#123;</div><div class="line">	s2.push(&quot;00&quot;);</div><div class="line">&#125;</div><div class="line">return new Date(s1[0],s1[1]-1,s1[2],s2[0],s2[1],s2[2]);</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="方法二："><a href="#方法二：" class="headerlink" title="方法二："></a>方法二：</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var date = new Date(strDate.replace(&quot;-&quot;, &quot;/&quot;).replace(&quot;-&quot;, &quot;/&quot;));</div></pre></td></tr></table></figure>
-<h6 id="修改"><a href="#修改" class="headerlink" title="修改"></a>修改</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var oldTime = (new Date(msg.messageTime.replace(&quot;-&quot;, &quot;/&quot;).replace(&quot;-&quot;, &quot;/&quot;))).getTime();</div><div class="line"> var curTime=new Date(oldTime).Format(&quot;yyyy/MM/dd&quot;);</div></pre></td></tr></table></figure>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/26/new-Date-str-返回-Invalid-date问题——javascript-js-时间初始化/" class="archive-article-date">
-  	<time datetime="2017-04-26T06:58:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/前端/">前端</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/38/">38</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/39/">39</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
     </nav>
   
 
@@ -922,7 +946,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.47px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.29px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.88px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.47px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.71px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 14.12px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.18px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.06px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 14.38px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     

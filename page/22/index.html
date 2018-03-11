@@ -152,6 +152,79 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-15-登录案例开发" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/07/Android-15-登录案例开发/">Android(15)-登录案例开发</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本课主要实现对用户登录信息的保存</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-登录界面"><a href="#1-登录界面" class="headerlink" title="1.登录界面"></a>1.登录界面</h6><p>本节做一个登录模块,最主要的模块效果图设计如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/55.png" alt="">  </p>
+<ol>
+<li>布局<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/56.png" alt="">  </li>
+<li>画ui<br>按照布局画ui <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;vertical&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot;&gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_username&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:hint=&quot;请输入用户名&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;EditText </div><div class="line">    android:id=&quot;@+id/et_password&quot;</div><div class="line">    android:password=&quot;true&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:hint=&quot;请输入密码&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;RelativeLayout </div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    &gt;</div><div class="line"> &lt;CheckBox </div><div class="line">     android:id=&quot;@+id/cb_isCheck&quot;</div><div class="line">     android:layout_width=&quot;wrap_content&quot;</div><div class="line">     android:layout_height=&quot;wrap_content&quot;</div><div class="line">     android:text=&quot;记住用户名和密码&quot;</div><div class="line">     /&gt;</div><div class="line"> &lt;Button </div><div class="line">     android:onClick=&quot;login&quot;</div><div class="line">     android:layout_width=&quot;wrap_content&quot;</div><div class="line">     android:layout_height=&quot;wrap_content&quot;</div><div class="line">     android:layout_alignParentRight=&quot;true&quot;</div><div class="line">     android:text=&quot;login&quot;</div><div class="line">     /&gt;</div><div class="line">&lt;/RelativeLayout&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>效果图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/57.png" alt=""></p>
+<h6 id="2-把数据保存到data目录-写逻辑"><a href="#2-把数据保存到data目录-写逻辑" class="headerlink" title="2.把数据保存到data目录(写逻辑)"></a>2.把数据保存到data目录(写逻辑)</h6><p>1.找到我们想要的控件<br>2.写按钮的点击事件login<br>3.login()里面拿到用户名和密码,判断是否为空(给出提示),不为空的话<br>4.判断checkBox是否勾选,勾选存储数据到data下面的login对应的应用下(io流),否则,提示  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">   private EditText username;</div><div class="line">private EditText password;</div><div class="line">private CheckBox cb_isCheck;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       super.onCreate(savedInstanceState);</div><div class="line">       setContentView(R.layout.activity_main);</div><div class="line">       username = (EditText)findViewById(R.id.et_username);</div><div class="line">       password = (EditText)findViewById(R.id.et_password);</div><div class="line">       cb_isCheck = (CheckBox)findViewById(R.id.cb_isCheck);</div><div class="line">   </div><div class="line">   &#125;</div><div class="line">   </div><div class="line">   private void login(View v)&#123;</div><div class="line">   	//login()里面拿到用户名和密码,判断是否为空(给出提示),不为空的话  </div><div class="line">   	//想要获得用户名密码控件里面的值,我们把它们定义成成员变量</div><div class="line">   	String name = username.getText().toString().trim();</div><div class="line">   	String pwd = password.getText().toString().trim();</div><div class="line">   	</div><div class="line">   	if(TextUtils.isEmpty(name) || TextUtils.isEmpty(pwd))&#123;</div><div class="line">   		Toast.makeText(MainActivity.this,&quot;用户名或者密码不为空&quot;, 1).show();</div><div class="line">   	&#125;else&#123;</div><div class="line">   		//不为空,判断勾选(获取checkBox)</div><div class="line">   		if(cb_isCheck.isChecked())&#123;</div><div class="line">   			//保存用户信息</div><div class="line">   			boolean result = UserInfoUtils.saveUserInfo(name,pwd);</div><div class="line">   			if(result)&#123;</div><div class="line">   				Toast.makeText(MainActivity.this, &quot;保存成功&quot;, 1).show();</div><div class="line">   			&#125;else&#123;</div><div class="line">   				Toast.makeText(MainActivity.this, &quot;保存失败&quot;, 1).show();</div><div class="line">   			&#125;</div><div class="line">   			cb_isCheck.setChecked(false);</div><div class="line">   		&#125;else&#123;</div><div class="line">   			Toast.makeText(MainActivity.this, &quot;cb勾选&quot;, 1).show();</div><div class="line">   		&#125;</div><div class="line">   	&#125;</div><div class="line">    &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   //工具类</div><div class="line">   public class UserInfoUtils &#123;</div><div class="line">//保存用户名和密码</div><div class="line">   public static boolean saveUserInfo(String username,String password)&#123;</div><div class="line">   	String result = username+password;</div><div class="line">   	String path = &quot;/data/data/com.yxm.login&quot;;</div><div class="line">   	//定义文件保存位置</div><div class="line">   	File file = new File(path);</div><div class="line">   	//定义一个输出流</div><div class="line">   	try &#123;</div><div class="line">		FileOutputStream fos = new FileOutputStream(file);</div><div class="line">		fos.write(result.getBytes());</div><div class="line">		fos.flush();</div><div class="line">		fos.close();</div><div class="line">		return true;</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">		return false;</div><div class="line">	&#125;</div><div class="line">    &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><ol>
+<li>文件保存位置(DDMS-&gt;data/data/com.yxm.login)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/58.png" alt="">  </li>
+</ol>
+<h6 id="3-把用户名和密码显示出来-记住密码的逻辑"><a href="#3-把用户名和密码显示出来-记住密码的逻辑" class="headerlink" title="3.把用户名和密码显示出来(记住密码的逻辑)"></a>3.把用户名和密码显示出来(记住密码的逻辑)</h6><p>1.读出保存文本文件的内容放到map中<br>2.然后显示到空间页面上 </p>
+<ol>
+<li><p>1.在UserInfoUtils加入一个读取方法  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">     //读取用户信息到Map中</div><div class="line">    public static Map&lt;String,String&gt; readUserInfo()&#123;</div><div class="line">    	try &#123;</div><div class="line">			Map&lt;String, String&gt; map = new HashMap&lt;String,String&gt;();</div><div class="line">			String path = &quot;/data/data/com.yxm.login/info.txt&quot;;</div><div class="line">			File file = new File(path);</div><div class="line">			FileInputStream fis = new FileInputStream(file);</div><div class="line">			BufferedReader br = new BufferedReader(new InputStreamReader(fis));</div><div class="line">			String content = br.readLine();</div><div class="line">			String[] split = content.split(&quot;##&quot;);</div><div class="line">			map.put(&quot;name&quot;, split[0]);</div><div class="line">			map.put(&quot;pwd&quot;, split[1]);</div><div class="line">			fis.close();</div><div class="line">			return map;</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			// TODO Auto-generated catch block</div><div class="line">			e.printStackTrace();</div><div class="line">			return null;</div><div class="line">		&#125;</div><div class="line">    &#125;</div><div class="line">    ``` </div><div class="line">2. 2.在MainActivity中调用</div></pre></td></tr></table></figure>
+<p> Map<string, string=""> userInfo = UserInfoUtils.readUserInfo();</string,></p>
+<pre><code>if(userInfo!=null){
+ username.setText(userInfo.get(&quot;name&quot;));
+ password.setText(userInfo.get(&quot;name&quot;));
+</code></pre><p> }<br> ```</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/07/Android-15-登录案例开发/" class="archive-article-date">
+  	<time datetime="2017-03-07T14:43:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-14-日志猫的使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -708,62 +781,9 @@ android:label=&quot;@string/app_name&quot; &gt;
 
 
   
-    <article id="post-Android-五-模拟器创建" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/04/Android-五-模拟器创建/">Android(五)-模拟器创建</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h6 id="1-模拟器创建"><a href="#1-模拟器创建" class="headerlink" title="1.模拟器创建"></a>1.模拟器创建</h6><ol>
-<li>1.点击android virtual device manager图标打开android virtual device manager视图<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/0.png" alt=""><br>AVD Name<br>Device:就是手机屏幕大小,根据自己内存而定,如果是cpu够使,就创建大屏的<br>Target:创建手机的版本:Android版本对应的 Api Level<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/1.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/2.png" alt=""><br>CPU/ABI:如果cpu是MD的选ARM,如果是intel,选Intel<br>填写参数点击确定,创建完毕</li>
-<li>2.点击start-&gt;launch开启模拟器<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/3.png" alt=""><br>模拟器:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/4.png" alt=""><br>创建完毕-设置为中文情况<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/5.png" alt="">  <h4 id="注意"><a href="#注意" class="headerlink" title="注意"></a>注意</h4>我们也可以在创建一个不同的模拟器,两个模拟器之间可以互相拨打电话:电话号码就是<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/6.png" alt=""><br>打电话<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/7.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/04/Android-五-模拟器创建/" class="archive-article-date">
-  	<time datetime="2017-03-04T07:35:24.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/21/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/38/">38</a><a class="extend next" rel="next" href="/page/23/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/21/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="page-number current">22</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="space">&hellip;</span><a class="page-number" href="/page/39/">39</a><a class="extend next" rel="next" href="/page/23/">Next &raquo;</a>
     </nav>
   
 
@@ -826,7 +846,7 @@ android:label=&quot;@string/app_name&quot; &gt;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.47px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.29px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.88px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.47px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.71px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 14.12px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.18px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.06px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 14.38px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
