@@ -152,6 +152,301 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-20-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/02/vue-20-过滤器/">vue(20)-过滤器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们接触过简单的过滤器,比如:capitalize  uppercase  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-vue常见基本过滤器"><a href="#1-vue常见基本过滤器" class="headerlink" title="1.vue常见基本过滤器"></a>1.vue常见基本过滤器</h5><p>capitalize  -&gt; 首字母大写<br>uppercas   -&gt; 变大写<br>debounce(需要配合事件) time :延迟  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;input type=&quot;button&quot; value=&quot;show&quot; @click=&quot;show | debounce 2000&quot;&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+    },
+    methods:{
+        show:function(){
+            alert(1);
+        }
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>延迟2秒执行<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/7.gif" alt=""></p>
+<h5 id="2-配合数组使用的过滤器"><a href="#2-配合数组使用的过滤器" class="headerlink" title="2.配合数组使用的过滤器"></a>2.配合数组使用的过滤器</h5><p>比如我们展示一个数组时候,里面有100条数据,但是我们只需要展示前50条,这个时候用limitBy   </p>
+<h6 id="2-1-limitBy"><a href="#2-1-limitBy" class="headerlink" title="2.1 limitBy"></a>2.1 limitBy</h6><p>1.limitBy -&gt;限制几个<br>2.limitBy 参数1 参数2  -&gt;从哪开始取几个  </p>
+<pre><code>&lt;div id=&quot;box&quot;&gt;
+    取2个:
+   &lt;ul&gt;
+       &lt;li v-for=&quot;items in arr | limitBy 2&quot;&gt;
+             {{items}}
+       &lt;/li&gt;
+   &lt;/ul&gt;
+    取2个从倒数第三取:
+    &lt;ul&gt;
+        &lt;li v-for=&quot;items in arr | limitBy 2 arr.length-3&quot;&gt;
+            {{items}}
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+        arr:[1,2,3,4,5,6]
+    },
+    methods:{
+
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/1.png" alt=""></p>
+<h6 id="2-2-filterBy过滤"><a href="#2-2-filterBy过滤" class="headerlink" title="2.2 filterBy过滤"></a>2.2 filterBy过滤</h6><p>过滤出包含”o”的数据  </p>
+<pre><code>body&gt;
+&lt;div id=&quot;box&quot;&gt;
+   按照输入的字母来过滤数组:
+    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;
+    &lt;br&gt;
+    &lt;ul&gt;
+        &lt;li v-for=&quot;items in arr | filterBy a&quot;&gt;
+              {{items}}
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+        a:&apos;&apos;,
+        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;,&quot;tomato&quot;]
+    },
+    methods:{
+
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/1.gif" alt=""></p>
+<h6 id="2-3-orderBy排序"><a href="#2-3-orderBy排序" class="headerlink" title="2.3 orderBy排序"></a>2.3 orderBy排序</h6><p>有时候我们希望数据过来之后排序,使用orderby<br>orderBy就是正序倒序排列:orderBy 1/-1  -&gt;正序排列/倒序排列 </p>
+<pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+   按照输入的字母来排序数组:
+    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;
+    &lt;br&gt;
+    &lt;ul&gt;
+        &lt;li v-for=&quot;items in arr | orderBy a&quot;&gt;
+              {{items}}
+        &lt;/li&gt;
+    &lt;/ul&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+        a:&apos;&apos;,
+        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;,&quot;tomato&quot;]
+    },
+    methods:{
+
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt; 
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/2.gif" alt=""></p>
+<h5 id="3-自定义过滤器"><a href="#3-自定义过滤器" class="headerlink" title="3.自定义过滤器"></a>3.自定义过滤器</h5><p>对于时间过滤器,vue没有自带的过滤器使用,我们需要自定义过滤器  </p>
+<p>自定义过滤器:<br>   Vue是一个类,通过类上的一个方法filter来自定义过滤器  </p>
+<pre><code>Vue.filter(name,function(parameter,a,b){
+  //回调函数
+});
+parameter是要过滤的数据 a,b是调用时过滤器后面的参数  
+</code></pre><h6 id="3-1-自定义时间过滤器"><a href="#3-1-自定义时间过滤器" class="headerlink" title="3.1 自定义时间过滤器"></a>3.1 自定义时间过滤器</h6><pre><code>&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+   {{date | dateFormat}}
+&lt;/div&gt;
+&lt;script&gt;
+Vue.filter(&quot;dateFormat&quot;,function(val){
+    var oData = new Date(val);
+    return oData.getFullYear()+&quot;-&quot;+(oData.getMonth()+1)+&quot;-&quot;+oData.getDate()+&quot; &quot;+oData.getHours()+&quot;:&quot;+oData.getMinutes()+&quot;:&quot;+oData.getSeconds();
+});
+var vm = new Vue({
+    data:{
+      date:Date.now()
+    },
+    methods:{
+
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt;
+&lt;/body&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/2.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/02/vue-20-过滤器/" class="archive-article-date">
+  	<time datetime="2017-09-02T03:47:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-19-vue循环-去除重复数据" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/02/vue-19-vue循环-去除重复数据/">vue(19)-vue循环(去除重复数据)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们一般在vue数组中添加数据时候第一次添加可以但是第二次,第三次添加不可以  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-实例"><a href="#1-实例" class="headerlink" title="1.实例"></a>1.实例</h5><h6 id="1-1-问题"><a href="#1-1-问题" class="headerlink" title="1.1 问题"></a>1.1 问题</h6><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;input type=&quot;button&quot; value=&quot;添加&quot; @click=&quot;add&quot;&gt;
+    &lt;li v-for=&quot;item in arr&quot;&gt;
+        {{item}}
+    &lt;/li&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+       a:1,
+        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;]
+    },
+    methods:{
+        add:function(){
+            this.arr.push(&quot;tomato&quot;);
+        }
+    }
+}).$mount(&quot;#box&quot;);
+
+
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;  
+</code></pre><p>效果：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/5.gif" alt=""><br>错误:vue.js:991 [Vue warn]: Duplicate value found in v-for=”item in arr”: “tomato”. Use track-by=”$index” if you are expecting duplicate values.  </p>
+<h6 id="1-2-去重"><a href="#1-2-去重" class="headerlink" title="1.2 去重"></a>1.2 去重</h6><p>track-by=”索引”  </p>
+<p>代码:  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;Title&lt;/title&gt;
+&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div id=&quot;box&quot;&gt;
+    &lt;input type=&quot;button&quot; value=&quot;添加&quot; @click=&quot;add&quot;&gt;
+    &lt;li v-for=&quot;item in arr&quot; track-by=&quot;$index&quot;&gt;
+        {{item}}
+    &lt;/li&gt;
+&lt;/div&gt;
+&lt;script&gt;
+var vm = new Vue({
+    data:{
+       a:1,
+        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;]
+    },
+    methods:{
+        add:function(){
+            this.arr.push(&quot;tomato&quot;);
+        }
+    }
+}).$mount(&quot;#box&quot;);
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>测试:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/6.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/02/vue-19-vue循环-去除重复数据/" class="archive-article-date">
+  	<time datetime="2017-09-01T16:26:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-18-vue实例简单方法" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -929,151 +1224,6 @@ new Vue({
 
 
   
-    <article id="post-redis-8-列表上" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/20/redis-8-列表上/">redis(8)-列表上</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>以有序的方式储存多个可重复的值  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-列表-list"><a href="#1-列表-list" class="headerlink" title="1.列表(list)"></a>1.列表(list)</h5><p>一个列表可以包含一个或一个以上数量的项(item),每个项按照它们被推入到列表的位置来排序。  </p>
-<p>每个列表项所处的位置决定了这个项的索引值(index),索引以0为开始,从列表的左端到右端依次递增,位于列表最左端(表头)的项的索引为0,而位于列表最右端(表尾)的项的索引为N-1,其中N为列表长度。  </p>
-<p>列表包含的项可以出现重复,他们不必是唯一的。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/30.png" alt="">  </p>
-<h6 id="1-1-推入和弹出操作"><a href="#1-1-推入和弹出操作" class="headerlink" title="1.1 推入和弹出操作"></a>1.1 推入和弹出操作</h6><p>了解如何向列表添加项,以及如何从列表里面删除项  </p>
-<h6 id="从列表左端推入值"><a href="#从列表左端推入值" class="headerlink" title="从列表左端推入值"></a>从列表左端推入值</h6><p>LPUSH key value [value …]  </p>
-<p>将一个或以上数量的值依次推入到列表的左端,命令返回新值被推入之后,列表目前包含的项数量。  </p>
-<p>复杂度O(N),其中N为被推入值的数量,如果只推入一个值,那么命令的复杂度为O(1)。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/31.png" alt="">  </p>
-<h6 id="从列表左端推入多个值"><a href="#从列表左端推入多个值" class="headerlink" title="从列表左端推入多个值"></a>从列表左端推入多个值</h6><p>如果执行LPUSH命令时给定多个值,那么各个值将按照给定时的顺序,从左到右依次地被推入到列表左端。  </p>
-<p>举个例子,执行命令:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/32.png" alt="">  </p>
-<h6 id="从列表右端推入多个值"><a href="#从列表右端推入多个值" class="headerlink" title="从列表右端推入多个值"></a>从列表右端推入多个值</h6><p>RPUSH key value [value …]  </p>
-<p>将一个或以上数量的值依次推入到列表的右端,命令返回新值被推入之后,列表目前包含的项数量。  </p>
-<p>复杂度O(N),其中N依次为被推入值的数量,如果只推入一个值,那么命令的复杂度为O(1)。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/33.png" alt="">  </p>
-<h6 id="从列表的右端推入多个值"><a href="#从列表的右端推入多个值" class="headerlink" title="从列表的右端推入多个值"></a>从列表的右端推入多个值</h6><p>如果执行RPUSH命令时候给定了多个值,那么各个值将按照所给定时的顺序,从左到右依次地推入到表的右端  </p>
-<p>举个例子:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/34.png" alt="">  </p>
-<h6 id="从列表的两端弹出项"><a href="#从列表的两端弹出项" class="headerlink" title="从列表的两端弹出项"></a>从列表的两端弹出项</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/35.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/36.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/37.png" alt=""> </p>
-<h6 id="获取列表的长度"><a href="#获取列表的长度" class="headerlink" title="获取列表的长度"></a>获取列表的长度</h6><p>LLEN key  </p>
-<p>返回列表key的长度,也即是,返回列表包含的列表项数量。  </p>
-<p>因为Redis会记录每个列表的长度,所以 这个命令无须遍历列表,它的复杂度为O(1)。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/38.png" alt="">  </p>
-<h6 id="返回给定索引上的项"><a href="#返回给定索引上的项" class="headerlink" title="返回给定索引上的项"></a>返回给定索引上的项</h6><p>LINDEX key index  </p>
-<p>返回列表键key中,指定索引 index上的列表项。index索引可以是正数或者负数。  </p>
-<p>复杂度为O(N),N为列表长度。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/39.png" alt=""> </p>
-<h6 id="返回给定索引范围之内的所有项"><a href="#返回给定索引范围之内的所有项" class="headerlink" title="返回给定索引范围之内的所有项"></a>返回给定索引范围之内的所有项</h6><p>LRANGE key start stop  </p>
-<p>返回列表键key中,从索引start至索引stop范围内的所有列表项。两个索引参数都可以是正数或者负数。  </p>
-<p>复杂度O(N),N为被返回的列表项数量。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/41.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/42.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/44.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/45.png" alt="">   </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/20/redis-8-列表上/" class="archive-article-date">
-  	<time datetime="2017-08-20T10:56:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-redis-7-散列下" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/20/redis-7-散列下/">redis(7)-散列下</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>散列和字符串也有很多相似的地方</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-效果类似命令"><a href="#1-效果类似命令" class="headerlink" title="1.效果类似命令"></a>1.效果类似命令</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/27.png" alt="">  </p>
-<h5 id="2-散列和字符串区别"><a href="#2-散列和字符串区别" class="headerlink" title="2.散列和字符串区别"></a>2.散列和字符串区别</h5><p>如果散列键能做的事情,字符串键也能做,那么我们为什么不使用字符串键呢？</p>
-<h6 id="2-1散列好处-1-将数据放到同一个地方"><a href="#2-1散列好处-1-将数据放到同一个地方" class="headerlink" title="2.1散列好处(1):将数据放到同一个地方"></a>2.1散列好处(1):将数据放到同一个地方</h6><p>1.散列可以将一些相关数据信息存储到同一个地方,而不是直接分散地存储在整个数据库里面,这不仅方便了数据管理,还可以尽量避免误操作发生  </p>
-<p>2.字符串存储多个值时候会创建多个键,但是对于散列只需要创建一个键,如下:message一个键可以存储散列  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/28.png" alt="">  </p>
-<h6 id="2-2散列好处-1-避免键名冲突"><a href="#2-2散列好处-1-避免键名冲突" class="headerlink" title="2.2散列好处(1):避免键名冲突"></a>2.2散列好处(1):避免键名冲突</h6><p>在介绍字符串键的时候,我们说过,可以在命名键的时候,使用分隔符来避免命名冲突,但更好的办法是直接使用散列键来储存键值对数据。  </p>
-<p>举个例子,如果我们需要储存多条消息,那么我们可能会按照格式message::<id>::<field>的方式来创建字符串键并储存数据,比如使用message::12345::receiver键来储存id为12345的消息的接收者,使用message::10086::sender键来储存id为10086的发送者,诸如此类。</field></id></p>
-<p>但更好的办法是直接使用message::<id>散列键来表示消息信息,并将与消息有关的各项信息储存到散列的各个域里面,比如创建message::12345散列,并将该消息的各项信息分别储存到这个散列的id域,receiver域和sender域里面。  </id></p>
-<p>这保证了数据库中每个键的作用都是固定的,单一的,储存的信息都是被隔离的,从而最大限度地键名冲突  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/29.png" alt=""> </p>
-<h6 id="2-3散列好处-3-减少内存占用"><a href="#2-3散列好处-3-减少内存占用" class="headerlink" title="2.3散列好处(3):减少内存占用"></a>2.3散列好处(3):减少内存占用</h6><p>在一般情况下,保存相同数量的键值对信息,使用散列键比使用字符串键更节约内存。  </p>
-<p>因为在数据库里面创建的每个键都带有数据库附加的管理信息(比如这个键的类型,最后一次被访问的时间等等),所以数据库里面的键越多,服务器在储存附加管理信息方面耗费的内存就越多,花在管理数据库键上的cpu也会越多  </p>
-<p>除此之外,当散列保存的域值对数量比较少的时候,Redis会自动使用一种占用内存非常少的数据结构来做散列的底层实现 ,在散列的数量比较多的时候,这一措施对减少内存有很大的帮助。</p>
-<h5 id="3-结论"><a href="#3-结论" class="headerlink" title="3.结论"></a>3.结论</h5><p>只要有可能的话,就尽量使用散列键而不是字符串键来储存键值对数据,因为散列键管理方便,能够避免键冲突,并且还能节约内存。  </p>
-<p>一些没办法使用散列键来替代字符串键的情况:<br>1.使用二进制位操作命令：因为Redis目前支持对字符串键进行SETBIT,GETBIT,BITOP等操作,如果你想使用这些操作,那么只能使用字符串键。<br>2.使用过期功能:Redis的键过期功能目前只能对键进行过期操作,而不能对散列的域进行过期操作,因此如果你要对键值对数据使用过期功能的话,那么只能把键值对储存在字符串里面。关于过期键的详细信息会在之后介绍。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/20/redis-7-散列下/" class="archive-article-date">
-  	<time datetime="2017-08-20T09:01:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Redis/">Redis</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/10/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/page/38/">38</a><a class="extend next" rel="next" href="/page/12/">Next &raquo;</a>
@@ -1139,7 +1289,7 @@ new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 13.13px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.47px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15.29px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.88px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.47px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.71px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 14.12px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.18px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 17.06px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
