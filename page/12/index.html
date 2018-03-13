@@ -152,6 +152,297 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-14-vue生存周期" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/25/vue-14-vue生存周期/">vue(14)-vue生存周期</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.当我们用vue做一个数据回显(也就是当打开或者刷新页面时候在vue方法里面就马上执行这个函数,而不是使用window.onload),我们需要用到vue的生命周期中的一些方法。<br>2.注意:在我们创建vue对象时候,如果不加</p>
+<pre><code>window.onload=function(){
+     new Vue({
+         el:&apos;#box&apos;,
+         data:{
+             msg:&quot;hello vue&quot;
+         }
+     });
+ }
+</code></pre><p>会报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/62.png" alt=""><br>原因就是box在其后面定义,而new Vue()先执行所以找不到,我们也可以将new Vue()放在box后面  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-vue生命周期"><a href="#1-vue生命周期" class="headerlink" title="1. vue生命周期"></a>1. vue生命周期</h5><p>要想在vue中实现类似于window.onload效果,我们需要知道vue生命周期:</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/vuelifecycle.png" alt=""></p>
+<p>1.new Vue()其实就是创建一个实例,实例什么时候创建完毕是有标志的钩子函数之一:created<br>2.将变成正真的数据(vue中的data中的msg中的well)需要进行编译：beforeCompile,Compiled<br>3.需要把编译好的数据添加到dom树上(文本节点插入到文档中:类似于window.onload)：ready<br>4.对象也可以销毁:beforeDestroy和destroyed(要想让beforeDestroy和destroyed执行,我们需要绑定事件执行vue里面自带的方法)<br>5.以上是基于vue1.0,,vue2.0将以上周期函数改名了</p>
+<h6 id="1-1钩子函数"><a href="#1-1钩子函数" class="headerlink" title="1.1钩子函数"></a>1.1钩子函数</h6><p>   created            -&gt; 实例已经创建<br>   boforeCompile      -&gt;编译之前<br>   compiled           -&gt;编译之后<br>   ready              -&gt;插入到文档中<br>   beforeDestroy      -&gt;销毁之前<br>   destroyed          -&gt;销毁之后  </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><pre><code>&lt;!DOCTYPE html&gt;
+&lt;html lang=&quot;en&quot;&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;&gt;
+&lt;title&gt;vue生命周期&lt;/title&gt;
+&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
+
+&lt;/head&gt;
+  &lt;body&gt;
+  &lt;div id=&quot;box&quot;&gt;
+   {{msg}}
+  &lt;/div&gt;
+
+  &lt;script&gt;
+  var vm = new Vue({
+       el:&apos;#box&apos;,
+       data:{
+           msg:&quot;well&quot;
+       },
+       created:function(){
+           alert(&quot;对象已经创建!&quot;);
+       },
+       beforeCompile:function(){
+           alert(&quot;编译之前!&quot;);
+       },
+       compiled:function(){
+           alert(&quot;编译之后&quot;);
+       },
+       ready:function(){
+           alert(&quot;插入到文档中&quot;);
+       },
+       beforeDestroy:function () {
+           alert(&quot;销毁前&quot;);
+       },
+       destroyed:function () {
+           alert(&quot;销毁后&quot;);
+       }
+   });
+
+   //点击文档之后销毁对象,对象的销毁并不会在浏览器里面自动执行,需要事件触发
+   document.onclick=function(){
+       vm.$destroy();
+   }
+&lt;/script&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/lifecycledemo.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/25/vue-14-vue生存周期/" class="archive-article-date">
+  	<time datetime="2017-08-24T16:08:17.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-13-微博评论示例" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/08/24/vue-13-微博评论示例/">vue(13)-微博评论示例</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>基于vue的微博评论案例</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-功能要求"><a href="#1-功能要求" class="headerlink" title="1.功能要求"></a>1.功能要求</h5><p>1.点击”提交评论”,我们把提交的数据扔到下面留言框.<br>2.页面刷新时候我们需要展示已经添加的一些数据  </p>
+<h5 id="2-实现要求"><a href="#2-实现要求" class="headerlink" title="2.实现要求"></a>2.实现要求</h5><h6 id="1-点击”提交评论”-我们把提交的数据扔到下面留言框"><a href="#1-点击”提交评论”-我们把提交的数据扔到下面留言框" class="headerlink" title="1.点击”提交评论”,我们把提交的数据扔到下面留言框."></a>1.点击”提交评论”,我们把提交的数据扔到下面留言框.</h6><p> a.点击事件:v-on:事件  @事件<br> b.发送数据请求:this.$http.get()/post()/jsonp() this.$http()<br> c:按照接口请求数据 </p>
+<pre><code>接口为:weibo.do?act=add&amp;content=xxx    添加一条
+        返回：{error:0, id: 新添加内容的ID, time: 添加时间}
+  this.$http({//默认为get
+    url:url,
+    data:{
+      act:&quot;abc&quot;,
+      content://content值是textarea数据值,我们绑定v-model,并在data中定义
+    },
+
+  }).then(function(res){
+    //返回时候渲染留言
+     console.log(res.data);
+  });
+</code></pre><p>d:请求成功时候渲染:在vue的data里面定义msgData[{},{}],里面内容是返回结果<br>e:在view里面遍历用vue-for<br>f:暂无留言出来条件:v-show  msgData.length==0<br>5:清空textarea  </p>
+<h6 id="2-页面刷新时候我们需要展示已经添加的一些数据"><a href="#2-页面刷新时候我们需要展示已经添加的一些数据" class="headerlink" title="2.页面刷新时候我们需要展示已经添加的一些数据"></a>2.页面刷新时候我们需要展示已经添加的一些数据</h6><p>a.获取某一页<br>b.接口:weibo.php?act=get&amp;page=1    获取一页数据  </p>
+<pre><code>返回：[{id: ID, content: &quot;内容&quot;, time: 时间戳, acc: 顶次数, ref: 踩次数}, {...}, ...]
+</code></pre><p>c.交互:getPageData(n)<br>d:需要在页面一加载调用:能不能提供一个类似于：window.load函数,其实是vue有自带的:vue的生存周期<br>e:vue类似于window.load函数就是:ready  </p>
+<h5 id="3-代码"><a href="#3-代码" class="headerlink" title="3.代码:"></a>3.代码:</h5><pre><code>&lt;!doctype html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;utf-8&quot;&gt;
+&lt;title&gt;&lt;/title&gt;
+&lt;link href=&quot;style/weibo.css&quot; rel=&quot;stylesheet&quot; type=&quot;text/css&quot; /&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../js/vue-resource.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;
+    window.onload=function(){
+        new Vue({
+            el:&quot;.znsArea&quot;,
+            data:{
+               msg:&quot;abc&quot;,
+                msgData:[/*{
+                  content:&quot;aaa&quot;,
+                    time:121212,
+                    acc:0,
+                    ref:4,
+                    id:12
+                }*/]
+            },
+            methods:{
+                add:function(){
+                    //发送数据
+                    this.$http({
+                        url:URL,
+                        data:{
+                            act:&quot;abc&quot;,
+                            content:this.msg
+                        }
+                    }).then(function(res){
+                        var json = res.data;
+                        //添加返回结果到msgData
+                        this.msgData.unshift({
+                            content:this.t1,
+                            time:json.time,
+                            acc:0,
+                            ref:0,
+                            id:json.id
+                        });
+                        //清空textarea数据
+                        this.t1=&quot;&quot;;
+                    });
+                },
+                getPageData:function (n) {
+                    this.$http({
+                        url:URL,
+                        data:{
+                           act:&quot;get&quot;,
+                            page:n
+                        }
+                    }).then(function(res){
+                       //将分页数据加载到数据中(msgData)
+                        var arr = res.data;
+                        //遍历数据
+                        for(var i=0;i&lt;arr.length;i++){
+                            this.msgData.push({
+                                content:arr[i].content,
+                                time:arr[i].time,
+                                acc:arr[i].acc,
+                                ref:arr[i].ref,
+                                id:arr[i].id
+                            })
+                        }
+                    });
+                }
+            },
+            ready:function(){
+                //页面一加载就查询第一页
+                this.getPageData(1);
+            }
+        });
+    };
+&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;div class=&quot;znsArea&quot;&gt;
+&lt;!--留言--&gt;
+ &lt;div class=&quot;takeComment&quot;&gt;
+    &lt;textarea name=&quot;textarea&quot; class=&quot;takeTextField&quot; id=&quot;tijiaoText&quot; v-model=&quot;msg&quot;&gt;&lt;/textarea&gt;
+    &lt;div class=&quot;takeSbmComment&quot;&gt;
+        &lt;input type=&quot;button&quot; class=&quot;inputs&quot; value=&quot;&quot; @click=&quot;add&quot;/&gt;
+        &lt;span&gt;(可按 Enter 回复)&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;!--已留--&gt;
+&lt;div class=&quot;commentOn&quot;&gt;
+    &lt;div class=&quot;noContent&quot; v-show=&quot;msgData.length==0&quot;&gt;暂无留言&lt;/div&gt;
+    &lt;div class=&quot;messList&quot;&gt;
+        &lt;div class=&quot;reply&quot; v-for=&quot;item in msgData&quot; v-&gt;
+            &lt;p class=&quot;replyContent&quot;&gt;{{item.content}}&lt;/p&gt;
+            &lt;p class=&quot;operation&quot;&gt;
+                &lt;span class=&quot;replyTime&quot;&gt;{{item.time}}&lt;/span&gt;
+                &lt;span class=&quot;handle&quot;&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;top&quot;&gt;{{item.acc}}&lt;/a&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;down_icon&quot;&gt;{{item.ref}}&lt;/a&gt;
+                    &lt;a href=&quot;javascript:;&quot; class=&quot;cut&quot;&gt;删除&lt;/a&gt;
+                &lt;/span&gt;
+            &lt;/p&gt;
+        &lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;page&quot;&gt;
+        &lt;a href=&quot;javascript:;&quot; class=&quot;active&quot;&gt;1&lt;/a&gt;
+        &lt;a href=&quot;javascript:;&quot;&gt;2&lt;/a&gt;
+        &lt;a href=&quot;javascript:;&quot;&gt;3&lt;/a&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="6-源码"><a href="#6-源码" class="headerlink" title="6.源码"></a>6.源码</h5><p><a href="https://github.com/startshineye/vue-action">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/08/24/vue-13-微博评论示例/" class="archive-article-date">
+  	<time datetime="2017-08-24T14:37:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-redis-10-列表下" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -974,236 +1265,6 @@ at processImmediate [as _immediateCallback] (timers.js:582:5)
 
 
   
-    <article id="post-vue-10-模板" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/10/vue-10-模板/">vue(10)-模板</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Vue.js 使用了基于 HTML 的模版语法，允许开发者声明式地将 DOM 绑定至底层 Vue 实例的数据。<br>Vue.js 的核心是一个允许你采用简洁的模板语法来声明式的将数据渲染进 DOM 的系统。<br>结合响应系统，在应用状态改变时， Vue 能够智能地计算出重新渲染组件的最小代价并应用到 DOM 操作上。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>两个大括号模板   数据更新模板变化</p>
-<p>1.代码</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&quot;#box&quot;,
-            data:{
-                msg:&apos;abc&apos;
-            }
-        })
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   &lt;input type=&quot;text&quot; v-model=&quot;msg&quot;&gt;&lt;br&gt;
-   {{msg}}&lt;br&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>2.测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/1.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/10/vue-10-模板/" class="archive-article-date">
-  	<time datetime="2017-08-10T15:32:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-9-属性" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/08/09/vue-9-属性/">vue(9)-属性</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.其实,属性跟指令是不一样的,指令是扩展了标签,是框架自带的如:v-model,他在标签中找不到和他有关的东西<br>2.属性:用于说明标签的特征,比如：class,style</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>vue里面的属性其实就是对原来标签属性的修改,是在原来标签的基础之上的  </p>
-<h5 id="1-基本属性"><a href="#1-基本属性" class="headerlink" title="1.基本属性"></a>1.基本属性</h5><p>v-bind:属性 简写为: :属性<br>1.基本属性<br>src属性<br>v-bind:src=”a”   a 只是数据名称<br>:src = “a”<br><img src=""><br>  在vue2.0时候不行<br><img v-bind:src="url">  推荐  </p>
-<p>代码:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&quot;#box&quot;,
-            data:{
-               url:&quot;https://ss0.bdstatic.com/5aV1bjqh_Q23odCf/static/superman/img/logo/bd_logo1_31bdc765.png&quot;,
-                w:&quot;100px&quot;,
-                t:&quot;这是一个图片&quot;
-            }
-            }
-        );
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-  &lt;!--绑定src--&gt;
-  &lt;img v-bind:src=&quot;url&quot;&gt;&lt;br&gt;
-  &lt;img :src=&quot;url&quot;&gt;
-  &lt;!--其他属性:width--&gt;
-  &lt;img :src=&quot;url&quot; :width=&quot;w&quot; :title=&quot;t&quot;&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/4.png" alt=""></p>
-<h5 id="2-特殊属性-class-style"><a href="#2-特殊属性-class-style" class="headerlink" title="2.特殊属性:class  style"></a>2.特殊属性:class  style</h5><h5 id="2-1-class"><a href="#2-1-class" class="headerlink" title="2.1 class:"></a>2.1 class:</h5><p>a)第一种::class=”[red]”  red是data里面数据 但是 此处的red就是data里面的red也是style里面的red data里面red只是一个代号,其值必须和style里面的相似，如下:<br>b)第二种:{red:true,b:true}  </p>
-<p>代码:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&quot;#box&quot;,
-            data:{
-                red:&apos;red&apos;,
-                t:&quot;b&quot;
-            }
-            }
-        );
-    }
-&lt;/script&gt;
-&lt;style&gt;
-    .red{
-        color: red;
-    }
-    .b{
-        background: blue;
-    }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-  &lt;!--原生态方式--&gt;
-  &lt;strong class=&quot;red&quot;&gt;张三&lt;/strong&gt;&lt;br&gt;
-  &lt;!--此处的red就是data里面的red也是style里面的red--&gt;
-  &lt;strong :class=&quot;[red]&quot;&gt;李四&lt;/strong&gt;&lt;br&gt;
-  &lt;!--多个时候,以,隔开--&gt;
-  &lt;strong :class=&quot;[red,t]&quot;&gt;王五&lt;/strong&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/5.png" alt=""></p>
-<h6 id="2-style"><a href="#2-style" class="headerlink" title="2.style:"></a>2.style:</h6><p> 和class类似<br> 注意：符合样式,采用驼峰命名<br> :style=”[c]”<br> :style=”[c,d]”<br> :style=”json” </p>
-<p>代码:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;vue.js&quot;&gt;&lt;/script&gt;
-&lt;script&gt;
-    window.onload=function(){
-        new Vue({
-            el:&quot;#box&quot;,
-            data:{
-             c:{color:&apos;red&apos;},
-                b:{backgroundColor:&apos;blue&apos;}
-            }
-            }
-        );
-    }
-&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-&lt;strong :style=&quot;[c,b]&quot;&gt;中国&lt;/strong&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt; 
-</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/6.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/08/09/vue-9-属性/" class="archive-article-date">
-  	<time datetime="2017-08-09T15:24:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-08-09</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/39/">39</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
@@ -1269,7 +1330,7 @@ at processImmediate [as _immediateCallback] (timers.js:582:5)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 15px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
     			</div>
     	</section>
     
