@@ -152,6 +152,153 @@
       <div class="body-wrap">
         
   
+    <article id="post-泛型-一-泛型的入门" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/03/泛型-一-泛型的入门/">泛型(一)-泛型的入门</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="jdk1-5之前集合类中存在的问题"><a href="#jdk1-5之前集合类中存在的问题" class="headerlink" title="jdk1.5之前集合类中存在的问题"></a>jdk1.5之前集合类中存在的问题</h4><p>给一个需求：开发者获取容器(集合)中的整形数据,但是容器中的数据放入是第三方放入  </p>
+<ol>
+<li><p>看以下代码：  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static List container()&#123;</div><div class="line">	   List list = new ArrayList();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2L);</div><div class="line">	   list.add(&quot;3&quot;);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	   //开发人员在主方法中获取容器中数据</div><div class="line">	   List container = container();</div><div class="line">	  int i = (Integer)container.get(1);//java.lang.ClassCastException: java.lang.Long cannot be cast to java.lang.Integer</div><div class="line">	   </div><div class="line">	   //取出数据</div><div class="line">	   Integer j = newcontainer().get(1);</div><div class="line">	   System.out.println(j);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>假如以上代表往list中添加数据时候是别人写的,而你只是从里面拿出一个整形数据，以上有两个不方便:<br>1.需要对取出来的数据进行强制类型转换<br>2.取出来的数据类型不确定</p>
+</li>
+<li><p>对以上代码进行修改  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  private static List&lt;Integer&gt; newcontainer()&#123;</div><div class="line">	   List&lt;Integer&gt; list = new ArrayList&lt;Integer&gt;();</div><div class="line">	   list.add(1);</div><div class="line">	   list.add(2);</div><div class="line">	   list.add(3);</div><div class="line">	   return list;</div><div class="line">  &#125;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	   //取出数据</div><div class="line">	   Integer j = newcontainer().get(1);</div><div class="line">	   System.out.println(j);//2</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>以上代码就运用了泛型，弥补了以上两个缺陷，可以将一个集合中的元素限定为一个特定类型</p>
+<h4 id="泛型基本概念"><a href="#泛型基本概念" class="headerlink" title="泛型基本概念"></a>泛型基本概念</h4><ol>
+<li>泛型的本质是参数化类型，也就是说所操作的数据类型被指定为一个参数。</li>
+<li>泛型是jdk1.5的所有新特性中最难深入掌握的部分,不过,在实际应用中不能掌握的那么深入，只需要掌握一些基本内容就可以。</li>
+<li>没有使用泛型时，只要是对象,不管是什么类型的对象，都可以存储进同一个集合当中。使用泛型集合，可以将一个集合中的元素限定为一个特定类型。集合中只能存储同一个类型的对象,这样更安全，并且当从集合获取一个对象时,编译器也可以知道这个对象的类型,不需要对对象进行强制类型转换。</li>
+<li>Java 泛型（generics）是 JDK 5 中引入的一个新特性, 泛型提供了编译时类型安全检测机制，该机制允许程序员在编译时检测到非法的类型。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/03/泛型-一-泛型的入门/" class="archive-article-date">
+  	<time datetime="2017-01-03T12:36:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-03</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-注解-三-注解的属性" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/02/注解-三-注解的属性/">注解(三)-注解的属性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="什么是注解的属性"><a href="#什么是注解的属性" class="headerlink" title="什么是注解的属性"></a>什么是注解的属性</h4><ol>
+<li>一个注解相当于一个胸牌,如果你胸前贴了胸牌,可以说明你是哪个工作单位的员工，否则就不是，如果还想区分公司哪个部门的那个员工，这时候就可以为胸牌增加一个属性进行区分。增加了属性的标记效果为：@AAnotaion(color=”red”);</li>
+<li>注解中的属性是以方法实行定义，赋值时候是以java属性形式赋值，调用时候也是用调用方法形式。<h4 id="定义基本类型的属性和应用属性"><a href="#定义基本类型的属性和应用属性" class="headerlink" title="定义基本类型的属性和应用属性:"></a>定义基本类型的属性和应用属性:</h4></li>
+<li>在注解中增加String color();</li>
+<li>@AAnotaion(color=”red”);</li>
+</ol>
+<h4 id="反射获得实例对象，再通过该对象调用属性相应的方法"><a href="#反射获得实例对象，再通过该对象调用属性相应的方法" class="headerlink" title="反射获得实例对象，再通过该对象调用属性相应的方法"></a>反射获得实例对象，再通过该对象调用属性相应的方法</h4><ol>
+<li>定义注解 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">public @interface AAnnotation &#123;</div><div class="line">  String color();//此方法是共有的，抽象的，不用加其他修饰符，类似于接口中方法</div><div class="line">  String value();</div><div class="line">&#125;</div><div class="line">``` </div><div class="line">2. 使用注解的类</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>/**</p>
+<ul>
+<li>应用注解</li>
+<li>@author yxm</li>
+<li>@date 2017-1-2<br>*/<br>@AAnnotation(color=”red”)<br>public class B {</li>
+</ul>
+<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">3. 使用注解类的类</div></pre></td></tr></table></figure></p>
+<p>public class AnnotationTest {<br>public static void main(String[] args) {<br>     //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码<br>    //1.获取当前的注解<br>    boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);<br>    //2.如果存在注解,则打印出注解对象<br>    if(annotationPresent){<br>        //获取注解对象<br>        AAnnotation aa = B.class.getAnnotation(AAnnotation.class);<br>        //获取注解对象中的属性<br>        System.out.println(aa.color());//red<br>    }<br>  }</p>
+<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">#### 为属性制定缺省值</div><div class="line">1. String color() default &quot;yellow&quot;;</div><div class="line">#### value属性</div><div class="line">1. String value() default &quot;yxm&quot;;</div><div class="line">2. 如果注解中有一个名称为value的属性，且你只想为此属性赋值可以省略属性名  </div><div class="line">#### 注解类的数组类型的属性</div><div class="line">int [] arrayAttr() default &#123;1,2,3&#125;; </div><div class="line">被添加的注解设置属性值：@AAnnotation(arrayAttr=&#123;2,3,4&#125;)。</div><div class="line">如果数组属性中只有一个元素，这时候属性值部分可以省略大括号。</div><div class="line">#### 枚举类型的属性</div><div class="line">EnumTest.TrafficLamp lamp() ;</div><div class="line">被添加的注解设置属性值：@AAnnotation(lamp=EnumTest.TrafficLamp.GREEN)</div><div class="line">#### 注解类型的属性</div><div class="line"> MetaAnnotation annotationAttr() default @MetaAnnotation(&quot;xxxx&quot;); </div><div class="line">被添加的注解设置属性值：@AAnnotation(annotationAttr=@MetaAnnotation(“yyy”) )</div><div class="line">可以认为上面这个@MyAnnotation是MyAnnotaion类的一个实例对象，同样的道理，可以认为上面这个@MetaAnnotation是MetaAnnotation类的一个实例对象，调用代码如下：</div><div class="line">MetaAnnotation ma =  myAnnotation.annotationAttr();</div><div class="line">System.out.println(ma.value());</div><div class="line">#### 代码示例</div></pre></td></tr></table></figure></p>
+<p>@interface MetaAnnotation{<br>      String value();<br>}  </p>
+<p>@Retention(RetentionPolicy.RUNTIME) //此注解运行到内存时才消除<br>@Target({ElementType.METHOD,ElementType.TYPE}) //此注解可修饰方法和类<br>@interface AAnnotation {<br>    String color() default “blue” ;<br>    String value();<br>    int[] arrayAttr() default {1};<br>    EnumDemo4.TrafficLamp lamp() default EnumDemo4.TrafficLamp.RED;<br>    MetaAnnotation annotationAttr() default @MetaAnnotation( “lhm”);<br>    Class clazz() default String.class;<br>}<br>//AnnotationTest2类的注解及属性<br>@AAnnotation(annotationAttr=@MetaAnnotation(“flx”),color=”red”,value=”abc”,arrayAttr={1,2,3})<br>public class AnnotationTest2 {<br>    @AAnnotation(“xyz”)  //main方法的注解的属性value=”xyz”<br>    public static void main(String[] args) {<br>        if(AnnotationTest2.class.isAnnotationPresent(AAnnotation. class)){<br>            AAnnotation aa = AnnotationTest2.class .getAnnotation(AAnnotation.class);<br>            System. out.println(aa.color());<br>            //结果：red<br>            System. out.println(aa.arrayAttr().length);<br>            //结果：3<br>            System. out.println(aa.lamp().nextLamp().name());<br>            //结果：GREEN<br>            System. out.println(aa.annotationAttr().value());<br>            //结果：flx<br>            System. out.println(aa.clazz());<br>            //结果：class java.lang.String<br>        }<br>    }<br>}<br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/02/注解-三-注解的属性/" class="archive-article-date">
+  	<time datetime="2017-01-02T11:42:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-注解-二-注解的定义及反射调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -694,109 +841,9 @@
 
 
   
-    <article id="post-java反射-八-数组反射应用二" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/23/java反射-八-数组反射应用二/">java反射-八-数组反射应用二</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="数组反射应用二"><a href="#数组反射应用二" class="headerlink" title="数组反射应用二"></a>数组反射应用二</h4><h6 id="1-需求"><a href="#1-需求" class="headerlink" title="1.需求"></a>1.需求</h6><p>给打印对象的方法传递一个参数，如果是一般对象，直接打印出来，如果是数组那么就一个个打印出来。</p>
-<h6 id="2-实例"><a href="#2-实例" class="headerlink" title="2.实例"></a>2.实例</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">public class Reflect &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	/**</div><div class="line">	 * 功能：打印一个对象,如果是数组就按照每一个元素打印出来，</div><div class="line">	 * 如果是一般对象，直接打印出来</div><div class="line">	 */</div><div class="line">	String[] a1 = new String[]&#123;&quot;a&quot;,&quot;b&quot;,&quot;c&quot;&#125;;</div><div class="line">	String a2 = &quot;xyz&quot;;</div><div class="line">	printObj(a1);//a b c</div><div class="line">	printObj(a2);//xyz</div><div class="line">  &#125;</div><div class="line">private static void printObj(Object obj) &#123;</div><div class="line">	Class classArr = obj.getClass();</div><div class="line">	if(classArr.isArray())&#123;</div><div class="line">		//1.取得对象的长度</div><div class="line">		int length = Array.getLength(obj);</div><div class="line">		for(int i=0;i&lt;length;i++)&#123;</div><div class="line">			System.out.println(Array.get(obj, i));</div><div class="line">		&#125;</div><div class="line">	&#125;else&#123;</div><div class="line">		System.out.println(obj);</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/23/java反射-八-数组反射应用二/" class="archive-article-date">
-  	<time datetime="2016-12-23T14:00:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-g" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/22/g/">g</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/22/g/" class="archive-article-date">
-  	<time datetime="2016-12-21T16:03:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-22</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/29/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="page-number current">30</span><a class="page-number" href="/page/31/">31</a><a class="page-number" href="/page/32/">32</a><span class="space">&hellip;</span><a class="page-number" href="/page/39/">39</a><a class="extend next" rel="next" href="/page/31/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/29/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="page-number current">30</span><a class="page-number" href="/page/31/">31</a><a class="page-number" href="/page/32/">32</a><span class="space">&hellip;</span><a class="page-number" href="/page/40/">40</a><a class="extend next" rel="next" href="/page/31/">Next &raquo;</a>
     </nav>
   
 
@@ -859,7 +906,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.25px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.63px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.5px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 16.25px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.88px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 15px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.63px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.5px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.5px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.88px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.63px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.38px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.25px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.75px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.13px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.5px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.63px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.63px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.63px;">html+css</a> <a href="/tags/html-css/" style="font-size: 16.25px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.38px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.5px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.63px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.25px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.88px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.63px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.88px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.88px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.88px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 13.13px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.63px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.25px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.63px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.25px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.25px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.88px;">代理</a> <a href="/tags/前端/" style="font-size: 10.63px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.5px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.88px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.75px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.25px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.75px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.5px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.5px;">转载</a> <a href="/tags/集合/" style="font-size: 12.5px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 11.76px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
