@@ -152,6 +152,84 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-22-SpringBoot启动时加载数据CommandLineRunner" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/26/SpringBoot-22-SpringBoot启动时加载数据CommandLineRunner/">SpringBoot(22)-SpringBoot启动时加载数据CommandLineRunner</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>实际应用中,我们有”在项目服务启动的时候就去加载一些数据或做一些事”的需求。<br>为了解决这样的问题，Spring Boot 为我们提供了一个方法，通过实现接口 CommandLineRunner 来实现。很简单，只需要一个类就可以，无需其他配置。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-步骤"><a href="#1-步骤" class="headerlink" title="1.步骤"></a>1.步骤</h5><p>步骤:(1)实现CommandLineRunner (2)添加@Component (3)在需要执行顺序的时候用注解:@Order(value=2)其中value值越小那么执行越早 </p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><p>在com.yxm.runner下创建MyRunnner1,MyRunner2<br>1.MyRunnner1  </p>
+<pre><code>@Component
+@Order(value=1)
+public class MyRunner1 implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;----服务启动执行MyRunner1 ,执行加载数据等操作----&quot;+arg0);
+}
+}
+</code></pre><p>2.MyRunnner2  </p>
+<pre><code>@Component
+@Order(value=2)
+public class MyRunner2 implements CommandLineRunner{
+
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;----服务启动执行MyRunner2 ,执行加载数据等操作----&quot;+arg0);
+}
+}
+</code></pre><h5 id="3-配置参数"><a href="#3-配置参数" class="headerlink" title="3.配置参数"></a>3.配置参数</h5><p>1.App.java中配置  </p>
+<pre><code>SpringApplication.run(App.class, new String[]{&quot;hello&quot;,&quot;jack&quot;});
+</code></pre><p>2.Myeclipse中:  </p>
+<pre><code>Myeclipse中给java应用传args参数的方法如下：
+1、先写好Java代码，比如文件名为IntArrqy.java；
+2、在工具栏或菜单上点run as下边有个Run Configuration；
+3、在弹出窗口点选第二个标签arguments；
+4、把你想输入的参数写在program argumenst就可以了，多个参数使用空格隔开。
+完成后点run即可通过运行结果看到参数使用情况了。
+</code></pre><h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><p>—-服务启动执行MyRunner1 ,执行加载数据等操作—-[Ljava.lang.String;@3ca005a7<br>—-服务启动执行MyRunner2 ,执行加载数据等操作—-[Ljava.lang.String;@3ca005a7<br>根据控制台结果可判断，@Order 注解的执行优先级是按value值从小到大顺序。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/26/SpringBoot-22-SpringBoot启动时加载数据CommandLineRunner/" class="archive-article-date">
+  	<time datetime="2017-07-26T01:16:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-26</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-21-SpringBoot拦截器HandlerInterceptor" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1349,116 +1427,6 @@ public String helloFreeMarker(Map&lt;String,Object&gt; map){
 
 
   
-    <article id="post-SpringBoot-十二-SpringBoot使用thymeleaf" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/20/SpringBoot-十二-SpringBoot使用thymeleaf/">SpringBoot(十二)-SpringBoot使用thymeleaf</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在很多时候开发中我们不是使用jsp来传输数据,我们是使用模板引擎来传送数据,这样的好处是前后前可以并行开发,降低了前台和后台的耦合度,其中thymeleaf就是一个很好的模板引擎,在Spring Boot项目中运用thymeleaf我们只需要引入Spring-Boot自带的thymeleaf依赖。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>在Spring Boot中使用thymeleaf的具体步骤如下：<br>1.在pom.xml中引入thymeleaf依赖<br>2.在application.properties文件里面添加thymeleaf配置;如:(关闭thymeleaf缓存)<br>3.编写模板文件.html<br>4.编写访问模板文件controller</p>
-<h5 id="1-在pom-xml中引入thymeleaf依赖"><a href="#1-在pom-xml中引入thymeleaf依赖" class="headerlink" title="1.在pom.xml中引入thymeleaf依赖"></a>1.在pom.xml中引入thymeleaf依赖</h5><p>在pom.xml加入thymeleaf的依赖:</p>
-<pre><code>&lt;dependency&gt;
-     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-     &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-在application-properties文件里面添加thymeleaf配置-如-关闭thymeleaf缓存"><a href="#2-在application-properties文件里面添加thymeleaf配置-如-关闭thymeleaf缓存" class="headerlink" title="2.在application.properties文件里面添加thymeleaf配置;如:(关闭thymeleaf缓存)"></a>2.在application.properties文件里面添加thymeleaf配置;如:(关闭thymeleaf缓存)</h5><p>在开发中我们一般关闭thymeleaf缓存；  </p>
-<pre><code>#########################################
-###THYMELEAF (ThymeleafAutoConfiguration)          #######################################
-#spring.thymeleaf.prefix=classpath:/templates/
-#spring.thymeleaf.suffix=.html
-#spring.thymeleaf.mode=HTML5
-#spring.thymeleaf.encoding=UTF-8
-# ;charset=&lt;encoding&gt; is added
-#spring.thymeleaf.content-type=text/html 
-# set to false for hot refresh
-spring.thymeleaf.cache=false 
-</code></pre><h5 id="3-编写模板文件-html"><a href="#3-编写模板文件-html" class="headerlink" title="3.编写模板文件.html"></a>3.编写模板文件.html</h5><p>编写模板文件src/main/resouces/templates/hello.html:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;/&gt;
-&lt;title&gt;thymeleaf&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-hello world
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h5 id="4-编写访问模板文件controller"><a href="#4-编写访问模板文件controller" class="headerlink" title="4.编写访问模板文件controller"></a>4.编写访问模板文件controller</h5><pre><code>@Controller
-@RequestMapping(&quot;/template&quot;)
-public class TemplateController {
-
-/**
- * 跳转页面不携带数据
- * @return
- */
-@RequestMapping(&quot;/th&quot;)
-public String helloThymeleaf(){
-    return &quot;hello&quot;;
-}
-/**
- * 返回页面并携带参数,注意向页面传递值时候哦用map的话,必须将map作为方法的参数,自己定义一个map返回的话是无效的
- * @return
- */
-@RequestMapping(&quot;/th1&quot;)
-public String helloThymeleaf1(Map&lt;String,Object&gt; map){
-    map.put(&quot;hello&quot;,&quot;Hello Thymeleaf&quot;);
-    return &quot;hello&quot;;
-}
-}
-</code></pre><h5 id="5-测试"><a href="#5-测试" class="headerlink" title="5.测试"></a>5.测试</h5><p>访问的时候后台输出以下错误:  </p>
-<pre><code>org.xml.sax.SAXParseException: 元素类型 &quot;meta&quot; 必须由匹配的结束标记 &quot;&lt;/meta&gt;&quot; 终止。
-at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.createSAXParseException(ErrorHandlerWrapper.java:203) ~[na:1.8.0_112]
-at com.sun.org.apache.xerces.internal.util.ErrorHandlerWrapper.fatalError(ErrorHandlerWrapper.java:177) ~[na:1.8.0_112]
-at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:400) ~[na:1.8.0_112]
-at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLErrorReporter.java:327) ~[na:1.8.0_112]
-</code></pre><p>原因是thymeleaf必须的标签包含”/“结束：  </p>
-<pre><code>&quot;&lt;meta charset=&quot;UTF-8&quot;/&gt;&quot;改变成&quot;&lt;meta charset=&quot;UTF-8&quot;/&gt;&quot;
-</code></pre><p>访问:<a href="http://localhost:8081/template/th" target="_blank" rel="external">http://localhost:8081/template/th</a> 输出结果:hello world</p>
-<p>访问:<a href="http://localhost:8081/template/th1" target="_blank" rel="external">http://localhost:8081/template/th1</a> 输出结果:hello world Hello Thymeleaf    </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/20/SpringBoot-十二-SpringBoot使用thymeleaf/" class="archive-article-date">
-  	<time datetime="2017-07-20T04:57:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/15/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/14/">14</a><a class="page-number" href="/page/15/">15</a><span class="page-number current">16</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="space">&hellip;</span><a class="page-number" href="/page/40/">40</a><a class="extend next" rel="next" href="/page/17/">Next &raquo;</a>
@@ -1524,7 +1492,7 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 12.94px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 13.53px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
