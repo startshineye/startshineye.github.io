@@ -7,18 +7,35 @@
   <title>websocket(6)-websocket实现单聊 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="用websocket实现单聊
-1.java后台2.前端页面3.测试">
+1.java后台1.websocketconfig
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+@Override
+public void registerStompEndp">
 <meta property="og:type" content="article">
 <meta property="og:title" content="websocket(6)-websocket实现单聊">
 <meta property="og:url" content="https://github.com/startshineye/2018/03/22/websocket-6-websocket实现单聊/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="用websocket实现单聊
-1.java后台2.前端页面3.测试">
-<meta property="og:updated_time" content="2018-03-22T15:16:06.895Z">
+1.java后台1.websocketconfig
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+@Override
+public void registerStompEndp">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/03/82.png">
+<meta property="og:updated_time" content="2018-03-24T13:10:08.101Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="websocket(6)-websocket实现单聊">
 <meta name="twitter:description" content="用websocket实现单聊
-1.java后台2.前端页面3.测试">
+1.java后台1.websocketconfig
+@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+@Override
+public void registerStompEndp">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/03/82.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -173,7 +190,159 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>用websocket实现单聊</p>
-<h5 id="1-java后台"><a href="#1-java后台" class="headerlink" title="1.java后台"></a>1.java后台</h5><h5 id="2-前端页面"><a href="#2-前端页面" class="headerlink" title="2.前端页面"></a>2.前端页面</h5><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5>
+<h5 id="1-java后台"><a href="#1-java后台" class="headerlink" title="1.java后台"></a>1.java后台</h5><p>1.websocketconfig</p>
+<pre><code>@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+@Override
+public void registerStompEndpoints(StompEndpointRegistry registry) {
+    registry.addEndpoint(&quot;websocket&quot;).withSockJS();
+}
+
+@Override
+public void configureMessageBroker(MessageBrokerRegistry config) {
+   config.enableSimpleBroker(&quot;/topic&quot;,&quot;/chat&quot;);
+   config.setApplicationDestinationPrefixes(&quot;/app&quot;);
+}
+}
+</code></pre><p>2.controller</p>
+<pre><code>@Controller
+public class V3SingleChatController {
+
+@Autowired
+private WebsocketService websocketService;
+
+@MessageMapping(&quot;/v3/singlechat&quot;)
+public void singleChat(InMessage message){
+    websocketService.sendSingleChatMessage(message);
+}
+}
+</code></pre><p>3.service</p>
+<pre><code>@Service
+public class WebsocketService{
+@Autowired
+private SimpMessagingTemplate template;
+
+public void sendTopicMessage(String dest,HelloMessage message){
+    template.convertAndSend(dest,new Greeting(message.getName()));
+}
+
+public void sendSingleChatMessage(InMessage message) {
+    System.out.println(&quot;dest:&quot;+&quot;/chat/single/&quot;+message.getTo());
+    template.convertAndSend(&quot;/chat/single/&quot;+message.getTo(),
+            new OutMessage(message.getFrom()+&quot;发送:&quot;+message.getContent())
+            );
+}
+}
+</code></pre><h5 id="2-前端页面"><a href="#2-前端页面" class="headerlink" title="2.前端页面"></a>2.前端页面</h5><p>1.app.js  </p>
+<pre><code>var stompClient = null;
+
+function setConnected(connected) {
+  $(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
+  $(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
+  if (connected) {
+    $(&quot;#conversation&quot;).show();
+  } else {
+    $(&quot;#conversation&quot;).hide();
+  }
+  $(&quot;#greetings&quot;).html(&quot;&quot;);
+}
+
+function connect() {
+  var from =  $(&quot;#from&quot;).val();
+  var socket = new SockJS(&apos;/websocket&apos;);
+  stompClient = Stomp.over(socket);
+  stompClient.connect({}, function (frame) {
+    setConnected(true);
+    console.log(&apos;Connected: &apos; + frame);
+    stompClient.subscribe(&apos;/chat/single/&apos;+from, function (greeting) {
+        showGreeting(JSON.parse(greeting.body));
+    });
+  });
+ }
+
+function disconnect() {
+if (stompClient !== null) {
+    stompClient.disconnect();
+}
+  setConnected(false);
+  console.log(&quot;Disconnected&quot;);
+}
+
+function sendName() {
+stompClient.send(&quot;/app/v3/singlechat&quot;, {}, JSON.stringify({&apos;content&apos;: $(&quot;#content&quot;).val(), &apos;to&apos;:$(&quot;#to&quot;).val(), &apos;from&apos;:$(&quot;#from&quot;).val()}));
+}
+
+function showGreeting(message) {
+$(&quot;#greetings&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + message.content + &quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+$(function () {
+$(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
+    e.preventDefault();
+});
+$( &quot;#connect&quot; ).click(function() { connect(); });
+$( &quot;#disconnect&quot; ).click(function() { disconnect(); });
+$( &quot;#send&quot; ).click(function() { sendName(); });
+});
+</code></pre><p>2.index.html  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+  &lt;title&gt;Hello WebSocket&lt;/title&gt;
+  &lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+  &lt;link href=&quot;/v3/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/webjars/sockjs-client/sockjs.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/webjars/stomp-websocket/stomp.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/v3/app.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;noscript&gt;&lt;h2 style=&quot;color: #ff0000&quot;&gt;Seems your browser doesn&apos;t support Javascript! Websocket relies on Javascript being
+enabled. Please enable
+Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;connect&quot;&gt;WebSocket connection:&lt;/label&gt;
+                &lt;button id=&quot;connect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;Connect&lt;/button&gt;
+                &lt;button id=&quot;disconnect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot; disabled=&quot;disabled&quot;&gt;Disconnect
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+               &lt;input type=&quot;text&quot; id=&quot;from&quot; class=&quot;form-control&quot; placeholder=&quot;my...&quot;&gt;
+                &lt;input type=&quot;text&quot; id=&quot;to&quot; class=&quot;form-control&quot; placeholder=&quot;to..&quot;&gt;
+
+                &lt;input type=&quot;text&quot; id=&quot;content&quot; class=&quot;form-control&quot; placeholder=&quot;...&quot;&gt;
+            &lt;/div&gt;
+            &lt;button id=&quot;send&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;Send&lt;/button&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-12&quot;&gt;
+        &lt;table id=&quot;conversation&quot; class=&quot;table table-striped&quot;&gt;
+            &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Greetings&lt;/th&gt;
+            &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody id=&quot;greetings&quot;&gt;
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p>测试结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/82.png" alt=""></p>
+
       
     </div>
     <div class="article-info article-info-index">
