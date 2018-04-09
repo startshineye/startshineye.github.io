@@ -152,6 +152,197 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-26-SpringBoot单元测试" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/14/SpringBoot-26-SpringBoot单元测试/">SpringBoot(26)-SpringBoot单元测试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>也许很多人写代码时候不写测试用例,但是要知道单元测试在工作是非常重要的.  </p>
+<p>重要性:  </p>
+<ol>
+<li>避免测试点的遗漏,提高测试效率  </li>
+<li>自动测试,可以在项目打包前进行测试校验  </li>
+<li>及时发现因为修改代码导致新的问题的出现，并及时解决  </li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>由于我们实际开发中大都是对业务代码进行测试,也就是Service层代码进行测试,所以以Service代码测试为例:<br>SpringBoot单元测试步骤:<br>1.加入依赖<br>2.编写测试service<br>3.编写测试类  </p>
+<h5 id="1-加入依赖"><a href="#1-加入依赖" class="headerlink" title="1.加入依赖"></a>1.加入依赖</h5><p>加入以下依赖:  </p>
+<pre><code>&lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
+        &lt;scope&gt;test&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre><p>如果我们添加的 依赖马上没有起效,我们可以:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/13.png" alt=""></p>
+<h5 id="2-编写service"><a href="#2-编写service" class="headerlink" title="2.编写service"></a>2.编写service</h5><pre><code>import org.springframework.stereotype.Service;
+@Service
+public class HelloService {
+public String printHello(){
+    return &quot;hello&quot;;
+}
+}
+</code></pre><h5 id="3-编写测试类"><a href="#3-编写测试类" class="headerlink" title="3.编写测试类"></a>3.编写测试类</h5><pre><code>import org.junit.runner.RunWith;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.SpringApplicationConfiguration;
+import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
+import org.springframework.test.context.web.WebAppConfiguration;
+import com.yxm.App;
+import com.yxm.junit.service.HelloService;
+//SpringJUnit支持，由此引入Spring-Test框架支持！
+@RunWith(SpringJUnit4ClassRunner.class)
+//指定SpringBoot工程启动工程
+@SpringApplicationConfiguration(classes = App.class)
+@WebAppConfiguration
+public class TestHelloService {
+//测试service
+//@Autowired
+@Autowired
+private HelloService service;
+@Test
+public void testPrintHello(){
+    Assert.assertEquals(&quot;hello&quot;, service.printHello());
+}
+}
+</code></pre><p>右键—Run As – Junit Test:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/14.png" alt="">  </p>
+<h5 id="4-Junit基本注解介绍"><a href="#4-Junit基本注解介绍" class="headerlink" title="4. Junit基本注解介绍"></a>4. Junit基本注解介绍</h5><p>//在所有测试方法前执行一次，一般在其中写上整体初始化的代码<br>@BeforeClass</p>
+<p>//在所有测试方法后执行一次，一般在其中写上销毁和释放资源的代码<br>@AfterClass</p>
+<p>//在每个测试方法前执行，一般用来初始化方法（比如我们在测试别的方法时，类中与其他测试方法共享的值已经被改变，为了保证测试结果的有效性，我们会在@Before注解的方法中重置数据）<br>@Before</p>
+<p>//在每个测试方法后执行，在方法执行完成后要做的事情<br>@After</p>
+<p>// 测试方法执行超过1000毫秒后算超时，测试将失败<br>@Test(timeout = 1000)</p>
+<p>// 测试方法期望得到的异常类，如果方法执行没有抛出指定的异常，则测试失败<br>@Test(expected = Exception.class)</p>
+<p>// 执行测试时将忽略掉此方法，如果用于修饰类，则忽略整个类<br>@Ignore(“not ready yet”) </p>
+<p>@Test</p>
+<p>@RunWith </p>
+<p>在JUnit中有很多个Runner，他们负责调用你的测试代码，每一个Runner都有各自的特殊功能，你要根据需要选择不同的Runner来运行你的测试代码。 </p>
+<p>如果我们只是简单的做普通Java测试，不涉及Spring Web项目，你可以省略@RunWith注解，这样系统会自动使用默认Runner来运行你的代码</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/14/SpringBoot-26-SpringBoot单元测试/" class="archive-article-date">
+  	<time datetime="2017-09-14T13:50:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-25-改变自动扫描包路径" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/">SpringBoot(25)-改变自动扫描包路径</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>默认情况下SpringBoot会扫描启动类同包以及子包下的注解,但是有时候我们需要改变包的扫描方式,原理：@ComponentScan注解进行指定要扫描的包以及要扫描的类</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>以下我们编写测试类测试:<br>三步:<br>1)新建两个包<br>2）新建两个类<br>3)启动类进行注解指定扫描路径  </p>
+<h5 id="1-新建两个包"><a href="#1-新建两个包" class="headerlink" title="1.新建两个包"></a>1.新建两个包</h5><p> com.cn   com.org</p>
+<h5 id="2-新建两个类"><a href="#2-新建两个类" class="headerlink" title="2.新建两个类"></a>2.新建两个类</h5><p>在这里为了方便测试，我们让我们的类在启动的时候就进行执行，所以我们就编写两个类，实现接口CommandLineRunner，这样在启动的时候我们就可以看到打印信息了。<br>注：类上添加@Configuration注解<br>Cn类:</p>
+<pre><code>package com.cn;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Cn implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.cn 下类执行&quot;);
+}
+}
+</code></pre><p>Org类:</p>
+<pre><code>package com.org;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Org implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.org 下类执行&quot;);
+}
+}
+</code></pre><h5 id="3-启动类进行注解指定扫描路径"><a href="#3-启动类进行注解指定扫描路径" class="headerlink" title="3.启动类进行注解指定扫描路径"></a>3.启动类进行注解指定扫描路径</h5><p>在App.java类中加入如下注解：<br> @ComponentScan(basePackages={“com.cn”,”com.org”})</p>
+<pre><code>@SpringBootApplication
+@ComponentScan(basePackages={&quot;com.cn&quot;,&quot;com.org&quot;})
+public class App 
+{
+public static void main( String[] args )
+ {
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+    SpringApplication.run(App.class, args);
+ }
+}
+</code></pre><p>输出：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/" class="archive-article-date">
+  	<time datetime="2017-09-13T11:41:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-24-使用自定义的properties" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1288,220 +1479,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-24-动画" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/03/vue-24-动画/">vue(24)-动画</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>一般我们可以通过改变css来制造动画,当然也可以通过vue.js的自带来构建动画.  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>vue -&gt;过渡(动画)<br>   本质走的是css3:transtion,animation  </p>
-<p>用法:<br>transition = “fade”:定义一个渐入渐出的动画  </p>
-<p>实例:点击按钮实现一个div的淡入淡出  </p>
-<pre><code>&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;style&gt;
-    #div1{
-        width: 200px;
-        height: 200px;
-        background: red;
-    }
-
-    &lt;!--定义动画--&gt;
-        .fade-transition{
-            transition: 1s all ease;
-        }
-    .fade-enter{
-        opacity: 0;
-    }
-    .fade-leave{
-        opacity: 0;
-        transform: translateX(200px);
-    }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;button&quot; value=&quot;按钮&quot; @click=&quot;toggle&quot;&gt;
-    &lt;div id=&quot;div1&quot; v-show=&quot;bSign&quot; transition=&quot;fade&quot;&gt;&lt;/div&gt;
-
-    &lt;/div&gt;
-&lt;script&gt;
-new Vue({
-    el:&apos;#box&apos;,
-    data:{
-        bSign:true
-    },
-    methods:{
-        toggle:function(){
-             this.bSign=!this.bSign;
-        }
-        /*toggle(){
-            this.bSign=!this.bSign;
-        }*/
-    }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/8.gif" alt=""></p>
-<p>但是对于动画我们一般用其他的一个框架:animate.css<br>定义动画时候vue自带了一个属性：transitions 所有动画的调用都是基于此.  </p>
-<pre><code>&lt;style&gt;
-    #box{
-        width:400px;
-        margin: 0 auto;
-    }
-    #div1{
-        width:100px;
-        height:100px;
-        background: red;
-    }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-&lt;input type=&quot;button&quot; value=&quot;按钮&quot; @click=&quot;toggle&quot;&gt;
-&lt;div id=&quot;div1&quot; class=&quot;animated&quot; v-show=&quot;bSign&quot; transition=&quot;bounce&quot;&gt;&lt;/div&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-new Vue({
-    el:&apos;#box&apos;,
-    data:{
-        bSign:true
-    },
-    methods:{
-        toggle:function () {
-            this.bSign=!this.bSign;
-        }
-    },
-    transitions:{ //定义所有动画名称
-        bounce:{
-            enterClass:&apos;zoomInLeft&apos;,
-            leaveClass:&apos;zoomOutRight&apos;
-        }
-    }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/9.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/03/vue-24-动画/" class="archive-article-date">
-  	<time datetime="2017-09-03T14:01:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-23-监听数据变化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-23-监听数据变化/">vue(23)-监听数据变化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们经过a数据变化b也会跟着变化,使用的是计算属性:computed,我们可以通过监听数据变化实现:vm.$wactch();</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-监听数据变化"><a href="#1-监听数据变化" class="headerlink" title="1.监听数据变化"></a>1.监听数据变化</h5><p>vm.$watch(name,fnCb);其中name是Vue中data里面要变化属性，fnCb是回调函数  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-    a:{{a}}&lt;br&gt;
-    msg:{{msg}}
-
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-     el:&quot;#box&quot;,
-     data:{
-       a:&quot;a&quot;,
-         b:&apos;&apos;,
-         msg:&apos;&apos;
-     },
- });
-vm.$watch(&quot;a&quot;,function(){
-    this.msg=&quot;a数据发生变化&quot;+this.a;
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/6.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-23-监听数据变化/" class="archive-article-date">
-  	<time datetime="2017-09-02T13:01:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/41/">41</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
@@ -1567,7 +1544,7 @@ vm.$watch(&quot;a&quot;,function(){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 10px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
