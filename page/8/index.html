@@ -152,6 +152,96 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-18-组件-注册组件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/31/vue-18-组件-注册组件/">vue(18)-组件-注册组件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>代码复用一直是软件开发中长期存在的一个问题，每个开发者都想再次使用之前写好的<br>代码，又担心引入这段代码后对现有的程序产生影响。</li>
+<li>从jQuery 开始，我们就开始通过插件的形式复用代码，到Requirejs 开始将js 文件模块化，按需加载。</li>
+<li>两种方式都提供了比较方便的复用方式，但往往还需要自己手动加入所需的CSS 文件和HTML模块。</li>
+<li>现在，WebComponents 的出现提供了一种新的思路，可以自定义tag 标签，并拥有自身的模板、样式和交互。</li>
+<li>Angularjs 的指令，Reactjs 的组件化都在往这方面做尝试。同样，Vue.js 也提供了自己的组件系统，支持自定义tag和原生HTML元素的扩展。</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>Vue.js 创建组件构造器的方式非常简单：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var MyComponent = Vue.extend(&#123; … &#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>这样，我们就获得了一个组件构造器，但现在还无法直接使用这个组件,需要将组件注<br>册到应用中。Vue.js 提供了两种注册方式,分别是全局注册和局部注册。</p>
+<h5 id="1-全局注册"><a href="#1-全局注册" class="headerlink" title="1.全局注册"></a>1.全局注册</h5><p>全局注册需要确保在根实例初始化之前注册，这样才能使组件在任意实例中被使用，注<br>册方式如下：  </p>
+<pre><code>Vue.component(&apos;my-component&apos;, MyComponent);
+</code></pre><p>这条语句需要写在</p>
+<pre><code>var vm = new Vue({…})
+</code></pre><p>之前，注册成功之后，就可以在模块中以自定义元素<my-component> 的形式使用组件。对于组件的命名，W3C 规范是字母小写且包<br>含一个短横杠“-”，Vue.js 暂不强制要求，但官方建议遵循这个规则比较好。<br>整个使用方法代码如下：</my-component></p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> &lt;div id = &quot;app&quot;&gt;</div><div class="line">       &lt;my-component&gt;&lt;/my-component&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line"> var MyComponent = Vue.extend(&#123;</div><div class="line">    template:&quot;&lt;p&gt;Hello Vue.js&lt;/p&gt;&quot;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">Vue.component(&apos;my-component&apos;,MyComponent);</div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line"></div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>输出结果:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">  &lt;p&gt;Hello Vue.js&lt;/p&gt;</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-局部注册"><a href="#2-局部注册" class="headerlink" title="2.局部注册"></a>2.局部注册</h5><p>局部注册则限定了组件只能在被注册的组件中使用，而无法在其他组件中使用，注册方式如下：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> &lt;div id = &quot;app&quot;&gt;</div><div class="line">       &lt;my-parent&gt;&lt;/my-parent&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line"> var Child = Vue.extend(&#123;</div><div class="line">    template:&quot;&lt;p&gt;Child Hello Vue.js&lt;/p&gt;&quot;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">var Parent = Vue.extend(&#123;</div><div class="line">   template:&apos;&lt;div&gt;&lt;p&gt;parent component&lt;/p&gt;&lt;my-child&gt;&lt;/my-child&gt;&lt;/div&gt;&apos;,</div><div class="line">  components:&#123;</div><div class="line">       &apos;my-child&apos;:Child</div><div class="line">  &#125;</div><div class="line">&#125;);</div><div class="line">Vue.component(&apos;my-parent&apos;,Parent);</div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>输出为:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;div&gt;　　　　</div><div class="line">  &lt;p&gt;This is a parent component&lt;/p&gt;</div><div class="line">  &lt;p&gt;This is a child component&lt;/p&gt;　　　　</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>而如果在根实例中调用</p>
+<pre><code>&lt;my-child&gt;&lt;/my-child&gt;
+</code></pre><p>会出现:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/53.png" alt=""></p>
+<h5 id="3-注册组件"><a href="#3-注册组件" class="headerlink" title="3.注册组件"></a>3.注册组件</h5><p>Vue.js 对于上述两种注册方式也提供了简化的方法，我们可以直接在注册的时候定义组件构造器选项  </p>
+<p>1.全局注册  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">    Vue.component(&apos;my-component&apos;, &#123;</div><div class="line">       template : &apos;&lt;p&gt;This is a component&lt;/p&gt;&apos;</div><div class="line">    &#125;)</div><div class="line">    ```  </div><div class="line"></div><div class="line">2.局部注册</div></pre></td></tr></table></figure>
+
+var Parent = Vue.extend({
+     template: &apos;&lt;div&gt;
+     &lt;p&gt;This is a parent component&lt;/p&gt;
+      &lt;my-child&gt;&lt;/my-child&gt;
+     &lt;/div&gt;&apos;,
+   components: {
+     &apos;my-child&apos;: {
+      template : &apos;&lt;p&gt;This is a child component&lt;/p&gt;&apos;
+    }
+   }
+ })
+```
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/31/vue-18-组件-注册组件/" class="archive-article-date">
+  	<time datetime="2017-10-31T13:50:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-17-过渡-过滤系统在Vue-js2-0中变化" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -819,78 +909,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-8-事件绑定与监听" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/29/vue-8-事件绑定与监听/">vue(8)-事件绑定与监听</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当模板渲染完成之后，就可以进行事件的绑定与监听了。Vue.js 提供了v-on 指令用来监听DOM 事件，通常在模板内直接使用，而不像传统方式在js 中获取DOM 元素，然后绑定<br>事件。例如：</p>
-<pre><code>&lt;button v-on:click=&quot;get&quot;&gt;get&lt;/button&gt;
-</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-方法及内联语句处理器"><a href="#1-方法及内联语句处理器" class="headerlink" title="1.方法及内联语句处理器"></a>1.方法及内联语句处理器</h5><p>通过v-on 可以绑定实例选项属性methods 中的方法作为事件的处理器，v-on: 后参数接受所有的原生事件名称。例如：</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   &lt;button v-on:click=&quot;get&quot;&gt;get&lt;/button&gt;</div><div class="line">var vm = new Vue(&#123;</div><div class="line">　 el : &apos;#app&apos;,</div><div class="line">　 data: &#123;</div><div class="line">　　 msg : &apos;Hello Vue.js&apos;</div><div class="line">　 &#125;,</div><div class="line">　 methods : &#123;</div><div class="line">　　 get : function() &#123;</div><div class="line">　　　　 alert(this.msg);</div><div class="line">　　 &#125;</div><div class="line">　 &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>单击button，即可触发get函数，弹出alert 框’Hello Vue.js’。<br>Vue.js 也提供了v-on 的缩写形式， 我们可以将模板中的内容改写：</p>
-<pre><code>&lt;button @click=&apos;get&apos;&gt;get&lt;/button&gt;，
-</code></pre><p>这两句语句是等价的。  </p>
-<p>除了直接绑定methods 函数外，v-on 也支持内联JavaScript 语句，但仅限一个语句。例如：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   &lt;button v-on:click=&quot;getA(&apos;from&apos;)&quot;&gt;getA&lt;/button&gt;</div><div class="line">var vm = new Vue(&#123;</div><div class="line">　 el : &apos;#app&apos;,</div><div class="line">　 data: &#123;</div><div class="line">　　 msg : &apos;Hello Vue.js&apos;</div><div class="line">　 &#125;,</div><div class="line">　 methods : &#123;</div><div class="line">　　  getA:function(param)&#123;</div><div class="line">           alert(this.msg+&quot; &quot;+param);</div><div class="line">        &#125;</div><div class="line">　 &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>在直接绑定methods 函数和内联JavaScript 语句时，都有可能需要获取原生DOM 事件对象，以下两种方式都可以获取：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">&lt;button v-on:click=&quot;showEvent&quot;&gt;Event&lt;/button&gt;</div><div class="line">&lt;button v-on:click=&quot;showEvent($event)&quot;&gt;showEvent&lt;/button&gt;</div><div class="line">&lt;button v-on:click=&quot;showEvent()&quot;&gt;showEvent&lt;/button&gt; // 这样写获取不到event</div><div class="line">var vm = new Vue(&#123;</div><div class="line">　 el : &apos;#app&apos;,</div><div class="line">　 methods : &#123;</div><div class="line">　　showEvent : function(event) &#123;</div><div class="line">　　 console.log(event);</div><div class="line">　　&#125;</div><div class="line">　 &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>同一元素上也可以通过v-on 绑定多个相同事件函数，执行顺序为顺序执行，例如：  </p>
-<pre><code>&lt;div v-on:click=&quot;sayFrom(&apos;first&apos;)&quot; v-on:click =&quot;sayFrom(&apos;second)&quot;&gt;
-</code></pre><h5 id="2-修饰符"><a href="#2-修饰符" class="headerlink" title="2.修饰符"></a>2.修饰符</h5><p>Vue.js 为指令v-on 提供了多个修饰符，方便我们处理一些DOM 事件的细节，并且修饰符可以串联使用。主要的修饰符如下。<br>.stop: 等同于调用event. stopPropagation()。<br>.prevent: 等同于调用event.preventDefault()。<br>.capture: 使用capture 模式添加事件监听器。<br>.self: 只当事件是从监听元素本身触发时才触发回调。  </p>
-<p>使用如下:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;a v-on:click.stop=&apos;doThis&apos;&gt;&lt;/a&gt;</div><div class="line">&lt;form v-on:submit.prevent=&quot;onSubmit&quot;&gt;&lt;/form&gt; // 阻止表单默认提交事件</div><div class="line">&lt;form v-on:submit.stop.prevent=&quot;onSubmit&quot;&gt;&lt;/form&gt; // 阻止默认提交事件且阻止冒泡</div><div class="line">&lt;form v-on:submit.stop.prevent&gt;&lt;/form&gt; // 也可以只有修饰符，并不绑定事件</div></pre></td></tr></table></figure>
-</code></pre><p>除了事件修饰符之外，v-on 还提供了按键修饰符，方便我们监听键盘事件中的按键。例如：  </p>
-<pre><code>&lt;input v-on:keyup.enter=&quot;submit&quot; /&gt;
-</code></pre><p>Vue.js 也允许我们自己定义按键别名，例如：  </p>
-<pre><code>Vue.directive(&apos;on&apos;).keyCodes.f1 = 112; // 即可以使用&lt;input v-on:keyup.f1=&quot;help&quot; /&gt;
-</code></pre><p>Vue.js 2.0 中可以直接在Vue.config.keyCodes 里添加自定义按键别名，无需修改v-on<br>指令，例如：Vue.config.keyCodes.f1 = 12。   </p>
-<h5 id="3-与传统事件绑定的区别"><a href="#3-与传统事件绑定的区别" class="headerlink" title="3.与传统事件绑定的区别"></a>3.与传统事件绑定的区别</h5><p>如果你之前没有接触过Angularjs，ReactJS 这类框架，或许会对Vue.js 这种事件监听<br>方式感到困惑。毕竟我们一开始接受的理念就是将HTML 和JS 隔离开编写。但其实Vue.js<br>事件处理方法和表达式都严格绑定在当前视图的ViewModel 上，所以并不会导致维护困难。<br>而这么写的好处在于：  </p>
-<p>1.无需手动管理事件。ViewModal 被销毁时，所有的事件处理器都会自动被删除，让<br>我们从获取DOM 绑定事件然后在特定情况下再解绑这样的事情中解脱出来。<br>2.解耦。ViewModel 代码是纯粹的逻辑代码，和DOM 无关，有利于我们写自动化测试<br>用例。<br>3.还有个与以往不同的细节是，我们在处理ul、li 这种列表，尤其是下拉刷新这种需要异<br>步加载数据的列表时，往往会把li 事件代理到ul 上，这样异步加载进来的新数据就不需要再<br>次绑定事件。而Vue.js 这类的框架由于不需要手动添加事件，往往直接会把事件绑定在li 上，<br>类似这样:<li v-repeat="item in items" v-on:click="clickLi"></li>，理论上每次新增li 的时候都会进行同li 个数的事件绑定，比用事件代理多耗了些性能。但在实际运用中并没有什么特别的性能瓶颈影响，而且我们也省去在代理中处理e.target 的步骤，让事件和DOM 元素关系更紧密、简单。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/29/vue-8-事件绑定与监听/" class="archive-article-date">
-  	<time datetime="2017-10-29T05:12:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-29</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/41/">41</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -956,7 +974,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 10px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 10.59px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
