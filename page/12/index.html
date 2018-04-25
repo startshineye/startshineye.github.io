@@ -152,6 +152,480 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-33-SpringBoot集成Redis实现缓存机制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/16/SpringBoot-33-SpringBoot集成Redis实现缓存机制/">SpringBoot(33)-SpringBoot集成Redis实现缓存机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>缓存机制在应用中是经常用的机制,Redis是常用的缓存</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>本文章牵涉到的技术点：Spring Data JPA、Redis、Spring MVC,Spirng Cache<br>实例步骤:<br>1.新建Java Maven Project<br>2.在pom.xml中添加相应的依赖包<br>3.编写Spring Boot启动类<br>4.配置application.properties<br>5.编写RedisCacheConfig配置类<br>6.编写RedisInfo测试实体类<br>7.编写RedisInfoRepository持久化类<br>8.编写RedisInfoService类<br>9.编写RedisInfoController类<br>10.测试代码是否正常运行了<br>11.自定义缓存key</p>
+<h5 id="1-新建Java-Maven-Project"><a href="#1-新建Java-Maven-Project" class="headerlink" title="1.新建Java Maven Project"></a>1.新建Java Maven Project</h5><p>新建spring-boot-redis项目   </p>
+<h5 id="2-在pom-xml中添加相应的依赖包"><a href="#2-在pom-xml中添加相应的依赖包" class="headerlink" title="2.在pom.xml中添加相应的依赖包"></a>2.在pom.xml中添加相应的依赖包</h5><p>maven中添加依赖:spring-boot父节点,spring-boot web支持,缓存服务spring-context-support,redis支持,JPA操作数据库,mysql数据驱动  </p>
+<pre><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+&lt;groupId&gt;com.yxm&lt;/groupId&gt;
+&lt;artifactId&gt;spring-boot-redis&lt;/artifactId&gt;
+&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+&lt;packaging&gt;jar&lt;/packaging&gt;
+
+&lt;name&gt;spring-boot-redis&lt;/name&gt;
+&lt;url&gt;http://maven.apache.org&lt;/url&gt;
+
+&lt;!-- spring-boot父节点 --&gt;
+&lt;parent&gt;
+ &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+ &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+ &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
+&lt;/parent&gt;
+
+&lt;properties&gt;
+&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+&lt;java-version&gt;1.8&lt;/java-version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+
+&lt;!-- spring-boot web支持 --&gt;
+&lt;dependency&gt;
+&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- 缓存服务spring-context-support --&gt;
+&lt;dependency&gt;
+&lt;groupId&gt;org.springframework&lt;/groupId&gt;
+&lt;artifactId&gt;spring-context-support&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- redis支持 --&gt;
+&lt;dependency&gt;
+ &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+ &lt;artifactId&gt;spring-boot-starter-redis&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- JPA操作数据库 --&gt;
+&lt;dependency&gt;
+ &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+ &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
+&lt;/dependency&gt;
+
+&lt;!-- mysql数据驱动 --&gt;
+&lt;dependency&gt;  
+ &lt;groupId&gt;mysql&lt;/groupId&gt;  
+ &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;  
+&lt;/dependency&gt; 
+
+&lt;!-- junit --&gt; 
+&lt;dependency&gt;  
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;  
+        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;  
+        &lt;scope&gt;test&lt;/scope&gt;  
+&lt;/dependency&gt; 
+&lt;/dependencies&gt;
+&lt;/project&gt;
+</code></pre><h5 id="3-编写Spring-Boot启动类"><a href="#3-编写Spring-Boot启动类" class="headerlink" title="3.编写Spring Boot启动类"></a>3.编写Spring Boot启动类</h5><pre><code>@SpringBootApplication
+public class App 
+{
+public static void main( String[] args )
+{
+   SpringApplication.run(App.class, args);
+}
+}
+</code></pre><h5 id="4-配置application-properties"><a href="#4-配置application-properties" class="headerlink" title="4.配置application.properties"></a>4.配置application.properties</h5><p>配置三个资源，第一就是数据库基本信息；第二就是redis配置；第三就是JPA的配置  </p>
+<pre><code>spring.datasource.url = jdbc:mysql://localhost:3306/test
+spring.datasource.username = root
+spring.datasource.password = root
+spring.datasource.driverClassName = com.mysql.jdbc.Driver
+spring.datasource.max-active=20
+spring.datasource.max-idle=8
+spring.datasource.min-idle=8
+spring.datasource.initial-size=10
+
+spring.redis.database=0
+spring.redis.host=127.0.0.1  
+spring.redis.port=6379
+spring.redis.pool.max-idle=8
+spring.redis.pool.min-idle=0
+spring.redis.pool.max-active=8
+spring.redis.pool.max-wait=-1
+spring.jpa.database = MYSQL
+spring.jpa.hibernate.ddl-auto = update
+spring.jpa.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy
+spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect
+</code></pre><h5 id="5-编写RedisCacheConfig配置类"><a href="#5-编写RedisCacheConfig配置类" class="headerlink" title="5.编写RedisCacheConfig配置类"></a>5.编写RedisCacheConfig配置类</h5><p>缓存主要有几个要实现的类：其一就是CacheManager缓存管理器；其二就是具体操作实现类；其三就是CacheManager工厂类（这个可以使用配置文件配置的进行注入，也可以通过编码的方式进行实现）；其四就是缓存key生产策略（当然Spring自带生成策略，但是在Redis客户端进行查看的话是系列化的key,对于我们肉眼来说就是感觉是乱码了，这里我们先使用自带的缓存策略）。</p>
+<pre><code>package com.yxm.config;
+import java.lang.reflect.Method;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+/** 
+ * redis 缓存配置; 
+ * 
+ * 注意：RedisCacheConfig这里也可以不用继承：CachingConfigurerSupport，也就是直接一个普通的Class就好了； 
+ * 
+ * 这里主要我们之后要重新实现 key的生成策略，只要这里修改KeyGenerator，其它位置不用修改就生效了。 
+ * 
+ * 普通使用普通类的方式的话，那么在使用@Cacheable的时候还需要指定KeyGenerator的名称;这样编码的时候比较麻烦。 
+ * 
+ * @author 
+ * @version v.0.1 
+ */  
+@Configuration
+@EnableCaching//启用缓存，这个注解很重要
+public class RedisCacheConfig extends CachingConfigurerSupport{
+/** 
+ * 自定义key. 
+ * 此方法将会根据类名+方法名+所有参数的值生成唯一的一个key,即使@Cacheable中的value属性一样，key也会不一样。 
+ */  
+@Override  
+public KeyGenerator keyGenerator() {  
+   System.out.println(&quot;RedisCacheConfig.keyGenerator()&quot;);  
+   return new KeyGenerator() {
+    public Object generate(Object o, Method method, Object... objects) {
+        // This will generate a unique key of the class name, the method name  
+        //and all method parameters appended.  
+        StringBuilder sb = new StringBuilder();  
+        sb.append(o.getClass().getName());  
+        sb.append(method.getName());  
+        for (Object obj : objects) {  
+            sb.append(obj.toString());  
+        }  
+        System.out.println(&quot;keyGenerator=&quot; + sb.toString());  
+        return sb.toString();  
+    }  
+   };  
+}  
+/**
+ * 缓存管理器
+ * @param redisTemplate
+ * @return
+ */
+@Bean
+public CacheManager cacheManager(RedisTemplate&lt;?, ?&gt; redisTemplate){
+     CacheManager cacheManager = new RedisCacheManager(redisTemplate);
+     return cacheManager;
+}
+/** 
+ * redis模板操作类,类似于jdbcTemplate的一个类; 
+ * 
+ * 虽然CacheManager也能获取到Cache对象，但是操作起来没有那么灵活； 
+ * 
+ * 这里在扩展下：RedisTemplate这个类不见得很好操作，我们可以在进行扩展一个我们 
+ * 
+ * 自己的缓存类，比如：RedisStorage类; 
+ * 
+ * @param factory : 通过Spring进行注入，参数在application.properties进行配置； 
+ * @return 
+ */  
+@Bean
+public RedisTemplate&lt;String,String&gt; redisTemplate(RedisConnectionFactory factory){
+     RedisTemplate&lt;String, String&gt; redisTemplate = new RedisTemplate&lt;String, String&gt;();  
+     redisTemplate.setConnectionFactory(factory);  
+     //key序列化方式;（不然会出现乱码;）,但是如果方法上有Long等非String类型的话，会报类型转换错误；  
+     //所以在没有自己定义key生成策略的时候，以下这个代码建议不要这么写，可以不配置或者自己实现ObjectRedisSerializer  
+     //或者JdkSerializationRedisSerializer序列化方式;  
+     RedisSerializer&lt;String&gt; redisSerializer = new StringRedisSerializer();//Long类型不可以会出现异常信息;  
+     redisTemplate.setKeySerializer(redisSerializer);  
+     redisTemplate.setHashKeySerializer(redisSerializer);
+     return redisTemplate; 
+  }    
+}
+</code></pre><p>RedisCacheConfig这里也可以不用继承：CachingConfigurerSupport，也就是直接一个普通的Class就好了；这里主要我们之后要重新实现 key的生成策略，只要这里修改KeyGenerator，其它位置不用修改就生效了。普通使用普通类的方式的话，那么在使用@Cacheable的时候还需要指定KeyGenerator的名称;这样编码的时候比较麻烦。</p>
+<h5 id="6-编写RedisInfo测试实体类"><a href="#6-编写RedisInfo测试实体类" class="headerlink" title="6.编写RedisInfo测试实体类"></a>6.编写RedisInfo测试实体类</h5><pre><code>import java.io.Serializable;
+import javax.persistence.Entity;
+import javax.persistence.GeneratedValue;
+import javax.persistence.Id;
+@Entity
+public class RedisInfo implements Serializable{
+private static final long serialVersionUID = 1L;
+@Id @GeneratedValue
+private Long id;
+private String name;
+private String pwd;
+
+public Long getId() {
+    return id;
+}
+
+public void setId(Long id) {
+    this.id = id;
+}
+
+public String getName() {
+    return name;
+}
+
+public void setName(String name) {
+    this.name = name;
+}
+
+public String getPwd() {
+    return pwd;
+}
+
+public void setPwd(String pwd) {
+    this.pwd = pwd;
+}
+@Override
+public String toString() {
+    return &quot;RedisInfo [id=&quot; + id + &quot;, name=&quot; + name + &quot;, pwd=&quot; + pwd + &quot;]&quot;;
+}
+}
+</code></pre><h5 id="7-编写RedisInfoRepository持久化类"><a href="#7-编写RedisInfoRepository持久化类" class="headerlink" title="7.编写RedisInfoRepository持久化类"></a>7.编写RedisInfoRepository持久化类</h5><pre><code>package com.yxm.web.dao;
+import org.springframework.data.repository.CrudRepository;
+import com.yxm.web.entity.RedisInfo;
+public interface RedisInfoRepository extends CrudRepository&lt;RedisInfo, Long&gt;{
+} 
+</code></pre><h5 id="8-编写RedisInfoService类"><a href="#8-编写RedisInfoService类" class="headerlink" title="8.编写RedisInfoService类"></a>8.编写RedisInfoService类</h5><p>使用Spring @Cacheable注解方式和RedisTemplate对象进行操作:<br>service:  </p>
+<pre><code>package com.yxm.web.service;
+import com.yxm.web.entity.RedisInfo;
+public interface RedisInfoService {
+  public RedisInfo findById(long id);
+  public void deleteCache(long id);
+   void test();
+  }
+</code></pre><p>serviceImpl:  </p>
+<pre><code>import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.stereotype.Service;
+import com.yxm.web.dao.RedisInfoRepository;
+import com.yxm.web.entity.RedisInfo;
+import com.yxm.web.service.RedisInfoService;
+@Service
+public class RedisInfoServiceImpl implements RedisInfoService{
+@Autowired
+private RedisInfoRepository repository;
+@Autowired
+private RedisTemplate&lt;String,String&gt; redisTemplate;
+@Cacheable(value=&quot;redisInfo&quot;)//缓存,这里没有指定key
+public RedisInfo findById(long id) {
+    System.out.println(&quot;------从数据库里面获取-------&quot;+id);
+    return repository.findOne(id);
+}
+@CacheEvict(value=&quot;redisInfo&quot;) 
+public void deleteCache(long id) {
+    System.out.println(&quot;--------d从缓存中删除----------&quot;);
+}
+public void test() {
+    ValueOperations&lt;String,String&gt; valueOperations = redisTemplate.opsForValue();  
+    valueOperations.set(&quot;redisKey&quot;, &quot;random=&quot;+Math.random());  
+    System.out.println(valueOperations.get(&quot;redisKey&quot;));
+ }
+}
+</code></pre><h5 id="9-编写RedisInfoController类"><a href="#9-编写RedisInfoController类" class="headerlink" title="9.编写RedisInfoController类"></a>9.编写RedisInfoController类</h5><pre><code>import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Controller;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseBody;
+import com.yxm.web.entity.RedisInfo;
+import com.yxm.web.service.RedisInfoService;
+@Controller
+public class RedisInfoController {
+@Autowired
+private RedisInfoService redisInfoService;
+@RequestMapping(&quot;/find&quot;)
+@ResponseBody
+public String find(){
+    RedisInfo loaded = redisInfoService.findById(1);
+    System.out.println(&quot;loaded[&quot;+loaded+&quot;]&quot;);
+    RedisInfo cached = redisInfoService.findById(1);
+    System.out.println(&quot;cached[&quot;+cached+&quot;]&quot;);
+    loaded = redisInfoService.findById(2);
+    System.out.println(&quot;loaded[&quot;+loaded+&quot;]&quot;);
+    return &quot;findById&quot;;
+}
+@RequestMapping(&quot;/delete&quot;)
+@ResponseBody
+public String delete(long id){
+    redisInfoService.deleteCache(id);
+    return &quot;delete&quot;;
+}
+@RequestMapping(&quot;/test&quot;)
+@ResponseBody
+public String test(){
+    redisInfoService.test();
+    System.out.println(&quot;--test--&quot;);
+    return &quot;test&quot;;
+}
+}
+</code></pre><h5 id="10-测试代码是否正常运行了"><a href="#10-测试代码是否正常运行了" class="headerlink" title="10.测试代码是否正常运行了"></a>10.测试代码是否正常运行了</h5><p>第一次访问:<br>启动应用程序,访问地址：<a href="http://localhost:8080/find" target="_blank" rel="external">http://localhost:8080/find</a>  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/21.png" alt=""><br>访问地址：<a href="http://127.0.0.1:8080/test" target="_blank" rel="external">http://127.0.0.1:8080/test</a>  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/22.png" alt=""><br>从以上知道:service里面只执行一次,说明第二次是从缓存中拿的  </p>
+<p>二次缓存:<br>访问地址：<a href="http://localhost:8080/find" target="_blank" rel="external">http://localhost:8080/find</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/23.png" alt=""></p>
+<p>这时候所有的数据都是执行缓存的<br>这时候执行删除动作：<a href="http://127.0.0.1:8080/delete?id=1" target="_blank" rel="external">http://127.0.0.1:8080/delete?id=1</a><br>然后在访问：<a href="http://127.0.0.1:8080/find" target="_blank" rel="external">http://127.0.0.1:8080/find</a></p>
+<h5 id="11-自定义缓存key"><a href="#11-自定义缓存key" class="headerlink" title="11.自定义缓存key"></a>11.自定义缓存key</h5><p>在com.yxm.config.RedisCacheConfig类中重写CachingConfigurerSupport中的keyGenerator ,具体实现代码如下： </p>
+<pre><code> /** 
+ * 自定义key. 
+ * 此方法将会根据类名+方法名+所有参数的值生成唯一的一个 key,即使@Cacheable中的value属性一样，key也会不一样。 
+ */  
+ @Override  
+ public KeyGenerator keyGenerator() {  
+   System.out.println(&quot;RedisCacheConfig.keyGenerator()&quot;);  
+   return new KeyGenerator() {  
+       @Override  
+       public Object generate(Object o, Method method, Object... objects) {  
+          // This will generate a unique key of the class name, the method name  
+          //and all method parameters appended.  
+          StringBuilder sb = new StringBuilder();  
+          sb.append(o.getClass().getName());  
+          sb.append(method.getName());  
+          for (Object obj : objects) {  
+              sb.append(obj.toString());  
+          }  
+          System.out.println(&quot;keyGenerator=&quot; + sb.toString());  
+          return sb.toString();  
+       }  
+   };  
+}   
+</code></pre><p>这时候在redis的客户端查看key的话还是序列化的肉眼看到就是乱码了，那么我改变key的序列方式，这个很简单，redis底层已经有具体的实现类了，我们只需要配置下：  </p>
+<pre><code>//key序列化方式;（不然会出现乱码;）,但是如果方法上有Long等非String类型的话，会报类型转换错误；  
+//所以在没有自己定义key生成策略的时候，以下这个代码建议不要这么写，可以不配置或者自己实现ObjectRedisSerializer  
+//或者JdkSerializationRedisSerializer序列化方式;  
+RedisSerializer&lt;String&gt; redisSerializer = new StringRedisSerializer();//Long类型不可以会出现异常信息;  
+redisTemplate.setKeySerializer(redisSerializer);  
+redisTemplate.setHashKeySerializer(redisSerializer);   
+</code></pre><p>RedisCacheConfig类的方法调整:  </p>
+<pre><code>package com.yxm.config;
+import java.lang.reflect.Method;
+import org.springframework.cache.CacheManager;
+import org.springframework.cache.annotation.CachingConfigurerSupport;
+import org.springframework.cache.annotation.EnableCaching;
+import org.springframework.cache.interceptor.KeyGenerator;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.cache.RedisCacheManager;
+import org.springframework.data.redis.connection.RedisConnectionFactory;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.RedisSerializer;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+/** 
+* redis 缓存配置; 
+* 
+* 注意：RedisCacheConfig这里也可以不用继承：CachingConfigurerSupport，也就是直接一个普通的Class就好了； 
+* 
+* 这里主要我们之后要重新实现 key的生成策略，只要这里修改KeyGenerator，其它位置不用修改就生效了。 
+* 
+* 普通使用普通类的方式的话，那么在使用@Cacheable的时候还需要指定KeyGenerator的名称;这样编码的时候比较麻烦。 
+* 
+* @author 
+* @version v.0.1 
+*/  
+@Configuration
+@EnableCaching//启用缓存，这个注解很重要
+public class RedisCacheConfig extends CachingConfigurerSupport{
+/** 
+ * 自定义key. 
+ * 此方法将会根据类名+方法名+所有参数的值生成唯一的一个key,即使@Cacheable中的value属性一样，key也会不一样。 
+ */  
+@Override  
+public KeyGenerator keyGenerator() {  
+   System.out.println(&quot;RedisCacheConfig.keyGenerator()&quot;);  
+   return new KeyGenerator() {
+    public Object generate(Object o, Method method, Object... objects) {
+        // This will generate a unique key of the class name, the method name  
+        //and all method parameters appended.  
+        StringBuilder sb = new StringBuilder();  
+        sb.append(o.getClass().getName());  
+        sb.append(method.getName());  
+        for (Object obj : objects) {  
+            sb.append(obj.toString());  
+        }  
+        System.out.println(&quot;keyGenerator=&quot; + sb.toString());  
+        return sb.toString();  
+    }  
+   };  
+}  
+/**
+ * 缓存管理器
+ * @param redisTemplate
+ * @return
+ */
+@Bean
+public CacheManager cacheManager(RedisTemplate&lt;?, ?&gt; redisTemplate){
+     CacheManager cacheManager = new RedisCacheManager(redisTemplate);
+     return cacheManager;
+}
+/** 
+ * redis模板操作类,类似于jdbcTemplate的一个类; 
+ * 
+ * 虽然CacheManager也能获取到Cache对象，但是操作起来没有那么灵活； 
+ * 
+ * 这里在扩展下：RedisTemplate这个类不见得很好操作，我们可以在进行扩展一个我们 
+ * 
+ * 自己的缓存类，比如：RedisStorage类; 
+ * 
+ * @param factory : 通过Spring进行注入，参数在application.properties进行配置； 
+ * @return 
+ */  
+@Bean
+public RedisTemplate&lt;String,String&gt; redisTemplate(RedisConnectionFactory factory){
+     RedisTemplate&lt;String, String&gt; redisTemplate = new RedisTemplate&lt;String, String&gt;();  
+     redisTemplate.setConnectionFactory(factory);  
+     //key序列化方式;（不然会出现乱码;）,但是如果方法上有Long等非String类型的话，会报类型转换错误；  
+     //所以在没有自己定义key生成策略的时候，以下这个代码建议不要这么写，可以不配置或者自己实现ObjectRedisSerializer  
+     //或者JdkSerializationRedisSerializer序列化方式;  
+     RedisSerializer&lt;String&gt; redisSerializer = new StringRedisSerializer();//Long类型不可以会出现异常信息;  
+     redisTemplate.setKeySerializer(redisSerializer);  
+     redisTemplate.setHashKeySerializer(redisSerializer);
+     return redisTemplate; 
+ }    
+}
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/16/SpringBoot-33-SpringBoot集成Redis实现缓存机制/" class="archive-article-date">
+  	<time datetime="2017-09-16T10:28:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-32-SpringBoot的启动器Starter" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1146,148 +1620,9 @@ person[zhangsan 23]
 
 
   
-    <article id="post-SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/">SpringBoot(23)-SpringBoot环境变量读取和属性对象的绑定</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-条件"><a href="#1-条件" class="headerlink" title="1.条件"></a>1.条件</h5><p>SpringBoot中想要获取环境变量读取和属性对象的绑定：<br>1)只要是Spring管理的类<br>2)实现接口 EnvironmentAware<br>3)重写方法 setEnvironment  </p>
-<p>可以在工程启动时就可以获取</p>
-<h5 id="2-代码示例"><a href="#2-代码示例" class="headerlink" title="2.代码示例"></a>2.代码示例</h5><h6 id="2-1-一般类通过实现EnvironmentAware接口"><a href="#2-1-一般类通过实现EnvironmentAware接口" class="headerlink" title="2.1 一般类通过实现EnvironmentAware接口"></a>2.1 一般类通过实现EnvironmentAware接口</h6><p>条件:<br>1)@Configuration<br>2)实现EnvironmentAware  </p>
-<pre><code>import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.bind.RelaxedPropertyResolver;
-import org.springframework.context.EnvironmentAware;
-import org.springframework.context.annotation.Configuration;
-import org.springframework.core.env.Environment;
-@Configuration
-public class MyEnviromentAware implements EnvironmentAware{
-
-//注入application.properties的属性到指定变量中
-@Value(&quot;${spring.datasource.url}&quot;)
-private String url;
-
-//重写的方法setEnvironment是在系统启动的时间被执行
-public void setEnvironment(Environment environment) {
-
-    //打印注入的属性信息
-    System.out.println(&quot;url[&quot;+url+&quot;]&quot;);
-
-    //系统environment获取到系统属性
-    System.out.println(environment.getProperty(&quot;JAVA_HOME&quot;));
-
-    //通过enviroment获取到application.properties配置的属性.
-    System.out.println(environment.getProperty(&quot;spring.datasource.url&quot;));
-
-    //获取到前缀是&quot;spring.datasource.&quot; 的属性列表值.
-    RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(environment, &quot;spring.datasource.&quot;);
-    System.out.println(&quot;spring.datasource.url=&quot;+relaxedPropertyResolver.getProperty(&quot;url&quot;));
-  }
-}
-</code></pre><p>输出:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/9.png" alt=""></p>
-<h6 id="2-2-Controller或者Service通过实现EnvironmentAware接口"><a href="#2-2-Controller或者Service通过实现EnvironmentAware接口" class="headerlink" title="2.2 Controller或者Service通过实现EnvironmentAware接口"></a>2.2 Controller或者Service通过实现EnvironmentAware接口</h6><p>@Controller @Service 等被Spring管理的类都支持，注意重写的方法 setEnvironment 是在系统启动的时候被执行.  </p>
-<pre><code>import org.springframework.context.EnvironmentAware;
-import org.springframework.core.env.Environment;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-import com.yxm.web.entity.Hello;
-/**
-* 使用@RestController代替@controller和@ResponseBody
-* @author yxm
-*/
-@RestController
-public class HelloController implements EnvironmentAware{
-
-private String JAVA_HOME;
-
-@RequestMapping(&quot;/hello&quot;)
-public Hello hello(){
-
-    Hello hello = new  Hello();
-    hello.setId(110);
-    hello.setName(JAVA_HOME);
-    return hello;
-}
-//在程序一启动就执行
-public void setEnvironment(Environment environment) {
-    JAVA_HOME = environment.getProperty(&quot;JAVA_HOME&quot;);
-     System.out.println(&quot;Controller里获取参数  [&quot;+JAVA_HOME+&quot;]&quot;);
- }
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.png" alt=""></p>
-<h6 id="2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性"><a href="#2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性" class="headerlink" title="2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性"></a>2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性</h6><p>1.加入依赖  </p>
-<pre><code>&lt;!--spring-boot-configuration:spring boot 配置处理器; --&gt;
- &lt;dependency&gt;
-       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-       &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
-       &lt;optional&gt;true&lt;/optional&gt;
- &lt;/dependency&gt;
-</code></pre><p>2.@ConfigurationProperties 读取application属性配置文件中的属性。</p>
-<pre><code>@Configuration
-@ConditionalOnClass(Mongo.class)
-@EnableConfigurationProperties(MongoProperties.class)
-public class MongoAutoConfiguration {
-
-@Autowired
-private MongoProperties properties;
-
-}
-</code></pre><ol>
-<li>@ConditionOnClass表明该@Configuration仅仅在一定条件下才会被加载，这里的条件是Mongo.class位于类路径上</li>
-<li>@EnableConfigurationProperties将Spring Boot的配置文件（application.properties）中的spring.data.mongodb.*属性映射为MongoProperties并注入到MongoAutoConfiguration中。</li>
-<li><p>@ConditionalOnMissingBean说明Spring Boot仅仅在当前上下文中不存在Mongo对象时，才会实例化一个Bean。这个逻辑也体现了Spring Boot的另外一个特性——自定义的Bean优先于框架的默认配置，我们如果显式的在业务代码中定义了一个Mongo对象，那么Spring Boot就不再创建。</p>
-<p> @ConfigurationProperties(prefix = “spring.data.mongodb”)<br> public class MongoProperties {</p>
-<p> private String host;<br> privateint port = DBPort.PORT;<br> private String uri = “mongodb://localhost/test”;<br> private String database;</p>
-<p> // … getters/ setters omitted<br> }</p>
-</li>
-</ol>
-<p>它就是以spring.data.mongodb作为前缀的属性，然后通过名字直接映射为对象的属性，同时还包含了一些默认值。如果不配置，那么mongo.uri就是mongodb://localhost/test。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/" class="archive-article-date">
-  	<time datetime="2017-09-12T04:59:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-12</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/41/">41</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/42/">42</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
     </nav>
   
 
@@ -1350,7 +1685,7 @@ private MongoProperties properties;
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 12.94px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 13.53px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
