@@ -152,6 +152,170 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-30-SpringBootApplication注解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/16/SpringBoot-30-SpringBootApplication注解/">SpringBoot(30)-SpringBootApplication注解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>很多Spring Boot开发者总是使用 @Configuration ， @EnableAutoConfiguration 和 @ComponentScan 注解他们的main类。由于这些注解被如此频繁地一块使用（特别是你遵循以上最佳实践时），Spring Boot提供一个方便的 @SpringBootApplication 选择。该 @SpringBootApplication 注解等价于以默认属性使用 @Configuration ， @EnableAutoConfiguration 和 @ComponentScan 。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/16/SpringBoot-30-SpringBootApplication注解/" class="archive-article-date">
+  	<time datetime="2017-09-16T03:35:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-29-导入xml配置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/16/SpringBoot-29-导入xml配置/">SpringBoot(29)-导入xml配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>SpringBoot理念:零配置编程,但是需要xml的配置(比如:用ehcache时候),只需要使用注解:@Configuration,使用@ImortResource注解以及 xml文件</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.建立maven工程<br>2.App.java类编写XmlService2<br>3.在App.java类无法扫描的包编写XmlService<br>4.编写application-bean.xml注入XmlService<br>5.编写配置类：ConfigClass注入配置文件application-bean.xml<br>6.编写App.java启动类测试<br>7.注意事项  </p>
+<h5 id="1-建立maven工程"><a href="#1-建立maven工程" class="headerlink" title="1.建立maven工程"></a>1.建立maven工程</h5><p> 建立spring-boot-xml项目    </p>
+<h5 id="2-App-java类编写XmlService2"><a href="#2-App-java类编写XmlService2" class="headerlink" title="2.App.java类编写XmlService2"></a>2.App.java类编写XmlService2</h5><p>首先我们这里有几个包：com.yxm,org.yxm,我们这里打算把App.java启动类放到com.yxmt中，根据Spring Boot扫描（根包到子包的原则），我们把HelloService2写在Spring Boot可以扫描的位置，HelloService写在Spring Boot无法扫描到的位置，那么我们使用配置文件bean的方式进行引入，具体代码如下：</p>
+<pre><code>package com.yxm.service;
+import org.springframework.stereotype.Service;
+@Service
+public class XmlService2 {
+/**
+ * 启动时候观察控制台是否打印此信息
+ */
+public void xmlPrint(){
+    System.out.println(&quot;---------XmlService2.xmlPrint() 执行---------------&quot;);
+ }
+}
+</code></pre><h5 id="3-在App-java类无法扫描的包编写XmlService"><a href="#3-在App-java类无法扫描的包编写XmlService" class="headerlink" title="3.在App.java类无法扫描的包编写XmlService"></a>3.在App.java类无法扫描的包编写XmlService</h5><p>注意这个类是写在Spring Boot无法自动扫描的位置，正常启动之后，如果引入HelloService的话肯定会报异常的，因为它根本没有被注入成功，具体代码如下:</p>
+<pre><code>package org.yxm.service;
+import org.springframework.stereotype.Service;
+@Service
+public class XmlService {
+public void xmlPrint(){
+    System.out.println(&quot;===========XmlService.xmlPrint()执行============&quot;);
+ }
+}
+</code></pre><h5 id="4-编写application-bean-xml注入XmlService"><a href="#4-编写application-bean-xml注入XmlService" class="headerlink" title="4.编写application-bean.xml注入XmlService"></a>4.编写application-bean.xml注入XmlService</h5><p>在src/main/resouces下编写配置文件application-bean.xml文件：</p>
+<pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;
+&lt;beans xmlns=&quot;http://www.springframework.org/schema/beans&quot;
+xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xsi:schemaLocation=&quot;http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd&quot;&gt;
+&lt;bean id=&quot;xmlService&quot; class=&quot;org.yxm.service.XmlService&quot;&gt;&lt;/bean&gt;
+&lt;/beans&gt;
+</code></pre><h5 id="5-编写配置类：ConfigClass注入配置文件application-bean-xml"><a href="#5-编写配置类：ConfigClass注入配置文件application-bean-xml" class="headerlink" title="5.编写配置类：ConfigClass注入配置文件application-bean.xml"></a>5.编写配置类：ConfigClass注入配置文件application-bean.xml</h5><p>在com.kfit.config包下编写类ConfigClass，这个确保能被Spring Boot可以扫描到，不然一切都付之东流了，具体代码如下： </p>
+<pre><code>package com.yxm.config;
+ import org.springframework.context.annotation.Configuration;
+ import org.springframework.context.annotation.ImportResource;
+ /**
+  * classpath路径：locations={&quot;classpath:application-bean1.xml&quot;,&quot;classpath:application-bean2.xml&quot;}
+  * file路径： locations = {&quot;file:d:/test/application-bean1.xml&quot;};
+  */
+ @Configuration
+ @ImportResource(locations={&quot;classpath:application-bean.xml&quot;})
+ public class ConfigClass {
+
+ }
+</code></pre><h5 id="6-编写App-java启动类测试"><a href="#6-编写App-java启动类测试" class="headerlink" title="6.编写App.java启动类测试"></a>6.编写App.java启动类测试</h5><pre><code>@SpringBootApplication
+public class App 
+{
+public static void main( String[] args )
+{
+    SpringApplication.run(App.class, args);
+ }
+}
+</code></pre><h5 id="7-注意事项"><a href="#7-注意事项" class="headerlink" title="7.注意事项"></a>7.注意事项</h5><p>ImportResouce有两种常用的引入方式：classpath和file  </p>
+<pre><code>classpath路径：locations={&quot;classpath:application-bean1.xml&quot;,
+&quot;classpath:application-bean2.xml&quot;
+ }
+file路径：
+locations = {&quot;file:d:/test/application-bean1.xml&quot;};
+</code></pre><h5 id="8-测试"><a href="#8-测试" class="headerlink" title="8.测试"></a>8.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/17.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/18.png" alt=""><br>去掉ConfigClass里面的@Configuration  </p>
+<pre><code>@ImportResource(locations={&quot;classpath:application-bean.xml&quot;})
+public class ConfigClass {
+
+}
+</code></pre><p>App中run as java application<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/19.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/16/SpringBoot-29-导入xml配置/" class="archive-article-date">
+  	<time datetime="2017-09-16T01:43:05.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-28-SpringBoot文件-多文件-上传" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1085,272 +1249,6 @@ function createdialog(title, content, url,name) {
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-jeecg-1-js方法存放文件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/11/jeecg-1-js方法存放文件/">jeecg(1)-js方法存放文件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>jeecg对很多插件进行了封装,其中也包括js的封装,对于初学者来说,不容易找到jeecg封装的js文件,本人也是摸索查询才知道的</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>在JEECG程序中，设计到的公共方法存放在webRoot/plug-in/tools/curdtools.js中,以下代码经过: <t:base type="jquery,easyui,tools,DatePicker"></t:base>引入对应的jquery,easyui和自己 封装的 js在tools里面  </p>
-<pre><code>&lt;%@ page language=&quot;java&quot; contentType=&quot;text/html; charset=UTF-8&quot;
-pageEncoding=&quot;UTF-8&quot;%&gt;
-&lt;%@include file=&quot;/context/mytags.jsp&quot;%&gt;
-&lt;t:base type=&quot;jquery,easyui,tools,DatePicker&quot;&gt;&lt;/t:base&gt; 
-&lt;div class=&quot;easyui-layout&quot; fit=&quot;true&quot;&gt;
-&lt;div region=&quot;center&quot; style=&quot;padding:0px;border:0px&quot;&gt;
-    &lt;t:datagrid name=&quot;rootflowList&quot; checkbox=&quot;false&quot; fitColumns=&quot;true&quot;
-         actionUrl=&quot;flowController.do?listFileFlow&amp;rootActId=0&quot; idField=&quot;id&quot;
-        fit=&quot;true&quot; queryMode=&quot;group&quot;&gt;
-        &lt;t:dgCol title=&quot;主键&quot; field=&quot;id&quot; hidden=&quot;true&quot; width=&quot;120&quot;&gt;&lt;/t:dgCol&gt;
-        &lt;t:dgCol title=&quot;文件名&quot; field=&quot;fileName&quot; hidden=&quot;true&quot; width=&quot;120&quot;&gt;&lt;/t:dgCol&gt;
-        &lt;t:dgCol title=&quot;名称&quot; field=&quot;showName&quot; query=&quot;false&quot; queryMode=&quot;single&quot; width=&quot;120&quot;&gt;&lt;/t:dgCol&gt;          
-        &lt;t:dgCol title=&quot;最后修改时间&quot; field=&quot;createTime&quot;  queryMode=&quot;single&quot; width=&quot;180&quot;&gt;&lt;/t:dgCol&gt;
-        &lt;t:dgCol title=&quot;操作&quot; field=&quot;opt&quot; width=&quot;100&quot;&gt;&lt;/t:dgCol&gt;
-        &lt;t:dgFunOpt funname=&quot;editRootFlow(id,fileName)&quot; title=&quot;加载&quot;&gt;&lt;/t:dgFunOpt&gt;     
-    &lt;/t:datagrid&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-</code></pre><p>在WebRoot/plug-in/tools/curdtools_zh-cn.js中定义了自己方法:  </p>
-<pre><code>/**
-* 添加事件打开窗口
-* @param title 编辑框标题
-* @param addurl//目标页面地址
-*/
-function add(title,addurl,gname,width,height) {
-gridname=gname;
-createwindow(title, addurl,width,height);
-}
-
-// 普通询问操作调用函数
-function jeecgconfirm(url, content,name) {
-createdialog(&apos;提示信息 &apos;, content, url,name);
-}
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/11/jeecg-1-js方法存放文件/" class="archive-article-date">
-  	<time datetime="2017-09-11T03:49:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-11</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-27-slot" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/10/vue-27-slot/">vue(27)-slot</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>slot:位置,槽口 作用:占个位置</p>
-<h5 id="1-单个slot"><a href="#1-单个slot" class="headerlink" title="1.单个slot"></a>1.单个slot</h5><p>实例:<br>  在用<aaa>组件时候我们往组件里面添加其他标签是没有作用的(因为这些标签在组件中并没有使用)</aaa></p>
-<pre><code>&lt;body&gt;
-&lt;div id = &quot;box&quot;&gt;
-&lt;aaa&gt;
-    &lt;ul&gt;
-        &lt;li&gt;111&lt;/li&gt;
-        &lt;li&gt;222&lt;/li&gt;
-        &lt;li&gt;333&lt;/li&gt;
-    &lt;/ul&gt;
-&lt;/aaa&gt;
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-  el:&quot;#box&quot;,
-   data:{
-      a:&quot;aaa&quot;//指代组件名
-   },
-   components:{
-      &quot;aaa&quot;:{
-          template:&quot;&lt;h1&gt;组件aaa&lt;/h1&gt;&quot;
-
-      }
-   }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p>输出:组件aaa  </p>
-<p>从以上知道,我们添加的<ul>标签里面很多内容已经不存在了,可以理解为组件内容覆盖了其内容</ul></p>
-<p>如果我没想要在定义的组件里面添加其他标签时候就需要用到slot：<br>使用slot注意:如果组件里面没有其他标签时候使用<slot>这是默认情况</slot>则会输出：这是默认情况  </p>
-<pre><code>&lt;body&gt;
-&lt;div id = &quot;box&quot;&gt;
-&lt;aaa&gt;
-&lt;/aaa&gt;
-&lt;/div&gt;
-&lt;template id=&quot;aaa&quot;&gt;
- &lt;h1&gt;组件aaa&lt;/h1&gt;
-  &lt;slot&gt;这是默认情况&lt;/slot&gt;
-&lt;/template&gt;
-&lt;script&gt;
-var vm = new Vue({
-  el:&quot;#box&quot;,
-   data:{
-      a:&quot;aaa&quot;//指代组件名
-   },
-   components:{
-      &quot;aaa&quot;:{
-          template:&quot;#aaa&quot;
-
-      }
-   }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/8.png" alt=""></p>
-<p>如果<slot>标签里面含有其他元素时候,此时会被覆盖  </slot></p>
-<pre><code>body&gt;
-&lt;div id = &quot;box&quot;&gt;
-&lt;aaa&gt;
-    &lt;ul&gt;
-        &lt;li&gt;111&lt;/li&gt;
-        &lt;li&gt;222&lt;/li&gt;
-        &lt;li&gt;333&lt;/li&gt;
-    &lt;/ul&gt;
-&lt;/aaa&gt;
-&lt;/div&gt;
-&lt;template id=&quot;aaa&quot;&gt;
- &lt;h1&gt;组件aaa&lt;/h1&gt;
-  &lt;slot&gt;这是默认情况&lt;/slot&gt;
-&lt;/template&gt;
-&lt;script&gt;
-var vm = new Vue({
-  el:&quot;#box&quot;,
-   data:{
-      a:&quot;aaa&quot;//指代组件名
-   },
-   components:{
-      &quot;aaa&quot;:{
-          template:&quot;#aaa&quot;
-
-      }
-   }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/8.png" alt=""></p>
-<h5 id="2-多个slot可以给定名字"><a href="#2-多个slot可以给定名字" class="headerlink" title="2.多个slot可以给定名字"></a>2.多个slot可以给定名字</h5><p>要求:<br>1.在模板template里面定义<br>2.在标签里面用属性 slot引入  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id = &quot;box&quot;&gt;
-&lt;aaa&gt;
-    &lt;ul slot=&quot;ul&quot;&gt;
-        &lt;li&gt;111&lt;/li&gt;
-        &lt;li&gt;222&lt;/li&gt;
-        &lt;li&gt;333&lt;/li&gt;
-    &lt;/ul&gt;
-    &lt;ol slot=&quot;ol&quot;&gt;
-        &lt;li&gt;111&lt;/li&gt;
-        &lt;li&gt;222&lt;/li&gt;
-        &lt;li&gt;333&lt;/li&gt;
-    &lt;/ol&gt;
-&lt;/aaa&gt;
-  &lt;aaa&gt;
-  &lt;/aaa&gt;
-&lt;/div&gt;
-&lt;template id=&quot;aaa&quot;&gt;
- &lt;h1&gt;组件aaa&lt;/h1&gt;
-  &lt;slot name=&quot;ul&quot;&gt;这是默认情况&lt;/slot&gt;
-  &lt;slot name=&quot;ol&quot;&gt;这是默认情况2&lt;/slot&gt;
-&lt;/template&gt;
-&lt;script&gt;
-var vm = new Vue({
-  el:&quot;#box&quot;,
-   data:{
-      a:&quot;aaa&quot;//指代组件名
-   },
-   components:{
-      &quot;aaa&quot;:{
-          template:&quot;#aaa&quot;
-
-      }
-   }
-});
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/25.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/10/vue-27-slot/" class="archive-article-date">
-  	<time datetime="2017-09-10T14:04:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
 	</div>
 
       

@@ -152,6 +152,304 @@
       <div class="body-wrap">
         
   
+    <article id="post-websocket-8-websocket结合Spring的握手拦截器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/25/websocket-8-websocket结合Spring的握手拦截器/">websocket(8)-websocket结合Spring的握手拦截器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-编写类"><a href="#1-编写类" class="headerlink" title="1.编写类"></a>1.编写类</h5><p>1、编写一个类，实现一个接口HandshakeInterceptor；  </p>
+<pre><code>public class HttpHandShakeInterceptor implements HandshakeInterceptor {
+@Override
+public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map&lt;String, Object&gt; attributes) throws Exception {
+
+    if(serverHttpRequest instanceof ServletServerHttpRequest){
+        ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) serverHttpRequest;
+        //获取sessionId传递
+        HttpSession session =  serverRequest.getServletRequest().getSession();
+        String sessionId = session.getId();
+        attributes.put(&quot;sessionId&quot;,sessionId);
+        System.out.println(&quot;握手拦截器: beforeHandshake&quot;+sessionId);
+    }
+    return true;
+}
+
+@Override
+public void afterHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, @Nullable Exception e) {
+    if(serverHttpRequest instanceof ServletServerHttpRequest){
+        ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) serverHttpRequest;
+        //获取sessionId传递
+        HttpSession session =  serverRequest.getServletRequest().getSession();
+        String sessionId = session.getId();
+        System.out.println(&quot;握手拦截器: afterHandshake&quot;+sessionId);
+    }
+}
+}
+</code></pre><h5 id="2-WebsocketConfig添加拦截器"><a href="#2-WebsocketConfig添加拦截器" class="headerlink" title="2.WebsocketConfig添加拦截器"></a>2.WebsocketConfig添加拦截器</h5><p>2.写完之后需要在websocket配置里面启用.addInterceptors(new HttpHandShakeIntecepter())</p>
+<p>3、实现两个方法beforeHandshake和afterHandshake，在里面可以获取resuest和response</p>
+<pre><code>@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+/**
+ * 注册端点，发布或者订阅消息的时候需要连接此端点
+ * setAllowedOrigins 非必须，*表示允许其他域进行连接
+ * withSockJS  表示开始sockejs支持
+ */
+@Override
+public void registerStompEndpoints(StompEndpointRegistry registry) {
+   // registry.addEndpoint(&quot;websocket&quot;).withSockJS();
+    registry.addEndpoint(&quot;websocket&quot;).addInterceptors(new HttpHandShakeInterceptor()).setAllowedOrigins(&quot;*&quot;).withSockJS();
+}
+/**
+ * 配置消息代理(中介)
+ * enableSimpleBroker 服务端推送给客户端的路径前缀
+ * setApplicationDestinationPrefixes  客户端发送数据给服务器端的一个前缀
+ */
+@Override
+public void configureMessageBroker(MessageBrokerRegistry config) {
+   config.enableSimpleBroker(&quot;/topic&quot;,&quot;/chat&quot;,&quot;/monitor&quot;);
+   config.setApplicationDestinationPrefixes(&quot;/app&quot;);
+}
+}
+</code></pre><h5 id="4-获取参数"><a href="#4-获取参数" class="headerlink" title="4.获取参数"></a>4.获取参数</h5><p>4.在监听器里面获取到拦截器传递的参数</p>
+<pre><code>@Component
+public class SubscribeEventListener implements ApplicationListener&lt;SessionSubscribeEvent&gt;{
+/**
+ * 在事件触发的时候调用这个方法
+ *
+ * StompHeaderAccessor  简单消息传递协议中处理消息头的基类，
+ * 通过这个类，可以获取消息类型(例如:发布订阅，建立连接断开连接)，会话id等
+ *
+ */
+@Override
+public void onApplicationEvent(SessionSubscribeEvent event) {
+    StompHeaderAccessor wrap = StompHeaderAccessor.wrap(event.getMessage());
+    System.out.println(&quot;[SubscribeEventListener 监听器类]&quot;+wrap.getCommand().getMessageType());
+
+    //在订阅事件中获取sessionId
+    Object sessionId = wrap.getSessionAttributes().get(&quot;sessionId&quot;);
+    System.out.println(&quot;[SubscribeEventListener 监听器类] 获取sessionId为:&quot;+sessionId);
+}
+}
+</code></pre><h5 id="5-效果"><a href="#5-效果" class="headerlink" title="5.效果"></a>5.效果</h5><p>因为事件订阅是websocket连接节后进行的,websocket连接时候需要发送http请求,http请求是在拦截器里面进行的,所以如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/84.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/03/25/websocket-8-websocket结合Spring的握手拦截器/" class="archive-article-date">
+  	<time datetime="2018-03-24T16:51:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-websocket-7-websocket实现jvm的实时监控" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/24/websocket-7-websocket实现jvm的实时监控/">websocket(7)-websocket实现jvm的实时监控</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
+<li><p>websocket结合springboot的注解Scheduled实现定时推送，使用服务端定时推送注意事项；开发简单监控JVM监控功能  </p>
+</li>
+<li><p>在controller的类方法上标注 @Scheduled(fixedRate = 3000) 表示这个方法会定时执行 fixedRate表示是多少毫秒 3000就3秒</p>
+</li>
+<li><p>需要在springboot启动类上@EnableScheduling</p>
+</li>
+<li>被注解@Scheduled标记的方法，是不能有参数，不然会报错</li>
+<li>由于只是后端推送消息给前端,前端只需要订阅就行,不需要消息路由,则controller不需要加上MessageMapping   </li>
+</ol>
+<h4 id="java"><a href="#java" class="headerlink" title="java"></a>java</h4><p>1.controller  </p>
+<pre><code>@Controller
+public class V4JvmMonitor {
+
+@Autowired
+private WebsocketService ws;
+
+@Scheduled(fixedRate=3000)
+public void sendJvmInfo(){
+    ws.sendJvmInfo();
+ }
+}  
+</code></pre><p>2.service</p>
+<pre><code> public void sendJvmInfo() {
+    //可用进程数
+    int availa = Runtime.getRuntime().availableProcessors();
+    //空闲内存
+    long free = Runtime.getRuntime().freeMemory();
+    //最大内存数
+    long max = Runtime.getRuntime().maxMemory();
+
+    String content = String.format(&quot;可用进程数:%s 空闲内存:%s 最大内存数:%s&quot;,availa,free,max);
+    System.out.println(&quot;信息: &quot;+content);
+    template.convertAndSend(&quot;/monitor/jvm/info&quot;,new OutMessage(content));
+}
+</code></pre><h4 id="前端"><a href="#前端" class="headerlink" title="前端"></a>前端</h4><p>1.app.js  </p>
+<pre><code>var stompClient = null;
+function setConnected(connected) {
+$(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
+$(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
+if (connected) {
+    $(&quot;#conversation&quot;).show();
+}
+else {
+    $(&quot;#conversation&quot;).hide();
+}
+$(&quot;#greetings&quot;).html(&quot;&quot;);
+}
+
+function connect() {
+var socket = new SockJS(&apos;/websocket&apos;);
+stompClient = Stomp.over(socket);
+stompClient.connect({}, function (frame) {
+    setConnected(true);
+    console.log(&apos;Connected: &apos; + frame);
+    stompClient.subscribe(&apos;/monitor/jvm/info&apos;, function (greeting) {
+        showGreeting(JSON.parse(greeting.body).content);
+    });
+});
+}
+
+function disconnect() {
+  if (stompClient !== null) {
+    stompClient.disconnect();
+  }
+  setConnected(false);
+  console.log(&quot;Disconnected&quot;);
+}
+
+function showGreeting(message) {
+  $(&quot;#greetings&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + message + &quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+$(function () {
+   $(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
+    e.preventDefault();
+   });
+  $( &quot;#connect&quot; ).click(function() { connect(); });
+  $( &quot;#disconnect&quot; ).click(function() { disconnect(); });
+});
+</code></pre><p>2.index.html  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;title&gt;Hello WebSocket&lt;/title&gt;
+&lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;link href=&quot;/v4/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/webjars/sockjs-client/sockjs.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/webjars/stomp-websocket/stomp.min.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;/v4/app.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+&lt;noscript&gt;&lt;h2 style=&quot;color: #ff0000&quot;&gt;Seems your browser doesn&apos;t support Javascript! Websocket relies on Javascript being
+    enabled. Please enable
+    Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;label for=&quot;connect&quot;&gt;WebSocket connection:&lt;/label&gt;
+                &lt;button id=&quot;connect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;Connect&lt;/button&gt;
+                &lt;button id=&quot;disconnect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot; disabled=&quot;disabled&quot;&gt;Disconnect
+                &lt;/button&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-12&quot;&gt;
+        &lt;table id=&quot;conversation&quot; class=&quot;table table-striped&quot;&gt;
+            &lt;thead&gt;
+            &lt;tr&gt;
+                &lt;th&gt;Greetings&lt;/th&gt;
+            &lt;/tr&gt;
+            &lt;/thead&gt;
+            &lt;tbody id=&quot;greetings&quot;&gt;
+            &lt;/tbody&gt;
+        &lt;/table&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/83.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/03/24/websocket-7-websocket实现jvm的实时监控/" class="archive-article-date">
+  	<time datetime="2018-03-24T13:35:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-websocket-6-websocket实现单聊" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -735,128 +1033,6 @@ Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
       
       <a href="/2018/03/19/linux-16-多命令执行符/" class="archive-article-date">
   	<time datetime="2018-03-18T16:01:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-15-yum源码包安装" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/18/linux-15-yum源码包安装/">linux(15)-yum源码包安装</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-源码包和rpm包区别"><a href="#1-源码包和rpm包区别" class="headerlink" title="1.源码包和rpm包区别"></a>1.源码包和rpm包区别</h5><p>概念上:rpm包是编译好的包,而源码包是没有编译好的包,是可以看到源码的<br>安装位置上:<br>Rpm包的默认安装位置如下:<img src="71.png" alt=""> 这只是仅仅默认安装位置,但是80%以上的安装包不是这样的安装目录。<br>源码包一定要指定安装路径,一般有以下规范,但是你自己也可以不按照以下:<br>/usr/local/软件  </p>
-<h5 id="2-启动"><a href="#2-启动" class="headerlink" title="2. 启动"></a>2. 启动</h5><ol>
-<li>Rpm包启动方法:service 包名 start<br>关闭方法:service 包名 stop  </li>
-<li>apachectl start</li>
-</ol>
-<h5 id="3-源码包安装步骤"><a href="#3-源码包安装步骤" class="headerlink" title="3.源码包安装步骤:"></a>3.源码包安装步骤:</h5><p>1．    解压<br>$ tar –zxvf httpd-2.2.34<br>2．    制定安装位置并安装: /usr/local/软件<br>比如:安装apache<br>$./configure –prefix=/usr/local/apache<br>3.编译<br>$ make install  </p>
-<p>如果重新安装:切记一定要记住清除编译 make clear 清除编译缓存</p>
-<ol>
-<li>启动<br>进入apache安装源码目录下,进入安装说明:<br>$ vi INSTALL<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/72.png" alt=""></li>
-</ol>
-<p>查看到安装说明,一般软件代码都有此说明的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/73.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/18/linux-15-yum源码包安装/" class="archive-article-date">
-  	<time datetime="2018-03-18T15:48:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-14-yum命令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/18/linux-14-yum命令/">linux(14)-yum命令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-恢复在线yum"><a href="#1-恢复在线yum" class="headerlink" title="1.恢复在线yum"></a>1.恢复在线yum</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/60.png" alt=""> </p>
-<ol>
-<li><p>yum list<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/61.png" alt=""> </p>
-</li>
-<li><p>yum search 关键字(包名)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/62.png" alt=""><br>比如:搜索apache<br>yum search httpd<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/62.png" alt="">  </p>
-</li>
-<li><p>-y(自动回答yes)<br>比如安装zsh 半途会提示你输入yes或No 添加y会自动添加yes</p>
-</li>
-<li><p>yum update 包名 更新某一软件 </p>
-</li>
-<li><p>yum update -&gt;更新所有软件<br>yum remove  包名-&gt;卸载软件包<br>上面两个软件一般不能用,因为安装,卸载都有依赖,如果安装卸载则会把依赖也更改,并且途中也会使软件运行中断 </p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/18/linux-14-yum命令/" class="archive-article-date">
-  	<time datetime="2018-03-17T16:36:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
