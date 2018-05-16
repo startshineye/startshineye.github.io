@@ -152,6 +152,74 @@
       <div class="body-wrap">
         
   
+    <article id="post-log4j学习-web工程中应用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/01/log4j学习-web工程中应用/">log4j学习-web工程中应用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="web工程下使用"><a href="#web工程下使用" class="headerlink" title="web工程下使用"></a>web工程下使用</h4><p>在J2EE应用使用Log4j，必须先在启动服务时加载Log4j的配置文件进行初始化，可以在web.xml中进行。</p>
+<h6 id="1-log4j注意"><a href="#1-log4j注意" class="headerlink" title="1.log4j注意"></a>1.log4j注意</h6><ol>
+<li>1.web应用的log4j使用基本上都采用：新建一个servlet，这个servlet在init函数中为log4j执行配置。一般就是读入配置文件。所以需要在web.xml中为这个servlet配置，同时设定load-on-startup为1。</li>
+<li>2.这个servlet配置log4j就是读出配置文件，然后调用configure函数。这里有两个问题：一、需要知道文件在哪里；二、需要正确的文件类型</li>
+<li>3.配置文件位置在web.xml中配置一个param即可，路径一般是相对于web的root目录  </li>
+<li>4.文件类型一般有两种，一个是Java的property文件，另一种是xml文件,配置文件的大致内容：log4j可以指定输出的log级别的最低等级，以及log的输出配置格式，每个log可以指定多个输出方式  <h6 id="2-实例"><a href="#2-实例" class="headerlink" title="2.实例"></a>2.实例</h6></li>
+<li>1.创建Web工程，整个工程最后目录如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE129.png" alt=""></li>
+<li><p>2.web.xml配置如下  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">   &lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;</div><div class="line">   &lt;web-app version=&quot;2.5&quot; </div><div class="line">xmlns=&quot;http://java.sun.com/xml/ns/javaee&quot; </div><div class="line">xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot; </div><div class="line">xsi:schemaLocation=&quot;http://java.sun.com/xml/ns/javaee </div><div class="line">http://java.sun.com/xml/ns/javaee/web-app_2_5.xsd&quot;&gt;</div><div class="line">   &lt;servlet&gt;</div><div class="line">   &lt;servlet-name&gt;InitServlet&lt;/servlet-name&gt;</div><div class="line">   &lt;servlet-class&gt;com.yxm.InitServlet&lt;/servlet-class&gt;</div><div class="line">   &lt;init-param&gt;</div><div class="line">       &lt;param-name&gt;log4j-properties-location&lt;/param-name&gt;</div><div class="line">       &lt;param-value&gt;/WEB-INF/classes/log4j.properties&lt;/param-value&gt;</div><div class="line">    &lt;/init-param&gt;</div><div class="line">    &lt;load-on-startup&gt;1&lt;/load-on-startup&gt; </div><div class="line">    &lt;/servlet&gt;</div><div class="line">    &lt;servlet&gt;</div><div class="line">    &lt;servlet-name&gt;TestServlet&lt;/servlet-name&gt;</div><div class="line">    &lt;servlet-class&gt;com.yxm.TestServlet&lt;/servlet-class&gt;</div><div class="line">    &lt;/servlet&gt;</div><div class="line">   &lt;servlet-mapping&gt;</div><div class="line">   &lt;servlet-name&gt;TestServlet&lt;/servlet-name&gt;</div><div class="line">   &lt;url-pattern&gt;/test.do&lt;/url-pattern&gt;</div><div class="line">   &lt;/servlet-mapping&gt;	</div><div class="line"> </div><div class="line">   &lt;welcome-file-list&gt;</div><div class="line">   &lt;welcome-file&gt;index.jsp&lt;/welcome-file&gt;</div><div class="line">   &lt;/welcome-file-list&gt;</div><div class="line">   &lt;/web-app&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>3.配置文件log4j.properties  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">log4j.rootLogger = debug,stdout,D,E  </div><div class="line"></div><div class="line">log4j.appender.stdout = org.apache.log4j.ConsoleAppender  </div><div class="line">log4j.appender.stdout.Target = System.out  </div><div class="line">log4j.appender.stdout.layout = org.apache.log4j.PatternLayout  </div><div class="line">log4j.appender.stdout.layout.ConversionPattern = [%-5p] %d&#123;yyyy-MM-dd HH:mm:ss,SSS&#125; method:%l%n%m%n  </div><div class="line"></div><div class="line">log4j.appender.D = org.apache.log4j.DailyRollingFileAppender  </div><div class="line">log4j.appender.D.File = F://logs/log.log  </div><div class="line">log4j.appender.D.Append = true  </div><div class="line">log4j.appender.D.Threshold = DEBUG   </div><div class="line">log4j.appender.D.layout = org.apache.log4j.PatternLayout  </div><div class="line">log4j.appender.D.layout.ConversionPattern = %-d&#123;yyyy-MM-dd HH:mm:ss&#125;  [ %t:%r ] - [ %p ]  %m%n  </div><div class="line"></div><div class="line">log4j.appender.E = org.apache.log4j.DailyRollingFileAppender  </div><div class="line">log4j.appender.E.File =F://logs/error.log   </div><div class="line">log4j.appender.E.Append = true  </div><div class="line">log4j.appender.E.Threshold = ERROR   </div><div class="line">log4j.appender.E.layout = org.apache.log4j.PatternLayout  </div><div class="line">log4j.appender.E.layout.ConversionPattern = %-d&#123;yyyy-MM-dd HH:mm:ss&#125;  [ %t:%r ] - [ %p ]  %m%n</div></pre></td></tr></table></figure>
+</li>
+<li><p>4.web容器一来就初始化的servlet  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">   public class InitServlet extends HttpServlet &#123;</div><div class="line">public InitServlet() &#123;</div><div class="line">	super();</div><div class="line">&#125;</div><div class="line">public void destroy() &#123;</div><div class="line">	super.destroy();  </div><div class="line">&#125;</div><div class="line">public void doGet(HttpServletRequest request, HttpServletResponse response)</div><div class="line">		throws ServletException, IOException &#123;</div><div class="line">&#125;</div><div class="line">public void init(ServletConfig config) throws ServletException &#123;</div><div class="line">	 //读取配置文件</div><div class="line">	String log4jLocation = config.getInitParameter(&quot;log4j-properties-location&quot;);</div><div class="line">	ServletContext sc = config.getServletContext(); </div><div class="line">	if (log4jLocation == null) &#123;  </div><div class="line">           System.err.println(&quot;*** 没有 log4j-properties-location 初始化的文件, 所以使用 BasicConfigurator初始化&quot;);  </div><div class="line">           BasicConfigurator.configure();  </div><div class="line">       &#125; else &#123;  </div><div class="line">           String webAppPath = sc.getRealPath(&quot;/&quot;);  </div><div class="line">           String log4jProp = webAppPath + log4jLocation;  </div><div class="line">           File yoMamaYesThisSaysYoMama = new File(log4jProp);  </div><div class="line">           if (yoMamaYesThisSaysYoMama.exists()) &#123;  </div><div class="line">               System.out.println(&quot;使用: &quot; + log4jProp+&quot;初始化日志设置信息&quot;);  </div><div class="line">               PropertyConfigurator.configure(log4jProp);  </div><div class="line">           &#125; else &#123;  </div><div class="line">               System.err.println(&quot;*** &quot; + log4jProp + &quot; 文件没有找到， 所以使用 BasicConfigurator初始化&quot;);  </div><div class="line">               BasicConfigurator.configure();  </div><div class="line">           &#125;  </div><div class="line">       &#125;  </div><div class="line">       super.init(config);  </div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>调用日志TestServlet,java<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">   public class TestServlet extends HttpServlet&#123;</div><div class="line">private static final Logger logger;</div><div class="line">static&#123;</div><div class="line">	logger = Logger.getLogger(TestServlet.class);</div><div class="line">&#125;</div><div class="line">   @Override</div><div class="line">   protected void doGet(HttpServletRequest req, HttpServletResponse resp)</div><div class="line">	throws ServletException, IOException &#123;</div><div class="line"> logger.debug(&quot;this is debug message&quot;);</div><div class="line"> logger.info(&quot;this is  info message&quot;);</div><div class="line"> logger.error(&quot;this is  error message&quot;);</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>浏览器访问:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE130.png" alt=""><br>接下来就是运行了，来看看结果：<br>（1）首先是控制台的信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE125.png" alt=""><br> （2）再来看输出的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE126.png" alt=""><br>内容如下，发现已按照要求输出到对应的文档中去了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE127.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/%E6%88%AA%E5%9B%BE128.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/01/log4j学习-web工程中应用/" class="archive-article-date">
+  	<time datetime="2017-03-01T15:40:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/log4j/">log4j</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/转载/">转载</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-log4j学习-log4j项目中使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -684,57 +752,6 @@
 
 
   
-    <article id="post-XDB" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/02/21/XDB/">XDB</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>项目启动之后再浏览器输入<a href="http://localhost:8088/jxfocus" target="_blank" rel="external">http://localhost:8088/jxfocus</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/%E6%88%AA%E5%9B%BE112.png" alt=""><br>在项目启动中设置了Tomcat下的端口号是8088<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/%E6%88%AA%E5%9B%BE113.png" alt=""><br>而Oracle的监听是8080端口<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/%E6%88%AA%E5%9B%BE114.png" alt=""></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>网上查询说是由于端口号冲突所致,但是8080端口只有oracle监听服务启动<br>并且敲入8088端口自动会跳到8080端口,后来ctr+h搜索一番后发现是web.xml下面配置有<a href="http://localhost:8080/转向" target="_blank" rel="external">http://localhost:8080/转向</a><br>将其更改为8088即可:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/%E6%88%AA%E5%9B%BE115.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/02/21/XDB/" class="archive-article-date">
-  	<time datetime="2017-02-21T02:51:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/26/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="page-number current">27</span><a class="page-number" href="/page/28/">28</a><a class="page-number" href="/page/29/">29</a><span class="space">&hellip;</span><a class="page-number" href="/page/42/">42</a><a class="extend next" rel="next" href="/page/28/">Next &raquo;</a>
@@ -800,7 +817,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 15.88px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.29px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.65px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.41px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.82px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 18.24px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 16.47px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.65px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
