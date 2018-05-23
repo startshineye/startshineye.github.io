@@ -152,6 +152,85 @@
       <div class="body-wrap">
         
   
+    <article id="post-JVM-三-常见JVM参数配置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/11/JVM-三-常见JVM参数配置/">JVM(三)-常见JVM参数配置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.一个优秀的Java程序员必须了解GC的工作原理、如何优化GC的性能、如何与GC进行有限的交互，因为有一些应用程序对性能要求较高，例如嵌入式系统、实时系统等，只有全面提升内存的管理效率 ，才能提高整个应用程序的性能。本篇文章首先简单介绍GC的工作原理之后，然后再对GC的几个关键问题进行深入探讨，最后提出一些Java程序设计建议，从GC角度提高Java程序的性能<br>2.gc基本原理</p>
+<ol>
+<li>Java的内存管理实际上就是对象的管理，其中包括对象的分配和释放。</li>
+<li>对于程序员来说，分配对象使用new关键字；释放对象时，只要将对象所有引用赋值为null，让程序不能够再访问到这个对象，我们称该对象为\”不可达的\”.GC将负责回收所有\”不可达\”对象的内存空间<br>本文主要内容:  </li>
+</ol>
+<h5 id="1-Trace跟踪参数"><a href="#1-Trace跟踪参数" class="headerlink" title="1.Trace跟踪参数"></a>1.Trace跟踪参数</h5><h5 id="2-堆的分配参数"><a href="#2-堆的分配参数" class="headerlink" title="2.堆的分配参数"></a>2.堆的分配参数</h5><h5 id="3-栈的分配参数"><a href="#3-栈的分配参数" class="headerlink" title="3.栈的分配参数"></a>3.栈的分配参数</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>既然如此，那么在IDE的控制台打印GC日志是必不可少的了。现在就告诉你怎么打印。<br>如果是用的Eclipse或者Myeclipse,打印GC日志的操作如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/26.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/24.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/25.png" alt=""></p>
+<h5 id="1-Trace跟踪参数-1"><a href="#1-Trace跟踪参数-1" class="headerlink" title="1.Trace跟踪参数"></a>1.Trace跟踪参数</h5><h6 id="verbose-gc"><a href="#verbose-gc" class="headerlink" title="-verbose:gc"></a>-verbose:gc</h6><h6 id="XX-printGC"><a href="#XX-printGC" class="headerlink" title="-XX:printGC"></a>-XX:printGC</h6><p>可以打印出GC的简要信息:<br>[GC 4790K-&gt;374K(15872K), 0.0001606 secs]<br>[GC 4790K-&gt;374K(15872K), 0.0001474 secs]<br>[GC 4790K-&gt;374K(15872K), 0.0001563 secs]<br>[GC 4790K-&gt;374K(15872K), 0.0001682 secs]<br>上方日志的意思是说，GC之前，用了4M左右的内存，GC之后，用了374K内存，一共回收了将近4M。内存大小一共是16M左右。</p>
+<h6 id="XX-PrintGCDetalis"><a href="#XX-PrintGCDetalis" class="headerlink" title="-XX:PrintGCDetalis"></a>-XX:PrintGCDetalis</h6><p>打印出详细信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/27.png" alt=""><br>例如下面这段日志：<br>[GC[DefNew: 4416K-&gt;0K(4928K), 0.0001897 secs] 4790K-&gt;374K(15872K), 0.0002232 secs] [Times: user=0.00 sys=0.00, real=0.00 secs]<br>上方日志的意思是说：这是一个新生代的GC。方括号内部的“4416K-&gt;0K(4928K)”含义是：“GC前该内存区域已使用容量-&gt;GC后该内存区域已使用容量（该内存区域总容量）”。而在方括号之外的“4790K-&gt;374K(15872K)”表示“GC前Java堆已使用容量-&gt;GC后Java堆已使用容量（Java堆总容量）”。<br>再往后看，“0.0001897 secs”表示该内存区域GC所占用的时间，单位是秒。<br>上图中，我们先看一下用红框标注的“[0x27e80000, 0x28d80000, 0x28d80000)”的含义，它表示新生代在内存当中的位置：第一个参数是申请到的起始位置，第二个参数是申请到的终点位置，第三个参数表示最多能申请到的位置。上图中的例子表示新生代申请到了15M的控件，而这个15M是等于：（eden space的12288K）+（from space的1536K）+（to space的1536K）。<br>def new generation–新生代gc<br>eden space–对象出生的地方<br>tenured generation–老年代<br>低边界–指代起始位置<br>最高边界–指代最高能够申请的位置  </p>
+<h6 id="XX-PrintGCTimeStamps"><a href="#XX-PrintGCTimeStamps" class="headerlink" title="-XX:PrintGCTimeStamps"></a>-XX:PrintGCTimeStamps</h6><p>打印GC发生的时间戳</p>
+<h6 id="重定向GC的log"><a href="#重定向GC的log" class="headerlink" title="重定向GC的log"></a>重定向GC的log</h6><ol>
+<li>一般gc日志的输出都是在控制台的,在控制台的一般是无法保留的,不便于出现日志后分析,所以一般我们通过-Xloggc来 把gc位置存到本地磁盘上 </li>
+<li>-Xloggc:D:log/gc.log:指定GC log的位置,以文件输出，帮助开发人员分析问题<br>我们现在D:log/gc.log建立文件,然后在debug as中配置VM参数,运行就会输出gc日志到gc.log下面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/28.png" alt=""><h6 id="XX-TraceClassLoading"><a href="#XX-TraceClassLoading" class="headerlink" title="-XX:+TraceClassLoading"></a>-XX:+TraceClassLoading</h6>追踪类的加载:<br>[Loaded java.lang.Object from shared objects file]<br>[Loaded java.io.Serializable from shared objects file]<br>[Loaded java.lang.Comparable from shared objects file]<br>[Loaded java.lang.CharSequence from shared objects file]<br>[Loaded java.lang.String from shared objects file]<br>[Loaded java.lang.reflect.GenericDeclaration from shared objects file]<br>[Loaded java.lang.reflect.Type from shared objects file]<br>每一行都代表了一个被加载的类：<br>首先加载Object类<h6 id="XX-TraceClassLoading-1"><a href="#XX-TraceClassLoading-1" class="headerlink" title="-XX:+TraceClassLoading"></a>-XX:+TraceClassLoading</h6>打印类的信息<br>按下Ctrl+Break后,打印类的信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/29.png" alt=""><br>class name:B-指Byte C-指代char<br>#####2.堆的分配参数<br>######2.1.-Xmx –Xms：指定最大堆和最小堆<br>最大堆:java 虚拟机最多能够使用多少堆空间<br>最小堆:java虚拟机至少使用多少堆空间<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/30.png30" alt=""><br>-Xmx20m -Xms5m  运行代码<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/31.png" alt=""></li>
+<li>分配1M给数组<br>这时候最大空间不变,可用空间会减去1M，因为那1M已经分配了,总空间是还是5M,没有进行扩容，java语言中尽可能的维持在最小堆运行<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/32.png" alt=""></li>
+<li>分配4M给数组<br>当程序进行GC后没有办法将内存空间维持在最小堆,则会去扩容<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/33.png" alt=""><br>最大内存是10M说明已经扩容了。</li>
+<li>代码块之前做一次gc<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/34.png" alt=""><h6 id="2-2-思考"><a href="#2-2-思考" class="headerlink" title="2.2 思考"></a>2.2 思考</h6></li>
+<li>-Xmx 和 –Xms 应该保持一个什么关系，可以让系统的性能尽可能的好呢？</li>
+<li>如果你要做一个Java的桌面产品，需要绑定JRE，但是JRE又很大，你如何做一下JRE的瘦身呢？<h6 id="2-3-堆其他参数"><a href="#2-3-堆其他参数" class="headerlink" title="2.3.堆其他参数"></a>2.3.堆其他参数</h6></li>
+<li>-Xmn:设置新生代大小</li>
+<li>-XX:NewRatio:新生代（eden+2*s）和老年代（不包含永久区）的比值,4 表示 新生代:老年代=1:4，即年轻代占堆的1/5</li>
+<li>XX:SurvivorRatio:设置两个Survivor区和eden的比,<br>8表示 两个Survivor :eden=2:8，即一个Survivor占年轻代的1/10</li>
+<li>实例<h5 id="3-栈的分配参数-1"><a href="#3-栈的分配参数-1" class="headerlink" title="3.栈的分配参数"></a>3.栈的分配参数</h5></li>
+<li><p>-XX:+HeapDumpOnOutOfMemoryError：OOM时导出堆到文件</p>
+</li>
+<li><p>-XX:+HeapDumpPath：导出OOM的路径</p>
+</li>
+<li><p>-Xmx20m -Xms5m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=d:/a.dump<br>做堆的转存:在系统宕机内存溢出,我们很难排查出问题,这个时候我们可以做一个转存:-XX:+HeapDumpOnOutOfMemoryError<br>转存的位置为:-XX:+HeapDumpPath<br>-Xmx20m -Xms5m -XX:+HeapDumpOnOutOfMemoryError -XX:HeapDumpPath=d:/a.dump<br>把内存溢出日志打印到d盘的a.dump文件上</p>
+</li>
+<li>XX:OnOutOfMemoryError<br>在OOM时，执行一个脚本<br>“-XX:OnOutOfMemoryError=D:/tools/jdk1.7_40/bin/printstack.bat %p“<br>当程序OOM时，在D:/a.txt中将会生成线程的dump<br>可以在OOM时，发送邮件，甚至是重启程序</li>
+<li>根据实际事情调整新生代和幸存代的大小:<br>官方推荐新生代占堆的3/8<br>幸存代占新生代的1/10<br>在OOM时，记得Dump出堆，确保可以排查现场问题<h5 id="4-永久区分配参数"><a href="#4-永久区分配参数" class="headerlink" title="4.永久区分配参数"></a>4.永久区分配参数</h5>-XX:PermSize  -XX:MaxPermSize<br>设置永久区的初始空间和最大空间<br>他们表示，一个系统可以容纳多少个类型  <h5 id="3-栈大小分配"><a href="#3-栈大小分配" class="headerlink" title="3.栈大小分配"></a>3.栈大小分配</h5>-Xss<br>1.栈指的就是线程私有的一块区域,这个区域是每个线程都必须有的,栈里面的主要内容就是栈帧,栈帧里面就是有局部变量表,操作数栈,引用。一般我们分配栈的时候是几百k,栈越大,说明线程数越少,所以我们应该为了线程数越多,我们需要把栈空间分配的比较小,但是栈大小又决定了函数调用的深度,栈越小,可能会出现栈溢出<br>2.通常只有几百K<br>3.决定了函数调用的深度<br>4.每个线程都有独立的栈空间<br>局部变量、参数 分配在栈上  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/11/JVM-三-常见JVM参数配置/" class="archive-article-date">
+  	<time datetime="2017-06-11T06:50:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-11</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-JVM-二-JVM运行机制" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -749,118 +828,6 @@
       
       <a href="/2017/05/30/netty实践-七-单客户端多连接/" class="archive-article-date">
   	<time datetime="2017-05-30T14:19:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-netty实践-六-netty5" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/30/netty实践-六-netty5/">netty实践(六)-netty5</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-netty5服务端"><a href="#1-netty5服务端" class="headerlink" title="1.netty5服务端"></a>1.netty5服务端</h4><h6 id="1-思路"><a href="#1-思路" class="headerlink" title="1.思路"></a>1.思路</h6><ol>
-<li><p>netty5和netty3思路上是有类似的<br>1.创建服务–&gt;创建引导服务<br>2.创建线程池–&gt;创建事件循环组<br>3.设置socket工厂–&gt;设置channel类型<br>4.设置管道工厂–&gt;设置会话处理器<br>5.监听端口<br>6.连接关闭  </p>
-</li>
-<li><p>说明<br>1.netty3中是直接使用线程池,而netty5是更大的封装,里面是封装了线程池,使用了EventLoopGroup,一个EventGroup就代表一个线程<br>2.设置管道工厂是直接设置子处理器<br>3.boss是用于监听端口的<br>4.设置socket工厂：服务端:NioServerChannel  客户端：NioChannel<br>4.设置管道:服务端:childHandler  客户端Handler</p>
-<h6 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h6></li>
-<li><p>主方法中  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div></pre></td><td class="code"><pre><div class="line">import io.netty.bootstrap.ServerBootstrap;</div><div class="line">import io.netty.channel.Channel;</div><div class="line">import io.netty.channel.ChannelFuture;</div><div class="line">import io.netty.channel.ChannelInitializer;</div><div class="line">import io.netty.channel.ChannelOption;</div><div class="line">import io.netty.channel.EventLoopGroup;</div><div class="line">import io.netty.channel.nio.NioEventLoopGroup;</div><div class="line">import io.netty.channel.socket.nio.NioServerSocketChannel;</div><div class="line">import io.netty.handler.codec.string.StringDecoder;</div><div class="line">import io.netty.handler.codec.string.StringEncoder;</div><div class="line">/**</div><div class="line"> * netty5 服务端</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">  //1.创建服务  </div><div class="line">  ServerBootstrap serverBootstrap = new ServerBootstrap();</div><div class="line">  EventLoopGroup boss = new NioEventLoopGroup();</div><div class="line">  EventLoopGroup worker = new NioEventLoopGroup();</div><div class="line"> try &#123;</div><div class="line">	//2.创建线程池 (创建事件循环组) </div><div class="line">	  serverBootstrap.group(boss, worker);</div><div class="line">	  //3.设置socket工厂 ---&gt;设置会话 </div><div class="line">	  serverBootstrap.channel(NioServerSocketChannel.class);</div><div class="line">	  //4.设置管道工厂 --&gt;设置会话处理器</div><div class="line">	  serverBootstrap.childHandler(new ChannelInitializer&lt;Channel&gt;() &#123;</div><div class="line"></div><div class="line">		@Override</div><div class="line">		protected void initChannel(Channel ch) throws Exception &#123;</div><div class="line">			//从ch中获取管道并设置管道</div><div class="line">			ch.pipeline().addLast(new StringDecoder());</div><div class="line">			ch.pipeline().addLast(new StringEncoder());</div><div class="line">			ch.pipeline().addLast(new ServerHandler());</div><div class="line">		&#125;</div><div class="line">	  &#125;);</div><div class="line">	    //netty3中对应设置如下</div><div class="line">		//bootstrap.setOption(&quot;backlog&quot;, 1024);</div><div class="line">		//bootstrap.setOption(&quot;tcpNoDelay&quot;, true);</div><div class="line">		//bootstrap.setOption(&quot;keepAlive&quot;, true);</div><div class="line">		//设置参数，TCP参数</div><div class="line">	  serverBootstrap.option(ChannelOption.SO_BACKLOG, 2048);//serverSocketchannel的设置，链接缓冲池的大小</div><div class="line">	  serverBootstrap.childOption(ChannelOption.SO_KEEPALIVE, true);//socketchannel的设置,维持链接的活跃，清除死链接</div><div class="line">	  serverBootstrap.childOption(ChannelOption.TCP_NODELAY, true);//socketchannel的设置,关闭延迟发送</div><div class="line">		//5.监听端口</div><div class="line">	  ChannelFuture future = serverBootstrap.bind(10101);</div><div class="line">	  System.out.println(&quot;netty5 server start!&quot;);</div><div class="line">	  //6.连接关闭 </div><div class="line">	  future.channel().closeFuture().sync();</div><div class="line">&#125; catch (InterruptedException e) &#123;</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;finally&#123;</div><div class="line">	boss.shutdownGracefully();</div><div class="line">	worker.shutdownGracefully();</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>消息处理类  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">   import io.netty.channel.ChannelHandlerContext;</div><div class="line">import io.netty.channel.SimpleChannelInboundHandler;</div><div class="line">/**</div><div class="line"> * 服务端消息处理</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class ServerHandler extends SimpleChannelInboundHandler&lt;String&gt;&#123;</div><div class="line">@Override</div><div class="line">protected void messageReceived(ChannelHandlerContext ctx, String msg)</div><div class="line">		throws Exception &#123;</div><div class="line">	//接收客户端消息</div><div class="line">	System.out.println(&quot;客户端消息: &quot;+msg);</div><div class="line">	</div><div class="line">	//服务端发消息给客户端(发消息是通过chanel的，channel就是一个会话)</div><div class="line">	ctx.channel().writeAndFlush(&quot;服务端: hi&quot;);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 新客户端接入</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelActive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelActive&quot;);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 客户端断开</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelInactive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelInactive&quot;);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 异常</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception &#123;</div><div class="line">	cause.printStackTrace();</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>1.启动服务<br>2.telnet 127.0.0.1 10101<br>3.ctrl+]  send hello server<br>4.服务端 客户端收到消息</p>
-<h4 id="2-netty5客户端"><a href="#2-netty5客户端" class="headerlink" title="2.netty5客户端"></a>2.netty5客户端</h4><h6 id="1-思路-1"><a href="#1-思路-1" class="headerlink" title="1.思路"></a>1.思路</h6><ol>
-<li>思路<br>1.创建客户端服务<br>2.创建线程池<br>3.创建socket工厂<br>4.创建pipeiline工厂<br>5.建立连接,返回channel<br>6.通过channel返回数据  </li>
-<li>注意<br>1.netty5中BootStrap代表客户端引导服务,ServerBootStrap代表服务端引导，区别于netty3.<br>2.boss是用来监听端口的线程  </li>
-</ol>
-<h6 id="2-代码-1"><a href="#2-代码-1" class="headerlink" title="2.代码"></a>2.代码</h6><ol>
-<li><p>主方法中 </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">   import java.io.BufferedReader;</div><div class="line">import java.io.InputStreamReader;</div><div class="line"></div><div class="line">import io.netty.bootstrap.Bootstrap;</div><div class="line">import io.netty.channel.Channel;</div><div class="line">import io.netty.channel.ChannelFuture;</div><div class="line">import io.netty.channel.ChannelInitializer;</div><div class="line">import io.netty.channel.nio.NioEventLoopGroup;</div><div class="line">import io.netty.channel.socket.nio.NioSocketChannel;</div><div class="line">import io.netty.handler.codec.string.StringDecoder;</div><div class="line">import io.netty.handler.codec.string.StringEncoder;</div><div class="line">/**</div><div class="line"> * netty5客户端</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class Client &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	//1.创建客户端服务  </div><div class="line">	Bootstrap bootstrap = new Bootstrap();</div><div class="line">	NioEventLoopGroup worker = new NioEventLoopGroup();</div><div class="line">	try &#123;</div><div class="line">		//2.创建线程池--&gt;事件循环</div><div class="line">		bootstrap.group(worker);</div><div class="line">		//3.创建socket工厂 --&gt;设置channel会话类型</div><div class="line">		bootstrap.channel(NioSocketChannel.class);</div><div class="line">		//4.创建pipeiline工厂 </div><div class="line">		bootstrap.handler(new ChannelInitializer&lt;Channel&gt;() &#123;</div><div class="line"></div><div class="line">			@Override</div><div class="line">			protected void initChannel(Channel ch) throws Exception &#123;</div><div class="line">				ch.pipeline().addLast(new StringDecoder());</div><div class="line">				ch.pipeline().addLast(new StringEncoder());</div><div class="line">				ch.pipeline().addLast(new ClientHandler());</div><div class="line">			&#125;</div><div class="line">		&#125;);</div><div class="line">		//5.建立连接,返回channel  </div><div class="line">		ChannelFuture connect = bootstrap.connect(&quot;127.0.0.1&quot;, 10101);</div><div class="line">		//6.通过channel返回数据 </div><div class="line">		BufferedReader bufferedReader = new BufferedReader(new InputStreamReader(System.in));</div><div class="line">		while(true)&#123;</div><div class="line">			System.out.println(&quot;客户端请输入：&quot;);</div><div class="line">			String msg = bufferedReader.readLine();</div><div class="line">			connect.channel().writeAndFlush(msg);</div><div class="line">		&#125;</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;finally&#123;</div><div class="line">		worker.shutdownGracefully();</div><div class="line">	&#125;</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>消息处理类  </p>
-<pre><code>import io.netty.channel.ChannelHandlerContext;
-import io.netty.channel.SimpleChannelInboundHandler;
-/**
- * netty5客户端
- * @author yxm
- *
- */
-public class ClientHandler extends SimpleChannelInboundHandler&lt;String&gt;{
-@Override
-protected void messageReceived(ChannelHandlerContext ctx, String msg)
-        throws Exception {
- System.out.println(&quot;服务端消息：&quot;+msg);
- ctx.channel().writeAndFlush(&quot;客户端: hi&quot;);
-}
-/**
- * 新客户端接入
- */
-@Override
-public void channelActive(ChannelHandlerContext ctx) throws Exception {
-    System.out.println(&quot;channelActive&quot;);
-}
-
-/**
- * 客户端断开
- */
-@Override
-public void channelInactive(ChannelHandlerContext ctx) throws Exception {
-    System.out.println(&quot;channelInactive&quot;);
-}
-
-/**
- * 异常
- */
-@Override
-public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception {
-    cause.printStackTrace();
-}
-}
-</code></pre><h6 id="3-测试-1"><a href="#3-测试-1" class="headerlink" title="3.测试"></a>3.测试</h6><p>1.启动服务端<br>2.启动客户端<br>3.客户端输入  </p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/30/netty实践-六-netty5/" class="archive-article-date">
-  	<time datetime="2017-05-30T11:49:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-30</time>
 </a>
       
 	<div class="article-tag tagcloud">
