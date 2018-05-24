@@ -152,6 +152,236 @@
       <div class="body-wrap">
         
   
+    <article id="post-websocket-9-多人聊天-用户登录" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/25/websocket-9-多人聊天-用户登录/">websocket(9)-多人聊天-用户登录</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="java"><a href="#java" class="headerlink" title="java"></a>java</h5><p>1.bean  </p>
+<pre><code>public class User {
+private String name;
+private String password;
+public User(){
+
+}
+public User(String name,String password){
+    this.name=name;
+    this.password=password;
+}
+public String getName() {
+    return name;
+}
+public void setName(String name) {
+    this.name = name;
+}
+public String getPassword() {
+    return password;
+}
+public void setPassword(String password) {
+    this.password = password;
+}
+}
+</code></pre><p>2.controller</p>
+<pre><code>@Controller
+public class V6UserController {
+private static Map&lt;String,String&gt; userMap = new HashMap&lt;String,String&gt;();
+public static Map&lt;String,User&gt; onlineUserMap = new HashMap&lt;String,User&gt;();
+static {
+    userMap.put(&quot;admin&quot;,&quot;123456&quot;);
+    userMap.put(&quot;zs&quot;,&quot;123456&quot;);
+    userMap.put(&quot;lisi&quot;,&quot;123456&quot;);
+    userMap.put(&quot;wangwu&quot;,&quot;123456&quot;);
+    onlineUserMap.put(&quot;123&quot;,new User(&quot;admin&quot;,&quot;123456&quot;));
+}
+@RequestMapping(value = &quot;login&quot;, method= RequestMethod.POST)
+public String login(@RequestParam(value = &quot;username&quot;,required=true) String username, @RequestParam(value = &quot;pwd&quot;,required = true) String pwd, HttpSession session){
+    String password = userMap.get(username);
+    if(pwd.equals(password)){
+        User user = new User(username, pwd);
+        String sessionId = session.getId();
+        onlineUserMap.put(sessionId,user);
+        return &quot;redirect:/v6/chat.html&quot;;
+    }else{
+        return &quot;redirect:/v6/error.html&quot;;
+    }
+}
+}
+</code></pre><h5 id="前端"><a href="#前端" class="headerlink" title="前端"></a>前端</h5><p>1.index.html </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
+&lt;head&gt;
+&lt;title&gt;Hello WebSocket&lt;/title&gt;
+&lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;link href=&quot;/v6/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot; method=&apos;post&apos;  action=&quot;/login&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;input type=&quot;text&quot; name=&quot;username&quot; class=&quot;form-control&quot; placeholder=&quot;用户名&quot;&gt;
+                &lt;input type=&quot;password&quot; name=&quot;pwd&quot; class=&quot;form-control&quot; placeholder=&quot;密码&quot;&gt;
+                &lt;input type=&quot;submit&quot; class=&quot;default&quot; value=&quot;登录&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>2.app.js  </p>
+<pre><code>var stompClient = null;
+
+function setConnected(connected) {
+    $(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
+    $(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
+    if (connected) {
+        $(&quot;#conversation&quot;).show();
+    }
+    else {
+        $(&quot;#conversation&quot;).hide();
+    }
+    $(&quot;#notice&quot;).html(&quot;&quot;);
+}
+
+function connect() {
+    var socket = new SockJS(&apos;/websocket&apos;);
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        setConnected(true);
+        console.log(&apos;Connected: &apos; + frame);
+
+        //订阅群聊消息
+        stompClient.subscribe(&apos;/topic/chat&apos;, function (result) {
+            showContent(JSON.parse(result.body));
+        });
+
+        //订阅在线用户消息
+        stompClient.subscribe(&apos;/topic/onlineuser&apos;, function (result) {
+            showOnlieUser(JSON.parse(result.body));
+        });
+    });
+}
+
+
+//断开连接
+function disconnect() {
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
+    setConnected(false);
+    console.log(&quot;Disconnected&quot;);
+}
+
+//发送聊天记录
+function sendContent() {
+    stompClient.send(&quot;/app/v6/chat&quot;, {}, JSON.stringify({&apos;content&apos;: $(&quot;#content&quot;).val()}));
+
+}
+
+//显示聊天记录
+function showContent(body) {
+    $(&quot;#record&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+//显示实时在线用户
+function showOnlieUser(body) {
+    $(&quot;#online&quot;).html(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+
+$(function () {
+
+    connect();//自动上线
+
+    $(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
+        e.preventDefault();
+    });
+
+    $( &quot;#disconnect&quot; ).click(function() { disconnect(); });
+    $( &quot;#send&quot; ).click(function() {
+        sendContent(); 
+    });
+});
+</code></pre><p>3.error.html  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
+&lt;head&gt;
+    &lt;title&gt;Hello WebSocket&lt;/title&gt;
+    &lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+    &lt;link href=&quot;/v6/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+    &lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+       请重新登录
+    &lt;/div&gt;
+
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot; method=&apos;post&apos;  action=&quot;/login&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;input type=&quot;text&quot; name=&quot;username&quot; class=&quot;form-control&quot; placeholder=&quot;用户名&quot;&gt;
+                &lt;input type=&quot;password&quot; name=&quot;pwd&quot; class=&quot;form-control&quot; placeholder=&quot;密码&quot;&gt;
+                &lt;input type=&quot;submit&quot; class=&quot;default&quot; value=&quot;登录&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/03/25/websocket-9-多人聊天-用户登录/" class="archive-article-date">
+  	<time datetime="2018-03-25T14:23:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-websocket-8-websocket结合Spring的握手拦截器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -981,58 +1211,6 @@ Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
       
       <a href="/2018/03/19/linux-17-管道符/" class="archive-article-date">
   	<time datetime="2018-03-18T16:24:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-16-多命令执行符" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/19/linux-16-多命令执行符/">linux(16)-多命令执行符</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="多命令执行符"><a href="#多命令执行符" class="headerlink" title="多命令执行符"></a>多命令执行符</h5><p>分号(:)–&gt;多个命令顺序执行  </p>
-<p>逻辑与(&amp;&amp;) –&gt;当命令1执行正确,命令2才会执行,当命令1执行错误,命令2不会执行  </p>
-<p>逻辑或 -&gt; ||<br>当命令1执行不正确,才会执行命令2,当命令1执行完毕,命令2不会执行      </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/19/linux-16-多命令执行符/" class="archive-article-date">
-  	<time datetime="2018-03-18T16:01:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-19</time>
 </a>
       
 	<div class="article-tag tagcloud">

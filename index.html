@@ -152,6 +152,122 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-53-springboot使用消息中间件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/05/24/zyzx-53-springboot使用消息中间件/">zyzx(53)-springboot使用消息中间件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>使用SpringBoot集成rabbitmq实现一个发送和接收  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--加入mq依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h5 id="2-application-properties"><a href="#2-application-properties" class="headerlink" title="2.application.properties"></a>2.application.properties</h5><pre><code>#rabbitmq配置
+spring.application.name=springboot-mq
+spring.rabbitmq.host=192.168.17.129
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=mytest
+spring.rabbitmq.password=mytest
+</code></pre><h5 id="3-rabbitmap配置类"><a href="#3-rabbitmap配置类" class="headerlink" title="3.rabbitmap配置类"></a>3.rabbitmap配置类</h5><pre><code>import org.springframework.amqp.core.Queue;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RabbitMQConfig {
+
+    @Bean
+    public Queue mqQueue(){
+        return new Queue(&quot;mqboot&quot;);
+    }
+}
+</code></pre><h5 id="4-发送类"><a href="#4-发送类" class="headerlink" title="4.发送类"></a>4.发送类</h5><pre><code>@Component
+public class Sender {
+
+    @Autowired
+    private AmqpTemplate rabbitTemplate;
+
+    public void send(){
+        String content = &quot;send: hello&quot;+new Date();
+        System.out.println(&quot;Sender:&quot;+content)
+        this.rabbitTemplate.convertAndSend(&quot;mqboot&quot;,content);
+    }
+}
+</code></pre><h5 id="5-接收类"><a href="#5-接收类" class="headerlink" title="5.接收类"></a>5.接收类</h5><pre><code>@Component
+@RabbitListener(queues = &quot;mqboot&quot;)
+public class Receiver {
+
+    @RabbitHandler
+    public  void process(String data){
+        System.out.println(&quot;Receiver:&quot;+data);
+    }
+}
+</code></pre><h5 id="6-测试"><a href="#6-测试" class="headerlink" title="6.测试"></a>6.测试</h5><p>启动springBoot  </p>
+<p>如下显示表明:连接成功:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/46.png" alt=""></p>
+<pre><code>@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ApplicationTests {
+    @Autowired
+    private TeacherRepository teacherRepository;
+
+    /*@Autowired
+    private JavaMailSender   javaMailSender;*/
+
+    @Autowired
+   private Sender sender;
+
+    @Test
+    public void contextLoads() {
+        //mq测试
+        sender.send();
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/47.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/48.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/05/24/zyzx-53-springboot使用消息中间件/" class="archive-article-date">
+  	<time datetime="2018-05-24T15:14:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-52-rabbitmq安装" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -198,7 +314,7 @@
 <h5 id="二、安装rabbitmq"><a href="#二、安装rabbitmq" class="headerlink" title="二、安装rabbitmq"></a>二、安装rabbitmq</h5><h6 id="1、下载rabbigmq"><a href="#1、下载rabbigmq" class="headerlink" title="1、下载rabbigmq"></a>1、下载rabbigmq</h6><pre><code>wget http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.0/rabbitmq-server-3.6.0-1.noarch.rpm
 </code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/39.png" alt=""></p>
 <h6 id="2、安装"><a href="#2、安装" class="headerlink" title="2、安装"></a>2、安装</h6><pre><code>rpm -i --nodeps rabbitmq-server-3.6.0-1.noarch.rpm
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/40png" alt=""></p>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/40.png" alt=""></p>
 <h6 id="3、启动"><a href="#3、启动" class="headerlink" title="3、启动"></a>3、启动</h6><pre><code>service rabbitmq-server start 
 </code></pre><p>出现的错误以及解决办法如下：</p>
 <pre><code>ln -s /usr/local/erlang/bin/erl /usr/bin/erl
@@ -999,166 +1115,6 @@ public class MybatisUserServiceImpl implements IMybatisUserService {
       
       <a href="/2018/05/16/zyzx-43-SpringBoot使用事务管理/" class="archive-article-date">
   	<time datetime="2018-05-16T14:34:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-41-SpringBoot整合redis" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/12/zyzx-41-SpringBoot整合redis/">zyzx(41)-SpringBoot整合redis</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-data-redis&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-配置application-properties文件"><a href="#2-配置application-properties文件" class="headerlink" title="2.配置application.properties文件"></a>2.配置application.properties文件</h5><pre><code>#*************************************redis配置**************************************
-#redis连接
-# Redis数据库索引(默认为0)
-spring.redis.database=0
-# Redis服务器地址
-spring.redis.host=10.211.55.7
-# Redis服务器连接端口
-spring.redis.port=6379
-# Redis服务器连接密码(默认为空)
-spring.redis.password=
-# 连接池最大连接数(使用负值表示没有限制)
-spring.redis.pool.max-active=8
-# 连接池最大阻塞等待时间(使用负值表示没有限制)
-spring.redis.pool.max-wait=-1
-# 连接池中的最大空闲连接数
-spring.redis.pool.max-idle=8
-# 连接池中的最小空闲连接数
-spring.redis.pool.min-idle=0
-# 连接超时时间(毫秒)
-spring.redis.timeout=0
-#*************************************redis配置**************************************
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/9.png" alt="">  </p>
-<h5 id="3-使用"><a href="#3-使用" class="headerlink" title="3.使用"></a>3.使用</h5><p>简单redis的string类型操作是使用StringRedisTemplate,复杂数据操作(比如Object)需要配置:RedisConfig，RedisObjectSerializer  </p>
-<p>启动redis:</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/10.png" alt="">  </p>
-<h6 id="3-1-使用StringRedisTemplate"><a href="#3-1-使用StringRedisTemplate" class="headerlink" title="3.1 使用StringRedisTemplate"></a>3.1 使用StringRedisTemplate</h6><pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class XxxxSpringbootApplicationTests {
-@Autowired
-private StringRedisTemplate stringRedisTemplate;
-
-@Test
-public void contextLoads() {
-    //redis操作Stirng
-    stringRedisTemplate.opsForValue().set(&quot;key1&quot;,&quot;aaaaaaaaa&quot;);
-    stringRedisTemplate.opsForValue().set(&quot;key2&quot;,&quot;bbbbbbbbb&quot;);
-    System.out.println(&quot;key1:&quot;+stringRedisTemplate.opsForValue().get(&quot;key1&quot;)+&quot;key2:&quot;+stringRedisTemplate.opsForValue().get(&quot;key2&quot;));
-  }
- }
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/11.png" alt=""></p>
-<h6 id="3-1-redis存储对象object"><a href="#3-1-redis存储对象object" class="headerlink" title="3.1 redis存储对象object"></a>3.1 redis存储对象object</h6><p>RedisObjectSerializer:</p>
-<pre><code>import org.springframework.core.convert.converter.Converter;
-import org.springframework.core.serializer.support.DeserializingConverter;
-import org.springframework.core.serializer.support.SerializingConverter;
-import org.springframework.data.redis.serializer.RedisSerializer;
-import org.springframework.data.redis.serializer.SerializationException;
-
-public class RedisObjectSerializer implements RedisSerializer&lt;Object&gt; {
-    private Converter&lt;Object, byte[]&gt; serializer = new SerializingConverter();
-    private Converter&lt;byte[], Object&gt; deserializer = new DeserializingConverter();
-    static final byte[] EMPTY_ARRAY = new byte[0];
-    public Object deserialize(byte[] bytes) {
-        if (isEmpty(bytes)) {
-            return null;
-        }
-        try {
-            return deserializer.convert(bytes);
-        } catch (Exception ex) {
-            throw new SerializationException(&quot;Cannot deserialize&quot;, ex);
-        }
-    }
-    public byte[] serialize(Object object) {
-        if (object == null) {
-            return EMPTY_ARRAY;
-        }
-        try {
-            return serializer.convert(object);
-        } catch (Exception ex) {
-            return EMPTY_ARRAY;
-        }
-    }
-    private boolean isEmpty(byte[] data) {
-        return (data == null || data.length == 0);
-    }
-}
-</code></pre><p>RedisConfig:</p>
-<pre><code>@Configuration
-public class RedisConfig {
-    public RedisTemplate&lt;String,Object&gt; redisTemplate(RedisConnectionFactory factory){
-        RedisTemplate&lt;String, Object&gt; template = new RedisTemplate&lt;&gt;();
-        template.setConnectionFactory(factory);
-        template.setKeySerializer(new RedisObjectSerializer());
-        template.setValueSerializer(new RedisObjectSerializer());
-        return template;
-    }
-}
-</code></pre><p>测试:<br>        @RunWith(SpringRunner.class)<br>        @SpringBootTest<br>        public class XxxxSpringbootApplicationTests {<br>            @Autowired<br>            private RedisTemplate<string, object=""> redisTemplate;</string,></p>
-<pre><code>    @Test
-    public void contextLoads() {
-        //redis操作Stirng
-        stringRedisTemplate.opsForValue().set(&quot;key1&quot;,&quot;aaaaaaaaa&quot;);
-        stringRedisTemplate.opsForValue().set(&quot;key2&quot;,&quot;bbbbbbbbb&quot;);
-        System.out.println(&quot;key1:&quot;+stringRedisTemplate.opsForValue().get(&quot;key1&quot;)+&quot;key2:&quot;+stringRedisTemplate.opsForValue().get(&quot;key2&quot;));
-
-        //redis操作对象
-        Student stu = new Student();
-        stu.setName(&quot;lisi&quot;);
-        stu.setAge(24);
-
-         redisTemplate.opsForValue().set(stu.getName(), stu);
-        Student t2=(Student)redisTemplate.opsForValue().get(stu.getName());
-         System.out.println(&quot;redis操作对象: &quot;+t2.getName()+&quot;  &quot;+t2.getAge());
-
-    }
-}
-</code></pre><p>注:Student需要序列化</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/12.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/12/zyzx-41-SpringBoot整合redis/" class="archive-article-date">
-  	<time datetime="2018-05-12T11:12:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-12</time>
 </a>
       
 	<div class="article-tag tagcloud">

@@ -4,17 +4,34 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives | Startshineye的博客</title>
+  <title>zyzx(53)-springboot使用消息中间件 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/page/15/index.html">
+  <meta name="description" content="前言使用SpringBoot集成rabbitmq实现一个发送和接收  
+内容1.引入依赖&amp;lt;!--加入mq依赖--&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-boot-starter-amqp&amp;lt;/artifa">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zyzx(53)-springboot使用消息中间件">
+<meta property="og:url" content="https://github.com/startshineye/2018/05/24/zyzx-53-springboot使用消息中间件/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="前言使用SpringBoot集成rabbitmq实现一个发送和接收  
+内容1.引入依赖&amp;lt;!--加入mq依赖--&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-boot-starter-amqp&amp;lt;/artifa">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/46.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/47.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/48.png">
+<meta property="og:updated_time" content="2018-05-24T16:07:24.901Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="zyzx(53)-springboot使用消息中间件">
+<meta name="twitter:description" content="前言使用SpringBoot集成rabbitmq实现一个发送和接收  
+内容1.引入依赖&amp;lt;!--加入mq依赖--&amp;gt;
+&amp;lt;dependency&amp;gt;
+    &amp;lt;groupId&amp;gt;org.springframework.boot&amp;lt;/groupId&amp;gt;
+    &amp;lt;artifactId&amp;gt;spring-boot-starter-amqp&amp;lt;/artifa">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/46.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,346 +167,182 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-zyzx-53-springboot使用消息中间件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
+    <h1 class="article-title" itemprop="name">
+      zyzx(53)-springboot使用消息中间件
+    </h1>
   
+
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>使用SpringBoot集成rabbitmq实现一个发送和接收  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--加入mq依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h5 id="2-application-properties"><a href="#2-application-properties" class="headerlink" title="2.application.properties"></a>2.application.properties</h5><pre><code>#rabbitmq配置
+spring.application.name=springboot-mq
+spring.rabbitmq.host=192.168.17.129
+spring.rabbitmq.port=5672
+spring.rabbitmq.username=mytest
+spring.rabbitmq.password=mytest
+</code></pre><h5 id="3-rabbitmap配置类"><a href="#3-rabbitmap配置类" class="headerlink" title="3.rabbitmap配置类"></a>3.rabbitmap配置类</h5><pre><code>import org.springframework.amqp.core.Queue;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
+
+@Configuration
+public class RabbitMQConfig {
+
+    @Bean
+    public Queue mqQueue(){
+        return new Queue(&quot;mqboot&quot;);
+    }
+}
+</code></pre><h5 id="4-发送类"><a href="#4-发送类" class="headerlink" title="4.发送类"></a>4.发送类</h5><pre><code>@Component
+public class Sender {
+
+    @Autowired
+    private AmqpTemplate rabbitTemplate;
+
+    public void send(){
+        String content = &quot;send: hello&quot;+new Date();
+        System.out.println(&quot;Sender:&quot;+content)
+        this.rabbitTemplate.convertAndSend(&quot;mqboot&quot;,content);
+    }
+}
+</code></pre><h5 id="5-接收类"><a href="#5-接收类" class="headerlink" title="5.接收类"></a>5.接收类</h5><pre><code>@Component
+@RabbitListener(queues = &quot;mqboot&quot;)
+public class Receiver {
+
+    @RabbitHandler
+    public  void process(String data){
+        System.out.println(&quot;Receiver:&quot;+data);
+    }
+}
+</code></pre><h5 id="6-测试"><a href="#6-测试" class="headerlink" title="6.测试"></a>6.测试</h5><p>启动springBoot  </p>
+<p>如下显示表明:连接成功:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/46.png" alt=""></p>
+<pre><code>@RunWith(SpringRunner.class)
+@SpringBootTest
+public class ApplicationTests {
+    @Autowired
+    private TeacherRepository teacherRepository;
+
+    /*@Autowired
+    private JavaMailSender   javaMailSender;*/
+
+    @Autowired
+   private Sender sender;
+
+    @Test
+    public void contextLoads() {
+        //mq测试
+        sender.send();
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/47.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/48.png" alt=""></p>
+
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/11/jeecg-2-使用DOM自带的confirm方法/" class="archive-article-date">
-  	<time datetime="2017-09-11T04:01:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-11</time>
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/05/24/zyzx-53-springboot使用消息中间件/" class="archive-article-date">
+  	<time datetime="2018-05-24T15:14:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-24</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/11/jeecg-2-使用DOM自带的confirm方法/">jeecg(2)-使用DOM自带的confirm方法</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/11/jeecg-1-js方法存放文件/" class="archive-article-date">
-  	<time datetime="2017-09-11T03:49:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-11</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/11/jeecg-1-js方法存放文件/">jeecg(1)-js方法存放文件</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2018/05/24/zyzx-52-rabbitmq安装/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">zyzx(52)-rabbitmq安装</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/10/vue-27-slot/" class="archive-article-date">
-  	<time datetime="2017-09-10T14:04:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-10</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/10/vue-27-slot/">vue(27)-slot</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/07/vue-26-模板/" class="archive-article-date">
-  	<time datetime="2017-09-06T16:02:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-07</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/07/vue-26-模板/">vue(26)-模板</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/vue/">vue</a></li></ul>
-	</div>
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="zyzx-53-springboot使用消息中间件" data-title="zyzx(53)-springboot使用消息中间件" data-url="https://github.com/startshineye/2018/05/24/zyzx-53-springboot使用消息中间件/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/03/vue-25-组件/" class="archive-article-date">
-  	<time datetime="2017-09-03T14:56:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/03/vue-25-组件/">vue(25)-组件</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/03/vue-24-动画/" class="archive-article-date">
-  	<time datetime="2017-09-03T14:01:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/03/vue-24-动画/">vue(24)-动画</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/02/vue-23-监听数据变化/" class="archive-article-date">
-  	<time datetime="2017-09-02T13:01:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/02/vue-23-监听数据变化/">vue(23)-监听数据变化</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/02/vue-22-自定义键盘信息/" class="archive-article-date">
-  	<time datetime="2017-09-02T12:08:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/02/vue-22-自定义键盘信息/">vue(22)-自定义键盘信息</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/02/vue-21-指令-自定义指令/" class="archive-article-date">
-  	<time datetime="2017-09-02T08:08:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/02/vue-21-指令-自定义指令/">vue(21)-指令-自定义指令</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/09/02/vue-20-过滤器/" class="archive-article-date">
-  	<time datetime="2017-09-02T03:47:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/09/02/vue-20-过滤器/">vue(20)-过滤器</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/14/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/13/">13</a><a class="page-number" href="/archives/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/archives/page/16/">16</a><a class="page-number" href="/archives/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/43/">43</a><a class="extend next" rel="next" href="/archives/page/16/">Next &raquo;</a>
-    </nav>
-  
 
 
       </div>
@@ -512,8 +365,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
