@@ -4,17 +4,27 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives | Startshineye的博客</title>
+  <title>zyzx(54)-全文搜索概述 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/page/29/index.html">
+  <meta name="description" content="前言场景:1.一般我们在浏览器中使用搜索引擎搜索问题2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  
+主要内容:1.全文搜索2.全文搜索产品(ElasticSearch简介)3.ElasticSearch核心概念4.ElasticSearch与SpringBoot集成5.ElasticSearch实战  
+内容1.全文搜索1.1数据结构
+结构">
+<meta property="og:type" content="article">
+<meta property="og:title" content="zyzx(54)-全文搜索概述">
+<meta property="og:url" content="https://github.com/startshineye/2018/05/25/zyzx-54-全文搜索概述/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="前言场景:1.一般我们在浏览器中使用搜索引擎搜索问题2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  
+主要内容:1.全文搜索2.全文搜索产品(ElasticSearch简介)3.ElasticSearch核心概念4.ElasticSearch与SpringBoot集成5.ElasticSearch实战  
+内容1.全文搜索1.1数据结构
+结构">
+<meta property="og:updated_time" content="2018-05-25T16:28:52.921Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:title" content="zyzx(54)-全文搜索概述">
+<meta name="twitter:description" content="前言场景:1.一般我们在浏览器中使用搜索引擎搜索问题2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  
+主要内容:1.全文搜索2.全文搜索产品(ElasticSearch简介)3.ElasticSearch核心概念4.ElasticSearch与SpringBoot集成5.ElasticSearch实战  
+内容1.全文搜索1.1数据结构
+结构">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,341 +160,132 @@
 </nav>
 
       <div class="body-wrap">
+        <article id="post-zyzx-54-全文搜索概述" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
         
   
+    <h1 class="article-title" itemprop="name">
+      zyzx(54)-全文搜索概述
+    </h1>
   
+
+      </header>
     
-    
+    <div class="article-entry" itemprop="articleBody">
       
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>场景:<br>1.一般我们在浏览器中使用搜索引擎搜索问题<br>2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  </p>
+<p>主要内容:<br>1.全文搜索<br>2.全文搜索产品(ElasticSearch简介)<br>3.ElasticSearch核心概念<br>4.ElasticSearch与SpringBoot集成<br>5.ElasticSearch实战  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-全文搜索"><a href="#1-全文搜索" class="headerlink" title="1.全文搜索"></a>1.全文搜索</h5><h6 id="1-1数据结构"><a href="#1-1数据结构" class="headerlink" title="1.1数据结构"></a>1.1数据结构</h6><ol>
+<li>结构化：指具有固定格式或有限长度的数据,如数据库,元数据等,(见得最多的就是每次我们创建数据库时候需要制定数据的格式和长度)  </li>
+<li>非结构化:指不定长或者无固定格式的数据,如:邮件,word文档等。  </li>
+</ol>
+<p>结构化的数据查询一般来说我们都是比较熟悉的,但是对于非结构化的数据,我们如何查询呢？  </p>
+<h6 id="1-2-非结构化数据的检索"><a href="#1-2-非结构化数据的检索" class="headerlink" title="1.2 非结构化数据的检索"></a>1.2 非结构化数据的检索</h6><p>1.顺序扫描法(Serial Scanning)<br>比如在文档里面查找字符串,就是从头到尾找此字符串,直到找到为止(类似从字典里面查找某一个字的时候,我们从头到尾的找),这种方法对于数据量小的数据量,效率很高,但是数据量很大,就会很慢,那么大文件数据用哪种搜索法比较好呢?</p>
+<p>2.全文搜索(Full-text Search)<br>对于数据量比较大的时候,此方法合适<br>全文搜索:就是把非结构化的部分信息提取出来重新进行组织,使其变得有结构,对有结构的数据进行搜索,从而达到搜索相对较快的目的</p>
+<p>非结构化数据的检索其实就是把非结构化的数据组织成结构化数据,然后创建索引,来实现搜索目的.</p>
+<p>索引:从非结构化数据中部分提取出的结构化数据  </p>
+<p>比如字典:里面有很多汉字,那么如何找到其中的一个汉字,全文搜索就是替每一个汉字都建立起一套规则,汉字的拼音 就是索引</p>
+<h6 id="1-3-全文搜索概念"><a href="#1-3-全文搜索概念" class="headerlink" title="1.3 全文搜索概念"></a>1.3 全文搜索概念</h6><p>全文搜索概念:全文搜索是一种将文件中所有文本与搜索 项匹配的文字资料检索方法</p>
+<h6 id="1-4-全文搜索实现原理"><a href="#1-4-全文搜索实现原理" class="headerlink" title="1.4 全文搜索实现原理"></a>1.4 全文搜索实现原理</h6><p>以从字典中搜索出汉字为例:<br>建立文本库:建立要搜索的数据源<br>建立索引:提取结构化数据<br>执行搜索:进行搜索,结果返回给用户<br>过滤结果:将返回结果给用户时候,有很多种结果,在一个页面里面不可能全部展现出现,应该分页展示  </p>
+<h6 id="1-5-全文搜索实现技术"><a href="#1-5-全文搜索实现技术" class="headerlink" title="1.5 全文搜索实现技术"></a>1.5 全文搜索实现技术</h6><p>基于Java的开源实现<br>1.Lucene:基于全文搜索的引擎<br>2.ElasticSearch:基于Lucene之上的全文搜索<br>3.Solr:与ElasticSearch同类型的产品,也是基于Lucene的</p>
+<p>以车为例:Lucene其实就是车的发动机,对于具体什么车,ElasticSearch和Solr就是具体的车:比如奥迪,大众,可能用到了同一个引擎(Lucene)  </p>
+<p>ElasticSearch与Solr区别:<br>1.Solr在分布式管理上:利用了zookeper进行分布式,并且支持很多种数据格式:比如xml，json,csv,在传统业务上要好于Solr，但是在实时性处理要低ElasticSearch<br>2.ElasticSearch自带分布式,格式只支持json来提供restful接口<br>3.在目前市场上:ElasticSearch主流些,用的比较多</p>
+<h5 id="2-全文搜索产品-ElasticSearch简介"><a href="#2-全文搜索产品-ElasticSearch简介" class="headerlink" title="2.全文搜索产品(ElasticSearch简介)"></a>2.全文搜索产品(ElasticSearch简介)</h5><h5 id="3-ElasticSearch核心概念"><a href="#3-ElasticSearch核心概念" class="headerlink" title="3.ElasticSearch核心概念"></a>3.ElasticSearch核心概念</h5><h5 id="4-ElasticSearch与SpringBoot集成"><a href="#4-ElasticSearch与SpringBoot集成" class="headerlink" title="4.ElasticSearch与SpringBoot集成"></a>4.ElasticSearch与SpringBoot集成</h5><h5 id="5-ElasticSearch实战"><a href="#5-ElasticSearch实战" class="headerlink" title="5.ElasticSearch实战"></a>5.ElasticSearch实战</h5>
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2017" class="archive-year">2017</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/21/XDB/" class="archive-article-date">
-  	<time datetime="2017-02-21T02:51:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-21</time>
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/05/25/zyzx-54-全文搜索概述/" class="archive-article-date">
+  	<time datetime="2018-05-24T16:40:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-25</time>
 </a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/21/XDB/">XDB</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
+      
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
 	</div>
 
-          
+      
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+      <div class="clearfix"></div>
+    </div>
   </div>
 </article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/20/Oracle-连接远程数据库/" class="archive-article-date">
-  	<time datetime="2017-02-20T15:12:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/20/Oracle-连接远程数据库/">Oracle-连接远程数据库</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2018/05/24/zyzx-53-springboot使用消息中间件/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">zyzx(53)-springboot使用消息中间件</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-w">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/20/oracle创建表空间-用户-授权并导入dmp文件/" class="archive-article-date">
-  	<time datetime="2017-02-20T13:07:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-20</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/20/oracle创建表空间-用户-授权并导入dmp文件/">oracle创建表空间,用户,授权并导入dmp文件</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/18/weblogic-application-ModuleException/" class="archive-article-date">
-  	<time datetime="2017-02-18T14:09:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-18</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/18/weblogic-application-ModuleException/">weblogic.application.ModuleException</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Weblogic/">Weblogic</a></li></ul>
-	</div>
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="zyzx-54-全文搜索概述" data-title="zyzx(54)-全文搜索概述" data-url="https://github.com/startshineye/2018/05/25/zyzx-54-全文搜索概述/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/17/Error-configuring-application-listener-of-class-org-springframework-web-util-Log4jConfigListen/" class="archive-article-date">
-  	<time datetime="2017-02-17T03:32:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/17/Error-configuring-application-listener-of-class-org-springframework-web-util-Log4jConfigListen/">Error configuring application listener of class org.springframework.web.util.Log4jConfigListen</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/">Spring</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/17/Weblogic在Myeclipse下-weblogic-Could-not-get-the-server-file-lock/" class="archive-article-date">
-  	<time datetime="2017-02-17T01:48:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-17</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/17/Weblogic在Myeclipse下-weblogic-Could-not-get-the-server-file-lock/">Weblogic在Myeclipse下-weblogic Could not get the server file lock</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/" class="archive-article-date">
-  	<time datetime="2017-02-16T15:38:30.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/Myeclipse-A-full-JDK-must-be-specified/">Myeclipse-A full JDK must be specified</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/Myeclipse下部署Tomcat中finish按键无效/" class="archive-article-date">
-  	<time datetime="2017-02-16T03:13:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/Myeclipse下部署Tomcat中finish按键无效/">Myeclipse下部署Tomcat中finish按键无效</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/16/JAVA环境变量找不到/" class="archive-article-date">
-  	<time datetime="2017-02-16T02:16:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/16/JAVA环境变量找不到/">JAVA环境变量找不到</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JDK/">JDK</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Weblogic/">Weblogic</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2017/02/15/myeclipse-The-type-java-lang-CharSequence-cannot-be-resolved/" class="archive-article-date">
-  	<time datetime="2017-02-15T15:52:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-15</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2017/02/15/myeclipse-The-type-java-lang-CharSequence-cannot-be-resolved/">myeclipse-The type java.lang.CharSequence cannot be resolved</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/28/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/27/">27</a><a class="page-number" href="/archives/page/28/">28</a><span class="page-number current">29</span><a class="page-number" href="/archives/page/30/">30</a><a class="page-number" href="/archives/page/31/">31</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/43/">43</a><a class="extend next" rel="next" href="/archives/page/30/">Next &raquo;</a>
-    </nav>
-  
 
 
       </div>
@@ -507,8 +308,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,
