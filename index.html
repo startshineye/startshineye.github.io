@@ -232,11 +232,84 @@
 </ol>
 <h5 id="5-ElasticSearch实战"><a href="#5-ElasticSearch实战" class="headerlink" title="5.ElasticSearch实战"></a>5.ElasticSearch实战</h5><h6 id="1-修改application-properties"><a href="#1-修改application-properties" class="headerlink" title="1.修改application.properties"></a>1.修改application.properties</h6><pre><code>#ES地址
 spring.data.elasticsearch.cluster-nodes=localhost:9200
+#设置ES连接超时时间
 spring.data.elasticsearch.properties.transport.tcp.connect_timeout=120s
-</code></pre><h6 id="2-后台编码"><a href="#2-后台编码" class="headerlink" title="2.后台编码"></a>2.后台编码</h6><p>1.文档EsBlog</p>
-<p>2.资源库 EsBlogRepository  </p>
-<p>3.资源库测试用例 EsBlogRepositoryTest  </p>
-<p>4.BlogController(控制器)  </p>
+</code></pre><h6 id="2-后台编码"><a href="#2-后台编码" class="headerlink" title="2.后台编码"></a>2.后台编码</h6><p>####### 1.文档EsBlog<br> ES中id不是我们普通所指的Long类型的id,而是String类型id  </p>
+<pre><code>@Document(indexName = &quot;blog&quot;,type = &quot;blog&quot;)//标识是一个文档:indexName 索引名称
+public class EsBlog implements Serializable{
+private static final long serialVersionUID = 1L;
+/**
+ * Es主键是String类型的
+ */
+@Id //标识是主键
+private String id;
+/**
+ * 标题
+ */
+private String title;
+/**
+ * 摘要
+ */
+private  String summary;
+/**
+ * 内容
+ */
+private  String content;
+
+protected EsBlog(){//JPA规范要求,防止直接使用
+
+}
+public EsBlog(String title,String summary,String content){
+  this.title = title;
+  this.summary = summary;
+  this.content = content;
+}
+
+public String getId() {
+    return id;
+}
+
+public void setId(String id) {
+    this.id = id;
+}
+
+public String getTitle() {
+    return title;
+}
+
+public void setTitle(String title) {
+    this.title = title;
+}
+
+public String getSummary() {
+    return summary;
+}
+
+public void setSummary(String summary) {
+    this.summary = summary;
+}
+
+public String getContent() {
+    return content;
+}
+
+public void setContent(String content) {
+    this.content = content;
+}
+
+@Override
+public String toString() {
+    return &quot;EsBlog{&quot; +
+            &quot;id=&apos;&quot; + id + &apos;\&apos;&apos; +
+            &quot;, title=&apos;&quot; + title + &apos;\&apos;&apos; +
+            &quot;, summary=&apos;&quot; + summary + &apos;\&apos;&apos; +
+            &quot;, content=&apos;&quot; + content + &apos;\&apos;&apos; +
+            &apos;}&apos;;
+   }
+}
+</code></pre><p>####### 2.资源库 EsBlogRepository<br>定义一个方法:只从title,summary,content里面取搜索,只需要有一个地方搜索到,就返回此结果  </p>
+<p>####### 3.资源库测试用例 EsBlogRepositoryTest  </p>
+<p>####### 4.BlogController(控制器)  </p>
 
       
     </div>
