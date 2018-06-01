@@ -308,7 +308,51 @@ public String toString() {
    }
 }
 </code></pre><p>####### 2.资源库 EsBlogRepository<br>定义一个方法:只从title,summary,content里面取搜索,只需要有一个地方搜索到,就返回此结果  </p>
-<p>####### 3.资源库测试用例 EsBlogRepositoryTest  </p>
+<pre><code>public interface EsBlogRepository extends ElasticsearchRepository&lt;EsBlog,String&gt;{
+Page&lt;EsBlog&gt; findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(String title,String summary,String content,Pageable pageable);
+}
+</code></pre><p>####### 3.资源库测试用例 EsBlogRepositoryTest  </p>
+<pre><code>/**
+ * 测试
+ */
+@RunWith(SpringRunner.class)
+@SpringBootTest
+public class EsBlogRepositoryTest {
+
+@Autowired
+private EsBlogRepository esBlogRepository;
+
+@Before//before表明在Test初始化之前执行的动作
+public void initRepositoryData(){
+    //清除所有数据
+    esBlogRepository.deleteAll();
+
+    //创建初始化数据
+    esBlogRepository.save(new EsBlog(&quot;登鹳雀楼&quot;,&quot;王之涣的登鹳雀楼&quot;,&quot;白日依山尽,黄河入海流,欲穷千里目,更能上一层楼&quot;));
+    esBlogRepository.save(new EsBlog(&quot;相思&quot;,&quot;王维的相思&quot;,&quot;红豆生南国,春来发几枝,援军多采洁,此物最相思&quot;));
+    esBlogRepository.save(new EsBlog(&quot;静夜思&quot;,&quot;李白的静夜思&quot;,&quot;床前明月光,疑是地上霜,举头望明月,低头思故乡&quot;));
+
+}
+
+@Test
+public void testFindDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(){
+    //查询20条数据
+    Pageable pageable = new PageRequest(0, 20);
+    String titile = &quot;思&quot;;
+    String summary = &quot;相思&quot;;
+    String content = &quot;相思&quot;;
+
+    Page&lt;EsBlog&gt; page = esBlogRepository.findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(titile, summary, content, pageable);
+
+    System.out.println(&quot;------------start&quot;);
+    for (EsBlog esBlog:page) {
+        System.out.println(esBlog.toString());
+    }
+    System.out.println(&quot;------------end&quot;);
+  }
+}
+</code></pre><p>测试前先启动Es:<br>切换到bin的目录下,点击elasticsearch.bat  </p>
+<p><img src="1.png" alt=""></p>
 <p>####### 4.BlogController(控制器)  </p>
 
       
