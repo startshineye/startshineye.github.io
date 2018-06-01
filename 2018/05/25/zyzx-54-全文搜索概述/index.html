@@ -20,8 +20,9 @@
 结构">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/49.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/05/50.png">
-<meta property="og:image" content="https://github.com/startshineye/1.png">
-<meta property="og:updated_time" content="2018-06-01T16:30:07.276Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/06/1.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/06/2.png">
+<meta property="og:updated_time" content="2018-06-01T17:16:48.323Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="zyzx(54)-全文搜索概述">
 <meta name="twitter:description" content="前言场景:1.一般我们在浏览器中使用搜索引擎搜索问题2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  
@@ -242,9 +243,8 @@
  &lt;/dependency&gt;
 </code></pre></li>
 </ol>
-<h5 id="5-ElasticSearch实战"><a href="#5-ElasticSearch实战" class="headerlink" title="5.ElasticSearch实战"></a>5.ElasticSearch实战</h5><h6 id="1-修改application-properties"><a href="#1-修改application-properties" class="headerlink" title="1.修改application.properties"></a>1.修改application.properties</h6><pre><code>#ES地址
-spring.data.elasticsearch.cluster-nodes=localhost:9200
-#设置ES连接超时时间
+<h5 id="5-ElasticSearch实战"><a href="#5-ElasticSearch实战" class="headerlink" title="5.ElasticSearch实战"></a>5.ElasticSearch实战</h5><h6 id="1-修改application-properties"><a href="#1-修改application-properties" class="headerlink" title="1.修改application.properties"></a>1.修改application.properties</h6><pre><code># 内嵌 Elasticsearch 实例。默认存储位置是工作目录的 elastic 目录
+spring.data.elasticsearch.properties.path.home=target/elastic
 spring.data.elasticsearch.properties.transport.tcp.connect_timeout=120s
 </code></pre><h6 id="2-后台编码"><a href="#2-后台编码" class="headerlink" title="2.后台编码"></a>2.后台编码</h6><p>####### 1.文档EsBlog<br> ES中id不是我们普通所指的Long类型的id,而是String类型id  </p>
 <pre><code>@Document(indexName = &quot;blog&quot;,type = &quot;blog&quot;)//标识是一个文档:indexName 索引名称
@@ -364,8 +364,27 @@ public void testFindDistinctEsBlogByTitleContainingOrSummaryContainingOrContentC
   }
 }
 </code></pre><p>测试前先启动Es:<br>切换到bin的目录下,点击elasticsearch.bat  </p>
-<p><img src="1.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/06/1.png" alt=""></p>
 <p>####### 4.BlogController(控制器)  </p>
+<pre><code>@RestController
+@RequestMapping(&quot;/blogs&quot;)
+public class EsBlogController {
+@Autowired
+private EsBlogRepository esBlogRepository;
+@GetMapping
+public List&lt;EsBlog&gt; list(@RequestParam(value=&quot;title&quot;,required=false,defaultValue=&quot;&quot;) String title,
+                         @RequestParam(value=&quot;summary&quot;,required=false,defaultValue=&quot;&quot;) String summary,
+                         @RequestParam(value=&quot;content&quot;,required=false,defaultValue=&quot;&quot;) String content,
+                         @RequestParam(value=&quot;pageIndex&quot;,required=false,defaultValue=&quot;0&quot;) int pageIndex,
+                         @RequestParam(value=&quot;pageSize&quot;,required=false,defaultValue=&quot;10&quot;) int pageSize) {
+    // 数据在 Test 里面先初始化了，这里只管取数据
+    Pageable pageable = new PageRequest(pageIndex, pageSize);
+    Page&lt;EsBlog&gt; page = esBlogRepository.findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(title,summary,content,pageable);
+    return page.getContent();
+   }
+}
+</code></pre><p>测试: </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/06/2.png" alt=""></p>
 
       
     </div>
