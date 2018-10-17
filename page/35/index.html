@@ -152,6 +152,286 @@
       <div class="body-wrap">
         
   
+    <article id="post-注解-三-注解的属性" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/02/注解-三-注解的属性/">注解(三)-注解的属性</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="什么是注解的属性"><a href="#什么是注解的属性" class="headerlink" title="什么是注解的属性"></a>什么是注解的属性</h4><ol>
+<li>一个注解相当于一个胸牌,如果你胸前贴了胸牌,可以说明你是哪个工作单位的员工，否则就不是，如果还想区分公司哪个部门的那个员工，这时候就可以为胸牌增加一个属性进行区分。增加了属性的标记效果为：@AAnotaion(color=”red”);</li>
+<li>注解中的属性是以方法实行定义，赋值时候是以java属性形式赋值，调用时候也是用调用方法形式。<h4 id="定义基本类型的属性和应用属性"><a href="#定义基本类型的属性和应用属性" class="headerlink" title="定义基本类型的属性和应用属性:"></a>定义基本类型的属性和应用属性:</h4></li>
+<li>在注解中增加String color();</li>
+<li>@AAnotaion(color=”red”);</li>
+</ol>
+<h4 id="反射获得实例对象，再通过该对象调用属性相应的方法"><a href="#反射获得实例对象，再通过该对象调用属性相应的方法" class="headerlink" title="反射获得实例对象，再通过该对象调用属性相应的方法"></a>反射获得实例对象，再通过该对象调用属性相应的方法</h4><ol>
+<li>定义注解 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">public @interface AAnnotation &#123;</div><div class="line">  String color();//此方法是共有的，抽象的，不用加其他修饰符，类似于接口中方法</div><div class="line">  String value();</div><div class="line">&#125;</div><div class="line">``` </div><div class="line">2. 使用注解的类</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>/**</p>
+<ul>
+<li>应用注解</li>
+<li>@author yxm</li>
+<li>@date 2017-1-2<br>*/<br>@AAnnotation(color=”red”)<br>public class B {</li>
+</ul>
+<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">3. 使用注解类的类</div></pre></td></tr></table></figure></p>
+<p>public class AnnotationTest {<br>public static void main(String[] args) {<br>     //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码<br>    //1.获取当前的注解<br>    boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);<br>    //2.如果存在注解,则打印出注解对象<br>    if(annotationPresent){<br>        //获取注解对象<br>        AAnnotation aa = B.class.getAnnotation(AAnnotation.class);<br>        //获取注解对象中的属性<br>        System.out.println(aa.color());//red<br>    }<br>  }</p>
+<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">#### 为属性制定缺省值</div><div class="line">1. String color() default &quot;yellow&quot;;</div><div class="line">#### value属性</div><div class="line">1. String value() default &quot;yxm&quot;;</div><div class="line">2. 如果注解中有一个名称为value的属性，且你只想为此属性赋值可以省略属性名  </div><div class="line">#### 注解类的数组类型的属性</div><div class="line">int [] arrayAttr() default &#123;1,2,3&#125;; </div><div class="line">被添加的注解设置属性值：@AAnnotation(arrayAttr=&#123;2,3,4&#125;)。</div><div class="line">如果数组属性中只有一个元素，这时候属性值部分可以省略大括号。</div><div class="line">#### 枚举类型的属性</div><div class="line">EnumTest.TrafficLamp lamp() ;</div><div class="line">被添加的注解设置属性值：@AAnnotation(lamp=EnumTest.TrafficLamp.GREEN)</div><div class="line">#### 注解类型的属性</div><div class="line"> MetaAnnotation annotationAttr() default @MetaAnnotation(&quot;xxxx&quot;); </div><div class="line">被添加的注解设置属性值：@AAnnotation(annotationAttr=@MetaAnnotation(“yyy”) )</div><div class="line">可以认为上面这个@MyAnnotation是MyAnnotaion类的一个实例对象，同样的道理，可以认为上面这个@MetaAnnotation是MetaAnnotation类的一个实例对象，调用代码如下：</div><div class="line">MetaAnnotation ma =  myAnnotation.annotationAttr();</div><div class="line">System.out.println(ma.value());</div><div class="line">#### 代码示例</div></pre></td></tr></table></figure></p>
+<p>@interface MetaAnnotation{<br>      String value();<br>}  </p>
+<p>@Retention(RetentionPolicy.RUNTIME) //此注解运行到内存时才消除<br>@Target({ElementType.METHOD,ElementType.TYPE}) //此注解可修饰方法和类<br>@interface AAnnotation {<br>    String color() default “blue” ;<br>    String value();<br>    int[] arrayAttr() default {1};<br>    EnumDemo4.TrafficLamp lamp() default EnumDemo4.TrafficLamp.RED;<br>    MetaAnnotation annotationAttr() default @MetaAnnotation( “lhm”);<br>    Class clazz() default String.class;<br>}<br>//AnnotationTest2类的注解及属性<br>@AAnnotation(annotationAttr=@MetaAnnotation(“flx”),color=”red”,value=”abc”,arrayAttr={1,2,3})<br>public class AnnotationTest2 {<br>    @AAnnotation(“xyz”)  //main方法的注解的属性value=”xyz”<br>    public static void main(String[] args) {<br>        if(AnnotationTest2.class.isAnnotationPresent(AAnnotation. class)){<br>            AAnnotation aa = AnnotationTest2.class .getAnnotation(AAnnotation.class);<br>            System. out.println(aa.color());<br>            //结果：red<br>            System. out.println(aa.arrayAttr().length);<br>            //结果：3<br>            System. out.println(aa.lamp().nextLamp().name());<br>            //结果：GREEN<br>            System. out.println(aa.annotationAttr().value());<br>            //结果：flx<br>            System. out.println(aa.clazz());<br>            //结果：class java.lang.String<br>        }<br>    }<br>}<br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/02/注解-三-注解的属性/" class="archive-article-date">
+  	<time datetime="2017-01-02T11:42:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-注解-二-注解的定义及反射调用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/02/注解-二-注解的定义及反射调用/">注解(二)-注解的定义及反射调用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本文主要掌握：  </p>
+<ol>
+<li>注解定义</li>
+<li>注解调用<h4 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a>1.概述</h4></li>
+<li>注解就相当于你的源程序中要调用的一个类(注解本来就是一个类,一个@interface 类)，要在源程序中应用某个注解,得先准备好这个注解类,就像你要调用某个类,得先开发好这个类。<h4 id="1-注解的应用结构图"><a href="#1-注解的应用结构图" class="headerlink" title="1.注解的应用结构图"></a>1.注解的应用结构图</h4><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/51.png" alt="注解的应用结构图"></li>
+</ol>
+<h4 id="2-注解实例"><a href="#2-注解实例" class="headerlink" title="2.注解实例"></a>2.注解实例</h4><h6 id="1-定义注解"><a href="#1-定义注解" class="headerlink" title="1.定义注解"></a>1.定义注解</h6><p>@interface就是代表一个注解类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public @interface AAnnotation &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="2-应用注解的类"><a href="#2-应用注解的类" class="headerlink" title="2.应用注解的类"></a>2.应用注解的类</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@AAnnotation</div><div class="line">public class B &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="3-对应用了注解类的类进行反射操作的类"><a href="#3-对应用了注解类的类进行反射操作的类" class="headerlink" title="3.对应用了注解类的类进行反射操作的类"></a>3.对应用了注解类的类进行反射操作的类</h6><p>1.对一个类进行检查运用反射<br>2.运用 反射首先要搞到类的字节码<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) &#123;</div><div class="line">	 //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码</div><div class="line">	//1.获取当前的注解</div><div class="line">	boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);</div><div class="line">	//2.如果存在注解,则打印出注解对象</div><div class="line">	if(annotationPresent)&#123;</div><div class="line">		AAnnotation aa = B.class.getAnnotation(AAnnotation.class);</div><div class="line">		System.out.println(aa);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上没有打印结果，原因就是因为他的生命周期不在runtime时期</p>
+<h4 id="3-注解生命周期-元注解：Retention"><a href="#3-注解生命周期-元注解：Retention" class="headerlink" title="3.注解生命周期(元注解：Retention)"></a>3.注解生命周期(元注解：Retention)</h4><h6 id="1-Retention"><a href="#1-Retention" class="headerlink" title="1.@Retention"></a>1.@Retention</h6><ol>
+<li>在以上注解上加上@Retention(RetentionPolicy.RUNTIME)<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">public @interface AAnnotation &#123;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>运行以下类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) &#123;</div><div class="line">	 //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码</div><div class="line">	//1.获取当前的注解</div><div class="line">	boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);</div><div class="line">	//2.如果存在注解,则打印出注解对象</div><div class="line">	if(annotationPresent)&#123;</div><div class="line">		AAnnotation aa = B.class.getAnnotation(AAnnotation.class);</div><div class="line">		System.out.println(aa);</div><div class="line">	&#125;</div><div class="line">  &#125;</div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>以上输出：@com.yxm.annotation.AAnnotation()</p>
+<ol>
+<li>@Retention(RetentionPolicy.RUNTIME)表示告诉虚拟机注解一直保存到运行期间。</li>
+<li>@Retention元注解取值三种:<br>1.RetentionPolicy.SOURCE,RetentionPolicy.CLASS,RetentionPolicy.RUNTIME：分别对应:java源文件–&gt;class文件–&gt;内存中的字节码<h4 id="4-注解目标-元注解：Target"><a href="#4-注解目标-元注解：Target" class="headerlink" title="4.注解目标(元注解：Target)"></a>4.注解目标(元注解：Target)</h4>Target的默认值为任何元素,设置Target等于ElementType.METHOD,原来加在类上的注解就报错了,改用数组方式设置{ElementType.METHOD,ElementType.TYPE}就可以了，TYPE代表java中所有类型,包括类,接口等  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/02/注解-二-注解的定义及反射调用/" class="archive-article-date">
+  	<time datetime="2017-01-02T06:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-注解-一-了解注解" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/02/注解-一-了解注解/">注解(一)-了解注解</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="了解注解"><a href="#了解注解" class="headerlink" title="了解注解"></a>了解注解</h4><h6 id="1-SuppressWarnings实例"><a href="#1-SuppressWarnings实例" class="headerlink" title="1.SuppressWarnings实例"></a>1.SuppressWarnings实例</h6><p>在myecipse写如下代码会出现警告：The method runFinalizersOnExit(boolean) from the type System is deprecated说明这是一个过时的类<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 注解基本使用</div><div class="line"> * @author yxm</div><div class="line"> * @date 2017-1-2</div><div class="line"> */</div><div class="line">public class AnnotationTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	System.runFinalizersOnExit(true);</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="2-Deprecated注解实例"><a href="#2-Deprecated注解实例" class="headerlink" title="2.@Deprecated注解实例"></a>2.@Deprecated注解实例</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">public class AnnotationTest &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	//System.runFinalizersOnExit(true);</div><div class="line">	AnnotationTest.sayHello();</div><div class="line">  &#125;</div><div class="line">  //我们写一个方法sayHello,但是此方法已经不能满足当今需求，但是前面版本的运用人员确实用到了 这个类，如果我们随便删掉，将会</div><div class="line">  //给前面运用人员给出错误提示，我们为了不给前期人员给出错误，有告诫后面人员，这已经过时，所以我们加上一个注解Deprecated</div><div class="line">  @Deprecated</div><div class="line">  public static void sayHello()&#123;</div><div class="line">	  System.out.println(&quot;hello world!&quot;);</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="3-Override注解实例"><a href="#3-Override注解实例" class="headerlink" title="3.@Override注解实例"></a>3.@Override注解实例</h6><p>当我们需要判断两个对象相等时候,需要重写父类的equals方法，有时候虽然已经重写,但是依旧不起作用，一般是因为没有加verride注解</p>
+<h6 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a>4.总结</h6><ol>
+<li>一个注解就是一个类。用一个注解相当于创建了一个实例对象。</li>
+<li>注解是告诉编译器忽略一些编译警告。</li>
+<li>SuppressWarnings，Deprecated，Override是javase中常用注解。</li>
+<li>注解相当于一种标记,在程序中加了注解就等于为程序打上了某种标记,没加,则等于没有某种标志,javac编译器,开发工具和其他程序可以用反射来了解你的类及各种元素上有无何种标记,看你有什么标记,就去干相应的事。标记可以加在包,类,字段,方法,方法的参数以及局部变量上。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/02/注解-一-了解注解/" class="archive-article-date">
+  	<time datetime="2017-01-02T06:10:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-BeanUtils操作javaBean" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/12/26/BeanUtils操作javaBean/">BeanUtils操作javaBean</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>对javaBean的操作一般是apache提供了专门的工具类对其进行操作那就是beanUtils工具类，</li>
+<li>BeanUtils具有强大的功能，能给bean的属性及对象复制，并且能自动进行类型转换。</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-概述"><a href="#1-概述" class="headerlink" title="1.概述"></a>1.概述</h6><ol>
+<li>BeanUtils工具由Apache软件基金组织编写，提供给我们使用，主要解决的问题是：把对象的属性数据封装到对象中。在整个J2EE的编程过程中，我们经常会从各种配置文件中读取相应的数据，需要明白的一点是从配置文件中读取到的数据都是String，但是很显然我们的应用程序中不仅仅有String一种数据类型，比如：基本数据类型（int、double、char、float等），还有自定义数据类型（引用数据类型）</li>
+<li>使用其提供的BeanUtils工具，具体的说只需要知道其中的两个方法就能实现类型的转换，很简单，降低了编程的难度。<h6 id="2-导包"><a href="#2-导包" class="headerlink" title="2.导包"></a>2.导包</h6></li>
+<li>想使用别人开发的工具必须将其jar包导入到程序中，但是BeanUtils包存对另外一个软件包的依赖，下面将具体的显示jar包的名字<br>commons-beanutils.jar<br>commons-logging.jar<br>在开始编写具体的代码之前，请将source导入到程序中，否则将不能生成正确的重载函数，只需要使用吧Attach Source，将jar包（使用外部文件的方式导入，不要使用外部文件夹的方式导入）导入即可<h6 id="3-使用"><a href="#3-使用" class="headerlink" title="3.使用"></a>3.使用</h6>Beanutils工具在使用时几乎只用到以下几个方法。  </li>
+<li>BeanUtils.setProperty(bean, name, value);其中bean是指你将要设置的对象，name指的是将要设置的属性（写成”属性名”）,value（从配置文件中读取到到的字符串值）</li>
+<li>BeanUtils。copyProperties(bean, name, value)，和上面的方法是完全一样的。使用哪个都可以</li>
+<li>ConvertUtils.register(Converter converter , ..)，当需要将String数据转换成引用数据类型（自定义数据类型时），需要使用此方法实现转换。  </li>
+<li>BeanUtils.populate(bean,Map)，其中Map中的key必须与目标对象中的属性名相同，否则不能实现拷贝。  </li>
+<li>BeanUtils.copyProperties(newObject,oldObject)，实现对象的拷贝  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/12/26/BeanUtils操作javaBean/" class="archive-article-date">
+  	<time datetime="2016-12-26T14:35:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-26</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javaSE/">javaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java/">java</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java反射-十三-内省" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -545,227 +825,6 @@
 
 
   
-    <article id="post-g" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/22/g/">g</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/22/g/" class="archive-article-date">
-  	<time datetime="2016-12-21T16:03:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-22</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="w-Incompatibile-SockJS-Main-site-uses-1-0-3-the-iframe-1-0-0" class="article article-type-w" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/21/Incompatibile-SockJS-Main-site-uses-1-0-3-the-iframe-1-0-0/">Incompatibile SockJS! Main site uses: 1.0.3, the iframe: 1.0.0</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在做im客服时,在ie10下实现软电话状态传递给另一个工程下的服务器时候，由于websocket不可用，所以为了兼容ssm框架，所以就是用了sockjs-1.0.0以下版本，sockjs-1.0.3或者sockjs-1.1.1,但是出现了以下错误</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-错误"><a href="#1-错误" class="headerlink" title="1.错误"></a>1.错误</h6><ol>
-<li>错误一<br>SockJS on IE9 - getting ERROR - Incompatibile SockJS! Main site uses: “1.0.3”, the iframe: “1.0.0” </li>
-<li>错误2<br>在sockjs-1.0.0以下版本时候压根就连接不上服务器，到达不了websocket的拦截器。</li>
-</ol>
-<h6 id="2-解决办法"><a href="#2-解决办法" class="headerlink" title="2.解决办法"></a>2.解决办法</h6><ol>
-<li>解决一<br>Resolution was in the error message, so changed the SockJS version from 1.0.3 to 1.0.0<br><a href="http://www.bootcdn.cn/sockjs-client/" target="_blank" rel="external">下载地址1：</a><br><a href="https://github.com/startshineye/common-js">下载地址2:</a></li>
-<li>解决2<br>将版本变成sockjs-1.0.0</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/21/Incompatibile-SockJS-Main-site-uses-1-0-3-the-iframe-1-0-0/" class="archive-article-date">
-  	<time datetime="2016-12-21T15:52:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/im/">im</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-IE下SCRIPT5009-“JSON”未定义" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/21/IE下SCRIPT5009-“JSON”未定义/">IE下SCRIPT5009: “JSON”未定义</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在做im客服时,在ie10下实现软电话状态传递给另一个工程下的服务器时候，由于websocket不可用，所以为了兼容ssm框架，所以就是用了sockjs,但是出现了以下错误</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-错误"><a href="#1-错误" class="headerlink" title="1.错误"></a>1.错误</h6><p>IE10下SCRIPT5009: “JSON”未定义</p>
-<h6 id="2-解决"><a href="#2-解决" class="headerlink" title="2.解决"></a>2.解决</h6><p>页面引入json2.js<br><a href="http://www.json.org/" target="_blank" rel="external">下载1：官网</a><br><a href="https://github.com/startshineye/common-js">下载2：github</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/21/IE下SCRIPT5009-“JSON”未定义/" class="archive-article-date">
-  	<time datetime="2016-12-21T15:33:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/IE问题/">IE问题</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/im/">im</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-jQuery的append在ie8下兼容问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/21/jQuery的append在ie8下兼容问题/">jQuery的append在ie8下兼容问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="jQuery的append在ie8下兼容问题"><a href="#jQuery的append在ie8下兼容问题" class="headerlink" title="jQuery的append在ie8下兼容问题"></a>jQuery的append在ie8下兼容问题</h4><p>在做多媒体im聊天客服时候在ie8下append总结不能添加，后来查阅资料后总结如下。</p>
-<h6 id="1-例子"><a href="#1-例子" class="headerlink" title="1.例子"></a>1.例子</h6><p>错误：<br>var htmlStr=”<div>“<br>$(“#id”).append(“htmlStr”);<br>更正：<br>var htmlStr=”<div></div>“<br>$(“#id”).append(“htmlStr”);</div></p>
-<h6 id="2-总结"><a href="#2-总结" class="headerlink" title="2.总结"></a>2.总结</h6><p>ie对动态append的内容有要求，需要将一个具有完整意义的html一起append到代码中</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/21/jQuery的append在ie8下兼容问题/" class="archive-article-date">
-  	<time datetime="2016-12-21T13:06:17.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/jQuery/">jQuery</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/34/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="page-number" href="/page/34/">34</a><span class="page-number current">35</span><a class="page-number" href="/page/36/">36</a><a class="page-number" href="/page/37/">37</a><span class="space">&hellip;</span><a class="page-number" href="/page/44/">44</a><a class="extend next" rel="next" href="/page/36/">Next &raquo;</a>
@@ -831,7 +890,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.22px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 10px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10px;">c</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 10.56px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
