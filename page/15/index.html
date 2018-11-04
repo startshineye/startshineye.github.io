@@ -152,6 +152,124 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-29-vue-loader" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/24/vue-29-vue-loader/">vue(29)-vue-loader</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>至此,我们的vue的基本知识已经说完了,但是开发工作中大部分vue都不是这样用的,而是使用vue-loader  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1.基本概念"></a>1.基本概念</h5><ol>
+<li><p>vue-loader:其实我们还听说过其他loader:比如:css-loader,url-loader,html-loader…</p>
+</li>
+<li><p>还有我们经常熟悉的webpack,webpack现如今是比较火的,很多开源的框架都是基于他来做的  </p>
+</li>
+<li><p>webpack:模块加载器,一切东西都是模块  </p>
+</li>
+<li><p>vue-loader是基于webppack    </p>
+</li>
+<li><p>我们一般都比较熟悉例如:.js,.html,.css…文件，但是很少交过.vue文件,.vue文件浏览器是读不懂的,如果我们需要让浏览器读懂,所以我们需要使用vue-loader文件  </p>
+</li>
+<li><p>.vue文件是需要是使用vue-loader,vue-loader通过webpack编译成浏览器能懂的文件.  </p>
+</li>
+</ol>
+<ol>
+<li><p>.vue文件一般存放内容:  </p>
+<p> <template>html</template>   <style>css</style>   <script>js(平常代码,ES6代码)</script><br> //ES6代码需要通过babel-loader编译成ES5代码  </p>
+</li>
+</ol>
+<h5 id="2-搭建vue-loader"><a href="#2-搭建vue-loader" class="headerlink" title="2.搭建vue-loader"></a>2.搭建vue-loader</h5><h6 id="2-1vue-loader需要的文件准备"><a href="#2-1vue-loader需要的文件准备" class="headerlink" title="2.1vue-loader需要的文件准备"></a>2.1vue-loader需要的文件准备</h6><p>vue-loader文件是基于webpack,所以需要一个webpack.config.js文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/40.png" alt="">  </p>
+<p>package.json 用npm init –yes 生成<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/41.png" alt=""><br>其他手动生成  </p>
+<h6 id="2-2-简单配置"><a href="#2-2-简单配置" class="headerlink" title="2.2 简单配置"></a>2.2 简单配置</h6><p>vue-loader开发模式和单独通过<script> src开发是不一样的  </p>
+<p>比如在index.html中写入:</p>
+<pre><code>&lt;app&gt;&lt;/app&gt;
+</code></pre><p>app是一个组件,但是app怎么就能展示了,肯定是需要入口的。就是main.js,但是可自定义很多.js文件,那么怎样知道哪个.js是入口文件呢?则是通过webpack里面的配置.</p>
+<p>webpack简单配置如下:<br>     //module.exports声明导出模块<br>     module.exports={<br>         entry:’./main.js’,//声明入口文件<br>         output:{//出口<br>            path:_dirname,//当前路径<br>           filename:’build.js’//将App.vue里面内容统一打包成一个模块<br>          }<br>     }</p>
+<p>打包 成的build.js需要在index.html里面引入:  </p>
+<pre><code>&lt;!--引入打包文件--&gt;
+&lt;script src=&quot;build.js&quot;&gt;&lt;/script&gt;
+</code></pre><h6 id="3-main-js修改"><a href="#3-main-js修改" class="headerlink" title="3.main.js修改"></a>3.main.js修改</h6><p>引入App:</p>
+<pre><code>import App from &apos;./App.vue&apos; 
+</code></pre><p>import是ES6里面的引入方式<br>ES6：模块化开发<br>   导出模块:<br>     export default{}<br>   引入模块:<br>     import 模块名 from 地址</p>
+<h6 id="4-webpack准备"><a href="#4-webpack准备" class="headerlink" title="4.webpack准备"></a>4.webpack准备</h6><p>1.下载<br>  cnpm install webpack  -&gt;不带服务器版本<br>  cnpm install webpack-dev-server  -&gt;带服务器版本<br>  cnpm install webpack –sava-dev  -&gt;将下载的版本依赖添加到json文件 </p>
+<p>2.运行  </p>
+<p>npm run dev</p>
+<p>以上webpack已经下载,webpack的config配置文件也已经有了,正常情况下运行是在gitbash里面直接运行:<br>webpack-dev-server  </p>
+<p>热部署:<br>webpack-dev-server –inline –hot –port<br>每次这样写会累死,所以我们需要在package.json里面配置:</p>
+<pre><code>{
+  &quot;name&quot;: &quot;vue-loader-demo&quot;,
+  &quot;version&quot;: &quot;1.0.0&quot;,
+  &quot;description&quot;: &quot;&quot;,
+  &quot;main&quot;: &quot;main.js&quot;,
+  &quot;scripts&quot;: {
+    &quot;dev&quot;: &quot;webpack-dev-server --inline --hot --port 8002&quot;
+  },
+  &quot;keywords&quot;: [],
+  &quot;author&quot;: &quot;&quot;,
+  &quot;license&quot;: &quot;ISC&quot;
+}
+</code></pre><p>然后运行:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/46.png" alt=""></p>
+<p>在App.vue中加入:  </p>
+<pre><code>&lt;template&gt;
+&lt;h1&gt;welcome to vue-loader&lt;/h1&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+
+&lt;/script&gt;
+
+&lt;style&gt;
+
+&lt;/style&gt;
+</code></pre><p>从中可以知道叫我们访问:localhost:80002<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/47.png" alt=""></p>
+<p>说明我们所需要的模块不仅仅需要:webpack还需要解析App.vue</p>
+<p>App.vue   -&gt;想要变成正常代码    使用vue-loader  </p>
+<h6 id="5-vue-loader准备"><a href="#5-vue-loader准备" class="headerlink" title="5.vue-loader准备"></a>5.vue-loader准备</h6><p>App.vue   -&gt;想要变成正常代码    需要使用vue-loader  </p>
+<p>首先为了解析需要在webpack.config.js里面配置,其实webpack.config.js里面重要的不是entry,output,而是配module中的loader</p>
+<pre><code>{test:/\.vue$/,loader:&apos;vue&apos;}// \.是转义 vue$/以vue结尾,loader用vue-loader，可以省略为vue 多个用&apos;!&apos;连接 比如:vue!css
+</code></pre></script></p>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/24/vue-29-vue-loader/" class="archive-article-date">
+  	<time datetime="2017-09-24T02:48:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-28-vue-router" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1721,111 +1839,6 @@ public static void main( String[] args )
 
 
   
-    <article id="post-SpringBoot-26-SpringBoot单元测试" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/14/SpringBoot-26-SpringBoot单元测试/">SpringBoot(26)-SpringBoot单元测试</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>也许很多人写代码时候不写测试用例,但是要知道单元测试在工作是非常重要的.  </p>
-<p>重要性:  </p>
-<ol>
-<li>避免测试点的遗漏,提高测试效率  </li>
-<li>自动测试,可以在项目打包前进行测试校验  </li>
-<li>及时发现因为修改代码导致新的问题的出现，并及时解决  </li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>由于我们实际开发中大都是对业务代码进行测试,也就是Service层代码进行测试,所以以Service代码测试为例:<br>SpringBoot单元测试步骤:<br>1.加入依赖<br>2.编写测试service<br>3.编写测试类  </p>
-<h5 id="1-加入依赖"><a href="#1-加入依赖" class="headerlink" title="1.加入依赖"></a>1.加入依赖</h5><p>加入以下依赖:  </p>
-<pre><code>&lt;dependency&gt;
-        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;spring-boot-starter-test&lt;/artifactId&gt;
-        &lt;scope&gt;test&lt;/scope&gt;
-&lt;/dependency&gt;
-</code></pre><p>如果我们添加的 依赖马上没有起效,我们可以:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/13.png" alt=""></p>
-<h5 id="2-编写service"><a href="#2-编写service" class="headerlink" title="2.编写service"></a>2.编写service</h5><pre><code>import org.springframework.stereotype.Service;
-@Service
-public class HelloService {
-public String printHello(){
-    return &quot;hello&quot;;
-}
-}
-</code></pre><h5 id="3-编写测试类"><a href="#3-编写测试类" class="headerlink" title="3.编写测试类"></a>3.编写测试类</h5><pre><code>import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.SpringApplicationConfiguration;
-import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
-import org.springframework.test.context.web.WebAppConfiguration;
-import com.yxm.App;
-import com.yxm.junit.service.HelloService;
-//SpringJUnit支持，由此引入Spring-Test框架支持！
-@RunWith(SpringJUnit4ClassRunner.class)
-//指定SpringBoot工程启动工程
-@SpringApplicationConfiguration(classes = App.class)
-@WebAppConfiguration
-public class TestHelloService {
-//测试service
-//@Autowired
-@Autowired
-private HelloService service;
-@Test
-public void testPrintHello(){
-    Assert.assertEquals(&quot;hello&quot;, service.printHello());
-}
-}
-</code></pre><p>右键—Run As – Junit Test:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/14.png" alt="">  </p>
-<h5 id="4-Junit基本注解介绍"><a href="#4-Junit基本注解介绍" class="headerlink" title="4. Junit基本注解介绍"></a>4. Junit基本注解介绍</h5><p>//在所有测试方法前执行一次，一般在其中写上整体初始化的代码<br>@BeforeClass</p>
-<p>//在所有测试方法后执行一次，一般在其中写上销毁和释放资源的代码<br>@AfterClass</p>
-<p>//在每个测试方法前执行，一般用来初始化方法（比如我们在测试别的方法时，类中与其他测试方法共享的值已经被改变，为了保证测试结果的有效性，我们会在@Before注解的方法中重置数据）<br>@Before</p>
-<p>//在每个测试方法后执行，在方法执行完成后要做的事情<br>@After</p>
-<p>// 测试方法执行超过1000毫秒后算超时，测试将失败<br>@Test(timeout = 1000)</p>
-<p>// 测试方法期望得到的异常类，如果方法执行没有抛出指定的异常，则测试失败<br>@Test(expected = Exception.class)</p>
-<p>// 执行测试时将忽略掉此方法，如果用于修饰类，则忽略整个类<br>@Ignore(“not ready yet”) </p>
-<p>@Test</p>
-<p>@RunWith </p>
-<p>在JUnit中有很多个Runner，他们负责调用你的测试代码，每一个Runner都有各自的特殊功能，你要根据需要选择不同的Runner来运行你的测试代码。 </p>
-<p>如果我们只是简单的做普通Java测试，不涉及Spring Web项目，你可以省略@RunWith注解，这样系统会自动使用默认Runner来运行你的代码</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/14/SpringBoot-26-SpringBoot单元测试/" class="archive-article-date">
-  	<time datetime="2017-09-14T13:50:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/14/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="page-number current">15</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="space">&hellip;</span><a class="page-number" href="/page/45/">45</a><a class="extend next" rel="next" href="/page/16/">Next &raquo;</a>
@@ -1891,7 +1904,7 @@ public void testPrintHello(){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/爬虫/" style="font-size: 10px;">爬虫</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/爬虫/" style="font-size: 10.56px;">爬虫</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
