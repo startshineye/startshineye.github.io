@@ -152,6 +152,133 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring验证的错误-BindingResult" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2016/10/31/Spring验证的错误-BindingResult/">Spring验证的错误-BindingResult</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p><img src="http://p1.bqimg.com/576993/5c03b9a9e3abd3f1.png" alt="Markdown">  </p>
+<h3 id="SpingjavaBindingResultvalid验证"><a href="#SpingjavaBindingResultvalid验证" class="headerlink" title="SpingjavaBindingResultvalid验证"></a>SpingjavaBindingResultvalid验证</h3><p>本文引用<br>“<a href="http://zyjustin9.iteye.com/blog/2002606" target="_blank" rel="external">http://zyjustin9.iteye.com/blog/2002606</a>“;<br>最近做的一个项目使用了 Spring MVC3， 其中验证也是使用Spring的 validate 框架， 但不是全部。<br>我们 只是使用了org.springframework.validation.Errors， org.springframework.validation.BindingResult 来将验证错误信息返回到JSP页面。因为Spring提供了<form:errors>标签来显示BindingResult对象里的错误信 息， 并且这个验证框架还支持国际化， errorCode对应的语言文字放到工程的message资源文件就好了。  </form:errors></p>
+<p>下面是一个简单的注册账户的例子：包括三个文件：JSP， AccountValidator和AccountValidator。  </p>
+<h5 id="1-首先是JSP页面：addAccount-jsp的表单"><a href="#1-首先是JSP页面：addAccount-jsp的表单" class="headerlink" title="1.首先是JSP页面：addAccount,jsp的表单"></a>1.首先是JSP页面：addAccount,jsp的表单</h5><pre><code>   &lt;form:form modelAttribute=&quot;accountVo&quot; action=&quot;${actionUrl}&quot; method=&quot;post&quot;&gt;
+        &lt;form:hidden path=&quot;id&quot;  readonly=“readonly”/&gt;
+
+       &lt;form:input path=&quot;email&quot; size=&quot;30&quot; onblur=&quot;checkEmail();&quot;/&gt; //path的值必须和accountVo这个对象的属性一致
+
+       &lt;form:errors path=&quot;email&quot; cssClass=&quot;errorMsg&quot;&gt;&lt;/form:errors&gt;  
+
+               //这里省略了表单的其他元素， 直接来提交按钮   
+
+       &lt;input type=&quot;button&quot;  id=&quot;saveAccount&quot;  value=&apos;&lt;fmt:message key=&quot;button.next&quot; /&gt;&apos; onclick=&quot;submitAccount (&apos;accountVo&apos;)&quot;/&gt;
+
+               //这里完全可以使用type=“submit”， 这里使用button可以截获提交事件， 并在提交之前先做JS层面的验证
+
+&lt;/form:form&gt;
+</code></pre><p>Note: 使用上面这些标签， 必须引入Spring 的 form标签库：&lt;%@ taglib prefix=”form” uri=”<a href="http://www.springframework.org/tags/form" target="_blank" rel="external">http://www.springframework.org/tags/form</a>“ %&gt;   </p>
+<p>大家还看到我们使用了JSTL的fmt标签库（国际化）， 这个也要引入&lt;%@ taglib uri=”<a href="http://java.sun.com/jsp/jstl/fmt" target="_blank" rel="external">http://java.sun.com/jsp/jstl/fmt</a>“ prefix=”fmt” %&gt;， 其实我们也完全可以用<form message="">标签来做国际化的。这里我还想说一个东西：readonly这个属性根本起不到只读的作用， 完全可以被修改，但是使用disable属性后，这个表单元素就无法放到accountVo这个对象并提交了   </form></p>
+<hr>
+<h5 id="2-这里是个不完整的验证类AccountValidator，-注意，我们没有实现Validator接口"><a href="#2-这里是个不完整的验证类AccountValidator，-注意，我们没有实现Validator接口" class="headerlink" title="2.这里是个不完整的验证类AccountValidator， 注意，我们没有实现Validator接口"></a>2.这里是个不完整的验证类AccountValidator， 注意，我们没有实现Validator接口</h5><pre><code>public class AccountValidator {
+ public void validate(AccountVo accountVo, Errors errors) {
+    String email = accountVo.getEmail();
+    if (!StringUtils.hasLength(email)) {
+        errors.rejectValue(&quot;email&quot;, &quot;validate.email.empty&quot;, &quot;邮箱不能为空&quot;);//这个函数有好几个重载的变体
+    }
+ }
+}
+</code></pre><p>Note: Errors这个接口有好几个rejectValue()函数， 它们是可以支持国际化的。 比如， 上面这个例子表示， 错误的字段(filed)是“email”， errorCode是“validate.email.empty”， 与资源文件对应， 第三个是defaultMessage。很多国际化当中会带有参数， rejectValue其中的一个重载函数就是rejectValue(String field, String errorCode, Object[] errorArgs, String defaultMessage)。  </p>
+<hr>
+<h5 id="3-最后是AccountController"><a href="#3-最后是AccountController" class="headerlink" title="3.最后是AccountController"></a>3.最后是AccountController</h5><p>@Controller//基于注解， 声明这是一个controller<br>@RequestMapping(value=”/account”) //表示总的路径<br>@SessionAttributes(“account”) //表示account对象将会存入  session当中， //默认情况下model.addAttribute(account)将会把account对象放入request当中， 并且属性名为“account”    </p>
+<pre><code>public class AccountFormController {
+@RequestMapping(value = &quot;/add&quot;, method = RequestMethod.POST)
+public String addAccount(@ModelAttribute(&quot;accountVo&quot;) AccountVo accountVo,
+        BindingResult result, //这里面，BindResult result必须紧跟着前面的@ModelAttribute， 否则会出错
+
+        HttpServletResponse response,
+        HttpSession session, Model model) {
+    log.debug(accountVo.toString());
+
+    if(isExist(accountVo)){
+        log.debug(&quot;Opps, 这个email已经注册过了！&quot;);
+        result.rejectValue(&quot;email&quot;, &quot;misFormat&quot;, &quot;这个email已经注册过了！&quot;);
+        return &quot;account/addAccount&quot;;
+    }else{
+        new AccountValidator().validate(accountVo, result);
+        if(result.hasErrors()){
+            log.debug(&quot;表单数据有误， 重新填写&quot;+accountVo);
+            model.addAttribute(&quot;accountVo&quot;,accountVo);//把accountVo对象返回到页面， 这样不至于表单被清空了
+            return &quot;account/addAccount&quot;;//返回到注册页面，同时，这里会自动将验证错误信息返回到JSP页面， 怎么返回呢？看后面！
+        }
+        //这里会做很多数据库的操作， 省略
+   }
+
+ } //end of login()
+
+}//end of controller
+</code></pre><p>Note: 这里需要特别注意几个问题：1.函 数形参 BindResult result 必须紧跟着前面的@ModelAttribute， 否则会出异常； 2. @ModelAttribute(“accountVo”) AccountVo accountVo, 这个参数与JSP页面的<form:form modelattribute="accountVo" action="${actionUrl}" method="post">对应</form:form></p>
+<hr>
+<h5 id="4-进阶一下，-看看验证错误信息对象是怎么传递到页面的"><a href="#4-进阶一下，-看看验证错误信息对象是怎么传递到页面的" class="headerlink" title="4.进阶一下， 看看验证错误信息对象是怎么传递到页面的"></a>4.进阶一下， 看看验证错误信息对象是怎么传递到页面的</h5><p>这 一切看起来都很完美， 但是有时候出于设计的原因， 我们不得不使用redirect， 对， 就是重定向！ 就是这个东西让我对Spring MVC有了一点不好的印象， 特别是结合了sitemesh之后。这个先打住， 咱们还是说验证错误怎么传给重定向之后的JSP页面吧。  </p>
+<p>其实也简单， 咱们可以先把错误对象放入session当中， 然后在另一个Controller里把它取出来， 然后再返回到相应的JSP页面就行了！</p>
+<p>对！但是，这里要注意了， BindingResult这个对象是自动传入JSP的， 我们不知道应该把它放在request里面呢还是session里面， 或者其他的地方， 以及属性名叫什么。这个就是我昨天晚上纠结的问题， 最后看了一下Spring 的源代码， 终于稍微清楚了一点儿。下面直接上代码，然后解释。</p>
+<pre><code> if(session.getAttribute(&quot;BindingResult.accountVo&quot;) != null){
+       //放到session和request里面， 不论attr name设置成什么都不行
+       //只有这样才能把bindingresult的错误信息传到JSP页面
+       String errorAttrName = &quot;org.springframework.validation.BindingResult.accountenterpriseVo&quot;;
+       model.addAttribute(errorAttrName, session.getAttribute(&quot;BindingResult.accountVo&quot;));
+       session.removeAttribute(&quot;BindingResult.enterpriseVo&quot;);
+}
+</code></pre><p>首先， 验证错误对象 BindingResult 必须放入 org.springframework.ui.Model 当中返回给JSP页面。放到request和session当中都没用。  </p>
+<p>第二，这个属性名是BindingResult.getClass().getName + “.” + targetName, 也就是上面那一长串， 其中targerName对应着JSP页面的表单的modelAttribute， 即<form:form modelattribute="accountVo" action="${actionUrl}" method="post">中的accountVo。 对了， 顺便说一下， accountVo同时还是表单的id， 大家可以用firefox的firebug查看页面元素。<form:error>标签也会被翻译成</form:error></form:form></p>
+<p><span class="errorMsg" id="email.errors">邮箱格式不正确!</span> //如果是英文浏览器， “邮箱格式不正确!”就会使英文版本的。</p>
+<p>好的， 就先写到这里了。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2016/10/31/Spring验证的错误-BindingResult/" class="archive-article-date">
+  	<time datetime="2016-10-31T15:36:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring/">Spring</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/技术-Spring/">技术 Spring</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Oracle" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -909,67 +1036,6 @@ where
 
 
   
-    <article id="post-CTI嵌入坐席" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/10/26/CTI嵌入坐席/">CTI嵌入坐席</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-打开虚拟机（虚拟机已安装了CTI环境）"><a href="#1-打开虚拟机（虚拟机已安装了CTI环境）" class="headerlink" title="1.打开虚拟机（虚拟机已安装了CTI环境）"></a>1.打开虚拟机（虚拟机已安装了CTI环境）</h5><p>打开虚拟机，在自动弹出弹出的CTI华为智能呼叫中心，等到下面5个指示灯都亮了以后就说明启动成功。（此时winUAP自动启动）<br><img src="http://p1.bqimg.com/576993/05857100cfcde242.png" alt="Markdown"></p>
-<h5 id="2-打开管理系统应用服务器"><a href="#2-打开管理系统应用服务器" class="headerlink" title="2.打开管理系统应用服务器"></a>2.打开管理系统应用服务器</h5><p><img src="http://p1.bqimg.com/576993/fbe784ef72875c53.png" alt="Markdown"></p>
-<h5 id="3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"><a href="#3-打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）" class="headerlink" title="3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）"></a>3.打开通用坐席程序（此步骤和web端嵌入坐席是矛盾的，两个地方只能一处登录）</h5><p>打开此时”通用坐席程序”会提示工号和密码登录，登录后坐席就在虚拟机内启动，只需要嵌入即可。（一般在本机上也会装一个通用坐席程序，进行嵌入测试）<br><img src="http://p1.bqimg.com/576993/6d4388ac87aa2e6d.png" alt="Markdown"></p>
-<h5 id="4-打开CTI-Link协议服务器"><a href="#4-打开CTI-Link协议服务器" class="headerlink" title="4.打开CTI-Link协议服务器"></a>4.打开CTI-Link协议服务器</h5><p>CTI-Link协议服务器作用就是为了接入模拟电话 所开的通道连接<br><img src="http://p1.bqimg.com/576993/81f0e99118b74934.png" alt="Markdown"></p>
-<h5 id="5-打开web程序，在web端输入坐席名称密码和分机号码"><a href="#5-打开web程序，在web端输入坐席名称密码和分机号码" class="headerlink" title="5.打开web程序，在web端输入坐席名称密码和分机号码"></a>5.打开web程序，在web端输入坐席名称密码和分机号码</h5><p><img src="http://p1.bqimg.com/576993/67129d52342d2aab.png" alt="Markdown"></p>
-<h5 id="6-进入系统，准备嵌入"><a href="#6-进入系统，准备嵌入" class="headerlink" title="6.进入系统，准备嵌入"></a>6.进入系统，准备嵌入</h5><p><img src="http://p1.bqimg.com/576993/071bd5511c6e9ee1.png" alt="Markdown"></p>
-<h5 id="7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"><a href="#7-嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号" class="headerlink" title="7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号"></a>7.嵌入成功后，虚拟机内打开坐席分机分机号和另一个客户分机号</h5><p><img src="http://p1.bqimg.com/576993/c376167dc1539149.png" alt="Markdown"></p>
-<h5 id="8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"><a href="#8-拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）" class="headerlink" title="8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）"></a>8.拨号10086呼叫，在另一台机器上接入，此时在web端应答会闪烁（说明已经嵌入成功）</h5>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/10/26/CTI嵌入坐席/" class="archive-article-date">
-  	<time datetime="2016-10-26T14:51:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-10-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CTI/">CTI</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/CTI/">CTI</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/42/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/41/">41</a><a class="page-number" href="/page/42/">42</a><span class="page-number current">43</span><a class="page-number" href="/page/44/">44</a><a class="page-number" href="/page/45/">45</a><a class="extend next" rel="next" href="/page/44/">Next &raquo;</a>
@@ -1035,7 +1101,7 @@ where
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 11.67px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 12.22px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
