@@ -152,6 +152,78 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-七-单客户端多连接" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/05/30/netty实践-七-单客户端多连接/">netty实践(七)-单客户端多连接</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-线程池"><a href="#1-线程池" class="headerlink" title="1.线程池"></a>1.线程池</h4><h6 id="1-线程池工作原理"><a href="#1-线程池工作原理" class="headerlink" title="1.线程池工作原理"></a>1.线程池工作原理</h6><p>1.原理图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/%E7%BA%BF%E7%A8%8B%E6%B1%A0%E5%8E%9F%E7%90%86%E5%9B%BE.png" alt="线程池原理图"><br>2.分析:  </p>
+<ol>
+<li>线程池工作的时候一开始会初始化几个线程</li>
+<li>单线程:每个线程会被分配一个任务队列,从任务队列里面取出一个任务,执行run方法,执行完之后又从Runnable队列里面取出一个任务,接着执行，如果没有就阻塞等待  </li>
+<li>多个单线程组成一个多线程,每次执行Executor时候,会把任务分配给多个线程中的Runnable队列  </li>
+<li>整个线程池因为有多个Runable队列,所以可以并发执行   </li>
+<li>假如一个线程池只有一个队列,所以他是串行的,所以是线程安全的  </li>
+<li>我们做单客户端多线程,怎样做到多线程维护,运用到线程池和对象组</li>
+</ol>
+<p>3.结论<br>1.一个线程(thread)+队列 = 一个单线程线程池 也就意味着任务是线性串行执行的，线程安全的<br>2.线程安全不会产生阻塞效应,使用对象组<br>3.线程不安全:会产生阻塞效应,使用对象池  </p>
+<h4 id="2-对象池"><a href="#2-对象池" class="headerlink" title="2.对象池"></a>2.对象池</h4><p>1.原理图<br><img src="https://github.com/startshineye/img/blob/master/2017/5/%E5%AF%B9%E8%B1%A1%E6%B1%A0.png" alt="对象池原理图"><br>2.分析  </p>
+<ol>
+<li>首先初始化N个对象,将其放入队列里面,当外部需要一个对象时候,从队列中获取到对象后并返回,使用完毕之后是返回到线程池  </li>
+<li>对象池通常运用到线程不安全或者在多线程并发条件下会出现阻塞,比如数据库连接池,数据库连接数释放资源情况下就是返回到线程池中</li>
+</ol>
+<h4 id="3-对象组"><a href="#3-对象组" class="headerlink" title="3.对象组"></a>3.对象组</h4><p>1.原理图<br>2.分析  </p>
+<ol>
+<li>首先初始化N个对象,将其放入数组里面,当外部需要一个对象时候,从数组中获取到对象后并返回,使用完毕之后无需将对象归还到数组中,因为获取到对象时候,并未从数组中移除,也就意味着当你使用这个对象时候,这个对象有可能被其他使用 </li>
+<li>对象池通常运用到线程安全或者在多线程并发条件下会不出现阻塞,比如数据库连接池,数据库连接数释放资源情况下就是返回到线程池中<h4 id="4-netty5下"><a href="#4-netty5下" class="headerlink" title="4.netty5下"></a>4.netty5下</h4>由于我们要并发写的对象是使用的channel,查看源码channel是线程安全的,所以我们用对象组<h6 id="1-思路"><a href="#1-思路" class="headerlink" title="1.思路"></a>1.思路</h6>1.创建客户端服务类<br>2.创建对象组,并把channel放入里面<br>3.每次获取一个channel<br>4.创建一个启动类  </li>
+</ol>
+<h6 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h6><p>1.客户端类<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div></pre></td><td class="code"><pre><div class="line">   package com.yxm.six;</div><div class="line">   import java.util.ArrayList;</div><div class="line">   import java.util.List;</div><div class="line">   import java.util.concurrent.atomic.AtomicInteger;</div><div class="line">   import io.netty.bootstrap.Bootstrap;</div><div class="line">   import io.netty.channel.Channel;</div><div class="line">   import io.netty.channel.ChannelFuture;</div><div class="line">   import io.netty.channel.ChannelInitializer;</div><div class="line">   import io.netty.channel.EventLoopGroup;</div><div class="line">   import io.netty.channel.nio.NioEventLoopGroup;</div><div class="line">   import io.netty.channel.socket.nio.NioSocketChannel;</div><div class="line">   import io.netty.handler.codec.string.StringDecoder;</div><div class="line">   import io.netty.handler.codec.string.StringEncoder;</div><div class="line">   /**</div><div class="line">    * 多线程客户端</div><div class="line">    * @author yxm</div><div class="line">    */</div><div class="line">   public class MutiClient &#123;</div><div class="line">   //客户端服务类</div><div class="line">private Bootstrap bootstrap = new Bootstrap();</div><div class="line">//对象组(channel组)</div><div class="line">private List&lt;Channel&gt; channels = new ArrayList&lt;&gt;();</div><div class="line">//原子类计数器</div><div class="line">private final AtomicInteger index = new AtomicInteger();</div><div class="line"></div><div class="line">/**</div><div class="line"> * 初始化</div><div class="line"> */</div><div class="line">public void init(int count)&#123;</div><div class="line">	//创建worker</div><div class="line">	EventLoopGroup worker = new NioEventLoopGroup();</div><div class="line">	//设置连接池</div><div class="line">	bootstrap.group(worker);</div><div class="line">	//设置工厂</div><div class="line">	bootstrap.channel(NioSocketChannel.class);</div><div class="line">	//设置管道</div><div class="line">	bootstrap.handler(new ChannelInitializer&lt;Channel&gt;()&#123;</div><div class="line"></div><div class="line">		@Override</div><div class="line">		protected void initChannel(Channel ch) throws Exception &#123;</div><div class="line">			// TODO Auto-generated method stub</div><div class="line">			ch.pipeline().addLast(new StringEncoder());</div><div class="line">			ch.pipeline().addLast(new StringDecoder());</div><div class="line">			ch.pipeline().addLast(new ClientHandler());</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	for(int i=0;i&lt;count;i++)&#123;</div><div class="line">		ChannelFuture future = bootstrap.connect(&quot;127.0.0.1&quot;,10101);</div><div class="line">	   channels.add(future.channel());</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 获取会话</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">public Channel nextChannel()&#123;</div><div class="line">	return getFirstActiveChannel(0);</div><div class="line">&#125;</div><div class="line">   </div><div class="line">public Channel getFirstActiveChannel(int count)&#123;</div><div class="line">	Channel channel = channels.get(Math.abs(index.getAndIncrement() % channels.size()));</div><div class="line">      if(!channel.isActive())&#123;</div><div class="line">   	   //重连</div><div class="line">   	   reconnect(channel);</div><div class="line">   	   if(count&gt;channels.size())&#123;</div><div class="line">   		   throw new  RuntimeException(&quot;no can use channel&quot;);</div><div class="line">   	   &#125;</div><div class="line">   	   return getFirstActiveChannel(count+1);</div><div class="line">      &#125;</div><div class="line">      return channel;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 重连</div><div class="line"> */</div><div class="line">public void reconnect(Channel channel)&#123;</div><div class="line">	synchronized (channel) &#123;</div><div class="line">	  if(channels.indexOf(channel)==-1)&#123;</div><div class="line">		  return;</div><div class="line">	  &#125;	</div><div class="line">	  ChannelFuture future = bootstrap.connect(&quot;127.0.0.1&quot;,10101);</div><div class="line">	  channels.set(channels.indexOf(channel), future.channel());</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure></p>
+<p>2.启动类:<br>    <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">  package com.yxm.six;</div><div class="line">  import java.io.BufferedReader;</div><div class="line">  import java.io.InputStreamReader;</div><div class="line"> /**</div><div class="line">  * 启动类</div><div class="line">  * @author yxm</div><div class="line">  *</div><div class="line">  */</div><div class="line">   public class Start &#123;</div><div class="line">    public static void main(String[] args) &#123;</div><div class="line"> MutiClient client = new MutiClient();</div><div class="line"> client.init(4);</div><div class="line"> BufferedReader br = new BufferedReader(new InputStreamReader(System.in));</div><div class="line"> while(true)&#123;</div><div class="line">  try &#123;</div><div class="line">	System.err.println(&quot;请输入:  &quot;);</div><div class="line">	String msg = br.readLine();</div><div class="line">	client.nextChannel().writeAndFlush(msg);</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">           e.printStackTrace();</div><div class="line">&#125;</div><div class="line"> &#125;</div><div class="line">   &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>1.启动服务类<br>2.启动客户端</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/05/30/netty实践-七-单客户端多连接/" class="archive-article-date">
+  	<time datetime="2017-05-30T14:19:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-六-netty5" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -730,73 +802,6 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 
 
   
-    <article id="post-Android-39-Android下主线程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/04/02/Android-39-Android下主线程/">Android(39)-Android下主线程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>当我们在Android(38)源码查看器下输入<a href="http://www.google.com会报以下错误" target="_blank" rel="external">http://www.google.com会报以下错误</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br>此时后台会打印出ANR异常:  </p>
-<ol>
-<li>1。ANR: Application Not Resource 应用无响应</li>
-<li>2.原因:造成上面的原因是因为:由于在主线程中进行了耗时操作</li>
-<li>3.耗时操作包括:比如连接网络,拷贝大数据,所以主线程不能阻塞。</li>
-<li>4.避免anr 可以把耗时的操作 放到子线程中 自己在创建一个线程 </li>
-<li>5，在4.0之后谷歌强制要求连接网络不能在主线程进行访问<br>规则:不管你是什么版本的手机,只要做耗时的操作(比如:连接网络 拷贝大的数据 等等)就自己开一个子线程。获取数据后想要更新ui,就使用Handler就可以了 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在主线程中耗时5秒以上实例"><a href="#1-在主线程中耗时5秒以上实例" class="headerlink" title="1.在主线程中耗时5秒以上实例"></a>1.在主线程中耗时5秒以上实例</h5></li>
-<li>1.ui<br>略(参照Android(38))</li>
-<li>2.逻辑<br>点击按钮是一个联网操作,我们应该开启资格子线程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/4.png" alt=""></li>
-<li>3.测试<br>重新部署项目:输入<a href="http://www.baidu.com" target="_blank" rel="external">http://www.baidu.com</a><br>报以下异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/1.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/2.png" alt=""><br>以上总结:只有主线程(UI线程才可以更新ui)<br>但是我们怎样去主线程更改ui呢?也就是怎样把数据从子线程传递到主线程中去,引出handler消息机制。<h5 id="2-消息机制-handler"><a href="#2-消息机制-handler" class="headerlink" title="2.消息机制(handler)"></a>2.消息机制(handler)</h5><h6 id="1-消息机制使用"><a href="#1-消息机制使用" class="headerlink" title="1.消息机制使用"></a>1.消息机制使用</h6></li>
-<li>1.使用步骤<br>【1】在主线程中定义一个Handler<br>private Handler handler = new Handler();<br>【2】使用handler会重写handler的里面的handlemessage方法<br>public void handemessage(Message msg){};<br>【3】拿着我们在主线程创建的handler去子线程发消息<br>handler.sendMessage(msg);<br>【4】handlermessage方法就会执行 在这个方法里面去更新ui</li>
-<li>2.使用<br>在主线程中定义一个handler,并写一个大括号(表示重写此类里面的方法)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/6.png" alt=""><br>在子线程中发消息,我们先定义一个message<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/5.png" alt=""><br>当一执行完sendMessage则会在主线程中的handleMessage中获取消息,更新ui<h6 id="2-消息机制原理"><a href="#2-消息机制原理" class="headerlink" title="2.消息机制原理"></a>2.消息机制原理</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/4/7.png" alt=""><br>当我们想要更改ui时候,我们的耗时操作是在子线程的,但是子线程手机不能更改ui的,所以交给了主线程</li>
-<li>1.在子线程中发送消息（比如更改ui），消息是存放在messagequeue</li>
-<li>2.Looper的作用是从messagequeue中取消息,</li>
-<li>3.handler作用是发消息,处理消息</li>
-<li>4.只要不在代码里面创建子线程,任何地方都属于主线程</li>
-</ol>
-<h6 id="3-替代handler"><a href="#3-替代handler" class="headerlink" title="3.替代handler"></a>3.替代handler</h6><p>在主线程中更改ui时候,我们用到了handler.发送消息给主线程,在主线程中获取消息,然后更改Ui,但是我们也有另一种方法就是不用再主线程更改ui，直接调用runOnUiThread()来替代handler来更改ui.</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/04/02/Android-39-Android下主线程/" class="archive-article-date">
-  	<time datetime="2017-04-02T15:16:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-04-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/24/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/23/">23</a><a class="page-number" href="/page/24/">24</a><span class="page-number current">25</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="space">&hellip;</span><a class="page-number" href="/page/45/">45</a><a class="extend next" rel="next" href="/page/26/">Next &raquo;</a>
@@ -862,7 +867,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 12.22px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 12.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     

@@ -152,6 +152,50 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-21-组件-内容分发" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/10/vue-21-组件-内容分发/">vue(21)-组件-内容分发</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/10/vue-21-组件-内容分发/" class="archive-article-date">
+  	<time datetime="2017-11-10T08:09:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-20-组件-组件之间通信" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -802,90 +846,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-11-指令-自定义指令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/30/vue-11-指令-自定义指令/">vue(11)-指令-自定义指令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>除了内置指令外，Vue.js 也提供了方法让我们可以注册自定义指令，以便封装对DOM元素的重的处理行为，提高代码复用率。</li>
-<li>本篇主要说明了如何创建、注册自定义指令，以及讲述指令的相关属性钩子函数，更深一步地了解指令在Vue.js 中起到的作用。</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-指令的注册"><a href="#1-指令的注册" class="headerlink" title="1.指令的注册"></a>1.指令的注册</h5><p>1.我们可以通过Vue.directive(id, definition) 方法注册一个全局自定义指令，接收参数id和定义对象。id 是指令的唯一标识，定义对象则是指令的相关属性及钩子函数。  </p>
-<p>2.全局指令:    </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Vue.directive(‘global-directive’, definition); // 我们暂时只注册了这个指令，并没有赋予这个指令任何功能。</div></pre></td></tr></table></figure>
-</code></pre><p>我们可以在模板中这么使用：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;div v-global-directive&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>3.自定义指令:<br>而除了全局注册指令外，我们也可以通过在组件的directives 选项注册一个局部的自定义指令。</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">var comp = Vue.extend(&#123;</div><div class="line"> directives : &#123;</div><div class="line">   &apos;localDirective&apos; : &#123;&#125;　// 可以采用驼峰式命名</div><div class="line">  &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>该指令就只能在当前组件内通过v-local-directive 的方式调用，而无法被其他组件调用。  </p>
-<h5 id="2-指令的定义对象"><a href="#2-指令的定义对象" class="headerlink" title="2.指令的定义对象"></a>2.指令的定义对象</h5><p>我们在注册指令的同时，可以传入definition 定义对象，对指令赋予一些特殊的功能。这个定义对象主要包含三个钩子函数：bind、update和unbind。</p>
-<p>bind:只被调用一次，在指令第一次绑定到元素上时调用。<br>update ：指令在bind之后以初始值为参数进行第一次调用,之后每次当绑定值发生变化时调用,update接收到的参数为newValue 和oldValue<br>unbind ：指令从元素上解绑时调用，只调用一次。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">  &lt;div id=&quot;app&quot;&gt;</div><div class="line">    &lt;div v-if=&quot;isExist&quot; v-my-directive=&quot;param&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/div&gt;</div><div class="line">Vue.directive(&apos;my-directive&apos;,&#123;</div><div class="line">    bind:function()&#123;</div><div class="line">      console.log(&apos;bind&apos;,arguments);</div><div class="line">    &#125;,</div><div class="line">    update:function(newValue,oldValue)&#123;</div><div class="line">      console.log(&apos;updata&apos;,newValue,oldValue);</div><div class="line">    &#125;,</div><div class="line">    unbind:function()&#123;</div><div class="line">        console.log(&apos;unbind&apos;,arguments);</div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        param:&apos;first&apos;,</div><div class="line">        isExist:true</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>在控制台里先后输入vm.param =’second’ 和vm.isExist = false，整体输出如下：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/41.png" alt="">  </p>
-<p>另外，如果我们只需要使用update 函数时，可以直接传入一个函数代替定义对象：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Vue.directive(&apos;my-directive&apos;, function(value) &#123;</div><div class="line"> // 该函数即为update 函数</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/42.png" alt="">  </p>
-<p>上述例子中，可以使用my-directive 指令绑定的值是data 中的param 属性。也可以直<br>接绑定字符串常量，或使用字面修饰符，但这样的话需要注意update 方法将只调用一次，因<br>为普通字符串不能响应数据变化。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;div v-my-directive=&quot;constant string&quot;/&gt;&lt;/div&gt;　// -&gt; value 为undefined，因为data 中没有对应的属性</div><div class="line">   </div><div class="line">&lt;div v-my-direcitve=&quot;&apos;constant string&apos;&quot;&gt;&lt;/div&gt; // -&gt; value 为constant string，绑定字符串需要加单引号</div><div class="line">  </div><div class="line">&lt;div v-my-directive.literal=&quot;constant string&quot;&gt;&lt;/div&gt; // -&gt; value 为constantstring，利用字面修饰符后无需使用单引号</div></pre></td></tr></table></figure>
-</code></pre><p>除了字符串外，指令也能接受对象字面量或任意合法的JavaScript 表达式。例如：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;div v-my-directive=&quot;&#123; title : &apos;Vue.js&apos;, author : &apos;You&apos;&#125;&quot; &gt;&lt;/div&gt;</div><div class="line">&lt;div v-my-directive=&quot;isExist ? &apos;yes&apos; : &apos;no&apos;&quot; &gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>注意此时对象字面量不需要用单引号括起来，这和字符串常量不一样。  </p>
-<h5 id="3-指令实例属性"><a href="#3-指令实例属性" class="headerlink" title="3.指令实例属性"></a>3.指令实例属性</h5><p>除了了解指令的生命周期外，还需要知道指令中能调用的相关属性，以便我们对相关<br>DOM 进行操作。在指令的钩子函数内，可以通过this 来调用指令实例。<br>el:指令绑定元素<br>vm:指令的上下文ViewModel，可以为new Vue() 的实例，也可以为组件实例。<br>expression:指令的表达式，不包括参数和过滤器。<br>arg:指令的参数。<br>name:指令的名字,不包括v-前缀。<br>modifiers:一个对象,包括指令的修饰符。<br>description:一个对象,包括指令的解析结果。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"> &lt;div v-my-msg:console.log=&quot;content&quot;&gt;&lt;/div&gt;</div><div class="line"> Vue.directive(&apos;my-msg&apos;,&#123;</div><div class="line">    bind:function()&#123;</div><div class="line">      console.log(&apos;bind&apos;,arguments);</div><div class="line">      console.log(&apos;el&apos;,this.el);</div><div class="line">      console.log(&apos;name&apos;,this.name);</div><div class="line">      console.log(&apos;vm&apos;,this.vm);</div><div class="line">      console.log(&apos;expression&apos;, this.expression);</div><div class="line">      console.log(&apos;arg&apos;, this.arg);</div><div class="line">      console.log(&apos;modifiers&apos;,this.modifiers);</div><div class="line">      console.log(&apos;descriptor&apos;, this.descriptor);</div><div class="line">    &#125;,</div><div class="line">    update:function(newValue,oldValue)&#123;</div><div class="line">        var keys = Object.keys(this.modifiers);</div><div class="line">        window[this.arg][keys[0]](newValue);</div><div class="line">    &#125;,</div><div class="line">    unbind:function()&#123;</div><div class="line">        console.log(&apos;unbind&apos;,arguments);</div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">       content:&apos;there is the content&apos;</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/43.png" alt="">  </p>
-<h5 id="4-元素指令"><a href="#4-元素指令" class="headerlink" title="4.元素指令"></a>4.元素指令</h5><p>元素指令是Vue.js的一种特殊指令，普通指令需要绑定在某个具体的DOM 元素上，但元素指令可以单独存在，从使用方式上看更像是一个组件，但本身内部的实例属性和钩子函数是和指令一致的。例如：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;div v-my-directive&gt;&lt;/div&gt; // -&gt; 普通指令使用方式</div><div class="line">&lt;my-directive&gt;&lt;/my-directive&gt; // -&gt; 元素指令使用方式</div></pre></td></tr></table></figure>
-</code></pre><p>元素指令的注册方式和普通指令类似，也有全局注册和局部注册两种。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">Vue.elementDirective(&apos;my-ele-directive&apos;) // 全局注册方式</div><div class="line">var Comp = Vue.extend(&#123;　 // 局部注册，仅限该组件内使用</div><div class="line">   … // 省略了其他参数</div><div class="line">  elementDirectives : &#123;</div><div class="line">      &apos;eleDirective&apos; : &#123;&#125;</div><div class="line">  &#125;</div><div class="line"> &#125;);</div><div class="line"></div><div class="line">Vue.component(&apos;comp&apos;, Comp);</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li>元素指令不能接受参数或表达式，但可以读取元素特性从而决定行为。而且当编译过程<br>中遇到一个元素指令时，Vue.js 将忽略该元素及其子元素，只有元素指令本身才可以操作该元<br>素及其子元素。</li>
-<li>Vue.js 2.0 中取消了这个特性，推荐使用组件来实现需要的业务。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/30/vue-11-指令-自定义指令/" class="archive-article-date">
-  	<time datetime="2017-10-30T11:47:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/11/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="page-number current">12</span><a class="page-number" href="/page/13/">13</a><a class="page-number" href="/page/14/">14</a><span class="space">&hellip;</span><a class="page-number" href="/page/45/">45</a><a class="extend next" rel="next" href="/page/13/">Next &raquo;</a>
@@ -951,7 +911,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 12.22px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 12.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
