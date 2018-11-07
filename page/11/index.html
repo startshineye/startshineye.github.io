@@ -152,6 +152,62 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-十四-借助spring实现业务分离" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/29/netty实践-十四-借助spring实现业务分离/">netty实践(十四)-借助spring实现业务分离</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们通过RequestDecoder,把请求进行编码,然后传递给对应的HelloHandler来处理</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">  //4.设置管道工厂</div><div class="line">bootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">	ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">	//处理消息之前对消息进行编码</div><div class="line">	pipeline.addLast(&quot;mydecoder&quot;,new MyDecoder());</div><div class="line">	//管道里面加入handler</div><div class="line">	pipeline.addLast(&quot;handler1&quot;, new HelloHander());</div><div class="line">	return pipeline;</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>在处理中我们根据其获得的模块号和命令号进行判断:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">   @Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line">	Request message = (Request)e.getMessage();</div><div class="line">	if(message.getModule() == 1)&#123;</div><div class="line">		if(message.getCmd() == 1)&#123;</div><div class="line">			FightRequest fightRequest = new FightRequest();</div><div class="line">			fightRequest.readFromBytes(message.getData());</div><div class="line">			</div><div class="line">			System.out.println(&quot;fubenId:&quot; +fightRequest.getFubenId() + &quot;   &quot; + &quot;count:&quot; + fightRequest.getCount());</div><div class="line">			</div><div class="line">			//回写数据</div><div class="line">			FightResponse fightResponse = new FightResponse();</div><div class="line">			fightResponse.setGold(9999);</div><div class="line">			</div><div class="line">			Response response = new Response();</div><div class="line">			response.setModule((short) 1);</div><div class="line">			response.setCmd((short) 1);</div><div class="line">			response.setStatusCode(StatusCode.SUCCESS);</div><div class="line">			response.setData(fightResponse.getBytes());</div><div class="line">			ctx.getChannel().write(response);</div><div class="line">		&#125;else if(message.getCmd() == 2)&#123;</div><div class="line">			</div><div class="line">		&#125;</div><div class="line">	&#125;else if (message.getModule() == 1)&#123;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>如果if-else过多将会导致代码难以维护,并且也不够美观.我们可不可以做一个东西,类似于Springmvc，在其业务的 contrller加注解,标明他的路径。实现消息解析与业务层的分析。</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">@Controller</div><div class="line">@RequestMapping(&quot;agent&quot;)</div><div class="line">public class AgentController&#123;</div><div class="line">	</div><div class="line"> @RequestMapping(&quot;/login&quot;)</div><div class="line">  public String login(HttpServletRequest request)&#123;</div><div class="line">       //处理业务</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>利用Spring生命周期接口：BeanPostProcessor,我们可以在bean初始化之前后者之后执行都可以,我们这里选择之后。</p>
+<h5 id="1-定义两个注解"><a href="#1-定义两个注解" class="headerlink" title="1.定义两个注解"></a>1.定义两个注解</h5><h5 id="2-一个扫描器"><a href="#2-一个扫描器" class="headerlink" title="2.一个扫描器"></a>2.一个扫描器</h5>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/29/netty实践-十四-借助spring实现业务分离/" class="archive-article-date">
+  	<time datetime="2017-11-29T12:30:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netty/">netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-十三-socket字节流攻击" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -737,70 +793,6 @@
 
 
   
-    <article id="post-nodejs-使用nodeJs安装vue-cli" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/11/nodejs-使用nodeJs安装vue-cli/">nodejs-使用nodeJs安装vue-cli</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li><p>Node.js 就是运行在服务端的 JavaScript，</p>
-</li>
-<li><p>Node.js是一个事件驱动I/O服务端JavaScript环境，基于Google的V8引擎，V8引擎执行Javascript的速度非常快，性能非常好。</p>
-</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.安装node,node自带npm,cmd后：npm install -g vue-cli<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/18.png" alt="">  </p>
-<p>2.安装后，检查是否安装成功（显示版本则安装成功(vue -V）注意必须是大写<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/19.png" alt="">  </p>
-<p>3.使用vue建一个项目名叫my-project（vue init webpack my-project）<br>注：vue-cli 的模板包括 webpack 和 webpack-simple,前者是比较复杂专业的项目，他的配置并不全放在根目录下的 webpack.config.js 中。<br>webpack-simple 相对简单的，它根目录下才有个 webpack.config.js。<br>项目建立过程中，有如下选择，选择NO。（该选项为使用ESLint规范你的代码，一个空格错误都将报错，不开启，可以避免不必要的麻烦）<br>ESLint规范建议开启，加强代码规范  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/20.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/21.png" alt="">  </p>
-<p>4.建立项目后,进入my-project安装项目依赖npm install<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/22.png" alt="">  </p>
-<p>5.进入项目目录文件my-project中，就可以使用vue进行开发啦<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/23.png" alt=""></p>
-<p>6.使用npm run dev，便可以打开本地服务器实时查看效果（localhost:8080）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/24.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/25.png" alt=""></p>
-<p>7.10，退出监听，可以直接Ctrl+C</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/11/11/nodejs-使用nodeJs安装vue-cli/" class="archive-article-date">
-  	<time datetime="2017-11-11T01:57:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-11</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/nodeJs/">nodeJs</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/10/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/12/">Next &raquo;</a>
@@ -866,7 +858,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 14.44px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 15px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
