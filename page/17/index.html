@@ -152,6 +152,145 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/">SpringBoot(23)-SpringBoot环境变量读取和属性对象的绑定</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-条件"><a href="#1-条件" class="headerlink" title="1.条件"></a>1.条件</h5><p>SpringBoot中想要获取环境变量读取和属性对象的绑定：<br>1)只要是Spring管理的类<br>2)实现接口 EnvironmentAware<br>3)重写方法 setEnvironment  </p>
+<p>可以在工程启动时就可以获取</p>
+<h5 id="2-代码示例"><a href="#2-代码示例" class="headerlink" title="2.代码示例"></a>2.代码示例</h5><h6 id="2-1-一般类通过实现EnvironmentAware接口"><a href="#2-1-一般类通过实现EnvironmentAware接口" class="headerlink" title="2.1 一般类通过实现EnvironmentAware接口"></a>2.1 一般类通过实现EnvironmentAware接口</h6><p>条件:<br>1)@Configuration<br>2)实现EnvironmentAware  </p>
+<pre><code>import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+@Configuration
+public class MyEnviromentAware implements EnvironmentAware{
+
+//注入application.properties的属性到指定变量中
+@Value(&quot;${spring.datasource.url}&quot;)
+private String url;
+
+//重写的方法setEnvironment是在系统启动的时间被执行
+public void setEnvironment(Environment environment) {
+
+    //打印注入的属性信息
+    System.out.println(&quot;url[&quot;+url+&quot;]&quot;);
+
+    //系统environment获取到系统属性
+    System.out.println(environment.getProperty(&quot;JAVA_HOME&quot;));
+
+    //通过enviroment获取到application.properties配置的属性.
+    System.out.println(environment.getProperty(&quot;spring.datasource.url&quot;));
+
+    //获取到前缀是&quot;spring.datasource.&quot; 的属性列表值.
+    RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(environment, &quot;spring.datasource.&quot;);
+    System.out.println(&quot;spring.datasource.url=&quot;+relaxedPropertyResolver.getProperty(&quot;url&quot;));
+  }
+}
+</code></pre><p>输出:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/9.png" alt=""></p>
+<h6 id="2-2-Controller或者Service通过实现EnvironmentAware接口"><a href="#2-2-Controller或者Service通过实现EnvironmentAware接口" class="headerlink" title="2.2 Controller或者Service通过实现EnvironmentAware接口"></a>2.2 Controller或者Service通过实现EnvironmentAware接口</h6><p>@Controller @Service 等被Spring管理的类都支持，注意重写的方法 setEnvironment 是在系统启动的时候被执行.  </p>
+<pre><code>import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.yxm.web.entity.Hello;
+/**
+* 使用@RestController代替@controller和@ResponseBody
+* @author yxm
+*/
+@RestController
+public class HelloController implements EnvironmentAware{
+
+private String JAVA_HOME;
+
+@RequestMapping(&quot;/hello&quot;)
+public Hello hello(){
+
+    Hello hello = new  Hello();
+    hello.setId(110);
+    hello.setName(JAVA_HOME);
+    return hello;
+}
+//在程序一启动就执行
+public void setEnvironment(Environment environment) {
+    JAVA_HOME = environment.getProperty(&quot;JAVA_HOME&quot;);
+     System.out.println(&quot;Controller里获取参数  [&quot;+JAVA_HOME+&quot;]&quot;);
+ }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.png" alt=""></p>
+<h6 id="2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性"><a href="#2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性" class="headerlink" title="2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性"></a>2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性</h6><p>1.加入依赖  </p>
+<pre><code>&lt;!--spring-boot-configuration:spring boot 配置处理器; --&gt;
+ &lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+       &lt;optional&gt;true&lt;/optional&gt;
+ &lt;/dependency&gt;
+</code></pre><p>2.@ConfigurationProperties 读取application属性配置文件中的属性。</p>
+<pre><code>@Configuration
+@ConditionalOnClass(Mongo.class)
+@EnableConfigurationProperties(MongoProperties.class)
+public class MongoAutoConfiguration {
+
+@Autowired
+private MongoProperties properties;
+
+}
+</code></pre><ol>
+<li>@ConditionOnClass表明该@Configuration仅仅在一定条件下才会被加载，这里的条件是Mongo.class位于类路径上</li>
+<li>@EnableConfigurationProperties将Spring Boot的配置文件（application.properties）中的spring.data.mongodb.*属性映射为MongoProperties并注入到MongoAutoConfiguration中。</li>
+<li><p>@ConditionalOnMissingBean说明Spring Boot仅仅在当前上下文中不存在Mongo对象时，才会实例化一个Bean。这个逻辑也体现了Spring Boot的另外一个特性——自定义的Bean优先于框架的默认配置，我们如果显式的在业务代码中定义了一个Mongo对象，那么Spring Boot就不再创建。</p>
+<p> @ConfigurationProperties(prefix = “spring.data.mongodb”)<br> public class MongoProperties {</p>
+<p> private String host;<br> privateint port = DBPort.PORT;<br> private String uri = “mongodb://localhost/test”;<br> private String database;</p>
+<p> // … getters/ setters omitted<br> }</p>
+</li>
+</ol>
+<p>它就是以spring.data.mongodb作为前缀的属性，然后通过名字直接映射为对象的属性，同时还包含了一些默认值。如果不配置，那么mongo.uri就是mongodb://localhost/test。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/" class="archive-article-date">
+  	<time datetime="2017-09-12T04:59:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-jeecg-3-openwindow加载数据后操作数据后关闭窗口" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1325,141 +1464,9 @@ vm.$watch(&quot;a&quot;,function(){
 
 
   
-    <article id="post-vue-21-指令-自定义指令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-21-指令-自定义指令/">vue(21)-指令-自定义指令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>例如:v-text,v-for,v-html这些都是vue自带的指令,但是有时候也许自带指令不够时候我们需要自定义指令</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>自定义指令运用类的方法:Vue.directive()  </p>
-<pre><code>Vue.directive(指令名称,function(){
-
-});
-</code></pre><p>调用指令名称:在指令名称前面加上’v-‘  比如：red指令 则调用时候为:v-red  </p>
-<h5 id="1-改变背景"><a href="#1-改变背景" class="headerlink" title="1.改变背景"></a>1.改变背景</h5><p>1.指令无参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   &lt;span v-red&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(){
-    this.el.style.background=&quot;red&quot;;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.png" alt="">  </p>
-<p>2.指令传参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-   &lt;span v-red=&quot;a&quot;&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(val){
-    this.el.style.background=val;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         a:&quot;blue&quot;,
-         msg:&quot;hello world&quot;
-
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.gif" alt=""></p>
-<h5 id="2-拖拽"><a href="#2-拖拽" class="headerlink" title="2.拖拽"></a>2.拖拽</h5><pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;div v-drag :style=&quot;{width:&apos;100px&apos;,height:&apos;100px&apos;,background:&apos;yellow&apos;,position:&apos;absolute&apos;,right:0,top:0}&quot;&gt;
-
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;drag&quot;,function(){
-    var oDiv = this.el;
-    oDiv.onmousedown=function(ev){
-        var disX = ev.clientX-oDiv.offsetLeft;
-        var disY = ev.clientY-oDiv.offsetTop;
-
-        document.onmousemove=function(ev){
-            var l = ev.clientX-disX;
-            var t = ev.clientY-disY;
-            oDiv.style.left=l+&apos;px&apos;;
-            oDiv.style.top=t+&apos;px&apos;;
-        };
-        document.onmouseup=function(){
-            document.onmousemove=null;
-            document.onmouseup=null;
-        }
-    }
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-21-指令-自定义指令/" class="archive-article-date">
-  	<time datetime="2017-09-02T08:08:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/45/">45</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
     </nav>
   
 
@@ -1522,7 +1529,7 @@ Vue.directive(&quot;drag&quot;,function(){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15.26px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.37px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.89px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 13.68px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 11.05px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.37px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 13.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
