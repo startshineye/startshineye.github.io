@@ -152,6 +152,103 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-10-利用MyBatis生成器自动生成实体类-DAO接口和Mapping映射文件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/20/zyzx-10-利用MyBatis生成器自动生成实体类-DAO接口和Mapping映射文件/">zyzx(10)-利用MyBatis生成器自动生成实体类,DAO接口和Mapping映射文件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-添加学生表"><a href="#1-添加学生表" class="headerlink" title="1.添加学生表"></a>1.添加学生表</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/19.png" alt=""></p>
+<h5 id="2-添加几个文件"><a href="#2-添加几个文件" class="headerlink" title="2.添加几个文件"></a>2.添加几个文件</h5><ol>
+<li>mybatis-generator-core-1.3.5.jar 下载地址：<a href="https://github.com/mybatis/generator/releases">https://github.com/mybatis/generator/releases</a>  </li>
+<li>msyql-connector-java-5.1.30.jar</li>
+</ol>
+<h5 id="3-配置generatorConfig-xml"><a href="#3-配置generatorConfig-xml" class="headerlink" title="3.配置generatorConfig.xml"></a>3.配置generatorConfig.xml</h5><pre><code>&lt;?xml version=&quot;1.0&quot; encoding=&quot;UTF-8&quot;?&gt;    
+&lt;!DOCTYPE generatorConfiguration    
+ PUBLIC &quot;-//mybatis.org//DTD MyBatis Generator Configuration 1.0//EN&quot;    
+ &quot;http://mybatis.org/dtd/mybatis-generator-config_1_0.dtd&quot;&gt;    
+&lt;generatorConfiguration&gt;    
+&lt;!-- 数据库驱动--&gt;    
+&lt;classPathEntry  location=&quot;mysql-connector-java-5.1.30.jar&quot;/&gt;    
+&lt;context id=&quot;DB2Tables&quot;  targetRuntime=&quot;MyBatis3&quot;&gt;    
+    &lt;commentGenerator&gt;    
+        &lt;property name=&quot;suppressDate&quot; value=&quot;true&quot;/&gt;    
+        &lt;!-- 是否去除自动生成的注释 true：是 ： false:否 --&gt;    
+        &lt;property name=&quot;suppressAllComments&quot; value=&quot;true&quot;/&gt;    
+    &lt;/commentGenerator&gt;    
+    &lt;!--数据库链接URL，用户名、密码 --&gt;    
+    &lt;jdbcConnection driverClass=&quot;com.mysql.jdbc.Driver&quot; connectionURL=&quot;jdbc:mysql://10.211.55.8/bigdata&quot; userId=&quot;root&quot; password=&quot;bigdata&quot;&gt;    
+    &lt;/jdbcConnection&gt;    
+    &lt;javaTypeResolver&gt;    
+        &lt;property name=&quot;forceBigDecimals&quot; value=&quot;false&quot;/&gt;    
+    &lt;/javaTypeResolver&gt;    
+    &lt;!-- 生成模型的包名和位置--&gt;    
+    &lt;javaModelGenerator targetPackage=&quot;com.xxxx.mybatis.domain&quot; targetProject=&quot;src&quot;&gt;    
+        &lt;property name=&quot;enableSubPackages&quot; value=&quot;true&quot;/&gt;    
+        &lt;property name=&quot;trimStrings&quot; value=&quot;true&quot;/&gt;    
+    &lt;/javaModelGenerator&gt;    
+    &lt;!-- 生成映射文件的包名和位置--&gt;    
+    &lt;sqlMapGenerator targetPackage=&quot;com.xxxx.mybatis.mapping&quot; targetProject=&quot;src&quot;&gt;    
+        &lt;property name=&quot;enableSubPackages&quot; value=&quot;true&quot;/&gt;    
+    &lt;/sqlMapGenerator&gt;    
+    &lt;!-- 生成DAO的包名和位置--&gt;    
+    &lt;javaClientGenerator type=&quot;XMLMAPPER&quot; targetPackage=&quot;com.xxxx.mybatis.IDao&quot; targetProject=&quot;src&quot;&gt;    
+        &lt;property name=&quot;enableSubPackages&quot; value=&quot;true&quot;/&gt;    
+    &lt;/javaClientGenerator&gt;    
+    &lt;!-- 要生成的表 tableName是数据库中的表名或视图名 domainObjectName是实体类名--&gt;    
+    &lt;table tableName=&quot;enterprise&quot; domainObjectName=&quot;Enterprise&quot; enableCountByExample=&quot;false&quot; enableUpdateByExample=&quot;false&quot; enableDeleteByExample=&quot;false&quot; enableSelectByExample=&quot;false&quot; selectByExampleQueryId=&quot;false&quot;&gt;&lt;/table&gt;  
+&lt;/context&gt;    
+&lt;/generatorConfiguration&gt;  
+</code></pre><h5 id="4-三个文件存放位置如下"><a href="#4-三个文件存放位置如下" class="headerlink" title="4.三个文件存放位置如下"></a>4.三个文件存放位置如下</h5><p>三个文件存放在同一文件下<br>输入以下命令:  </p>
+<pre><code>java -jar mybatis-generator-core-1.3.5.jar -configfile generatorConfig.xml -overwrite
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/18.png" alt=""></p>
+<h5 id="5-根据命令产生文件"><a href="#5-根据命令产生文件" class="headerlink" title="5.根据命令产生文件"></a>5.根据命令产生文件</h5><p>在目录下新建一个src文件夹<br>java -jar mybatis-generator-core-1.3.5.jar -configfile generatorConfig.xml -overwrite这样在生成之后，就可以在src目录下找到相应的文件夹，每个表都会对应三个文件（实体类、接口、配置文件）。  </p>
+<h5 id="6-将生成文件拷贝到idea对应的项目工程中"><a href="#6-将生成文件拷贝到idea对应的项目工程中" class="headerlink" title="6.将生成文件拷贝到idea对应的项目工程中"></a>6.将生成文件拷贝到idea对应的项目工程中</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/20.png" alt="">  </p>
+<p>注意：需要将生成的.xml mapper文件拷贝到resources目录下<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/21.png" alt="">  </p>
+<h5 id="7-测试"><a href="#7-测试" class="headerlink" title="7.测试"></a>7.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/22.png" alt="">   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/04/20/zyzx-10-利用MyBatis生成器自动生成实体类-DAO接口和Mapping映射文件/" class="archive-article-date">
+  	<time datetime="2018-04-19T16:26:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-04-20</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-9-springmvc集成mybatis" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1391,181 +1488,6 @@ public void onApplicationEvent(SessionSubscribeEvent event) {
 
 
   
-    <article id="post-websocket-7-websocket实现jvm的实时监控" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/24/websocket-7-websocket实现jvm的实时监控/">websocket(7)-websocket实现jvm的实时监控</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="简介"><a href="#简介" class="headerlink" title="简介"></a>简介</h4><ol>
-<li><p>websocket结合springboot的注解Scheduled实现定时推送，使用服务端定时推送注意事项；开发简单监控JVM监控功能  </p>
-</li>
-<li><p>在controller的类方法上标注 @Scheduled(fixedRate = 3000) 表示这个方法会定时执行 fixedRate表示是多少毫秒 3000就3秒</p>
-</li>
-<li><p>需要在springboot启动类上@EnableScheduling</p>
-</li>
-<li>被注解@Scheduled标记的方法，是不能有参数，不然会报错</li>
-<li>由于只是后端推送消息给前端,前端只需要订阅就行,不需要消息路由,则controller不需要加上MessageMapping   </li>
-</ol>
-<h4 id="java"><a href="#java" class="headerlink" title="java"></a>java</h4><p>1.controller  </p>
-<pre><code>@Controller
-public class V4JvmMonitor {
-
-@Autowired
-private WebsocketService ws;
-
-@Scheduled(fixedRate=3000)
-public void sendJvmInfo(){
-    ws.sendJvmInfo();
- }
-}  
-</code></pre><p>2.service</p>
-<pre><code> public void sendJvmInfo() {
-    //可用进程数
-    int availa = Runtime.getRuntime().availableProcessors();
-    //空闲内存
-    long free = Runtime.getRuntime().freeMemory();
-    //最大内存数
-    long max = Runtime.getRuntime().maxMemory();
-
-    String content = String.format(&quot;可用进程数:%s 空闲内存:%s 最大内存数:%s&quot;,availa,free,max);
-    System.out.println(&quot;信息: &quot;+content);
-    template.convertAndSend(&quot;/monitor/jvm/info&quot;,new OutMessage(content));
-}
-</code></pre><h4 id="前端"><a href="#前端" class="headerlink" title="前端"></a>前端</h4><p>1.app.js  </p>
-<pre><code>var stompClient = null;
-function setConnected(connected) {
-$(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
-$(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
-if (connected) {
-    $(&quot;#conversation&quot;).show();
-}
-else {
-    $(&quot;#conversation&quot;).hide();
-}
-$(&quot;#greetings&quot;).html(&quot;&quot;);
-}
-
-function connect() {
-var socket = new SockJS(&apos;/websocket&apos;);
-stompClient = Stomp.over(socket);
-stompClient.connect({}, function (frame) {
-    setConnected(true);
-    console.log(&apos;Connected: &apos; + frame);
-    stompClient.subscribe(&apos;/monitor/jvm/info&apos;, function (greeting) {
-        showGreeting(JSON.parse(greeting.body).content);
-    });
-});
-}
-
-function disconnect() {
-  if (stompClient !== null) {
-    stompClient.disconnect();
-  }
-  setConnected(false);
-  console.log(&quot;Disconnected&quot;);
-}
-
-function showGreeting(message) {
-  $(&quot;#greetings&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + message + &quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
-}
-
-$(function () {
-   $(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
-    e.preventDefault();
-   });
-  $( &quot;#connect&quot; ).click(function() { connect(); });
-  $( &quot;#disconnect&quot; ).click(function() { disconnect(); });
-});
-</code></pre><p>2.index.html  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;title&gt;Hello WebSocket&lt;/title&gt;
-&lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;link href=&quot;/v4/main.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/webjars/sockjs-client/sockjs.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/webjars/stomp-websocket/stomp.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/v4/app.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;noscript&gt;&lt;h2 style=&quot;color: #ff0000&quot;&gt;Seems your browser doesn&apos;t support Javascript! Websocket relies on Javascript being
-    enabled. Please enable
-    Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
-&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
-&lt;div class=&quot;row&quot;&gt;
-    &lt;div class=&quot;col-md-6&quot;&gt;
-        &lt;form class=&quot;form-inline&quot;&gt;
-            &lt;div class=&quot;form-group&quot;&gt;
-                &lt;label for=&quot;connect&quot;&gt;WebSocket connection:&lt;/label&gt;
-                &lt;button id=&quot;connect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;Connect&lt;/button&gt;
-                &lt;button id=&quot;disconnect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot; disabled=&quot;disabled&quot;&gt;Disconnect
-                &lt;/button&gt;
-            &lt;/div&gt;
-        &lt;/form&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;row&quot;&gt;
-    &lt;div class=&quot;col-md-12&quot;&gt;
-        &lt;table id=&quot;conversation&quot; class=&quot;table table-striped&quot;&gt;
-            &lt;thead&gt;
-            &lt;tr&gt;
-                &lt;th&gt;Greetings&lt;/th&gt;
-            &lt;/tr&gt;
-            &lt;/thead&gt;
-            &lt;tbody id=&quot;greetings&quot;&gt;
-            &lt;/tbody&gt;
-        &lt;/table&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h4 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/83.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/24/websocket-7-websocket实现jvm的实时监控/" class="archive-article-date">
-  	<time datetime="2018-03-24T13:35:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -1631,7 +1553,7 @@ $(function () {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 15.56px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 16.11px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     

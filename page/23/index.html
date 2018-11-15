@@ -152,6 +152,294 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-十五-SpringBoot集成MyBatis" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/">SpringBoot(十五)-SpringBoot集成MyBatis</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Spring Boot集成MyBatis分为以下步骤:<br>1.新建maven project;<br>2.在pom.xml文件中引入相关依赖；<br>3.创建启动类App.java<br>4.在application.properties添加配置文件；<br>5.编写Demo测试类;<br>6.编写DemoMapper；<br>7.编写DemoService<br>8.编写DemoController;<br>9.加入PageHelper<br>10.获取自增长ID;  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-新建maven-project"><a href="#1-新建maven-project" class="headerlink" title="1.新建maven project;"></a>1.新建maven project;</h5><p>新建一个maven project,取名为：spring-boot-mybatis</p>
+<h5 id="2-在pom-xml文件中引入相关依赖；"><a href="#2-在pom-xml文件中引入相关依赖；" class="headerlink" title="2.在pom.xml文件中引入相关依赖；"></a>2.在pom.xml文件中引入相关依赖；</h5><p>1.基本依赖：parent,web<br>2.jdk版本号；<br>3.mysql驱动，<br>4.mybatis依赖包，<br>5.mysql分页PageHelper:</p>
+<pre><code>&lt;project xmlns=&quot;http://maven.apache.org/POM/4.0.0&quot; xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
+xsi:schemaLocation=&quot;http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd&quot;&gt;
+&lt;modelVersion&gt;4.0.0&lt;/modelVersion&gt;
+
+&lt;groupId&gt;com.yxm&lt;/groupId&gt;
+&lt;artifactId&gt;spring-boot-mybatis&lt;/artifactId&gt;
+&lt;version&gt;0.0.1-SNAPSHOT&lt;/version&gt;
+&lt;packaging&gt;jar&lt;/packaging&gt;
+
+&lt;name&gt;spring-boot-mybatis&lt;/name&gt;
+&lt;url&gt;http://maven.apache.org&lt;/url&gt;
+
+&lt;!-- spring boot parent节点，引入这个之后，在下面和spring boot相关的就不需要引入版本了; --&gt;
+&lt;parent&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-parent&lt;/artifactId&gt;
+    &lt;version&gt;1.4.1.RELEASE&lt;/version&gt;
+&lt;/parent&gt;
+
+&lt;properties&gt;
+&lt;project.build.sourceEncoding&gt;UTF-8&lt;/project.build.sourceEncoding&gt;
+&lt;!-- 指定一下jdk的版本 ，这里我们使用jdk 1.8 ,默认是1.6 --&gt;
+&lt;java.version&gt;1.8&lt;/java.version&gt;
+&lt;/properties&gt;
+
+&lt;dependencies&gt;
+ &lt;!-- web支持: 1、web mvc; 2、restful; 3、jackjson支持; 4、aop ........ --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+ &lt;!-- mysql 数据库驱动. --&gt;
+    &lt;dependency&gt;
+            &lt;groupId&gt;mysql&lt;/groupId&gt;
+            &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
+    &lt;/dependency&gt;
+
+        &lt;!--     
+        spring-boot mybatis依赖：
+
+        请不要使用1.0.0版本，因为还不支持拦截器插件，
+        1.1.1 是博主写帖子时候的版本，大家使用最新版本即可
+     --&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
+        &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
+        &lt;version&gt;1.1.1&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;!-- 
+    MyBatis提供了拦截器接口，我们可以实现自己的拦截器，
+    将其作为一个plugin装入到SqlSessionFactory中。 
+    Github上有位开发者写了一个分页插件，我觉得使用起来还可以，挺方便的。 
+    Github项目地址： https://github.com/pagehelper/Mybatis-PageHelper
+  --&gt;    
+    &lt;dependency&gt;
+        &lt;groupId&gt;com.github.pagehelper&lt;/groupId&gt;
+        &lt;artifactId&gt;pagehelper&lt;/artifactId&gt;
+        &lt;version&gt;4.1.0&lt;/version&gt;
+    &lt;/dependency&gt;    
+
+&lt;/dependencies&gt;
+&lt;/project&gt;
+</code></pre><h5 id="3-创建启动类App-java"><a href="#3-创建启动类App-java" class="headerlink" title="3.创建启动类App.java"></a>3.创建启动类App.java</h5><h5 id="4-在application-properties添加配置文件；"><a href="#4-在application-properties添加配置文件；" class="headerlink" title="4.在application.properties添加配置文件；"></a>4.在application.properties添加配置文件；</h5><pre><code>########################################################
+###datasource
+########################################################
+spring.datasource.url = jdbc:mysql://localhost:3306/test
+spring.datasource.username = root
+spring.datasource.password = root
+spring.datasource.driverClassName = com.mysql.jdbc.Driver
+spring.datasource.max-active=20
+spring.datasource.max-idle=8
+spring.datasource.min-idle=8
+spring.datasource.initial-size=10
+</code></pre><h5 id="5-编写Demo测试类"><a href="#5-编写Demo测试类" class="headerlink" title="5.编写Demo测试类;"></a>5.编写Demo测试类;</h5><pre><code>public class Demo {
+private int id;
+private String name;
+
+public int getId() {
+    return id;
+}
+
+public void setId(int id) {
+    this.id = id;
+}
+
+public String getName() {
+    return name;
+}
+
+public void setName(String name) {
+    this.name = name;
+}
+}
+</code></pre><h5 id="6-编写DemoMapper；"><a href="#6-编写DemoMapper；" class="headerlink" title="6.编写DemoMapper；"></a>6.编写DemoMapper；</h5><p>运用mybatis时候需要首先在数据库建立实体类对应的表:<br>书写三个方法:通过name获取实体,通过id获取实体,通过id获取name</p>
+<pre><code>package com.yxm.dao;
+
+import java.util.List;
+
+import org.apache.ibatis.annotations.Insert;
+import org.apache.ibatis.annotations.Options;
+import org.apache.ibatis.annotations.Select;
+
+import com.yxm.entity.Demo;
+
+public interface DemoMapper {
+
+@Select(&quot;select * from demo where name = #{name}&quot;)
+public Demo getByName(String name);
+
+@Select(&quot;select * from demo where id = #{id}&quot;)
+public Demo getById(String id);
+
+@Select(&quot;select name from demo where id = #{id}&quot;)
+public String getNameById(String id);
+
+@Select(&quot;select * from demo&quot;)
+public List&lt;Demo&gt; get();
+
+/**
+ * 保存数据.
+ */
+@Insert(&quot;insert into Demo(name) values(#{name})&quot;)
+@Options(useGeneratedKeys=true,keyProperty=&quot;id&quot;,keyColumn=&quot;id&quot;)
+public void save(Demo demo);
+}
+</code></pre><h5 id="7-编写DemoService"><a href="#7-编写DemoService" class="headerlink" title="7.编写DemoService"></a>7.编写DemoService</h5><pre><code>package com.yxm.service;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import com.yxm.dao.DemoMapper;
+import com.yxm.entity.Demo;
+
+@Service
+public class DemoService {
+
+@Autowired
+private DemoMapper demoMappper;
+
+public Demo getByName(String name){
+    return demoMappper.getByName(name);
+};
+
+public Demo getById(String id){
+    return demoMappper.getById(id);
+};
+
+public String getNameById(String id){
+    return demoMappper.getNameById(id);
+}; 
+
+public List&lt;Demo&gt; get(){
+    return demoMappper.get();
+};
+
+@Transactional//添加事务.
+public void save(Demo demo){
+    demoMappper.save(demo);
+}
+}
+</code></pre><h5 id="8-编写DemoController"><a href="#8-编写DemoController" class="headerlink" title="8.编写DemoController;"></a>8.编写DemoController;</h5><pre><code>package com.yxm.controller;
+
+import java.util.List;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.github.pagehelper.PageHelper;
+import com.yxm.entity.Demo;
+import com.yxm.service.DemoService;
+
+@RestController
+public class DemoController {
+
+@Autowired
+private DemoService demoService;
+
+@RequestMapping(&quot;/test&quot;)
+public Demo test(){
+    Demo demo = new Demo();
+    demo.setId(1);
+    demo.setName(&quot;zs&quot;);
+    return demo;
+}
+@RequestMapping(&quot;/name&quot;)
+public Demo getByName(String name){
+    return demoService.getByName(name);
+};
+
+@RequestMapping(&quot;/id&quot;)
+public Demo getById(String id){
+    return demoService.getById(id);
+};
+@RequestMapping(&quot;/getNameById&quot;)
+public String getNameById(String id){
+    return demoService.getNameById(id);
+}; 
+
+@RequestMapping(&quot;/getByPage&quot;)
+public List&lt;Demo&gt; getByPage(){
+     PageHelper.startPage(1,2);
+     return demoService.get();
+}
+
+@RequestMapping(&quot;/save&quot;)
+public Demo save(){
+    Demo demo = new Demo();
+    demo.setName(&quot;张三&quot;);
+    demoService.save(demo);
+    return demo;
+}
+}    
+</code></pre><h5 id="9-加入PageHelper"><a href="#9-加入PageHelper" class="headerlink" title="9.加入PageHelper"></a>9.加入PageHelper</h5><pre><code>@Configuration
+public class MyBatisConfiguration {
+@Bean
+public PageHelper pageHelper() {
+    System.out.println(&quot;MyBatisConfiguration.pageHelper()&quot;);
+    PageHelper pageHelper = new PageHelper();
+    Properties p = new Properties();
+    p.setProperty(&quot;offsetAsPageNum&quot;, &quot;true&quot;);
+    p.setProperty(&quot;rowBoundsWithCount&quot;, &quot;true&quot;);
+    p.setProperty(&quot;reasonable&quot;, &quot;true&quot;);
+    pageHelper.setProperties(p);
+    return pageHelper;
+}
+}
+</code></pre><h5 id="10-获取自增长ID"><a href="#10-获取自增长ID" class="headerlink" title="10.获取自增长ID;"></a>10.获取自增长ID;</h5><pre><code>@Insert(&quot;insert into Demo(name,password) values(#{name},#{password})&quot;)
+public long save(Demo name);
+</code></pre><h5 id="11-测试"><a href="#11-测试" class="headerlink" title="11.测试"></a>11.测试</h5><p>数据如图:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/26.png" alt=""><br>访问:<a href="http://localhost:8081/test/" target="_blank" rel="external">http://localhost:8081/test/</a> 输出结果:{“id”:1,”name”:”zs”}<br>访问:<a href="http://localhost:8081/name?name=zs" target="_blank" rel="external">http://localhost:8081/name?name=zs</a> 输出结果:{“id”:1,”name”:”zs”}<br>访问:<a href="http://localhost:8081/id?id=2" target="_blank" rel="external">http://localhost:8081/id?id=2</a> 输出结果:{“id”:2,”name”:”lisi”}<br>访问:<a href="http://localhost:8081/getNameById?id=3" target="_blank" rel="external">http://localhost:8081/getNameById?id=3</a> 输出结果:we<br>访问:<a href="http://localhost:8081/getByPage" target="_blank" rel="external">http://localhost:8081/getByPage</a> 输出结果:[{“id”:1,”name”:”zs”},{“id”:2,”name”:”lisi”}] </p>
+<h5 id="12-源码地址"><a href="#12-源码地址" class="headerlink" title="12 源码地址"></a>12 源码地址</h5><p><a href="https://github.com/startshineye/Spring-Boot/tree/master/spring-boot-mybatis">源码</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/22/SpringBoot-十五-SpringBoot集成MyBatis/" class="archive-article-date">
+  	<time datetime="2017-07-22T15:19:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-十四-SpringBoot添加JSP支持" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -542,60 +830,6 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
 
 
   
-    <article id="post-SpringBoot-十-第10节全局异常捕捉 (2)" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/">SpringBoot(十)-第10节全局异常捕捉</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在一个项目中,我们通常会把异常统一进行处理,在Spring Boot中如何进行统一处理异常呢？<br>步骤:<br>1.新建一个类GlobalDefaultExceptionHandler<br>2.在class注解上@ControllerAdvice<br>3.在方法上注解上@ExceptionHandler(value = Exception.class)</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-问题"><a href="#1-问题" class="headerlink" title="1.问题"></a>1.问题</h5><p>我们先来看一个实例,使用jdbcTemplate根据cat_name查询数据库信息<br>数据库中<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/19.png" alt=""><br>在前端访问,错误:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/20.png" alt=""><br>在后台出错<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/21.png" alt="">说明其实期望返回一个结果,但是出现了2个结果</p>
-<h5 id="2-建立类"><a href="#2-建立类" class="headerlink" title="2.建立类"></a>2.建立类</h5><p>正对于以上情况,我们新建一个包下的一个类:GlobalDefaultExceptionHandle</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 1、新建一个Class,这里取名为GlobalDefaultExceptionHandler</div><div class="line">   * 2、在class上添加注解，@ControllerAdvice;</div><div class="line">   * 3、在class中添加一个方法</div><div class="line">   * 4、在方法上添加@ExcetionHandler拦截相应的异常信息；</div><div class="line">   * 5、如果返回的是View -- 方法的返回值是ModelAndView;</div><div class="line">   * 6、如果返回的是String或者是Json数据，那么需要在方法上添加@ResponseBody注解.</div><div class="line">   */</div><div class="line">   @ControllerAdvice</div><div class="line">   public class GlobalDefaultExceptionHandler &#123;</div><div class="line"></div><div class="line">@ExceptionHandler(value = Exception.class)</div><div class="line">@ResponseBody</div><div class="line">public String defaultErrorHandler(HttpServletRequest req, Exception e)  &#123;</div><div class="line">	//返回String</div><div class="line">	return &quot;the Server is busy,please wait a moment&quot;;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/22.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/" class="archive-article-date">
-  	<time datetime="2017-07-19T14:29:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
     <article id="post-SpringBoot-十-第10节全局异常捕捉" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -631,6 +865,60 @@ at com.sun.org.apache.xerces.internal.impl.XMLErrorReporter.reportError(XMLError
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Spring-Boot/">Spring Boot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-十-第10节全局异常捕捉 (2)" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/">SpringBoot(十)-第10节全局异常捕捉</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在一个项目中,我们通常会把异常统一进行处理,在Spring Boot中如何进行统一处理异常呢？<br>步骤:<br>1.新建一个类GlobalDefaultExceptionHandler<br>2.在class注解上@ControllerAdvice<br>3.在方法上注解上@ExceptionHandler(value = Exception.class)</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-问题"><a href="#1-问题" class="headerlink" title="1.问题"></a>1.问题</h5><p>我们先来看一个实例,使用jdbcTemplate根据cat_name查询数据库信息<br>数据库中<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/19.png" alt=""><br>在前端访问,错误:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/20.png" alt=""><br>在后台出错<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/21.png" alt="">说明其实期望返回一个结果,但是出现了2个结果</p>
+<h5 id="2-建立类"><a href="#2-建立类" class="headerlink" title="2.建立类"></a>2.建立类</h5><p>正对于以上情况,我们新建一个包下的一个类:GlobalDefaultExceptionHandle</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 1、新建一个Class,这里取名为GlobalDefaultExceptionHandler</div><div class="line">   * 2、在class上添加注解，@ControllerAdvice;</div><div class="line">   * 3、在class中添加一个方法</div><div class="line">   * 4、在方法上添加@ExcetionHandler拦截相应的异常信息；</div><div class="line">   * 5、如果返回的是View -- 方法的返回值是ModelAndView;</div><div class="line">   * 6、如果返回的是String或者是Json数据，那么需要在方法上添加@ResponseBody注解.</div><div class="line">   */</div><div class="line">   @ControllerAdvice</div><div class="line">   public class GlobalDefaultExceptionHandler &#123;</div><div class="line"></div><div class="line">@ExceptionHandler(value = Exception.class)</div><div class="line">@ResponseBody</div><div class="line">public String defaultErrorHandler(HttpServletRequest req, Exception e)  &#123;</div><div class="line">	//返回String</div><div class="line">	return &quot;the Server is busy,please wait a moment&quot;;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/22.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/19/SpringBoot-十-第10节全局异常捕捉 (2)/" class="archive-article-date">
+  	<time datetime="2017-07-19T14:29:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
 	</div>
 
       
@@ -890,64 +1178,6 @@ public Cat findByJdbcTemplate(String catName){
 
 
   
-    <article id="post-SpringBoot-七-SpringBoot-JPA-Hibernate" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/17/SpringBoot-七-SpringBoot-JPA-Hibernate/">SpringBoot(七)-SpringBoot JPA-Hibernate</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="步骤"><a href="#步骤" class="headerlink" title="步骤"></a>步骤</h4><p>1.在pom.xml添加mysql,spring-data-jpa依赖<br>2.在application.properties文件中配置mysql连接配置文件<br>3.在application.properties文件中配置JPA配置信息<br>4.编写测试例子</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-在pom-xml添加mysql-spring-data-jpa依赖"><a href="#1-在pom-xml添加mysql-spring-data-jpa依赖" class="headerlink" title="1.在pom.xml添加mysql,spring-data-jpa依赖"></a>1.在pom.xml添加mysql,spring-data-jpa依赖</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">  &lt;dependency&gt;</div><div class="line">&lt;groupId&gt;mysql&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;</div><div class="line">  &lt;/dependency&gt;</div><div class="line">  &lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;</div><div class="line">  &lt;/dependency&gt;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="2-在application-properties文件中配置mysql连接配置文件"><a href="#2-在application-properties文件中配置mysql连接配置文件" class="headerlink" title="2.在application.properties文件中配置mysql连接配置文件"></a>2.在application.properties文件中配置mysql连接配置文件</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">spring.datasource.url = jdbc:mysql://localhost:3306/test</div><div class="line">spring.datasource.username = root</div><div class="line">spring.datasource.password = root</div><div class="line">spring.datasource.driverClassName = com.mysql.jdbc.Driver</div><div class="line">spring.datasource.max-active=20</div><div class="line">spring.datasource.max-idle=8</div><div class="line">spring.datasource.min-idle=8</div><div class="line">spring.datasource.initial-size=10</div></pre></td></tr></table></figure>
-</code></pre><h5 id="3-在application-properties文件中配置JPA配置信息"><a href="#3-在application-properties文件中配置JPA配置信息" class="headerlink" title="3.在application.properties文件中配置JPA配置信息"></a>3.在application.properties文件中配置JPA配置信息</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//Specify the DBMS</div><div class="line">spring.jpa.database = MYSQL</div><div class="line">//Show or not log for each sql query</div><div class="line">spring.jpa.show-sql = true</div><div class="line">//Hibernate ddl auto (create, create-drop, update)</div><div class="line"> spring.jpa.hibernate.ddl-auto = update</div><div class="line">spring.jpa.hibernate.naming-strategy = org.hibernate.cfg.ImprovedNamingStrategy</div><div class="line">//stripped before adding them to the entity manager)</div><div class="line">spring.jpa.properties.hibernate.dialect = org.hibernate.dialect.MySQL5Dialect</div></pre></td></tr></table></figure>
-</code></pre><h5 id="4-编写测试例子"><a href="#4-编写测试例子" class="headerlink" title="4.编写测试例子"></a>4.编写测试例子</h5><h6 id="1-创建实体类Demo-如果已经存在，可以忽略"><a href="#1-创建实体类Demo-如果已经存在，可以忽略" class="headerlink" title="(1)创建实体类Demo,如果已经存在，可以忽略"></a>(1)创建实体类Demo,如果已经存在，可以忽略</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 创建了一个实体类。</div><div class="line"> * </div><div class="line"> * 如何持久化呢？</div><div class="line"> * </div><div class="line"> * 1、使用@Entity进行实体类的持久化操作，当JPA检测到我们的实体类当中有</div><div class="line"> * </div><div class="line"> * @Entity 注解的时候，会在数据库中生成对应的表结构信息。</div><div class="line"> * </div><div class="line"> * </div><div class="line"> * 如何指定主键以及主键的生成策略？</div><div class="line"> * </div><div class="line"> * 2、使用@Id指定主键.</div><div class="line"> */</div><div class="line">@Entity</div><div class="line">public class Cat &#123;</div><div class="line">	</div><div class="line">/**</div><div class="line"> * 使用@Id指定主键.</div><div class="line"> * </div><div class="line"> * 使用代码@GeneratedValue(strategy=GenerationType.AUTO)</div><div class="line"> * 指定主键的生成策略，mysql默认的是自增长。</div><div class="line"> * </div><div class="line"> */</div><div class="line">@Id @GeneratedValue(strategy=GenerationType.AUTO)</div><div class="line">private int id;//主键.</div><div class="line"></div><div class="line">private String catName;//姓名. cat_name</div><div class="line"></div><div class="line">private int catAge;//年龄. cat_age;</div><div class="line"></div><div class="line">public int getId() &#123;</div><div class="line">	return id;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setId(int id) &#123;</div><div class="line">	this.id = id;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public String getCatName() &#123;</div><div class="line">	return catName;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setCatName(String catName) &#123;</div><div class="line">	this.catName = catName;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public int getCatAge() &#123;</div><div class="line">	return catAge;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setCatAge(int catAge) &#123;</div><div class="line">	this.catAge = catAge;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-创建jpa-repository类操作持久化-CrudRepository"><a href="#2-创建jpa-repository类操作持久化-CrudRepository" class="headerlink" title="(2)创建jpa repository类操作持久化(CrudRepository)"></a>(2)创建jpa repository类操作持久化(CrudRepository)</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">public interface CatRepository extends CrudRepository&lt;Cat, Integer&gt;&#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="3-创建service类"><a href="#3-创建service类" class="headerlink" title="(3)创建service类"></a>(3)创建service类</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">   @Service</div><div class="line">   public class CatService &#123;</div><div class="line"></div><div class="line">@Resource</div><div class="line">private CatRepository catRepository;</div><div class="line"></div><div class="line">/**</div><div class="line"> * save,update ,delete 方法需要绑定事务.</div><div class="line"> * </div><div class="line"> * 使用@Transactional进行事务的绑定.</div><div class="line"> * </div><div class="line"> * @param cat</div><div class="line"> */</div><div class="line"></div><div class="line">//保存数据.</div><div class="line">@Transactional</div><div class="line">public void save(Cat cat)&#123;</div><div class="line">	catRepository.save(cat);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//删除数据》</div><div class="line">@Transactional</div><div class="line">public void delete(int id)&#123;</div><div class="line">	catRepository.delete(id);</div><div class="line">&#125;</div><div class="line"></div><div class="line">//查询数据.</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catRepository.findAll();</div><div class="line">&#125;</div><div class="line"></div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="4-创建restful请求类"><a href="#4-创建restful请求类" class="headerlink" title="(4)创建restful请求类"></a>(4)创建restful请求类</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">   @RestController</div><div class="line">@RequestMapping(&quot;/cat&quot;)</div><div class="line">public class CatController &#123;</div><div class="line">	</div><div class="line">@Resource</div><div class="line">private CatService catService;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/save&quot;)</div><div class="line">public String save()&#123;</div><div class="line">	Cat cat = new Cat();</div><div class="line">	cat.setCatName(&quot;jack&quot;);</div><div class="line">	cat.setCatAge(3);</div><div class="line">	catService.save(cat);</div><div class="line">	return &quot;save ok.&quot;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/delete&quot;)</div><div class="line">public String delete()&#123;</div><div class="line">	catService.delete(1);</div><div class="line">	return &quot;delete ok&quot;;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@RequestMapping(&quot;/getAll&quot;)</div><div class="line">public Iterable&lt;Cat&gt; getAll()&#123;</div><div class="line">	return catService.getAll();</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="5-测试"><a href="#5-测试" class="headerlink" title="(5)测试"></a>(5)测试</h6><p>在前端输入save.do,delete.do,getAll时候后台数据库执行正确<br><a href="https://github.com/startshineye/Spring-Boot/tree/master/spring-boot-hello">参考源码</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/17/SpringBoot-七-SpringBoot-JPA-Hibernate/" class="archive-article-date">
-  	<time datetime="2017-07-17T13:51:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/22/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/21/">21</a><a class="page-number" href="/page/22/">22</a><span class="page-number current">23</span><a class="page-number" href="/page/24/">24</a><a class="page-number" href="/page/25/">25</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/24/">Next &raquo;</a>
@@ -1013,7 +1243,7 @@ public Cat findByJdbcTemplate(String catName){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 15.56px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 16.11px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
