@@ -4,28 +4,36 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>自己写一个apache服务器(十八)-实现资源转发-javaServer16 | Startshineye的博客</title>
+  <title>java爬虫-12-Queue队列实现循环抓取 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
+  <meta name="description" content="前言
+之前我们爬取页面后 就是把当前页面内容给爬取了,而没有循环遍历爬取数据,这一节 我们通过Queue队列实现循环抓取
+实现功能:添加url队列,循环解析电视剧列表页和详情页(队列里面先进先出)  
+
+内容1.建立队列 存储所有url建立一个安全并且并发执行的队列  
+1private Queue urlQueue = new ConcurrentLinkedDeque();
+2.主程序中开启爬">
 <meta property="og:type" content="article">
-<meta property="og:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
-<meta property="og:url" content="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/index.html">
+<meta property="og:title" content="java爬虫-12-Queue队列实现循环抓取">
+<meta property="og:url" content="https://github.com/startshineye/2018/11/15/java爬虫-12-Queue队列实现循环抓取/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
-<meta property="og:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/e64f04f4c42322e7.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/253af750fc140865.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/da2996da681764ce.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/87b76fd935f16cff.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/dfb56fa0928cf282.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/72fe49dac1242242.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/8aac1cefef8c7b03.png">
-<meta property="og:updated_time" content="2016-12-18T03:09:48.302Z">
+<meta property="og:description" content="前言
+之前我们爬取页面后 就是把当前页面内容给爬取了,而没有循环遍历爬取数据,这一节 我们通过Queue队列实现循环抓取
+实现功能:添加url队列,循环解析电视剧列表页和详情页(队列里面先进先出)  
+
+内容1.建立队列 存储所有url建立一个安全并且并发执行的队列  
+1private Queue urlQueue = new ConcurrentLinkedDeque();
+2.主程序中开启爬">
+<meta property="og:updated_time" content="2018-11-15T05:02:37.824Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
-<meta name="twitter:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
-<meta name="twitter:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
+<meta name="twitter:title" content="java爬虫-12-Queue队列实现循环抓取">
+<meta name="twitter:description" content="前言
+之前我们爬取页面后 就是把当前页面内容给爬取了,而没有循环遍历爬取数据,这一节 我们通过Queue队列实现循环抓取
+实现功能:添加url队列,循环解析电视剧列表页和详情页(队列里面先进先出)  
+
+内容1.建立队列 存储所有url建立一个安全并且并发执行的队列  
+1private Queue urlQueue = new ConcurrentLinkedDeque();
+2.主程序中开启爬">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -161,7 +169,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-自己写一个apache服务器-十八-实现资源转发-javaServer16" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-java爬虫-12-Queue队列实现循环抓取" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -171,7 +179,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      自己写一个apache服务器(十八)-实现资源转发-javaServer16
+      java爬虫-12-Queue队列实现循环抓取
     </h1>
   
 
@@ -179,29 +187,29 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="实现资源转发-javaServer16"><a href="#实现资源转发-javaServer16" class="headerlink" title="实现资源转发-javaServer16"></a>实现资源转发-javaServer16</h4><p>我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了两个Servlet，先执行LoginServlet，然后再跳转到EmpListServlet继续执行，这个我们应该怎么做呢？<br>有人说，在LoginServlet中service方法执行结束的时候，由WebApp开发人员手动调用EmpListServlet中的service方法不就行了吗。这当然是不行的，因为Servlet对象的创建，包括Servlet对象上方法的调用，都是由Web服务器来管理的，WebApp开发人员无权干涉。那该怎么办呢？只好把这个Servlet对象上service方法的真正调用交给Web服务器来完成了。<br>那我们把这种机制定义为转发机制，转发过程中必须保证是在同一个请求当中，为了保证LoginServlet和EmpListServlet在同一个请求当中，必须保证LoginServlet和EmpListServlet共享同一个request对象和同一个response对象。<br>那就让我们的角色转变为Web服务器的开发人员，定义一个“请求转发器”类型，类名RequestDispatcherImpl，在转发器中定义转发方法，将request和response参数传递过去，如下图所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">public class RequestDispatcherImpl implements RequestDispatcher &#123;</div><div class="line">   private String uri;</div><div class="line">   </div><div class="line">   public RequestDispatcherImpl(String uri)&#123;</div><div class="line">	   this.uri=uri;</div><div class="line">   &#125;</div><div class="line">	@Override</div><div class="line">	public void forward(ServletRequest request, ServletResponse response) &#123;</div><div class="line">      if(uri.endsWith(&quot;.html&quot;) || uri.endsWith(&quot;.htm&quot;))&#123;</div><div class="line">    	  String htmlPath = uri.substring(1);</div><div class="line">    	  System.out.println(htmlPath);</div><div class="line">    	  BufferedReader br=null;</div><div class="line">    	  try &#123;</div><div class="line">    		  br=new BufferedReader(new FileReader(htmlPath));</div><div class="line">		      String temp = null;</div><div class="line">		      while((temp = br.readLine())!=null)&#123;</div><div class="line">		    	  response.getWriter().print(temp);</div><div class="line">		      &#125;</div><div class="line">    	  &#125; catch (Exception e) &#123;</div><div class="line">    		  e.printStackTrace();</div><div class="line">		  &#125;finally&#123;</div><div class="line">			  if(br!=null)&#123;//br关闭流</div><div class="line">				  try &#123;</div><div class="line">					br.close();</div><div class="line">				&#125; catch (IOException e) &#123;</div><div class="line">					e.printStackTrace();</div><div class="line">				&#125;</div><div class="line">			  &#125;</div><div class="line">		  &#125;</div><div class="line">      &#125;else&#123;</div><div class="line">    	  String s1 = uri.substring(1);</div><div class="line">    	  System.out.println(s1);</div><div class="line">    	  String webappname=&quot;&quot;;</div><div class="line">    	  if(s1.contains(&quot;/&quot;))&#123;</div><div class="line">    		  webappname=s1.split(&quot;/&quot;)[0];</div><div class="line">    	  &#125;else&#123;</div><div class="line">    		  webappname=s1;</div><div class="line">    	  &#125;</div><div class="line">    	  String servletPath = s1.substring(webappname.length());</div><div class="line">    	  if(servletPath.length()&gt;0)&#123;</div><div class="line">    		  String servletName = WebParse.servletMaps.get(webappname).get(servletPath);</div><div class="line">    	      Servlet servlet = ServletCache.get(servletName);</div><div class="line">    	      if(servlet == null)&#123;</div><div class="line">    	    	  try &#123;</div><div class="line">    	    		  servlet = (Servlet)Class.forName(servletName).newInstance();</div><div class="line">				 &#125;catch (Exception e) &#123;</div><div class="line">					 e.printStackTrace();</div><div class="line">				 &#125;</div><div class="line">    	      &#125;</div><div class="line">    	      servlet.service(request, response);</div><div class="line">    	  &#125; </div><div class="line">	  &#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>以上WEB服务器的开发人员将请求转发器开发之后，该请求转发器对象肯定要在WebApp中使用，所以SUN应该制定请求转发器接口，WebApp的开发人员应该面向该请求转发器接口编程，那么我们的角色转变为SUN公司，制定接口如下：<br><img src="http://i1.piimg.com/576993/7ee2a1666472a075.png" alt="Markdown"><br>角色转变为WEB服务器的开发人员，让请求转发器对象实现以上的请求转发器接口，代码如下所示：<br><img src="http://i1.piimg.com/576993/e64f04f4c42322e7.png" alt="Markdown"><br>请求转发器类型我们已经定义好了，但是这个对象对于WebApp的开发人员来说怎么能获取到呢？在Servlet类中采用new的方式吗？当然不行，因为对于WebApp的开发人员来说请求转发器类型是不可见的，也就是说WebApp的开发人员不知道有RequestDispatcherImpl这样一个类，他只知道RequestDispatcherImpl实现了SUN提供的RequestDispatcher接口。那怎么能获取到该转发器对象呢？对于WebApp的开发人员来说，一个Servlet类的service方法中有两个参数，一个是request，一个是response，WebApp的开发人员是可以调用request接口中的方法的，所以SUN可以在request接口中加入下面的方法：<br><img src="http://i1.piimg.com/576993/253af750fc140865.png" alt="Markdown"><br>SUN制定的request接口发生了变化，自然实现类需要进一步实现这个方法，开发角色转变为WEB服务器的开发人员，代码如下所示：<br><img src="http://i1.piimg.com/576993/da2996da681764ce.png" alt="Markdown"><br>转发器开发完毕，接下来我们测试一下是否可以正常使用，开发角色转变为WebApp的开发人员，分别开发AServlet、BServlet、testForward.html，AServlet执行然后转发到BServlet执行，BServlet执行再转发到testForward.html，代码和配置如下所示：<br><img src="http://i1.piimg.com/576993/87b76fd935f16cff.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/dfb56fa0928cf282.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/72fe49dac1242242.png" alt="Markdown"><br>启动httpserver，打开浏览器，输入以下访问地址，发送请求，测试结果如下所示：<br><img src="http://i1.piimg.com/576993/8aac1cefef8c7b03.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
-
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>之前我们爬取页面后 就是把当前页面内容给爬取了,而没有循环遍历爬取数据,这一节 我们通过Queue队列实现循环抓取</li>
+<li>实现功能:添加url队列,循环解析电视剧列表页和详情页(队列里面先进先出)  </li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-建立队列-存储所有url"><a href="#1-建立队列-存储所有url" class="headerlink" title="1.建立队列 存储所有url"></a>1.建立队列 存储所有url</h5><p>建立一个安全并且并发执行的队列  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">private Queue urlQueue = new ConcurrentLinkedDeque();</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-主程序中开启爬虫"><a href="#2-主程序中开启爬虫" class="headerlink" title="2.主程序中开启爬虫"></a>2.主程序中开启爬虫</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">  /**</div><div class="line"> * 开启一个爬虫入口</div><div class="line"> */</div><div class="line">public void startSpider()&#123;</div><div class="line">    while(true)&#123;</div><div class="line">       //从队列中提取需要解析的url</div><div class="line">        String url = urlQueue.poll();</div><div class="line"></div><div class="line">        //判断url是否为空</div><div class="line">        if(StringUtils.isNotBlank(url))&#123;</div><div class="line">            //下载</div><div class="line">            Page page = this.downloadPage(url);</div><div class="line">            //解析</div><div class="line">            this.processPage(page);</div><div class="line">            List&lt;String&gt; urlList = page.getUrlList();</div><div class="line"></div><div class="line">            //循环抓取</div><div class="line">            for(String eachUrl:urlList)&#123;</div><div class="line">                this.urlQueue.add(eachUrl);</div><div class="line">            &#125;</div><div class="line">            if(page.getUrl().startsWith(&quot;http://www.youku.com/show_page&quot;))&#123;</div><div class="line">                //存储数据</div><div class="line">                this.processPage(page);</div><div class="line">            &#125;</div><div class="line">        &#125;else&#123;</div><div class="line">            System.out.println(&quot;队列中的电视剧url解析完毕，请等待！&quot;);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-mian中调用"><a href="#2-mian中调用" class="headerlink" title="2.mian中调用"></a>2.mian中调用</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> public static void main(String[] args) &#123;</div><div class="line">    //创建对象</div><div class="line">    StartDSJ dsj = new StartDSJ();</div><div class="line"></div><div class="line">    //定义是用哪个接口下载的,这里是httpClient</div><div class="line">    dsj.setDownLoadService(new HttpClientDownLoadSevice());</div><div class="line">    dsj.setProcessService(new YOUKUProcesService());</div><div class="line">    dsj.setStoreService(new ConsoleStoreService());</div><div class="line">    //dsj.setStoreService(new HBaseStoreService());</div><div class="line"></div><div class="line">    //String url = &quot;http://www.youku.com/show_page/id_z9cd2277647d311e5b692.html?spm=a2htv.20005143.m13050845531.5~5~1~3~A&amp;from=y1.3-tv-index-2640-5143.40177.1-1&quot;;</div><div class="line">    //下载页面</div><div class="line">    String url =&quot;http://tv.youku.com/search/index/_page40177_30_cmodid_40177?spm=a2htv.20005143.m13050845531.5%212~5~1~3%215~A&quot;;</div><div class="line"></div><div class="line">    //设置起始地址</div><div class="line">    dsj.urlQueue.add(url);</div><div class="line">    dsj.startSpider();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre>
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" class="archive-article-date">
-  	<time datetime="2016-12-18T02:06:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+      <a href="/2018/11/15/java爬虫-12-Queue队列实现循环抓取/" class="archive-article-date">
+  	<time datetime="2018-11-15T03:54:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-15</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
 	</div>
 
       
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
 
       <div class="clearfix"></div>
     </div>
@@ -211,18 +219,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/18/java反射-一-java反射-Class类/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          java反射-Class类
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</div>
+    <a href="/2018/11/07/java爬虫-11-解析所有分页url并优化解析实现类/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">java爬虫-11-解析所有分页url并优化解析实现类</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -268,7 +267,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="自己写一个apache服务器-十八-实现资源转发-javaServer16" data-title="自己写一个apache服务器(十八)-实现资源转发-javaServer16" data-url="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/"></div>
+	<div class="ds-thread" data-thread-key="java爬虫-12-Queue队列实现循环抓取" data-title="java爬虫-12-Queue队列实现循环抓取" data-url="https://github.com/startshineye/2018/11/15/java爬虫-12-Queue队列实现循环抓取/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
