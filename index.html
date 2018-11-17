@@ -152,6 +152,101 @@
       <div class="body-wrap">
         
   
+    <article id="post-java-爬虫-16-定时启动爬虫项目" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/16/java-爬虫-16-定时启动爬虫项目/">java-爬虫-16-定时启动爬虫项目</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li><p>实现功能:定时添加填诗句分类url,也就是起始url,之前我们都是在程序里面写死的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/56.png" alt="">  </p>
+</li>
+<li><p>我们需要在定时时候启动爬虫项目,爬虫项目在队列中有url时候就爬,没有url的时候就停止  </p>
+</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-定时器"><a href="#1-定时器" class="headerlink" title="1.定时器"></a>1.定时器</h5><p>定时任务一般可以有以下几类方法:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/57.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/58.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/59.png" alt="">  </p>
+<p>我们选择使用:quartz  </p>
+<h5 id="2-新建一个task包"><a href="#2-新建一个task包" class="headerlink" title="2.新建一个task包"></a>2.新建一个task包</h5><ol>
+<li><p>1.添加quartz依赖  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">      &lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;org.quartz-scheduler&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;quartz&lt;/artifactId&gt;</div><div class="line">	&lt;version&gt;1.8.4&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.定义一个任务,并实现执行的方法  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">     /**</div><div class="line"> * 向redis添加分类url(分类url的key用RedisUtil.startkey代替)</div><div class="line"> * @author yxm</div><div class="line"> * @date 2018/11/17 13:17:20</div><div class="line"> */</div><div class="line">public class AddUrlJob implements Job &#123;</div><div class="line">    RedisUtil redisUtil = new RedisUtil();</div><div class="line">    @Override</div><div class="line">    public void execute(JobExecutionContext jobExecutionContext) throws JobExecutionException &#123;</div><div class="line">        System.out.println(&quot;===execute===start:&quot;+System.currentTimeMillis());</div><div class="line">        List&lt;String&gt; list = redisUtil.lrange(RedisUtil.startkey, 0, -1);</div><div class="line">        System.out.println(&quot;===execute===redis list&quot;+list.toString());</div><div class="line">        for(String url:list)&#123;</div><div class="line">            redisUtil.add(RedisUtil.highkey,url);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.定义一个Scheduler启动类<br>此类用于关联任务(job)和任务策略(trigger)之间关联并且启动定时任务  </p>
+</li>
+</ol>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">    /**</div><div class="line"> * 分类url定时抓取job</div><div class="line"> * @author yxm</div><div class="line"> * @date 2018/11/17 12:26:20</div><div class="line"> */</div><div class="line">public class UrlScheduler &#123;</div><div class="line">    public static void main(String[] args)&#123;</div><div class="line">        try &#123;</div><div class="line">            //获取默认调度器</div><div class="line">            Scheduler defaultScheduler = StdSchedulerFactory.getDefaultScheduler();</div><div class="line">            //开启调度器</div><div class="line">            defaultScheduler.start();</div><div class="line"></div><div class="line">            //被调度的任务</div><div class="line">            JobDetail jobDetail = new JobDetail(&quot;url-job&quot;, Scheduler.DEFAULT_GROUP, AddUrlJob.class);</div><div class="line"></div><div class="line">            //执行任务的策略</div><div class="line">            CronTrigger trigger = new CronTrigger(&quot;url-job&quot;, Scheduler.DEFAULT_GROUP, &quot;0/3 * * * * ?&quot;);</div><div class="line"></div><div class="line">            //添加调度任务</div><div class="line">            defaultScheduler.scheduleJob(jobDetail, trigger);</div><div class="line">        &#125;catch (Exception e)&#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-RedisUtil里面添加startkey-并在main中放入"><a href="#3-RedisUtil里面添加startkey-并在main中放入" class="headerlink" title="3.RedisUtil里面添加startkey,并在main中放入"></a>3.RedisUtil里面添加startkey,并在main中放入</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">     **</div><div class="line">		 * 操作redis数据库的工具类</div><div class="line">		 * @author yxm</div><div class="line">		 * @date 2018/11/15 23:04:20</div><div class="line">		 */</div><div class="line">		public class RedisUtil &#123;</div><div class="line">			/**</div><div class="line">			 * redis中高优先级</div><div class="line">			 */</div><div class="line">			public static String highkey = &quot;spider.highlevel&quot;;</div><div class="line">			/**</div><div class="line">			 * redis中低优先级</div><div class="line">			 */</div><div class="line">			public static String lowkey = &quot;spider.lowlevel&quot;;</div><div class="line">			/**</div><div class="line">			 * redis中开始key</div><div class="line">			 */</div><div class="line">			public static String startkey = &quot;spider.start&quot;;</div><div class="line">		</div><div class="line">		</div><div class="line">			JedisPool jedisPool = null;</div><div class="line">		</div><div class="line">			public RedisUtil()&#123;</div><div class="line">				JedisPoolConfig poolConfig = new JedisPoolConfig();</div><div class="line">				poolConfig.setMaxIdle(10);</div><div class="line">				poolConfig.setMaxTotal(100);</div><div class="line">				poolConfig.setMaxWaitMillis(10000);</div><div class="line">				poolConfig.setTestOnBorrow(true);</div><div class="line">				jedisPool = new JedisPool(poolConfig, &quot;127.0.0.1&quot;, 6379);</div><div class="line">			&#125;</div><div class="line">		</div><div class="line">			/**</div><div class="line">			 * 查询</div><div class="line">			 * @param key</div><div class="line">			 * @param start</div><div class="line">			 * @param end</div><div class="line">			 * @return</div><div class="line">			 */</div><div class="line">			public List&lt;String&gt; lrange(String key,int start,int end)&#123;</div><div class="line">				Jedis resource = jedisPool.getResource();</div><div class="line">				</div><div class="line">				List&lt;String&gt; list = resource.lrange(key, start, end);</div><div class="line">				jedisPool.returnResourceObject(resource);</div><div class="line">				return list;</div><div class="line">				</div><div class="line">			&#125;</div><div class="line">			/**</div><div class="line">			 * 添加</div><div class="line">			 * @param Key</div><div class="line">			 * @param url</div><div class="line">			 */</div><div class="line">			public void add(String Key, String url) &#123;</div><div class="line">				Jedis resource = jedisPool.getResource();</div><div class="line">				resource.lpush(Key, url);</div><div class="line">				jedisPool.returnResourceObject(resource);</div><div class="line">			&#125;</div><div class="line">			/**</div><div class="line">			 * 获取</div><div class="line">			 * @param key</div><div class="line">			 * @return</div><div class="line">			 */</div><div class="line">			public String poll(String key) &#123;</div><div class="line">				Jedis resource = jedisPool.getResource();</div><div class="line">				String result = resource.rpop(key);</div><div class="line">				jedisPool.returnResourceObject(resource);</div><div class="line">				return result;</div><div class="line">			&#125;</div><div class="line">		</div><div class="line">			public static void main(String[] args) &#123;</div><div class="line">				RedisUtil redisUtil = new RedisUtil();</div><div class="line">				String url = &quot;http://tv.youku.com/search/index/_page40177_1_cmodid_40177&quot;;</div><div class="line">				redisUtil.add(highkey, url);</div><div class="line">				redisUtil.add(startkey, url);</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line"></div><div class="line">    ``` </div><div class="line"></div><div class="line">##### 4.爬虫启动  </div><div class="line">在启动时候,我们通过定时任务已经获往redis里面存储了url，所以我们在StartDSJ中的main中注释掉:dsj.repositoryService.addHighLevel(url);</div></pre></td></tr></table></figure>
+
+ public static void main(String[] args) {
+    //创建对象
+    StartDSJ dsj = new StartDSJ();
+
+    //定义是用哪个接口下载的,这里是httpClient
+    dsj.setDownLoadService(new HttpClientDownLoadSevice());
+    dsj.setProcessService(new YOUKUProcesService());
+    dsj.setStoreService(new ConsoleStoreService());
+    //dsj.setStoreService(new HBaseStoreService());
+
+    //dsj.setRepositoryService(new QueueRepositoryService());
+    dsj.setRepositoryService(new RedisRepositoryService());
+    //String url = &quot;http://www.youku.com/show_page/id_z9cd2277647d311e5b692.html?spm=a2htv.20005143.m13050845531.5~5~1~3~A&amp;from=y1.3-tv-index-2640-5143.40177.1-1&quot;;
+    //下载页面
+    String url =&quot;http://tv.youku.com/search/index/_page40177_30_cmodid_40177?spm=a2htv.20005143.m13050845531.5%212~5~1~3%215~A&quot;;
+
+    //设置起始地址
+    //dsj.urlQueue.add(url);
+    //其实地址此对象带有的repositoryService属性中获取,并且要在之前设置值
+    //dsj.repositoryService.addHighLevel(url);
+    dsj.startSpider();
+}
+```
+</code></pre><h5 id="5-定时任务的效果"><a href="#5-定时任务的效果" class="headerlink" title="5.定时任务的效果"></a>5.定时任务的效果</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/60.png" alt=""></p>
+<h5 id="6-代码目录结构"><a href="#6-代码目录结构" class="headerlink" title="6.代码目录结构"></a>6.代码目录结构</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/61.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/16/java-爬虫-16-定时启动爬虫项目/" class="archive-article-date">
+  	<time datetime="2018-11-16T12:23:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java爬虫-15-多线程爬虫" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -872,82 +967,6 @@
 
 
   
-    <article id="post-java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/05/java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面/">java爬虫-7-1-爬虫代码实现一:下载解析视频网站页面</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-业务需求及技术"><a href="#1-业务需求及技术" class="headerlink" title="1.业务需求及技术"></a>1.业务需求及技术</h5><ol>
-<li>爬虫目标:优酷</li>
-<li>抓取字段:总播放数，每日播放增量，评论数，收藏数，赞，踩</li>
-<li>实现功能:下载解析页面</li>
-<li>采用技术:HttpClient，HtmlCleaner，Xpath，正则表达式  </li>
-</ol>
-<h5 id="2-创建SpringBoot项目及代码编写"><a href="#2-创建SpringBoot项目及代码编写" class="headerlink" title="2.创建SpringBoot项目及代码编写"></a>2.创建SpringBoot项目及代码编写</h5><ol>
-<li>我们进入<a href="http://start.spring.io进行SpringBoot的工程构建" target="_blank" rel="external">http://start.spring.io进行SpringBoot的工程构建</a></li>
-<li>进入:maven库(<a href="https://mvnrepository.com/)搜索出HttpClient，HtmlCleaner依赖加入pom.xml文件中" target="_blank" rel="external">https://mvnrepository.com/)搜索出HttpClient，HtmlCleaner依赖加入pom.xml文件中</a>.</li>
-</ol>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">     &lt;!--引入HttpClient依赖--&gt;</div><div class="line">   &lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;httpclient&lt;/artifactId&gt;</div><div class="line"> &lt;version&gt;4.5.2&lt;/version&gt;</div><div class="line">   &lt;/dependency&gt;</div><div class="line"></div><div class="line">      &lt;!--引入HtmlCleaner依赖--&gt;</div><div class="line">&lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;net.sourceforge.htmlcleaner&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;htmlcleaner&lt;/artifactId&gt;</div><div class="line">	&lt;version&gt;2.10&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li>数据下载页面工具类<br>我们书写一个工具类来来获取网页信息</li>
-</ol>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">       /**</div><div class="line">     * 页面下载工具类</div><div class="line">     * @author yxm</div><div class="line">     * @date 2018/11/5 23:54:20</div><div class="line">     */</div><div class="line">    public class PageDownLoadUtil &#123;</div><div class="line">    /**</div><div class="line">     * 获取页面内容</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public static String getPageContent(String url)&#123;</div><div class="line">        //创建builder</div><div class="line">        HttpClientBuilder builder = HttpClients.custom();</div><div class="line"></div><div class="line">        //build一个CloseableHttpClient</div><div class="line">        CloseableHttpClient client = builder.build();</div><div class="line">        //创建一个Get请求</div><div class="line">        HttpGet request = new HttpGet(url);</div><div class="line">        </div><div class="line">        //执行请求并返回</div><div class="line">        String content = null;</div><div class="line">        try &#123;</div><div class="line">            CloseableHttpResponse response = client.execute(request);</div><div class="line">            HttpEntity entity = response.getEntity();</div><div class="line"></div><div class="line">            //将entity转换成String</div><div class="line">            content = EntityUtils.toString(entity);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return content;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args)&#123;</div><div class="line">        String url = &quot;http://comic.youku.com/?spm=a2hmv.20009921.topNav.5~1~3!5~A&quot;;</div><div class="line">        String content = getPageContent(url);</div><div class="line">        System.out.println(content);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li><p>抓取数据封装成beans<br>抓取字段:总播放数，每日播放增量，评论数，收藏数，赞，踩 肯定需要存放在实体类里面,我们创建一个包，定义一个类来保存页面内容  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">/**</div><div class="line"> * 存储页面信息实体类</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class Page &#123;</div><div class="line">    /**</div><div class="line">     * 页面内容</div><div class="line">     */</div><div class="line">   private String content;</div><div class="line">    /**</div><div class="line">     * 总播放量</div><div class="line">     */</div><div class="line">   private String allNumber;</div><div class="line">    /**</div><div class="line">     * 每日播放量</div><div class="line">     */</div><div class="line">   private String dayNumber;</div><div class="line">    /**</div><div class="line">     * 评论数</div><div class="line">     */</div><div class="line">   private String commitNumber;</div><div class="line">    /**</div><div class="line">     * 收藏数</div><div class="line">     */</div><div class="line">   private String collectNumber;</div><div class="line">    /**</div><div class="line">     * 赞</div><div class="line">     */</div><div class="line">   private String supportNumber;</div><div class="line">    /**</div><div class="line">     * 踩</div><div class="line">     */</div><div class="line">   private String againstNumber;</div><div class="line">    /**</div><div class="line">     * 电视剧名称</div><div class="line">     */</div><div class="line">   private String tvName;</div><div class="line">    /**</div><div class="line">     * 页面url</div><div class="line">     */</div><div class="line">   private String url;</div><div class="line">    /**</div><div class="line">     * 子集信息</div><div class="line">     */</div><div class="line">   private String episodeNumber;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>定义下载接口(下载有优酷,土豆,爱奇艺,我们定义接口各自去实现)<br>下载有优酷,土豆,爱奇艺,我们定义接口各自去实现，各种网站的解析模板可能是不一样的,我们后面要抓取某一个网站,我们直接实现这个接口，之前写了通过httpClient下载之后估计还有很多其他方式,我们提供一个接口,降低耦合度</p>
-</li>
-</ol>
-<p>IDownLoadService接口: </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line"> * 页面下载接口</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public interface IDownLoadService &#123;</div><div class="line">    public Page download(String url);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><p>HttpClientDownLoadSevice实现:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">     /**</div><div class="line"> * HttpClient方式下载</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class HttpClientDownLoadSevice implements IDownLoadService &#123;</div><div class="line">    @Override</div><div class="line">    public Page download(String url) &#123;</div><div class="line">        Page page = new Page();</div><div class="line">        page.setContent(PageDownLoadUtil.getPageContent(url));</div><div class="line">        return page;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="3-项目结构目录"><a href="#3-项目结构目录" class="headerlink" title="3.项目结构目录"></a>3.项目结构目录</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/31.png" alt="">   </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/05/java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面/" class="archive-article-date">
-  	<time datetime="2018-11-05T15:34:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1013,7 +1032,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 16.67px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.22px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
