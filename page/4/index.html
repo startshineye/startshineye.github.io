@@ -152,6 +152,58 @@
       <div class="body-wrap">
         
   
+    <article id="post-shiro-3-shiro认证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/22/shiro-3-shiro认证/">shiro(3)-shiro认证</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="登录步骤"><a href="#登录步骤" class="headerlink" title="登录步骤"></a>登录步骤</h5><p>从之前的quickStart知道,用户的登录需要完成以下步骤:<br>1.获取当前的 Subject. 调用 SecurityUtils.getSubject();<br>2.测试当前的用户是否已经被认证. 即是否已经登录. 调用 Subject 的 isAuthenticated()<br>3.若没有被认证, 则把用户名和密码封装为 UsernamePasswordToken 对象<br>1).创建一个表单页面<br>2).把请求提交到 SpringMVC 的 Handler<br>3).获取用户名和密码(在Handler中).<br>4.执行登录: 调用 Subject 的 login(AuthenticationToken) 方法. 此AuthenticationToken会在org.apache.shiro.realm.AuthenticatingRealm中的doGetAuthenticationInfo(AuthenticationToken)<br>5.自定义Realm 的方法,从数据库中获取对应的记录,返回给Shiro.<br>1).实际上需要继承 org.apache.shiro.realm.AuthenticatingRealm 类<br>2).实现 doGetAuthenticationInfo(AuthenticationToken) 方法.<br>6.由shiro完成对密码的比对.  </p>
+<h5 id="盐值加密"><a href="#盐值加密" class="headerlink" title="盐值加密"></a>盐值加密</h5><p>1.为什么使用 MD5 盐值加密: 为了让相同明文密码的用户所对应的加密后密码也不一样<br>2.如何做到:<br>1). 在 doGetAuthenticationInfo 方法返回值创建 SimpleAuthenticationInfo 对象的时候, 需要使用<br>SimpleAuthenticationInfo(principal, credentials, credentialsSalt, realmName) 构造器<br>2). 使用 ByteSource.Util.bytes() 来计算盐值.<br>3). 盐值需要唯一: 一般使用随机字符串或 user id<br>4). 使用 new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations); 来计算盐值加密后的密码的值.   </p>
+<p>1.如何把一个字符串加密为MD5<br>2.替换当前 Realm 的 credentialsMatcher 属性. 直接使用 HashedCredentialsMatcher 对象, 并设置加密算法即可.   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/07/22/shiro-3-shiro认证/" class="archive-article-date">
+  	<time datetime="2018-07-22T14:38:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-07-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shiro/">shiro</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-shiro-2-shiro之quickstart" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1293,147 +1345,6 @@ public interface TeacherRepository extends JpaRepository&lt;Teacher,Integer&gt;,
       
       <a href="/2018/05/20/zyzx-49-SpringBoot使用EhCache做集中式缓存/" class="archive-article-date">
   	<time datetime="2018-05-20T09:57:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-48-SpringBoot整合spring-security" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/">zyzx(48)-SpringBoot整合spring-security</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--spring security依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
-&lt;/dependency&gt;   
-
-&lt;!--以thymeleaf渲染页面--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-配置类"><a href="#2-配置类" class="headerlink" title="2.配置类"></a>2.配置类</h5><pre><code>@Configuration
-@EnableWebSecurity // 注解开启Spring Security的功能
-//WebSecurityConfigurerAdapter:重写它的方法来设置一些web的安全西街
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()  //定义哪些url需要保护，哪些url不需要保护
-                .antMatchers(&quot;/&quot;, &quot;/message/&quot;).permitAll()    //定义不需要认证就可以访问
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .loginPage(&quot;/login&quot;)  //定义当需要用户登录时候，转到的登录页面
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll();
-        http.csrf().disable();
-    }
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser(&quot;user&quot;).password(&quot;password&quot;).roles(&quot;USER&quot;);
-        //在内存中创建了一个用户，该用户的名称为user，密码为password，用户角色为USER
-    }
-}
-</code></pre><p>以上定义除了”/“, “/message/“ 访问时候不需要跳过login页面,其他登录都会要经过login页面<br>当用户名/密码:user/password时候 认证通过</p>
-<h5 id="3-演示测试"><a href="#3-演示测试" class="headerlink" title="3.演示测试"></a>3.演示测试</h5><p>1.新建LoginController类:</p>
-<pre><code>@Controller
-public class LoginController {
-
-    @RequestMapping(value = &quot;/login&quot;)
-    public String login(){
-     return &quot;login&quot;;
-    }
-}
-</code></pre><p>2.在resources下新建template存放前端页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/26.png" alt=""></p>
-<p>hello.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;/&gt;
-&lt;title&gt;Hello World!&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;Hello world!&lt;/h1&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>index.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;/&gt;
-&lt;title&gt;Security&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-        &lt;h1&gt;Spring Security!&lt;/h1&gt;
-        &lt;p&gt;点击&lt;a th:href=&quot;@{/hello}&quot;&gt;这里&lt;/a&gt;到碗里来！&lt;/p&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>login.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;
-      xmlns:th=&quot;http://www.thymeleaf.org&quot;
-      xmlns:sec=&quot;http://www.thymeleaf.org/thymeleaf-extras-springsecurity3&quot;&gt;
-    &lt;head&gt;
-        &lt;title&gt;Spring Security Example &lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;div th:if=&quot;${param.error}&quot;&gt;
-            用户名或密码错
-        &lt;/div&gt;
-        &lt;div th:if=&quot;${param.logout}&quot;&gt;
-            您已注销成功
-        &lt;/div&gt;
-        &lt;form th:action=&quot;@{/login}&quot; method=&quot;post&quot;&gt;
-            &lt;div&gt;&lt;label&gt; 用户名 : &lt;input type=&quot;text&quot; name=&quot;username&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;label&gt; 密  码 : &lt;input type=&quot;password&quot; name=&quot;password&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;input type=&quot;submit&quot; value=&quot;登录&quot;/&gt;&lt;/div&gt;
-        &lt;/form&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/" class="archive-article-date">
-  	<time datetime="2018-05-19T09:58:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-19</time>
 </a>
       
 	<div class="article-tag tagcloud">

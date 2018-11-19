@@ -28,9 +28,9 @@
 设置成3 5秒抓取时间比较固定,一般来说,网站能够分析出你抓取的频率,鉴定出是爬虫,我们设置随机数（1 2 3 4 5）秒 总是变化">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/11/62.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/11/63.png">
-<meta property="og:image" content="https://github.com/startshineye/65.png">
-<meta property="og:image" content="https://github.com/startshineye/66.png">
-<meta property="og:updated_time" content="2018-11-19T01:55:25.547Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/11/65.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/11/66.png">
+<meta property="og:updated_time" content="2018-11-19T02:08:52.579Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="java爬虫-20-解决频繁抓取ip被封问题">
 <meta name="twitter:description" content="前言
@@ -219,10 +219,10 @@
 <li><p>ip代理库就是在用httpClient下载,在PageDownLoadUtil.java代码如下:</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">      /**</div><div class="line"> * 页面下载工具类</div><div class="line"> * @author yxm</div><div class="line"> * @date 2018/11/5 23:54:20</div><div class="line"> */</div><div class="line">public class PageDownLoadUtil &#123;</div><div class="line">    /**</div><div class="line">     * 设置用户代理，模拟浏览器</div><div class="line">     */</div><div class="line">    private final static String USER_AGENT=&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36&quot;;</div><div class="line">    /**</div><div class="line">     * 获取页面内容</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public static String getPageContent(String url)&#123;</div><div class="line">        //创建builder</div><div class="line">        HttpClientBuilder builder = HttpClients.custom();</div><div class="line"></div><div class="line">        //build一个CloseableHttpClient</div><div class="line">        CloseableHttpClient client = null;</div><div class="line"></div><div class="line">        //------------设置动态ip-----------------start</div><div class="line">        RedisUtil redisUtil = new RedisUtil();</div><div class="line">        //动态获取ip</div><div class="line">        String ip_port = redisUtil.getSet(&quot;proxy&quot;);</div><div class="line">        if(StringUtils.isNotBlank(ip_port))&#123;</div><div class="line">            String[] arr = ip_port.split(&quot;:&quot;);</div><div class="line">            String proxy_ip = arr[0];</div><div class="line">            int proxy_port = Integer.parseInt(arr[1]);</div><div class="line">            //设置代理</div><div class="line">            HttpHost proxy = new HttpHost(proxy_ip, proxy_port);</div><div class="line">            client = builder.setProxy(proxy).build();</div><div class="line">        &#125;else&#123;</div><div class="line">            client = builder.build();</div><div class="line">        &#125;</div><div class="line">        //创建一个Get请求</div><div class="line">        HttpGet request = new HttpGet(url);</div><div class="line">        //------------设置动态ip-----------------end</div><div class="line">        //执行请求并返回</div><div class="line">        String content = null;</div><div class="line">        try &#123;</div><div class="line">            //设置用户代理-模拟浏览器</div><div class="line">            request.setHeader(&quot;User-Agent&quot;,USER_AGENT);</div><div class="line">            CloseableHttpResponse response = client.execute(request);</div><div class="line">            HttpEntity entity = response.getEntity();</div><div class="line"></div><div class="line">            //将entity转换成String</div><div class="line">            content = EntityUtils.toString(entity);</div><div class="line">            //如果当前ip不可用，从动态代理ip库里面删除</div><div class="line">            redisUtil.deleteSet(&quot;proxy&quot;, ip_port);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return content;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args)&#123;</div><div class="line">        String url = &quot;http://comic.youku.com/?spm=a2hmv.20009921.topNav.5~1~3!5~A&quot;;</div><div class="line">        String content = getPageContent(url);</div><div class="line">        System.out.println(content);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 </li>
-<li><p>运行RedisUtil里面的main方法,然后在redis里面查看:<br><img src="65.png" alt=""></p>
+<li><p>运行RedisUtil里面的main方法,然后在redis里面查看:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/65.png" alt=""></p>
 </li>
 </ol>
-<h6 id="1-3-多应用部署"><a href="#1-3-多应用部署" class="headerlink" title="1.3 多应用部署"></a>1.3 多应用部署</h6><p><img src="66.png" alt=""></p>
+<h6 id="1-3-多应用部署"><a href="#1-3-多应用部署" class="headerlink" title="1.3 多应用部署"></a>1.3 多应用部署</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/66.png" alt=""></p>
 
       
     </div>
@@ -246,6 +246,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2018/11/19/java爬虫-21-爬虫项目监控/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          java爬虫-21-爬虫项目监控
+        
+      </div>
+    </a>
   
   
     <a href="/2018/11/17/java爬虫-19-数据可视化/" id="article-nav-older" class="article-nav-link-wrap">
