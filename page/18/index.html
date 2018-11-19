@@ -152,6 +152,429 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-25-改变自动扫描包路径" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/">SpringBoot(25)-改变自动扫描包路径</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>默认情况下SpringBoot会扫描启动类同包以及子包下的注解,但是有时候我们需要改变包的扫描方式,原理：@ComponentScan注解进行指定要扫描的包以及要扫描的类</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>以下我们编写测试类测试:<br>三步:<br>1)新建两个包<br>2）新建两个类<br>3)启动类进行注解指定扫描路径  </p>
+<h5 id="1-新建两个包"><a href="#1-新建两个包" class="headerlink" title="1.新建两个包"></a>1.新建两个包</h5><p> com.cn   com.org</p>
+<h5 id="2-新建两个类"><a href="#2-新建两个类" class="headerlink" title="2.新建两个类"></a>2.新建两个类</h5><p>在这里为了方便测试，我们让我们的类在启动的时候就进行执行，所以我们就编写两个类，实现接口CommandLineRunner，这样在启动的时候我们就可以看到打印信息了。<br>注：类上添加@Configuration注解<br>Cn类:</p>
+<pre><code>package com.cn;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Cn implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.cn 下类执行&quot;);
+}
+}
+</code></pre><p>Org类:</p>
+<pre><code>package com.org;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.annotation.Configuration;
+@Configuration
+public class Org implements CommandLineRunner{
+public void run(String... arg0) throws Exception {
+    System.out.println(&quot;com.org 下类执行&quot;);
+}
+}
+</code></pre><h5 id="3-启动类进行注解指定扫描路径"><a href="#3-启动类进行注解指定扫描路径" class="headerlink" title="3.启动类进行注解指定扫描路径"></a>3.启动类进行注解指定扫描路径</h5><p>在App.java类中加入如下注解：<br> @ComponentScan(basePackages={“com.cn”,”com.org”})</p>
+<pre><code>@SpringBootApplication
+@ComponentScan(basePackages={&quot;com.cn&quot;,&quot;com.org&quot;})
+public class App 
+{
+public static void main( String[] args )
+ {
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+    SpringApplication.run(App.class, args);
+ }
+}
+</code></pre><p>输出：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/12.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/13/SpringBoot-25-改变自动扫描包路径/" class="archive-article-date">
+  	<time datetime="2017-09-13T11:41:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-24-使用自定义的properties" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/13/SpringBoot-24-使用自定义的properties/">SpringBoot(24)-使用自定义的properties</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>SpringBoot使用application.properties默认了很多配置,自己添加一些配置时候,该怎么做呢?或者自己建立一个.properties文件又该怎么办呢?  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>实现以上需求只需要三步:<br>1)构造自定义的properties文件(在原properties文件里面加入key或者自己创建一个.properties文件)<br>2)定义配置类<br>3)SpringBoot入口使用@EnableConfigurationProperties注解  </p>
+<h5 id="1-构造自定义的properties文件"><a href="#1-构造自定义的properties文件" class="headerlink" title="1. 构造自定义的properties文件"></a>1. 构造自定义的properties文件</h5><h6 id="1-1-复用application-properties"><a href="#1-1-复用application-properties" class="headerlink" title="1.1 复用application.properties"></a>1.1 复用application.properties</h6><p>1.application.properties中添加  </p>
+<pre><code>china.province=hunan
+china.city=beijing
+</code></pre><h6 id="1-2-创建person-properties"><a href="#1-2-创建person-properties" class="headerlink" title="1.2 创建person.properties"></a>1.2 创建person.properties</h6><p>1.创建person.properties</p>
+<pre><code>person.name=zhangsan
+person.age=23
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/11.png" alt=""></p>
+<h5 id="2-定义配置类-ConfigurationProperties"><a href="#2-定义配置类-ConfigurationProperties" class="headerlink" title="2.定义配置类( @ConfigurationProperties)"></a>2.定义配置类( @ConfigurationProperties)</h5><p>1.定义配置类: </p>
+<pre><code>@ConfigurationProperties(prefix = &quot;china&quot;)  
+public class China {
+private String province;
+private String city;
+
+public String getProvince() {
+    return province;
+}
+
+public void setProvince(String province) {
+    this.province = province;
+}
+
+public String getCity() {
+    return city;
+}
+
+public void setCity(String city) {
+    this.city = city;
+}
+}
+</code></pre><p>2.定义配置类  </p>
+<pre><code>@ConfigurationProperties(prefix = &quot;person&quot;,locations = &quot;classpath:resources/person.properties&quot;)  
+public class Person {
+private String name;
+private int age;
+
+public String getName() {
+    return name;
+}
+
+public void setName(String name) {
+    this.name = name;
+}
+
+public int getAge() {
+    return age;
+}
+
+public void setAge(int age) {
+    this.age = age;
+}
+}
+</code></pre><h5 id="3-SpringBoot入口使用-EnableConfigurationProperties注解"><a href="#3-SpringBoot入口使用-EnableConfigurationProperties注解" class="headerlink" title="3.SpringBoot入口使用@EnableConfigurationProperties注解"></a>3.SpringBoot入口使用@EnableConfigurationProperties注解</h5><pre><code>@SpringBootApplication
+@EnableConfigurationProperties({China.class,Person.class})
+public class App 
+{
+public static void main( String[] args )
+{
+    /**
+     * 使用SpringApplication.run启动应用
+     */
+    SpringApplication.run(App.class, args);
+}
+}
+</code></pre><h5 id="4-测试-使用注解：-Autowired"><a href="#4-测试-使用注解：-Autowired" class="headerlink" title="4.测试(使用注解： @Autowired)"></a>4.测试(使用注解： @Autowired)</h5><pre><code>@RestController
+public class PropertiesController {
+
+@Autowired
+private China china;
+
+@Autowired
+private Person person;
+
+@RequestMapping(&quot;/testProperties&quot;)
+public String TestProperties(){
+    System.out.println(&quot;china[&quot;+china.getProvince()+&quot; &quot;+china.getCity()+&quot;]&quot;);
+    System.out.println(&quot;person[&quot;+person.getName()+&quot; &quot;+person.getAge()+&quot;]&quot;);
+    return &quot;ok&quot;;
+}
+}
+</code></pre><p>请求:<a href="http://localhost:8081/testProperties" target="_blank" rel="external">http://localhost:8081/testProperties</a><br>输出：</p>
+<pre><code>china[hunan beijing]
+person[zhangsan 23]
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/13/SpringBoot-24-使用自定义的properties/" class="archive-article-date">
+  	<time datetime="2017-09-12T16:06:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/">SpringBoot(23)-SpringBoot环境变量读取和属性对象的绑定</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-条件"><a href="#1-条件" class="headerlink" title="1.条件"></a>1.条件</h5><p>SpringBoot中想要获取环境变量读取和属性对象的绑定：<br>1)只要是Spring管理的类<br>2)实现接口 EnvironmentAware<br>3)重写方法 setEnvironment  </p>
+<p>可以在工程启动时就可以获取</p>
+<h5 id="2-代码示例"><a href="#2-代码示例" class="headerlink" title="2.代码示例"></a>2.代码示例</h5><h6 id="2-1-一般类通过实现EnvironmentAware接口"><a href="#2-1-一般类通过实现EnvironmentAware接口" class="headerlink" title="2.1 一般类通过实现EnvironmentAware接口"></a>2.1 一般类通过实现EnvironmentAware接口</h6><p>条件:<br>1)@Configuration<br>2)实现EnvironmentAware  </p>
+<pre><code>import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+@Configuration
+public class MyEnviromentAware implements EnvironmentAware{
+
+//注入application.properties的属性到指定变量中
+@Value(&quot;${spring.datasource.url}&quot;)
+private String url;
+
+//重写的方法setEnvironment是在系统启动的时间被执行
+public void setEnvironment(Environment environment) {
+
+    //打印注入的属性信息
+    System.out.println(&quot;url[&quot;+url+&quot;]&quot;);
+
+    //系统environment获取到系统属性
+    System.out.println(environment.getProperty(&quot;JAVA_HOME&quot;));
+
+    //通过enviroment获取到application.properties配置的属性.
+    System.out.println(environment.getProperty(&quot;spring.datasource.url&quot;));
+
+    //获取到前缀是&quot;spring.datasource.&quot; 的属性列表值.
+    RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(environment, &quot;spring.datasource.&quot;);
+    System.out.println(&quot;spring.datasource.url=&quot;+relaxedPropertyResolver.getProperty(&quot;url&quot;));
+  }
+}
+</code></pre><p>输出:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/9.png" alt=""></p>
+<h6 id="2-2-Controller或者Service通过实现EnvironmentAware接口"><a href="#2-2-Controller或者Service通过实现EnvironmentAware接口" class="headerlink" title="2.2 Controller或者Service通过实现EnvironmentAware接口"></a>2.2 Controller或者Service通过实现EnvironmentAware接口</h6><p>@Controller @Service 等被Spring管理的类都支持，注意重写的方法 setEnvironment 是在系统启动的时候被执行.  </p>
+<pre><code>import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.yxm.web.entity.Hello;
+/**
+* 使用@RestController代替@controller和@ResponseBody
+* @author yxm
+*/
+@RestController
+public class HelloController implements EnvironmentAware{
+
+private String JAVA_HOME;
+
+@RequestMapping(&quot;/hello&quot;)
+public Hello hello(){
+
+    Hello hello = new  Hello();
+    hello.setId(110);
+    hello.setName(JAVA_HOME);
+    return hello;
+}
+//在程序一启动就执行
+public void setEnvironment(Environment environment) {
+    JAVA_HOME = environment.getProperty(&quot;JAVA_HOME&quot;);
+     System.out.println(&quot;Controller里获取参数  [&quot;+JAVA_HOME+&quot;]&quot;);
+ }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.png" alt=""></p>
+<h6 id="2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性"><a href="#2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性" class="headerlink" title="2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性"></a>2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性</h6><p>1.加入依赖  </p>
+<pre><code>&lt;!--spring-boot-configuration:spring boot 配置处理器; --&gt;
+ &lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+       &lt;optional&gt;true&lt;/optional&gt;
+ &lt;/dependency&gt;
+</code></pre><p>2.@ConfigurationProperties 读取application属性配置文件中的属性。</p>
+<pre><code>@Configuration
+@ConditionalOnClass(Mongo.class)
+@EnableConfigurationProperties(MongoProperties.class)
+public class MongoAutoConfiguration {
+
+@Autowired
+private MongoProperties properties;
+
+}
+</code></pre><ol>
+<li>@ConditionOnClass表明该@Configuration仅仅在一定条件下才会被加载，这里的条件是Mongo.class位于类路径上</li>
+<li>@EnableConfigurationProperties将Spring Boot的配置文件（application.properties）中的spring.data.mongodb.*属性映射为MongoProperties并注入到MongoAutoConfiguration中。</li>
+<li><p>@ConditionalOnMissingBean说明Spring Boot仅仅在当前上下文中不存在Mongo对象时，才会实例化一个Bean。这个逻辑也体现了Spring Boot的另外一个特性——自定义的Bean优先于框架的默认配置，我们如果显式的在业务代码中定义了一个Mongo对象，那么Spring Boot就不再创建。</p>
+<p> @ConfigurationProperties(prefix = “spring.data.mongodb”)<br> public class MongoProperties {</p>
+<p> private String host;<br> privateint port = DBPort.PORT;<br> private String uri = “mongodb://localhost/test”;<br> private String database;</p>
+<p> // … getters/ setters omitted<br> }</p>
+</li>
+</ol>
+<p>它就是以spring.data.mongodb作为前缀的属性，然后通过名字直接映射为对象的属性，同时还包含了一些默认值。如果不配置，那么mongo.uri就是mongodb://localhost/test。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/" class="archive-article-date">
+  	<time datetime="2017-09-12T04:59:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-jeecg-3-openwindow加载数据后操作数据后关闭窗口" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/11/jeecg-3-openwindow加载数据后操作数据后关闭窗口/">jeecg(3)-openwindow加载数据后操作数据后关闭窗口</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在jeecg平台开发中,我们通过jeecg自带方法代开新的窗口  </p>
+<pre><code>openwindow(&apos;备份文件加载2&apos;, &apos;xxx.do?xxList&amp;Id=&apos;+Id+&apos;,&quot;&quot;, 400, 200);
+</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>打开的窗口用来加载数据:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/13.gif" alt=""></p>
+<p>js:  </p>
+<pre><code>success:function(jsonObj){
+          console.info(&quot;jsonObj&quot;,jsonObj);
+          if(jsonObj.result==&quot;success&quot;){
+              alert(&quot;加载成功&quot;);
+            windowapi.opener.appDiv.setReloadCallBack(true); 
+              windowapi.close();                                   
+          }else{
+             alert(&quot;加载失败&quot;);
+          }
+        }
+</code></pre><p>通过 windowapi.close();关闭窗口,通过  windowapi.opener.appDiv.setReloadCallBack(true); 向父页面的函数传值。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/11/jeecg-3-openwindow加载数据后操作数据后关闭窗口/" class="archive-article-date">
+  	<time datetime="2017-09-11T05:47:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-11</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-jeecg-2-使用DOM自带的confirm方法" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1092,488 +1515,9 @@ new Vue({
 
 
   
-    <article id="post-vue-23-监听数据变化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-23-监听数据变化/">vue(23)-监听数据变化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们经过a数据变化b也会跟着变化,使用的是计算属性:computed,我们可以通过监听数据变化实现:vm.$wactch();</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-监听数据变化"><a href="#1-监听数据变化" class="headerlink" title="1.监听数据变化"></a>1.监听数据变化</h5><p>vm.$watch(name,fnCb);其中name是Vue中data里面要变化属性，fnCb是回调函数  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-    a:{{a}}&lt;br&gt;
-    msg:{{msg}}
-
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-     el:&quot;#box&quot;,
-     data:{
-       a:&quot;a&quot;,
-         b:&apos;&apos;,
-         msg:&apos;&apos;
-     },
- });
-vm.$watch(&quot;a&quot;,function(){
-    this.msg=&quot;a数据发生变化&quot;+this.a;
-});
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/6.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-23-监听数据变化/" class="archive-article-date">
-  	<time datetime="2017-09-02T13:01:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-22-自定义键盘信息" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-22-自定义键盘信息/">vue(22)-自定义键盘信息</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在键盘按下一些事件中我们可以通过@keydown.按键  来实现键盘事件,但是有些事件,比如：ctrl事件是不能通过@keydown.ctrl来实现的,需要</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h4 id="1-enter事件"><a href="#1-enter事件" class="headerlink" title="1.enter事件"></a>1.enter事件</h4><pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; @keydown.enter=&quot;show&quot;&gt;
-&lt;/div&gt;
-&lt;script&gt;
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     },
-     methods:{
-         show:function(){
-             alert(&quot;enter&quot;);
-         }
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/5.gif" alt=""></p>
-<h5 id="2-ctrl按键"><a href="#2-ctrl按键" class="headerlink" title="2.ctrl按键"></a>2.ctrl按键</h5><pre><code> document.onkeydown=function(ev){
-    alert(ev.keyCode);
-};
-</code></pre><p>得到ctrl的keyCode值为17  </p>
-<p>1.方式一:  </p>
-<pre><code>&lt;input type=&quot;text&quot; @keydown.17=&quot;show&quot;&gt;  
-</code></pre><p>2.方式二:<br> Vue.directive(“on”).keyCodes.ctrl=17;  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; @keydown.ctrl=&quot;show&quot;&gt;
-&lt;/div&gt;
-&lt;script&gt;
- Vue.directive(&quot;on&quot;).keyCodes.ctrl=17;
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     },
-     methods:{
-         show:function(){
-             alert(&quot;ctrl&quot;);
-         }
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-22-自定义键盘信息/" class="archive-article-date">
-  	<time datetime="2017-09-02T12:08:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-21-指令-自定义指令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-21-指令-自定义指令/">vue(21)-指令-自定义指令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>例如:v-text,v-for,v-html这些都是vue自带的指令,但是有时候也许自带指令不够时候我们需要自定义指令</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>自定义指令运用类的方法:Vue.directive()  </p>
-<pre><code>Vue.directive(指令名称,function(){
-
-});
-</code></pre><p>调用指令名称:在指令名称前面加上’v-‘  比如：red指令 则调用时候为:v-red  </p>
-<h5 id="1-改变背景"><a href="#1-改变背景" class="headerlink" title="1.改变背景"></a>1.改变背景</h5><p>1.指令无参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   &lt;span v-red&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(){
-    this.el.style.background=&quot;red&quot;;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.png" alt="">  </p>
-<p>2.指令传参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-   &lt;span v-red=&quot;a&quot;&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(val){
-    this.el.style.background=val;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         a:&quot;blue&quot;,
-         msg:&quot;hello world&quot;
-
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.gif" alt=""></p>
-<h5 id="2-拖拽"><a href="#2-拖拽" class="headerlink" title="2.拖拽"></a>2.拖拽</h5><pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;div v-drag :style=&quot;{width:&apos;100px&apos;,height:&apos;100px&apos;,background:&apos;yellow&apos;,position:&apos;absolute&apos;,right:0,top:0}&quot;&gt;
-
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;drag&quot;,function(){
-    var oDiv = this.el;
-    oDiv.onmousedown=function(ev){
-        var disX = ev.clientX-oDiv.offsetLeft;
-        var disY = ev.clientY-oDiv.offsetTop;
-
-        document.onmousemove=function(ev){
-            var l = ev.clientX-disX;
-            var t = ev.clientY-disY;
-            oDiv.style.left=l+&apos;px&apos;;
-            oDiv.style.top=t+&apos;px&apos;;
-        };
-        document.onmouseup=function(){
-            document.onmousemove=null;
-            document.onmouseup=null;
-        }
-    }
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-21-指令-自定义指令/" class="archive-article-date">
-  	<time datetime="2017-09-02T08:08:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-20-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-20-过滤器/">vue(20)-过滤器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前我们接触过简单的过滤器,比如:capitalize  uppercase  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-vue常见基本过滤器"><a href="#1-vue常见基本过滤器" class="headerlink" title="1.vue常见基本过滤器"></a>1.vue常见基本过滤器</h5><p>capitalize  -&gt; 首字母大写<br>uppercas   -&gt; 变大写<br>debounce(需要配合事件) time :延迟  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;./js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;button&quot; value=&quot;show&quot; @click=&quot;show | debounce 2000&quot;&gt;
-&lt;/div&gt;
-
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-    },
-    methods:{
-        show:function(){
-            alert(1);
-        }
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>延迟2秒执行<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/8/7.gif" alt=""></p>
-<h5 id="2-配合数组使用的过滤器"><a href="#2-配合数组使用的过滤器" class="headerlink" title="2.配合数组使用的过滤器"></a>2.配合数组使用的过滤器</h5><p>比如我们展示一个数组时候,里面有100条数据,但是我们只需要展示前50条,这个时候用limitBy   </p>
-<h6 id="2-1-limitBy"><a href="#2-1-limitBy" class="headerlink" title="2.1 limitBy"></a>2.1 limitBy</h6><p>1.limitBy -&gt;限制几个<br>2.limitBy 参数1 参数2  -&gt;从哪开始取几个  </p>
-<pre><code>&lt;div id=&quot;box&quot;&gt;
-    取2个:
-   &lt;ul&gt;
-       &lt;li v-for=&quot;items in arr | limitBy 2&quot;&gt;
-             {{items}}
-       &lt;/li&gt;
-   &lt;/ul&gt;
-    取2个从倒数第三取:
-    &lt;ul&gt;
-        &lt;li v-for=&quot;items in arr | limitBy 2 arr.length-3&quot;&gt;
-            {{items}}
-        &lt;/li&gt;
-    &lt;/ul&gt;
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-        arr:[1,2,3,4,5,6]
-    },
-    methods:{
-
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/1.png" alt=""></p>
-<h6 id="2-2-filterBy过滤"><a href="#2-2-filterBy过滤" class="headerlink" title="2.2 filterBy过滤"></a>2.2 filterBy过滤</h6><p>过滤出包含”o”的数据  </p>
-<pre><code>body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   按照输入的字母来过滤数组:
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;
-    &lt;br&gt;
-    &lt;ul&gt;
-        &lt;li v-for=&quot;items in arr | filterBy a&quot;&gt;
-              {{items}}
-        &lt;/li&gt;
-    &lt;/ul&gt;
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-        a:&apos;&apos;,
-        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;,&quot;tomato&quot;]
-    },
-    methods:{
-
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/1.gif" alt=""></p>
-<h6 id="2-3-orderBy排序"><a href="#2-3-orderBy排序" class="headerlink" title="2.3 orderBy排序"></a>2.3 orderBy排序</h6><p>有时候我们希望数据过来之后排序,使用orderby<br>orderBy就是正序倒序排列:orderBy 1/-1  -&gt;正序排列/倒序排列 </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   按照输入的字母来排序数组:
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;
-    &lt;br&gt;
-    &lt;ul&gt;
-        &lt;li v-for=&quot;items in arr | orderBy a&quot;&gt;
-              {{items}}
-        &lt;/li&gt;
-    &lt;/ul&gt;
-&lt;/div&gt;
-&lt;script&gt;
-var vm = new Vue({
-    data:{
-        a:&apos;&apos;,
-        arr:[&quot;apple&quot;,&quot;orange&quot;,&quot;banana&quot;,&quot;tomato&quot;]
-    },
-    methods:{
-
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt; 
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/2.gif" alt=""></p>
-<h5 id="3-自定义过滤器"><a href="#3-自定义过滤器" class="headerlink" title="3.自定义过滤器"></a>3.自定义过滤器</h5><p>对于时间过滤器,vue没有自带的过滤器使用,我们需要自定义过滤器  </p>
-<p>自定义过滤器:<br>   Vue是一个类,通过类上的一个方法filter来自定义过滤器  </p>
-<pre><code>Vue.filter(name,function(parameter,a,b){
-  //回调函数
-});
-parameter是要过滤的数据 a,b是调用时过滤器后面的参数  
-</code></pre><h6 id="3-1-自定义时间过滤器"><a href="#3-1-自定义时间过滤器" class="headerlink" title="3.1 自定义时间过滤器"></a>3.1 自定义时间过滤器</h6><pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   {{date | dateFormat}}
-&lt;/div&gt;
-&lt;script&gt;
-Vue.filter(&quot;dateFormat&quot;,function(val){
-    var oData = new Date(val);
-    return oData.getFullYear()+&quot;-&quot;+(oData.getMonth()+1)+&quot;-&quot;+oData.getDate()+&quot; &quot;+oData.getHours()+&quot;:&quot;+oData.getMinutes()+&quot;:&quot;+oData.getSeconds();
-});
-var vm = new Vue({
-    data:{
-      date:Date.now()
-    },
-    methods:{
-
-    }
-}).$mount(&quot;#box&quot;);
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/2.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-20-过滤器/" class="archive-article-date">
-  	<time datetime="2017-09-02T03:47:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/46/">46</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/47/">47</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
     </nav>
   
 
@@ -1636,7 +1580,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 15px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.22px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.78px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.22px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 11.11px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.22px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 14.74px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 11.05px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
