@@ -6,25 +6,20 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>netty实践(三)-netty之helloword服务端 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1.netty版本netty版本大致分为:netty3.x 和netty4.x,netty5.x
-2.netty运用在那些领域1.分布式进程通信例如：hadoop,dubbo,akka等具有分布式功能的框架,底层RPC通信都是基于netty实现的，这些框架使用的基本是netty3.x
-2.游戏服务器就java的最新的游戏服务器有部分公司可能已经开始采用netty4.x 或 netty5.x
-3.h">
+  <meta name="description" content="前言构建netty服务器分为以下几个步骤:1.构建一对主从线程组netty使用Reactor模型,提供了三种线程模型(单线程,多线程,主从多线程),netty官方推荐建议我们去使用主从线程模型2.定义服务器启动类任何启动类,不管是tomcat,jetty还是netty都会有一个Bootstrap启动类,这样的server类,我们在netty服务器构建的时候也会创建3.为服务器设置Channel之前">
 <meta property="og:type" content="article">
 <meta property="og:title" content="netty实践(三)-netty之helloword服务端">
 <meta property="og:url" content="https://github.com/startshineye/2017/05/21/netty实践-三-netty之helloword服务端/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="1.netty版本netty版本大致分为:netty3.x 和netty4.x,netty5.x
-2.netty运用在那些领域1.分布式进程通信例如：hadoop,dubbo,akka等具有分布式功能的框架,底层RPC通信都是基于netty实现的，这些框架使用的基本是netty3.x
-2.游戏服务器就java的最新的游戏服务器有部分公司可能已经开始采用netty4.x 或 netty5.x
-3.h">
-<meta property="og:updated_time" content="2018-12-02T16:01:37.593Z">
+<meta property="og:description" content="前言构建netty服务器分为以下几个步骤:1.构建一对主从线程组netty使用Reactor模型,提供了三种线程模型(单线程,多线程,主从多线程),netty官方推荐建议我们去使用主从线程模型2.定义服务器启动类任何启动类,不管是tomcat,jetty还是netty都会有一个Bootstrap启动类,这样的server类,我们在netty服务器构建的时候也会创建3.为服务器设置Channel之前">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/10.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/11.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/12.png">
+<meta property="og:updated_time" content="2018-12-04T16:55:24.603Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="netty实践(三)-netty之helloword服务端">
-<meta name="twitter:description" content="1.netty版本netty版本大致分为:netty3.x 和netty4.x,netty5.x
-2.netty运用在那些领域1.分布式进程通信例如：hadoop,dubbo,akka等具有分布式功能的框架,底层RPC通信都是基于netty实现的，这些框架使用的基本是netty3.x
-2.游戏服务器就java的最新的游戏服务器有部分公司可能已经开始采用netty4.x 或 netty5.x
-3.h">
+<meta name="twitter:description" content="前言构建netty服务器分为以下几个步骤:1.构建一对主从线程组netty使用Reactor模型,提供了三种线程模型(单线程,多线程,主从多线程),netty官方推荐建议我们去使用主从线程模型2.定义服务器启动类任何启动类,不管是tomcat,jetty还是netty都会有一个Bootstrap启动类,这样的server类,我们在netty服务器构建的时候也会创建3.为服务器设置Channel之前">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/10.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -178,7 +173,14 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="1-netty版本"><a href="#1-netty版本" class="headerlink" title="1.netty版本"></a>1.netty版本</h4><p>netty版本大致分为:netty3.x 和netty4.x,netty5.x</p>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>构建netty服务器分为以下几个步骤:<br>1.构建一对主从线程组<br>netty使用Reactor模型,提供了三种线程模型(单线程,多线程,主从多线程),netty官方推荐建议我们去使用主从线程模型<br>2.定义服务器启动类<br>任何启动类,不管是tomcat,jetty还是netty都会有一个Bootstrap启动类,这样的server类,我们在netty服务器构建的时候也会创建<br>3.为服务器设置Channel<br>之前我们在讲解nio时候,我们说过,当我们的客户端和我们的服务端建立连接之后,就会形成一个双向通道,这个双向通道就是Channel,所以我们在我们的服务器需要定义一个这样的Channel类<br>4.设置处理从线程池的助手类初始化器<br>我们会有一个Channel,这个Channel会有一堆的初始化助手类Handler对他进行处理,比如说:编解码处理,读数据写数据等等这样的操作,理解的话可以把它看做一个拦截器Interceptor,我们可以配置多个拦截器去拦截我们的Channel<br>5.监听启动和关闭服务器<br>针对于Server,我们需要监听它的启动,监听的话,我们需要设置他的端口,服务启动完了之后,我们也需要做做关闭的监听  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-构建简单netty服务器"><a href="#1-构建简单netty服务器" class="headerlink" title="1.构建简单netty服务器"></a>1.构建简单netty服务器</h5><h6 id="1-1-创建maven项目"><a href="#1-1-创建maven项目" class="headerlink" title="1.1 创建maven项目"></a>1.1 创建maven项目</h6><p>在idea中创建maven工程</p>
+<h6 id="1-2-引入netty依赖"><a href="#1-2-引入netty依赖" class="headerlink" title="1.2 引入netty依赖"></a>1.2 引入netty依赖</h6><ol>
+<li>在浏览器输入：<a href="http://mvnrepository.com" target="_blank" rel="external">http://mvnrepository.com</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/10.png" alt=""><br>然后在idea中查看到对应依赖已经导入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/11.png" alt="">  </li>
+</ol>
+<h6 id="1-3-书写简单服务器端代码"><a href="#1-3-书写简单服务器端代码" class="headerlink" title="1.3 书写简单服务器端代码"></a>1.3 书写简单服务器端代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"> /**</div><div class="line"> * 实现客户端发送一个请求,服务端返回Hello netty</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class HelloServer &#123;</div><div class="line"> public static void main(String[] args)&#123;</div><div class="line">       //定义一组线程组</div><div class="line">       //主线程组,用于接受客户端的连接,但是不做任何处理,跟老板一样,不做事</div><div class="line">       EventLoopGroup bossGroup = new NioEventLoopGroup();</div><div class="line">       //从线程组,老板线程组会把任务丢给他,让手下线程去做任务</div><div class="line">       EventLoopGroup workerGroup = new NioEventLoopGroup();</div><div class="line">   try &#123;</div><div class="line">       //netty服务器的创建,ServerBootstarp 是一个启动类</div><div class="line">       ServerBootstrap serverBootstrap = new ServerBootstrap();</div><div class="line">       serverBootstrap.group(bossGroup, workerGroup)    //设置主从线程组</div><div class="line">               .channel(NioServerSocketChannel.class)  //设置nio的双向通道</div><div class="line">               .childHandler(null);                   //子处理器,用于处理workerGroup</div><div class="line"></div><div class="line">       //启动server,并且设置8088为启动的端口号,同时启动方式为同步</div><div class="line">       ChannelFuture channelFuture = serverBootstrap.bind(8088).sync();//绑定需要等待耗时,设置为同步就是等待netty启动完毕</div><div class="line"></div><div class="line">       //监听关闭的channel,设置为同步方式</div><div class="line">       channelFuture.channel().closeFuture().sync();</div><div class="line">   &#125;catch (Exception e)&#123;</div><div class="line"></div><div class="line">   &#125;finally &#123;</div><div class="line">       //最后关闭我们的主从线程组</div><div class="line">       bossGroup.shutdownGracefully();</div><div class="line">       workerGroup.shutdownGracefully();</div><div class="line">     &#125;</div><div class="line">   &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/12.png" alt="">  </p>
+<h4 id="1-netty版本"><a href="#1-netty版本" class="headerlink" title="1.netty版本"></a>1.netty版本</h4><p>netty版本大致分为:netty3.x 和netty4.x,netty5.x</p>
 <h4 id="2-netty运用在那些领域"><a href="#2-netty运用在那些领域" class="headerlink" title="2.netty运用在那些领域"></a>2.netty运用在那些领域</h4><h6 id="1-分布式进程通信"><a href="#1-分布式进程通信" class="headerlink" title="1.分布式进程通信"></a>1.分布式进程通信</h6><p>例如：hadoop,dubbo,akka等具有分布式功能的框架,底层RPC通信都是基于netty实现的，这些框架使用的基本是netty3.x</p>
 <h6 id="2-游戏服务器"><a href="#2-游戏服务器" class="headerlink" title="2.游戏服务器"></a>2.游戏服务器</h6><p>就java的最新的游戏服务器有部分公司可能已经开始采用netty4.x 或 netty5.x</p>
 <h4 id="3-helloworld实例"><a href="#3-helloworld实例" class="headerlink" title="3.helloworld实例"></a>3.helloworld实例</h4><h6 id="1-导入jar包"><a href="#1-导入jar包" class="headerlink" title="1.导入jar包"></a>1.导入jar包</h6><ol>
