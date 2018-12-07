@@ -152,6 +152,138 @@
       <div class="body-wrap">
         
   
+    <article id="post-java爬虫-15-多线程爬虫" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/15/java爬虫-15-多线程爬虫/">java爬虫-15-多线程爬虫</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li><p>实现多线程爬虫<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/53.png" alt="">  </p>
+</li>
+<li><p>之前的爬虫程序,是单线程,爬取网页url，一次只能爬取一个,假如网页url比较多的话,爬虫时间就会很长,针对于单个应用,爬虫时间比较长的话,我们并行执行,时间就会缩短了。</p>
+</li>
+<li>假如单线程爬虫需要24分钟,如果我们开启两个线程,那么十多个小时就能够搞定</li>
+<li>线程并不是越多越好,它受电脑资源的限制,电脑cpu所提供的资源有限,当资源到达瓶颈时候,其他线程将会排队  </li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-定义线程池"><a href="#1-定义线程池" class="headerlink" title="1.定义线程池"></a>1.定义线程池</h5><ol>
+<li>1.新建resources下配置文件:  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/55.png" alt=""></p>
+<ol>
+<li><p>2.定义工具类:LoadPropertyUtil中方法:getConfig(String key)</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">/**</div><div class="line"> * 读取配置文件属性工具类</div><div class="line"> */</div><div class="line">public class LoadPropertyUtil &#123;</div><div class="line">	</div><div class="line">	//读取优酷配置文件</div><div class="line">	public static String getYOUKU(String key)&#123;</div><div class="line">		String value = &quot;&quot;;</div><div class="line">		Locale locale = Locale.getDefault();</div><div class="line">		try &#123;</div><div class="line">			ResourceBundle localResource = ResourceBundle.getBundle(&quot;youku&quot;,</div><div class="line">					locale);</div><div class="line">			value = localResource.getString(key);</div><div class="line">		&#125; catch (MissingResourceException mre) &#123;</div><div class="line">			value = &quot;&quot;;</div><div class="line">		&#125;</div><div class="line">		return value;</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public static String getConfig(String key)&#123;</div><div class="line">		String value = &quot;&quot;;</div><div class="line">		Locale locale = Locale.getDefault();</div><div class="line">		try &#123;</div><div class="line">			ResourceBundle localResource = ResourceBundle.getBundle(&quot;config&quot;,</div><div class="line">					locale);</div><div class="line">			value = localResource.getString(key);</div><div class="line">		&#125; catch (MissingResourceException mre) &#123;</div><div class="line">			value = &quot;&quot;;</div><div class="line">		&#125;</div><div class="line">		return value;</div><div class="line">	&#125;</div><div class="line">	public static void main(String[] args) &#123;</div><div class="line">		System.out.println(getYOUKU(&quot;parseAllNumber&quot;));</div><div class="line">		System.out.println(getConfig(&quot;threadNum&quot;));</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>3.在开始执行类中:StartDSJ 定义一个固定的线程池属性</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">	</div><div class="line">	      /**</div><div class="line">	     * 固定线程池</div><div class="line">	     */</div><div class="line">	    private ExecutorService newFixedThreadPool = Executors.newFixedThreadPool(Integer.parseInt(LoadPropertyUtil.getConfig(&quot;threadNum&quot;)));</div><div class="line"></div><div class="line">    ```    </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 2.在开始爬虫里面进行多线程操作</div></pre></td></tr></table></figure>
+<pre><code>/**
+ * 开启一个爬虫入口
+*/
+</code></pre><p>   public void startSpider(){</p>
+<pre><code>   while(true){
+    //从队列中提取需要解析的url
+     //String url = urlQueue.poll();
+     String url = repositoryService.poll();
+     //判断url是否为空
+     if(StringUtils.isNotBlank(url)){
+         //执行多线程
+         newFixedThreadPool.execute(new Runnable() {
+             @Override
+             public void run() {
+                 System.out.println(&quot;当前第&quot;+Thread.currentThread().getId()+&quot;个线程&quot;);
+                 //下载
+                 Page page = StartDSJ.this.downloadPage(url);
+                 //解析
+                 StartDSJ.this.processPage(page);
+                 List&lt;String&gt; urlList = page.getUrlList();
+
+                 //循环抓取
+                 for(String eachUrl:urlList){
+                     //循环遍历时候,根据每一个url的前缀是否是 http://tv.youku.com/search/index
+                     if(eachUrl.startsWith(&quot;http://tv.youku.com/search/index&quot;)){
+                         StartDSJ.this.repositoryService.addHighLevel(eachUrl);
+                     }else{
+                         StartDSJ.this.repositoryService.addLowLevel(eachUrl);
+                     }
+                     // this.urlQueue.add(eachUrl);
+                 }
+                 if(page.getUrl().startsWith(&quot;http://www.youku.com/show_page&quot;)){
+                     //存储数据
+                     StartDSJ.this.processPage(page);
+                 }
+
+                 //为了防止频繁短时间抓取,ip被封锁,我们引入
+                 ThreadUtil.sleep(Long.parseLong(LoadPropertyUtil.getConfig(&quot;millions_3&quot;)));
+             }
+         });
+     }else{
+         System.out.println(&quot;队列中的电视剧url解析完毕，请等待！&quot;);
+         //线程睡眠5秒
+         ThreadUtil.sleep(Long.parseLong(LoadPropertyUtil.getConfig(&quot;millions_5&quot;)));
+     }
+   }
+}
+</code></pre> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 3.降低访问频率(防止网站封ip)</div><div class="line">1. 定义一个线程工具类,让线程休眠</div></pre></td></tr></table></figure>
+<p>  public class ThreadUtil {</p>
+<p> @SuppressWarnings(“static-access”)<br> public static void sleep(long millions){</p>
+<pre><code>try {
+    Thread.currentThread().sleep(millions);
+} catch (InterruptedException e) {
+    // TODO Auto-generated catch block
+    e.printStackTrace();
+}
+</code></pre><p>   }<br> }</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 在config.properties里面配置</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>  threadNum=5  
+  millions_3=3000   
+  millions_5=5000   
+
+```
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/15/java爬虫-15-多线程爬虫/" class="archive-article-date">
+  	<time datetime="2018-11-15T15:51:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java-爬虫-14-采用Redis创建url仓库-实现分布式爬虫" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -792,58 +924,6 @@
       
       <a href="/2018/11/05/java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面/" class="archive-article-date">
   	<time datetime="2018-11-05T15:34:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-05</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-java爬虫-6-部署方案" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/05/java爬虫-6-部署方案/">java爬虫-6-部署方案</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.爬虫部署服务<br>2.部署方案图  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-爬虫部署服务"><a href="#1-爬虫部署服务" class="headerlink" title="1.爬虫部署服务"></a>1.爬虫部署服务</h5><p>服务器部署方案如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/29.png" alt=""> </p>
-<h5 id="2-部署方案图"><a href="#2-部署方案图" class="headerlink" title="2.部署方案图"></a>2.部署方案图</h5><p>部署图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/30.png" alt=""> </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/05/java爬虫-6-部署方案/" class="archive-article-date">
-  	<time datetime="2018-11-05T15:15:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-05</time>
 </a>
       
 	<div class="article-tag tagcloud">

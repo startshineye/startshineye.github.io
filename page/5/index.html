@@ -152,6 +152,100 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-52-rabbitmq安装" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/05/24/zyzx-52-rabbitmq安装/">zyzx(52)-rabbitmq安装</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>后台服务于工具消息中间件：rabbitmq安装</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="一、安装Erlang"><a href="#一、安装Erlang" class="headerlink" title="一、安装Erlang"></a>一、安装Erlang</h5><h6 id="1、下载Erlang"><a href="#1、下载Erlang" class="headerlink" title="1、下载Erlang"></a>1、下载Erlang</h6><pre><code>wget  http://erlang.org/download/otp_src_17.0.tar.gz
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/32.png" alt=""></p>
+<h6 id="2、解压"><a href="#2、解压" class="headerlink" title="2、解压"></a>2、解压</h6><pre><code>tar -zxvf otp_src_17.0.tar.gz
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/33.png" alt="">  </p>
+<h6 id="3、安装Erlang编译环境"><a href="#3、安装Erlang编译环境" class="headerlink" title="3、安装Erlang编译环境"></a>3、安装Erlang编译环境</h6><pre><code>yum -y install make ncurses-devel gcc gcc-c++ unixODBC unixODBC-devel openssl openssl-devel
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/34.png" alt="">  </p>
+<h6 id="4、编译安装Erlang"><a href="#4、编译安装Erlang" class="headerlink" title="4、编译安装Erlang"></a>4、编译安装Erlang</h6><pre><code>cd otp_src_17.0
+</code></pre><p>配置：</p>
+<pre><code>./configure  --prefix=/usr/local/erlang   --enable-smp-support   --enable-threads   --enable-sctp  --enable-kernel-poll    --enable-hipe  --with-ssl
+</code></pre><p>参数说明：<br>–prefix  指定安装目录<br>–enable-smp-support启用对称多处理支持（Symmetric Multi-Processing对称多处理结构的简称）<br>–enable-threads启用异步线程支持<br>–enable-sctp启用流控制协议支持（Stream Control Transmission Protocol，流控制传输协议）<br>–enable-kernel-poll启用Linux内核poll<br>–enable-hipe启用高性能Erlang（High Performance Erlang）<br>–with-ssl使用SSL包  </p>
+<p>编译和安装：  </p>
+<pre><code>make &amp;&amp; make install
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/35.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/36.png" alt=""></p>
+<h6 id="5、设置环境变量"><a href="#5、设置环境变量" class="headerlink" title="5、设置环境变量"></a>5、设置环境变量</h6><pre><code>vi /etc/profile 
+
+    ERL_HOME=/usr/local/erlang  
+    PATH=$ERL_HOME/bin:$PATH  
+    export ERL_HOME PATH  
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/37.png" alt=""></p>
+<p>使配置生效：</p>
+<pre><code>source /etc/profile
+</code></pre><h6 id="6-查看安装与否"><a href="#6-查看安装与否" class="headerlink" title="6.查看安装与否"></a>6.查看安装与否</h6><pre><code>erl
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/38.png" alt=""></p>
+<h5 id="二、安装rabbitmq"><a href="#二、安装rabbitmq" class="headerlink" title="二、安装rabbitmq"></a>二、安装rabbitmq</h5><h6 id="1、下载rabbigmq"><a href="#1、下载rabbigmq" class="headerlink" title="1、下载rabbigmq"></a>1、下载rabbigmq</h6><pre><code>wget http://www.rabbitmq.com/releases/rabbitmq-server/v3.6.0/rabbitmq-server-3.6.0-1.noarch.rpm
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/39.png" alt=""></p>
+<h6 id="2、安装"><a href="#2、安装" class="headerlink" title="2、安装"></a>2、安装</h6><pre><code>rpm -i --nodeps rabbitmq-server-3.6.0-1.noarch.rpm
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/40.png" alt=""></p>
+<h6 id="3、启动"><a href="#3、启动" class="headerlink" title="3、启动"></a>3、启动</h6><pre><code>service rabbitmq-server start 
+</code></pre><p>出现的错误以及解决办法如下：</p>
+<pre><code>ln -s /usr/local/erlang/bin/erl /usr/bin/erl
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/45.png" alt=""></p>
+<p>常用的几个命令：<br>service rabbitmq-server start  启动服务<br>service rabbitmq-server etc   查看哪些命令可以使用<br>service rabbitmq-server stop  停止服务<br>service rabbitmq-server status查看服务状态    </p>
+<h5 id="三、开启界面访问rabbitmq"><a href="#三、开启界面访问rabbitmq" class="headerlink" title="三、开启界面访问rabbitmq"></a>三、开启界面访问rabbitmq</h5><p>执行：</p>
+<pre><code>/usr/sbin/rabbitmq-plugins enable rabbitmq_management 
+</code></pre><p>添加可视化插件</p>
+<p>页面访问：<a href="http://10.211.55.9:15672/" target="_blank" rel="external">http://10.211.55.9:15672/</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/43.png" alt=""></p>
+<p>添加访问账号和密码：</p>
+<pre><code>rabbitmqctl add_user mytest mytest  
+rabbitmqctl set_user_tags mytest administrator
+rabbitmqctl set_permissions -p / mytest &apos;.*&apos; &apos;.*&apos; &apos;.*&apos;
+rabbitmqctl list_permissions
+</code></pre><p>mytest/nytest登录进去</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/44.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/05/24/zyzx-52-rabbitmq安装/" class="archive-article-date">
+  	<time datetime="2018-05-23T16:42:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-51-springBoot实现邮件发送" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1065,144 +1159,6 @@ public class RedisConfig {
       
       <a href="/2018/05/12/zyzx-41-SpringBoot整合redis/" class="archive-article-date">
   	<time datetime="2018-05-12T11:12:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-12</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-38-springBoot整合mybatis" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/05/zyzx-38-springBoot整合mybatis/">zyzx(38)-springBoot整合mybatis</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>可以参考:<a href="https://startshineye.github.io/2017/10/04/SpringBoot-35-SpringBoot-mybatis-xml/" target="_blank" rel="external">https://startshineye.github.io/2017/10/04/SpringBoot-35-SpringBoot-mybatis-xml/</a><br>可以参考:<a href="https://startshineye.github.io/2017/10/04/SpringBoot-36-SpringBoot-mybatis-xml%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/" target="_blank" rel="external">https://startshineye.github.io/2017/10/04/SpringBoot-36-SpringBoot-mybatis-xml%E5%A2%9E%E5%88%A0%E6%94%B9%E6%9F%A5/</a></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-添加依赖"><a href="#1-添加依赖" class="headerlink" title="1.添加依赖"></a>1.添加依赖</h5><pre><code>&lt;dependency&gt;
-        &lt;groupId&gt;mysql&lt;/groupId&gt;
-        &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-        &lt;version&gt;5.1.21&lt;/version&gt;
-&lt;/dependency&gt;
-
-&lt;dependency&gt;
-        &lt;groupId&gt;org.mybatis.spring.boot&lt;/groupId&gt;
-        &lt;artifactId&gt;mybatis-spring-boot-starter&lt;/artifactId&gt;
-        &lt;version&gt;1.3.1&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-建立实体"><a href="#2-建立实体" class="headerlink" title="2.建立实体"></a>2.建立实体</h5><pre><code>public class MyBatisUser {
-private Integer id;
-private String name;
-private Integer age;
-public Integer getId() {
-    return id;
-}
-
-public void setId(Integer id) {
-    this.id = id;
-}
-
-public String getName() {
-    return name;
-}
-
-public void setName(String name) {
-    this.name = name;
-}
-
-public Integer getAge() {
-    return age;
-}
-
-public void setAge(Integer age) {
-    this.age = age;
-}
-}
-</code></pre><h5 id="3-建立mapper"><a href="#3-建立mapper" class="headerlink" title="3.建立mapper"></a>3.建立mapper</h5><p>一般我们都是创建mybatis时候都是创建一个dao和对应的mapper.xml文件,此处为了简化,我们类似于做一个合并。定义一个MybatisUserMapper接口,使用注解实现简单的增删查改。  </p>
-<pre><code>@Mapper
-public interface MybatisUserMapper {
-@Select(&quot;select * from mybatis_user where name=#{name}&quot;)
-MybatisUser findByName(@Param(&quot;name&quot;) String name);
-
-@Insert(&quot;insert into mybatis_user(name,age) values(#{name}, #{age})&quot;)
-int insert(@Param(&quot;name&quot;) String name, @Param(&quot;age&quot;) Integer age);
-
-//以map形式接受参数
-@Insert(&quot;INSERT INTO mybatis_user(NAME, AGE) VALUES(#{name,jdbcType=VARCHAR}, #{age,jdbcType=INTEGER})&quot;)
-int insertByMap(Map&lt;String, Object&gt; map);
-
-//以实体类形式接受参数
-@Insert(&quot;INSERT INTO mybatis_user(NAME, AGE) VALUES(#{name}, #{age})&quot;)
-int insertByMybatisUser(MybatisUser user);
-
-//更新
-@Update(&quot;update mybatis_user set age=30 where id=#{id}&quot;)
-void update(@Param(&quot;id&quot;) Integer id);
-
-//删除
-@Delete(&quot;DELETE FROM mybatis_user WHERE id =#{id}&quot;)
-void delete(Integer id);
-} 
-</code></pre><h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class XxxxSpringbootApplicationTests {
-@Autowired
-private Student stu;
-@Autowired
-private IUserService userService;
-
-@Autowired
-private ITeacherSerivce teacherService;
-
-@Autowired
-private MybatisUserMapper mybatisUserMapper;
-
-@Test
-public void contextLoads() {
-    //mybatis集成测试
-    mybatisUserMapper.insert(&quot;zs&quot;,23);
-    mybatisUserMapper.insert(&quot;ls&quot;,24);
-    mybatisUserMapper.insert(&quot;ww&quot;,25);
-    mybatisUserMapper.insert(&quot;zl&quot;,26);
-}
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/8.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/05/zyzx-38-springBoot整合mybatis/" class="archive-article-date">
-  	<time datetime="2018-05-05T03:11:05.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-05</time>
 </a>
       
 	<div class="article-tag tagcloud">
