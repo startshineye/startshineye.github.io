@@ -28,7 +28,14 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/164.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/165.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/166.png">
-<meta property="og:updated_time" content="2018-12-15T14:02:07.988Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/167.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/168.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/169.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/170.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/171.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/172.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/173.png">
+<meta property="og:updated_time" content="2018-12-16T10:16:04.446Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="netty实践-十九-发现页面与通讯录相关功能开发">
 <meta name="twitter:description" content="前言用户可以通过搜索其他用户账号进行好友添加，或者通过用户的唯一二维码进行扫码添加，发送添加请求后其他用户可以拒绝或者同意好友请求1 发现页面编码2 搜索朋友账号接口3 搜索朋友前后端联调4 搜索结果页讲解以及webview传参5 发送添加好友请求接口编码6 前后端连天发送好友请求7 查询好友请求接口8 朋友接受到请求页面联调开发9 同意或忽略事件动态绑定10 同意或忽略controller11">
@@ -266,7 +273,182 @@
 <li>拷贝mui.indexedlist.js  </li>
 <li>在contact.html中引入css和js  </li>
 </ol>
-<h5 id="19-图文列表和通讯录整合增加用户头像显示"><a href="#19-图文列表和通讯录整合增加用户头像显示" class="headerlink" title="19 图文列表和通讯录整合增加用户头像显示"></a>19 图文列表和通讯录整合增加用户头像显示</h5><h5 id="20-查询用户的所有好友列表接口"><a href="#20-查询用户的所有好友列表接口" class="headerlink" title="20 查询用户的所有好友列表接口"></a>20 查询用户的所有好友列表接口</h5><h5 id="21-手机端获取好友列表保存到本地"><a href="#21-手机端获取好友列表保存到本地" class="headerlink" title="21 手机端获取好友列表保存到本地"></a>21 手机端获取好友列表保存到本地</h5><h5 id="22-定义通讯录好友列表模型"><a href="#22-定义通讯录好友列表模型" class="headerlink" title="22 定义通讯录好友列表模型"></a>22 定义通讯录好友列表模型</h5><h5 id="23-通讯录列表渲染展现"><a href="#23-通讯录列表渲染展现" class="headerlink" title="23 通讯录列表渲染展现"></a>23 通讯录列表渲染展现</h5><h5 id="24-好友请求接收方更新通讯录"><a href="#24-好友请求接收方更新通讯录" class="headerlink" title="24 好友请求接收方更新通讯录"></a>24 好友请求接收方更新通讯录</h5>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/167.png" alt=""> </p>
+<h5 id="19-图文列表和通讯录整合增加用户头像显示"><a href="#19-图文列表和通讯录整合增加用户头像显示" class="headerlink" title="19 图文列表和通讯录整合增加用户头像显示"></a>19 图文列表和通讯录整合增加用户头像显示</h5><ol>
+<li>目前我们已经集成了通讯录列表,但是没有列表头像,我们要在其左边设置头像，并且我们将其设置为图文标签机上class:mui-media  </li>
+<li>并且给图片img好文字div以及li设置样式  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/168.png" alt=""> </p>
+<h5 id="20-查询用户的所有好友列表接口"><a href="#20-查询用户的所有好友列表接口" class="headerlink" title="20 查询用户的所有好友列表接口"></a>20 查询用户的所有好友列表接口</h5><p>controller:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">  /**</div><div class="line"> * 根据userId查询我的好友:需要返回朋友信息,我们可以定义一个VO</div><div class="line"> * @param userId</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">@RequestMapping(value = &quot;/queryMyFriends&quot;,method = RequestMethod.POST)</div><div class="line">public R queryMyFriends(String userId)&#123;</div><div class="line">        if(StringUtils.isBlank(userId))&#123;</div><div class="line">            return R.errorMsg(&quot;userId不能为空&quot;);</div><div class="line">        &#125;</div><div class="line">        List&lt;MyFriendsVO&gt;  myFriends =  userServiceSV.queryMyFriends(userId);</div><div class="line">        return R.ok(myFriends);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>IServiceSV:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> /**</div><div class="line"> * 查询我的朋友列表</div><div class="line"> * @param userId</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">List&lt;MyFriendsVO&gt; queryMyFriends(String userId);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> @Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public List&lt;MyFriendsVO&gt; queryMyFriends(String userId) &#123;</div><div class="line">   return myFriendsMapper.queryMyFriends(userId);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>mapper.xml:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">&lt;select id=&quot;queryMyFriends&quot; resultType=&quot;com.cc.pojo.vo.MyFriendsVO&quot; parameterType=&quot;java.lang.String&quot;&gt;</div><div class="line">  select</div><div class="line">    u.id as friendUserId,</div><div class="line">    u.username as friendUsername,</div><div class="line">    u.face_image as friendFaceImage,</div><div class="line">    u.nickname as friendNickname</div><div class="line">   from  magic_my_friends mf</div><div class="line">   left join magic_users u</div><div class="line">     on u.id = mf.my_friend_id</div><div class="line">    where mf.my_user_id = #&#123;userId&#125;</div><div class="line"> &lt;/select&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="21-手机端获取好友列表保存到本地"><a href="#21-手机端获取好友列表保存到本地" class="headerlink" title="21 手机端获取好友列表保存到本地"></a>21 手机端获取好友列表保存到本地</h5><h6 id="21-1-手机端获取好友列表"><a href="#21-1-手机端获取好友列表" class="headerlink" title="21.1 手机端获取好友列表"></a>21.1 手机端获取好友列表</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">       ///获取后端好友列表  </div><div class="line">function fetchContactList()&#123;</div><div class="line">	  alert(&quot;fetchContactList&quot;);</div><div class="line">	    var user = app.getGlobalUserInfo();</div><div class="line">		mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,&#123;</div><div class="line">				data:&#123;</div><div class="line">					userId:user.id</div><div class="line">				&#125;,</div><div class="line">				type:&apos;post&apos;,//HTTP请求类型</div><div class="line">				timeout:10000,//超时时间设置为10秒；</div><div class="line">				success:function(data)&#123;</div><div class="line">					if(data.status==200)&#123;</div><div class="line">						//获取到好友列表后,保存到全局</div><div class="line">						app.setContactList(data.data);</div><div class="line">						 console.log(JSON.stringify(data));</div><div class="line">					&#125;else&#123;</div><div class="line">					 //失败给出提示</div><div class="line">					    app.showToast(data.msg,&quot;error&quot;)</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="21-2-好友列表保存到本地"><a href="#21-2-好友列表保存到本地" class="headerlink" title="21.2 好友列表保存到本地"></a>21.2 好友列表保存到本地</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/169.png" alt="">  </p>
+<h5 id="22-定义通讯录好友列表模型"><a href="#22-定义通讯录好友列表模型" class="headerlink" title="22 定义通讯录好友列表模型"></a>22 定义通讯录好友列表模型</h5><ol>
+<li><p>通讯录好友模型我们用二维数据表示:前面表示字母A,B,C,D,…,Z 第二维是表示具体的friend对象  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">var contact = [</div><div class="line">    [],[],[]</div><div class="line">]</div></pre></td></tr></table></figure>
+</li>
+<li><p>获取到联系人列表后,我们就需要把其丢到之前的二维数组里面去,那么我们需要获取到联系人昵称,根据昵称找到联系人首字母  </p>
+</li>
+<li>在获取首字母之前,我们需要根据昵称获取拼音,然后截取第一个字符  </li>
+<li><p>根据昵称获取拼音使用:nickname.js插件,引入nickname.js<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/170.png" alt="">  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">      &lt;script src=&quot;js/nickname.js&quot;&gt;&lt;/script&gt;  </div><div class="line"></div><div class="line">&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	mui.init();</div><div class="line">	//26个字母外加 # 号 </div><div class="line">	var enWords=[</div><div class="line">	  &apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;D&apos;,&apos;E&apos;,&apos;F&apos;,&apos;G&apos;,</div><div class="line">	  &apos;H&apos;,&apos;I&apos;,&apos;J&apos;,&apos;K&apos;,&apos;L&apos;,&apos;M&apos;,&apos;N&apos;,</div><div class="line">	  &apos;O&apos;,&apos;P&apos;,&apos;Q&apos;,&apos;R&apos;,&apos;S&apos;,&apos;T&apos;,&apos;U&apos;,</div><div class="line">	  &apos;V&apos;,&apos;W&apos;,&apos;X&apos;,&apos;Y&apos;,&apos;Z&apos;,&apos;#&apos;</div><div class="line">	];</div><div class="line">	//存储的二维数组</div><div class="line">	var contactArray = [</div><div class="line">	 [],[],[],[],[],[],[],</div><div class="line">	 [],[],[],[],[],[],[]</div><div class="line">	];</div><div class="line">	</div><div class="line">	mui.plusReady(function()&#123;</div><div class="line">		</div><div class="line">		fetchContactList();</div><div class="line">		//在当前页面show的时候,加载出列表</div><div class="line">		var thisWebview = plus.webview.currentWebview();</div><div class="line">		thisWebview.addEventListener(&quot;show&quot;,function()&#123;</div><div class="line">			showList();</div><div class="line">		&#125;);</div><div class="line">	&#125;);</div><div class="line">	</div><div class="line">	//从缓存中获取联系人列表,并且渲染到页面  </div><div class="line">	function renderContactPage()&#123;</div><div class="line">		//1.获取联系人列表</div><div class="line">		var friendList = app.getContactList();</div><div class="line">		//2.循环好友列表,转换为拼音  </div><div class="line">		for(var i=0;i&lt;friendList.length;i++)&#123;</div><div class="line">			var friend = friendList[i];</div><div class="line">			//2.1转换拼音</div><div class="line">			var pinyin = words.getPingYinFromWords(friend.friendNickname);</div><div class="line">			// 2.2 截取拼音的首字母</div><div class="line">			var firstChar = pinyin.substr(0,1).toUpperCase();</div><div class="line">			//2.3 获取首字母在二维数组中的位置</div><div class="line">			var order = getOrderOfEnWords(firstChar);</div><div class="line">			// 2.4 获得顺序之后，塞入朋友</div><div class="line">			contactArray[order].push(friend);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">          function getOrderOfEnWords(enChar)&#123;</div><div class="line">          	//获取英文字母在27个字母的位置,我们首先需要构造27个字母数组</div><div class="line">          	for(var i=0;i&lt;enWords.length;i++)&#123;</div><div class="line">          		if(enChar[i]==enChar)&#123;</div><div class="line">          		 return i;	</div><div class="line">          		&#125;</div><div class="line">          	&#125;</div><div class="line">          	//没有匹配到(数字,表情,其他特殊字符):把数组长度26返回出去</div><div class="line">          	return enWords.length-1;</div><div class="line">          &#125;</div><div class="line">          </div><div class="line">          </div><div class="line">	///获取后端好友列表  </div><div class="line">	function fetchContactList()&#123;</div><div class="line">		  alert(&quot;fetchContactList&quot;);</div><div class="line">		    var user = app.getGlobalUserInfo();</div><div class="line">			mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,&#123;</div><div class="line">					data:&#123;</div><div class="line">						userId:user.id</div><div class="line">					&#125;,</div><div class="line">					type:&apos;post&apos;,//HTTP请求类型</div><div class="line">					timeout:10000,//超时时间设置为10秒；</div><div class="line">					success:function(data)&#123;</div><div class="line">						if(data.status==200)&#123;</div><div class="line">							//获取到好友列表后,保存到全局</div><div class="line">							app.setContactList(data.data);</div><div class="line">							 console.log(JSON.stringify(data));</div><div class="line">						&#125;else&#123;</div><div class="line">						 //失败给出提示</div><div class="line">						    app.showToast(data.msg,&quot;error&quot;)</div><div class="line">						&#125;</div><div class="line">					&#125;</div><div class="line">				&#125;);</div><div class="line">	&#125;</div><div class="line">	/**</div><div class="line">	 * 展示列表</div><div class="line">	 */</div><div class="line">	function showList()&#123;</div><div class="line">		var list = document.getElementById(&quot;list&quot;);</div><div class="line">		list.style.height = document.body.offsetHeight+&quot;px&quot;;</div><div class="line">		window.indexedList = new mui.IndexedList(list);</div><div class="line">	&#125;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="23-通讯录列表渲染展现"><a href="#23-通讯录列表渲染展现" class="headerlink" title="23 通讯录列表渲染展现"></a>23 通讯录列表渲染展现</h5><ol>
+<li>其实就是根据我们的二维数组做一个双重循环  </li>
+<li><p>双重循环时候对以下基本元素进行拼接  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">         &lt;li data-group=&quot;A&quot; class=&quot;mui-table-view-divider mui-indexed-list-group&quot;&gt;A&lt;/li&gt;</div><div class="line">&lt;li class=&quot;mui-media  mui-table-view-cell mui-indexed-list-item&quot; style=&quot;padding: 8px 10px;&quot;&gt;</div><div class="line">&lt;img  class=&quot;mui-media-object mui-pull-left&quot; style=&quot;max-width: 35px;height: 35px;&quot; src=&quot;css/registLogin/arrow.jpg&quot;/&gt;</div><div class="line">&lt;div class=&quot;mui-media-body&quot; style=&quot;line-height: 35px;&quot;&gt;yxm&lt;/div&gt;</div><div class="line">&lt;/li&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>为了以后方便,我们在li标签之上,做上相应的属性标识,用于以后传值:比如:friendUserId,friendNickname,friendFaceImage  </p>
+</li>
+<li>因为其二维数组是累加的,所以需要在我们渲染完毕之后做一个清空,清空就是重新赋空值  </li>
+<li>ul绑定id=”contactList” 进行渲染  </li>
+</ol>
+<pre><code>```
+
+ &lt;script type=&quot;text/javascript&quot;&gt;
+       mui.init();
+       //26个字母外加 # 号 
+       var enWords=[
+         &apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;D&apos;,&apos;E&apos;,&apos;F&apos;,&apos;G&apos;,
+         &apos;H&apos;,&apos;I&apos;,&apos;J&apos;,&apos;K&apos;,&apos;L&apos;,&apos;M&apos;,&apos;N&apos;,
+         &apos;O&apos;,&apos;P&apos;,&apos;Q&apos;,&apos;R&apos;,&apos;S&apos;,&apos;T&apos;,&apos;U&apos;,
+         &apos;V&apos;,&apos;W&apos;,&apos;X&apos;,&apos;Y&apos;,&apos;Z&apos;,&apos;#&apos;
+       ];
+       //存储的二维数组
+       var contactArray = [
+        [],[],[],[],[],[],[],
+        [],[],[],[],[],[],[]
+       ];
+
+       mui.plusReady(function(){
+
+           fetchContactList();
+           //在当前页面show的时候,加载出列表
+           var thisWebview = plus.webview.currentWebview();
+           thisWebview.addEventListener(&quot;show&quot;,function(){
+               //alert(&quot;contact show&quot;);
+               // 从缓存中获取联系人列表，并且渲染到页面
+               renderContactPage();
+               // 显示通讯录
+               showList();
+           });
+       });
+
+       //从缓存中获取联系人列表,并且渲染到页面  
+       function renderContactPage(){
+           //1.获取联系人列表
+           var friendList = app.getContactList();
+           console.log(&quot;app.getContactList:&quot;+JSON.stringify(friendList));
+           //2.循环好友列表,转换为拼音  
+           for(var i=0;i&lt;friendList.length;i++){
+               //alert(i);
+               var friend = friendList[i];
+               //2.1转换拼音
+               var pinyin = words.getPingYinFromWords(friend.friendNickname);
+               // 2.2 截取拼音的首字母
+               var firstChar = pinyin.substr(0,1).toUpperCase();
+               //2.3 获取首字母在二维数组中的位置
+               var order = getOrderOfEnWords(firstChar);
+               // 2.4 获得顺序之后，塞入朋友
+               contactArray[order].push(friend);
+           };
+
+           // 3. 构建通讯录html进行渲染
+           var contactHtml = &quot;&quot;;
+           for(var i=0;i&lt;contactArray.length;i++){
+               //获取每一个order下的friend数组
+               var friendArray = contactArray[i];
+               //判断非空
+               if(friendArray.length&gt;0){
+                   var nicknameStarter = enWords[i];
+                   contactHtml +=&apos;&lt;li data-group=&quot;&apos;+nicknameStarter+&apos;&quot; class=&quot;mui-table-view-divider mui-indexed-list-group&quot;&gt;&apos;+nicknameStarter+&apos;&lt;/li&gt;&apos;;
+                    for(var j=0;j&lt;friendArray.length;j++){
+                        contactHtml +=&apos;&lt;li friendUserId=&quot;&apos; + friendArray[j].friendUserId + &apos;&quot; friendNickname=&quot;&apos; + friendArray[j].friendNickname + &apos;&quot; friendFaceImage=&quot;&apos; + friendArray[j].friendFaceImage + &apos;&quot; class=&quot;mui-media  mui-table-view-cell mui-indexed-list-item&quot; style=&quot;padding: 8px 10px;&quot;&gt;&apos;+
+                       &apos;&lt;img  class=&quot;mui-media-object mui-pull-left&quot; style=&quot;max-width: 35px;height: 35px;&quot; src=&quot;&apos;+ app.imgServerUrl + friendArray[j].friendFaceImage+&apos;&quot;/&gt;&apos;+
+                       &apos;&lt;div class=&quot;mui-media-body&quot; style=&quot;line-height: 35px;&quot;&gt;&apos; + friendArray[j].friendNickname + &apos;&lt;/div&gt;&apos;+
+                       &apos;&lt;/li&gt;&apos;;
+                    }
+               }
+           }
+
+           //渲染列表
+           document.getElementById(&quot;contactList&quot;).innerHTML = contactHtml;
+           // 清空数组
+           clearContactArray();
+       }
+
+       function getOrderOfEnWords(enChar){
+           //获取英文字母在27个字母的位置,我们首先需要构造27个字母数组
+           for(var i=0;i&lt;enWords.length;i++){
+               if(enChar[i]==enChar){
+                return i;    
+               }
+           }
+           //没有匹配到(数字,表情,其他特殊字符):把数组长度26返回出去
+           return enWords.length-1;
+       }
+
+       /**
+        * 清空数组
+        */
+       function clearContactArray(){
+           contactArray = [
+          [],[],[],[],[],[],[],
+          [],[],[],[],[],[],[]
+         ];
+       }
+
+       ///获取后端好友列表  
+       function fetchContactList(){
+             // alert(&quot;fetchContactList&quot;);
+               var user = app.getGlobalUserInfo();
+               mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,{
+                       data:{
+                           userId:user.id
+                       },
+                       type:&apos;post&apos;,//HTTP请求类型
+                       timeout:10000,//超时时间设置为10秒；
+                       success:function(data){
+                           if(data.status==200){
+                               //获取到好友列表后,保存到全局
+                                app.setContactList(data.data);
+                                console.log(&quot;contactList:&quot;+JSON.stringify(data));
+                           }else{
+                            //失败给出提示
+                               app.showToast(data.msg,&quot;error&quot;)
+                           }
+                       }
+                   });
+       }
+       /**
+        * 展示列表
+        */
+       function showList(){
+           var list = document.getElementById(&quot;list&quot;);
+           list.style.height = document.body.offsetHeight+&quot;px&quot;;
+           window.indexedList = new mui.IndexedList(list);
+       }
+   &lt;/script&gt;
+
+```      
+</code></pre><h5 id="24-好友请求接收方更新通讯录"><a href="#24-好友请求接收方更新通讯录" class="headerlink" title="24 好友请求接收方更新通讯录"></a>24 好友请求接收方更新通讯录</h5><ol>
+<li><p>之前遗留的小问题:我们之前在chatlist.html中操作好友请求时候<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/171.png" alt="">  </p>
+</li>
+<li><p>通过好友请求之后,对于我自己的通讯录,我们要做一次更新<br>我们需要在上面进行一次查询,我们需要在下面接口中进行一次查询返回<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/172.png" alt="">  </p>
+</li>
+<li><p>前端重新获取,并保存到全局缓存中。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/173.png" alt=""> </p>
+</li>
+<li><p>此时发送方的好友列表,我们暂时还是不做,默认为TODO.等到websocket做完之后,我们再次实现。    </p>
+</li>
+</ol>
+
       
     </div>
     <div class="article-info article-info-index">
