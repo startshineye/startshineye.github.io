@@ -1,0 +1,460 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>netty实践-二十-聊天页面制作 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。
+1.聊天页面讲解与展示9-2 header动态改为好友昵称，动态滚动到最新消息9-3 发送按钮的颜色状态改变9-4 弹出软键盘重新设置聊天窗口高度9-5 发送消息前置条件网络状态判断9-6 监听网络连接事件9-7 发送消息html渲染9-8">
+<meta property="og:type" content="article">
+<meta property="og:title" content="netty实践-二十-聊天页面制作">
+<meta property="og:url" content="https://github.com/startshineye/2018/12/16/netty实践-二十-聊天页面制作/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="前言构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。
+1.聊天页面讲解与展示9-2 header动态改为好友昵称，动态滚动到最新消息9-3 发送按钮的颜色状态改变9-4 弹出软键盘重新设置聊天窗口高度9-5 发送消息前置条件网络状态判断9-6 监听网络连接事件9-7 发送消息html渲染9-8">
+<meta property="og:image" content="https://github.com/startshineye/174.png">
+<meta property="og:image" content="https://github.com/startshineye/175.png">
+<meta property="og:updated_time" content="2018-12-16T14:03:11.038Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="netty实践-二十-聊天页面制作">
+<meta name="twitter:description" content="前言构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。
+1.聊天页面讲解与展示9-2 header动态改为好友昵称，动态滚动到最新消息9-3 发送按钮的颜色状态改变9-4 弹出软键盘重新设置聊天窗口高度9-5 发送消息前置条件网络状态判断9-6 监听网络连接事件9-7 发送消息html渲染9-8">
+<meta name="twitter:image" content="https://github.com/startshineye/174.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-netty实践-二十-聊天页面制作" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      netty实践-二十-聊天页面制作
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。</p>
+<p>1.聊天页面讲解与展示<br>9-2 header动态改为好友昵称，动态滚动到最新消息<br>9-3 发送按钮的颜色状态改变<br>9-4 弹出软键盘重新设置聊天窗口高度<br>9-5 发送消息前置条件网络状态判断<br>9-6 监听网络连接事件<br>9-7 发送消息html渲染<br>9-8 接收消息html渲染<br>9-9 发送消息与接收消息时的铃声播放<br>9-10 手机端websocket模型定义和发送消息<br>9-11 websocket接受消息的渲染_x264<br>9-12 服务器断开后的重连机制<br>9-13 chatHandler初步重构<br>9-14 构建聊天业务模型<br>9-15 chatHandler - 处理客户端连接<br>9-16 chatHandler - 保存聊天消息到数据库<br>9-17 chatHandler - 处理消息发送<br>9-18 chatHandler - 签收单条或多条消息<br>9-19 客户端onopen联调，初始化用户和channel关系<br>9-20 客户端发送消息与接收联调<br>9-21 接收方获得消息后重构渲染<br>9-22 客户端签收消息<br>9-23 websocket新增好友类型联调<br>9-24 保存聊天记录到本地<br>9-25 从本地获取聊天记录<br>9-26 初始化聊天记录和渲染<br>9-27 聊天快照业务简单讲解<br>9-28 保存聊天快照到本地<br>9-29 获取聊天快照<br>9-30 已读未读消息的设置与快照调用<br>9-31 展示聊天快照<br>9-32 未读消息小红点标记<br>9-33 点击快照开始聊天<br>9-34 未读消息标记已读<br>9-35 开发获取未读消息列表接口<br>9-36 前端获取未读消息列表<br>9-37 批量签收并且展示未读消息<br>9-38 聊天快照左滑删除效果<br>9-39 聊天快照右滑删除聊天记录与快照  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-聊天页面讲解与展示"><a href="#1-聊天页面讲解与展示" class="headerlink" title="1 聊天页面讲解与展示"></a>1 聊天页面讲解与展示</h5><ol>
+<li><p>新增chat.css和chatting.html  </p>
+<h6 id="1-1-聊天页面代码"><a href="#1-1-聊天页面代码" class="headerlink" title="1.1 聊天页面代码"></a>1.1 聊天页面代码</h6>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">     &lt;!DOCTYPE html&gt;</div><div class="line">     &lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;utf-8&quot;&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;link href=&quot;css/mui.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/header.css&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/chat.css&quot; /&gt;</div><div class="line">	&lt;style&gt;</div><div class="line">		html,</div><div class="line">		body &#123;</div><div class="line">			height: 100%;</div><div class="line">			margin: 0px;</div><div class="line">			padding: 0px;</div><div class="line">			overflow: hidden;</div><div class="line">			-webkit-touch-callout: none;</div><div class="line">			-webkit-user-select: none;</div><div class="line">		&#125;</div><div class="line">	&lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body contextmenu=&quot;return false;&quot;&gt;</div><div class="line">	&lt;header class=&quot;mui-bar mui-bar-nav title&quot; style=&quot;position: fixed;&quot;&gt;</div><div class="line">		&lt;a class=&quot;mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color&quot;&gt;&lt;/a&gt;</div><div class="line">		&lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b id=&quot;chatting-nickname&quot;&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">	&lt;/header&gt;</div><div class="line">	</div><div class="line">	&lt;div id=&quot;msg-outter&quot; class=&quot;mui-content&quot;&gt;</div><div class="line">		</div><div class="line">		&lt;!--消息div--&gt;</div><div class="line">		&lt;div id=&apos;msg&apos;&gt;</div><div class="line">			</div><div class="line">			&lt;!--朋友消息--&gt;</div><div class="line">			&lt;div class=&quot;friend_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper right&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-left-white&quot;&gt;你是谁？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">	</div><div class="line">              &lt;!--我发送的消息--&gt;</div><div class="line">			&lt;div class=&quot;me_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper left&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-right-green&quot;&gt;Zero？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	&lt;footer&gt;</div><div class="line">		&lt;!--文本输入框--&gt;</div><div class="line">		&lt;div class=&quot;footer-center&quot;&gt;</div><div class="line">			&lt;textarea id=&apos;msg-text&apos; type=&quot;text&quot; class=&apos;input-text&apos;&gt;&lt;/textarea&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">		&lt;!--发送框--&gt;</div><div class="line">		&lt;label for=&quot;&quot; class=&quot;footer-right&quot;&gt;</div><div class="line">			&lt;button type=&quot;button&quot; class=&quot;mui-btn mui-btn-gray&quot; id=&quot;send&quot;&gt;发送&lt;/button&gt;</div><div class="line">		&lt;/label&gt;</div><div class="line">	&lt;/footer&gt;</div><div class="line">	&lt;script src=&quot;js/mui.min.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;application/javascript&quot; src=&quot;js/app.js&quot;&gt;&lt;/script&gt;</div><div class="line">  &lt;/body&gt;</div><div class="line">    &lt;/html&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="1-2-聊天页面展示效果"><a href="#1-2-聊天页面展示效果" class="headerlink" title="1.2 聊天页面展示效果"></a>1.2 聊天页面展示效果</h6><p><img src="174.png" alt="">  </p>
+<h6 id="1-3-通讯录点击打开聊天页面"><a href="#1-3-通讯录点击打开聊天页面" class="headerlink" title="1.3 通讯录点击打开聊天页面"></a>1.3 通讯录点击打开聊天页面</h6><ol>
+<li>在通讯录–&gt;点击好友列表时候展示对应的聊天页面–&gt;进行聊天  </li>
+<li>我们在通讯录之前页面做一个动态绑定,之前在展示通讯录时候,我们队展示出来的列表并没有做聊天页面打开绑定,现在我们自定义一个class<br><img src="175.png" alt="">  </li>
+<li><p>我们在通讯录列表加载完毕之后绑定一个打击事件  </p>
+</li>
+<li><p>此时点击通讯录时候会进入到聊天页面,在tap里面传递好友基本信息  </p>
+</li>
+</ol>
+<ol>
+<li>聊天页面对于不同的人不同(具有唯一性):      </li>
+</ol>
+<h5 id="9-2-header动态改为好友昵称，动态滚动到最新消息"><a href="#9-2-header动态改为好友昵称，动态滚动到最新消息" class="headerlink" title="9-2 header动态改为好友昵称，动态滚动到最新消息"></a>9-2 header动态改为好友昵称，动态滚动到最新消息</h5><ol>
+<li>打开聊天页面时候,最上面展示的应该是朋友的昵称图标,而不是app名称  </li>
+<li><p>我们在contact.html页面时候,通讯录列表里面绑定了:friendUserId  friendNickname  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">      //为好友通讯录批量绑定点击事件  </div><div class="line">mui(&quot;#contactList&quot;).on(&quot;tap&quot;,&quot;.chat-with-friend&quot;,function(e)&#123;</div><div class="line">	var friendUserId = this.getAttribute(&quot;friendUserId&quot;);</div><div class="line">	var friendNickname = this.getAttribute(&quot;friendNickname&quot;);</div><div class="line">	var friendFaceImage = this.getAttribute(&quot;friendFaceImage&quot;);</div><div class="line">	</div><div class="line">	 //好友点击通讯录时候,会打开聊天页面  </div><div class="line">	 mui.openWindow(&#123;</div><div class="line">	 	url:&quot;chatting.html&quot;,</div><div class="line">	 	id:&quot;chatting.html&quot;,</div><div class="line">	 	extras:&#123;</div><div class="line">	 		friendUserId:friendUserId,</div><div class="line">	 		friendNickname:friendNickname,</div><div class="line">	 		friendFaceImage:friendFaceImage</div><div class="line">	 	&#125;</div><div class="line">	 &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="9-3-发送按钮的颜色状态改变"><a href="#9-3-发送按钮的颜色状态改变" class="headerlink" title="9-3 发送按钮的颜色状态改变"></a>9-3 发送按钮的颜色状态改变</h5><h5 id="9-4-弹出软键盘重新设置聊天窗口高度"><a href="#9-4-弹出软键盘重新设置聊天窗口高度" class="headerlink" title="9-4 弹出软键盘重新设置聊天窗口高度"></a>9-4 弹出软键盘重新设置聊天窗口高度</h5><h5 id="9-5-发送消息前置条件网络状态判断"><a href="#9-5-发送消息前置条件网络状态判断" class="headerlink" title="9-5 发送消息前置条件网络状态判断"></a>9-5 发送消息前置条件网络状态判断</h5><h5 id="9-6-监听网络连接事件"><a href="#9-6-监听网络连接事件" class="headerlink" title="9-6 监听网络连接事件"></a>9-6 监听网络连接事件</h5><h5 id="9-7-发送消息html渲染"><a href="#9-7-发送消息html渲染" class="headerlink" title="9-7 发送消息html渲染"></a>9-7 发送消息html渲染</h5><h5 id="9-8-接收消息html渲染"><a href="#9-8-接收消息html渲染" class="headerlink" title="9-8 接收消息html渲染"></a>9-8 接收消息html渲染</h5><h5 id="9-9-发送消息与接收消息时的铃声播放"><a href="#9-9-发送消息与接收消息时的铃声播放" class="headerlink" title="9-9 发送消息与接收消息时的铃声播放"></a>9-9 发送消息与接收消息时的铃声播放</h5><h5 id="9-10-手机端websocket模型定义和发送消息"><a href="#9-10-手机端websocket模型定义和发送消息" class="headerlink" title="9-10 手机端websocket模型定义和发送消息"></a>9-10 手机端websocket模型定义和发送消息</h5><h5 id="9-11-websocket接受消息的渲染-x264"><a href="#9-11-websocket接受消息的渲染-x264" class="headerlink" title="9-11 websocket接受消息的渲染_x264"></a>9-11 websocket接受消息的渲染_x264</h5><h5 id="9-12-服务器断开后的重连机制"><a href="#9-12-服务器断开后的重连机制" class="headerlink" title="9-12 服务器断开后的重连机制"></a>9-12 服务器断开后的重连机制</h5><h5 id="9-13-chatHandler初步重构"><a href="#9-13-chatHandler初步重构" class="headerlink" title="9-13 chatHandler初步重构"></a>9-13 chatHandler初步重构</h5><h5 id="9-14-构建聊天业务模型"><a href="#9-14-构建聊天业务模型" class="headerlink" title="9-14 构建聊天业务模型"></a>9-14 构建聊天业务模型</h5><h5 id="9-15-chatHandler-处理客户端连接"><a href="#9-15-chatHandler-处理客户端连接" class="headerlink" title="9-15 chatHandler - 处理客户端连接"></a>9-15 chatHandler - 处理客户端连接</h5><h5 id="9-16-chatHandler-保存聊天消息到数据库"><a href="#9-16-chatHandler-保存聊天消息到数据库" class="headerlink" title="9-16 chatHandler - 保存聊天消息到数据库"></a>9-16 chatHandler - 保存聊天消息到数据库</h5><h5 id="9-17-chatHandler-处理消息发送"><a href="#9-17-chatHandler-处理消息发送" class="headerlink" title="9-17 chatHandler - 处理消息发送"></a>9-17 chatHandler - 处理消息发送</h5><h5 id="9-18-chatHandler-签收单条或多条消息"><a href="#9-18-chatHandler-签收单条或多条消息" class="headerlink" title="9-18 chatHandler - 签收单条或多条消息"></a>9-18 chatHandler - 签收单条或多条消息</h5><h5 id="9-19-客户端onopen联调，初始化用户和channel关系"><a href="#9-19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="9-19 客户端onopen联调，初始化用户和channel关系"></a>9-19 客户端onopen联调，初始化用户和channel关系</h5><h5 id="9-20-客户端发送消息与接收联调"><a href="#9-20-客户端发送消息与接收联调" class="headerlink" title="9-20 客户端发送消息与接收联调"></a>9-20 客户端发送消息与接收联调</h5><h5 id="9-21-接收方获得消息后重构渲染"><a href="#9-21-接收方获得消息后重构渲染" class="headerlink" title="9-21 接收方获得消息后重构渲染"></a>9-21 接收方获得消息后重构渲染</h5><h5 id="9-22-客户端签收消息"><a href="#9-22-客户端签收消息" class="headerlink" title="9-22 客户端签收消息"></a>9-22 客户端签收消息</h5><h5 id="9-23-websocket新增好友类型联调"><a href="#9-23-websocket新增好友类型联调" class="headerlink" title="9-23 websocket新增好友类型联调"></a>9-23 websocket新增好友类型联调</h5><h5 id="9-24-保存聊天记录到本地"><a href="#9-24-保存聊天记录到本地" class="headerlink" title="9-24 保存聊天记录到本地"></a>9-24 保存聊天记录到本地</h5><h5 id="9-25-从本地获取聊天记录"><a href="#9-25-从本地获取聊天记录" class="headerlink" title="9-25 从本地获取聊天记录"></a>9-25 从本地获取聊天记录</h5><h5 id="9-26-初始化聊天记录和渲染"><a href="#9-26-初始化聊天记录和渲染" class="headerlink" title="9-26 初始化聊天记录和渲染"></a>9-26 初始化聊天记录和渲染</h5><h5 id="9-27-聊天快照业务简单讲解"><a href="#9-27-聊天快照业务简单讲解" class="headerlink" title="9-27 聊天快照业务简单讲解"></a>9-27 聊天快照业务简单讲解</h5><h5 id="9-28-保存聊天快照到本地"><a href="#9-28-保存聊天快照到本地" class="headerlink" title="9-28 保存聊天快照到本地"></a>9-28 保存聊天快照到本地</h5><h5 id="9-29-获取聊天快照"><a href="#9-29-获取聊天快照" class="headerlink" title="9-29 获取聊天快照"></a>9-29 获取聊天快照</h5><h5 id="9-30-已读未读消息的设置与快照调用"><a href="#9-30-已读未读消息的设置与快照调用" class="headerlink" title="9-30 已读未读消息的设置与快照调用"></a>9-30 已读未读消息的设置与快照调用</h5><h5 id="9-31-展示聊天快照"><a href="#9-31-展示聊天快照" class="headerlink" title="9-31 展示聊天快照"></a>9-31 展示聊天快照</h5><h5 id="9-32-未读消息小红点标记"><a href="#9-32-未读消息小红点标记" class="headerlink" title="9-32 未读消息小红点标记"></a>9-32 未读消息小红点标记</h5><h5 id="9-33-点击快照开始聊天"><a href="#9-33-点击快照开始聊天" class="headerlink" title="9-33 点击快照开始聊天"></a>9-33 点击快照开始聊天</h5><h5 id="9-34-未读消息标记已读"><a href="#9-34-未读消息标记已读" class="headerlink" title="9-34 未读消息标记已读"></a>9-34 未读消息标记已读</h5><h5 id="9-35-开发获取未读消息列表接口"><a href="#9-35-开发获取未读消息列表接口" class="headerlink" title="9-35 开发获取未读消息列表接口"></a>9-35 开发获取未读消息列表接口</h5><h5 id="9-36-前端获取未读消息列表"><a href="#9-36-前端获取未读消息列表" class="headerlink" title="9-36 前端获取未读消息列表"></a>9-36 前端获取未读消息列表</h5><h5 id="9-37-批量签收并且展示未读消息"><a href="#9-37-批量签收并且展示未读消息" class="headerlink" title="9-37 批量签收并且展示未读消息"></a>9-37 批量签收并且展示未读消息</h5><h5 id="9-38-聊天快照左滑删除效果"><a href="#9-38-聊天快照左滑删除效果" class="headerlink" title="9-38 聊天快照左滑删除效果"></a>9-38 聊天快照左滑删除效果</h5><h5 id="9-39-聊天快照右滑删除聊天记录与快照"><a href="#9-39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="9-39 聊天快照右滑删除聊天记录与快照"></a>9-39 聊天快照右滑删除聊天记录与快照</h5>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/12/16/netty实践-二十-聊天页面制作/" class="archive-article-date">
+  	<time datetime="2018-12-16T11:50:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2018/12/17/work-4-插件开发/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          work-4-插件开发
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2018/12/12/netty实践-十九-发现页面与通讯录相关功能开发/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">netty实践-十九-发现页面与通讯录相关功能开发</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="netty实践-二十-聊天页面制作" data-title="netty实践-二十-聊天页面制作" data-url="https://github.com/startshineye/2018/12/16/netty实践-二十-聊天页面制作/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2018 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 12.22px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

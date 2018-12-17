@@ -152,6 +152,128 @@
       <div class="body-wrap">
         
   
+    <article id="post-获取src下配置文件" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/17/获取src下配置文件/">获取src下配置文件</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>在很多情况下我们都需要加载src目录下的文件，特别是配置文件加载的较多，以下是我们加载配置文件的两种方式,再此处记录<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4></li>
+<li>文件目录<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/85.png" alt=""></li>
+<li>文件内容  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">REDIRECT_PREFIX=&quot;redirect:&quot;</div><div class="line">SCANNER_PATH=&quot;simple.test.controller&quot;</div><div class="line">PAGE_PREFIX=&quot;/WEB-INF&quot;</div><div class="line">PAGE_SUFFIX=&quot;.jsp&quot;</div><div class="line">UTF8=&quot;UTF-8&quot;</div><div class="line">MVC_CONTENT=&quot;simple_mvc&quot;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="1-第一种方式-通过反射加载配置文件"><a href="#1-第一种方式-通过反射加载配置文件" class="headerlink" title="1.第一种方式(通过反射加载配置文件)"></a>1.第一种方式(通过反射加载配置文件)</h6><ol>
+<li>注意当使用getClass()方法而不是getClassLoader()时资源钱的”/“不能生略  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">public class ConfigUtil &#123;</div><div class="line">   //从配置文件中读取配置</div><div class="line">	public static void main(String[] args) throws IOException &#123;</div><div class="line">		//1.注意当使用getClass()方法而不是getClassLoader()时资源钱的&quot;/&quot;不能生略</div><div class="line">		 InputStream in = ConfigUtil.class.getResourceAsStream(&quot;/config/config.properties&quot;);</div><div class="line">	     Properties pr = new Properties();	</div><div class="line">         pr.load(in);</div><div class="line">         String REDIRECT_PREFIX  = pr.getProperty(&quot;REDIRECT_PREFIX&quot;);</div><div class="line">         String SCANNER_PATH = pr.getProperty(&quot;SCANNER_PATH&quot;);</div><div class="line">         String PAGE_PREFIX  = pr.getProperty(&quot;PAGE_PREFIX&quot;);</div><div class="line">         String PAGE_SUFFIX = pr.getProperty(&quot;PAGE_SUFFIX&quot;);</div><div class="line">         String UTF8 = pr.getProperty(&quot;UTF8&quot;);</div><div class="line">         String MVC_CONTENT = pr.getProperty(&quot;MVC_CONTENT&quot;);</div><div class="line">         System.out.println(REDIRECT_PREFIX+&quot; &quot;+SCANNER_PATH+&quot; &quot;+PAGE_PREFIX+&quot; &quot;+PAGE_SUFFIX+&quot; &quot;+UTF8+&quot; &quot;+MVC_CONTENT);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>输出结果:<br>“redirect:” “simple.test.controller” “/WEB-INF” “.jsp” “UTF-8” “simple_mvc”</p>
+<h6 id="1-第一种方式-通过类加载器"><a href="#1-第一种方式-通过类加载器" class="headerlink" title="1.第一种方式(通过类加载器)"></a>1.第一种方式(通过类加载器)</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">public class ConfigUtil &#123;</div><div class="line">   //从配置文件中读取配置</div><div class="line">	public static void main(String[] args) throws IOException &#123;</div><div class="line">		//1.注意当使用getClass()方法而不是getClassLoader()时资源钱的&quot;/&quot;不能生略</div><div class="line">		 InputStream in = ConfigUtil.class.getResourceAsStream(&quot;/config/config.properties&quot;);</div><div class="line">		 </div><div class="line">	/*	 //2.使用classLoader</div><div class="line">		 InputStream in2 = Thread.currentThread().getContextClassLoader().getResourceAsStream(&quot;config/config.properties&quot;);</div><div class="line">        */  Properties pr = new Properties();	</div><div class="line">         pr.load(in);</div><div class="line">         String REDIRECT_PREFIX  = pr.getProperty(&quot;REDIRECT_PREFIX&quot;);</div><div class="line">         String SCANNER_PATH = pr.getProperty(&quot;SCANNER_PATH&quot;);</div><div class="line">         String PAGE_PREFIX  = pr.getProperty(&quot;PAGE_PREFIX&quot;);</div><div class="line">         String PAGE_SUFFIX = pr.getProperty(&quot;PAGE_SUFFIX&quot;);</div><div class="line">         String UTF8 = pr.getProperty(&quot;UTF8&quot;);</div><div class="line">         String MVC_CONTENT = pr.getProperty(&quot;MVC_CONTENT&quot;);</div><div class="line">         System.out.println(REDIRECT_PREFIX+&quot; &quot;+SCANNER_PATH+&quot; &quot;+PAGE_PREFIX+&quot; &quot;+PAGE_SUFFIX+&quot; &quot;+UTF8+&quot; &quot;+MVC_CONTENT);</div><div class="line">	&#125;</div><div class="line">	 </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>输出结果:<br>“redirect:” “simple.test.controller” “/WEB-INF” “.jsp” “UTF-8” “simple_mvc”</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/17/获取src下配置文件/" class="archive-article-date">
+  	<time datetime="2017-01-16T16:28:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-17</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/文件读取/">文件读取</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java配置文件/">java配置文件</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-获取当前线程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/16/获取当前线程/">获取当前线程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="java获取当前线程"><a href="#java获取当前线程" class="headerlink" title="java获取当前线程"></a>java获取当前线程</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">package com.yxm.thread;  </div><div class="line">  </div><div class="line">public class ThreadTest&#123;  </div><div class="line">  </div><div class="line">    public static void main(String[] args) &#123;  </div><div class="line">      Thread currentThread = Thread.currentThread();</div><div class="line">        //当前线程的名称  </div><div class="line">        System.out.println(currentThread.getName());  </div><div class="line">    &#125;  </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/16/获取当前线程/" class="archive-article-date">
+  	<time datetime="2017-01-16T09:08:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/线程/">线程</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java线程/">java线程</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-代理-四-动态代理类的设计原理与结构" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -685,128 +807,6 @@
 
 
   
-    <article id="post-类加载器-四-测试编写自己的解密类加载器" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/11/类加载器-四-测试编写自己的解密类加载器/">类加载器(四)-测试编写自己的解密类加载器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>在前面的类加载器(三)知道,经过加密后的类通过通过系统的类加载器加载后会出现错误(把自己的加密类放到系统加载类的class路径下)<br>覆盖原来的,这时候会出现错误.</li>
-<li>所以我们自己定义自己的类加载器进行加载<h4 id="定义自己的类加载器"><a href="#定义自己的类加载器" class="headerlink" title="定义自己的类加载器"></a>定义自己的类加载器</h4></li>
-<li>让自己的类加载器继承ClassLoader</li>
-<li><p>覆盖父类的findClass方法(只有覆盖才不会让父类去找)<br>在findClass里去调用父类的findClass方法根据classFileName，和FileInputStream读取到classFileName里面的数据，通过读出流到bytes[] 字节数组，然后根据字节数组，调用defineClass得到Class，则类加载器写好了</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException &#123;</div><div class="line">	//加载类之前进行解密</div><div class="line">    //得到文件全名</div><div class="line">    String classFileName = classDir+&quot;\\&quot;+name+&quot;.class&quot;;</div><div class="line">    </div><div class="line">    //得到输入流,输出流进行解密</div><div class="line">    try &#123;</div><div class="line">		FileInputStream fis = new FileInputStream(classFileName);</div><div class="line">		ByteArrayOutputStream bos = new ByteArrayOutputStream();</div><div class="line">	    secret(fis, bos);</div><div class="line">	    fis.close();</div><div class="line">	    byte[] bytes = bos.toByteArray();</div><div class="line">	    return defineClass(bytes,0, bytes.length);</div><div class="line">    &#125; catch (Exception e) &#123;</div><div class="line">		e.printStackTrace();</div><div class="line">	&#125;</div><div class="line">	return super.findClass(name);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>在主方法中调用类加载器，</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public static void main(String[] args) throws Exception&#123;</div><div class="line">	   //加载ClassLoaderAttachment得到一个字节码</div><div class="line">	   Class clazz = new MyClassLoader(&quot;classlib&quot;).loadClass(&quot;ClassLoaderAttachment&quot;);</div><div class="line">	   //ClassLoaderAttachment newInstance = (ClassLoaderAttachment)clazz.newInstance();//编译器通不过，因为这个类是加密后乱七八糟的类</div><div class="line">       //所以用到父类Date</div><div class="line">	  Date d1= (Date) clazz.newInstance();</div><div class="line">	  System.out.println(d1);</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>以上会出现错误，因为是其父类到对应的目录下找，我们删除父类对应的ClassLoaderAttachment的class文件,就会出现<br><img src="69" alt=""><br>虽然我们已经把那个.class文件给删掉了，但是还会报错因为jre已经记录住了加载的内，已经到内存中了，此时重启动myeclipse.<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * MyClassLoader既作为类加载器也作为加密工具</div><div class="line"> */</div><div class="line">public class MyClassLoader extends ClassLoader&#123;</div><div class="line">	private String classDir;</div><div class="line">	/**</div><div class="line">	 * 目标：找到ClassLoaderAttachment对其进行加密,然后放入到classlib下</div><div class="line">	 * @param args</div><div class="line">	 * @throws Exception</div><div class="line">	 */</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	  System.out.println(&quot;begin&quot;);</div><div class="line">	   //加载ClassLoaderAttachment得到一个字节码</div><div class="line">	   Class clazz = new MyClassLoader(&quot;classlib&quot;).loadClass(&quot;ClassLoaderAttachment&quot;);</div><div class="line">	   //ClassLoaderAttachment newInstance = (ClassLoaderAttachment)clazz.newInstance();//编译器通不过，因为这个类是加密后乱七八糟的类</div><div class="line">       //所以用到父类Date</div><div class="line">	  Date d1= (Date) clazz.newInstance();</div><div class="line">	  System.out.println(d1);</div><div class="line">  &#125;</div><div class="line">  </div><div class="line">  /**</div><div class="line">   * 加密类，对输入流进行加密，然后输出到输出流中</div><div class="line">   * 输入：是一个二进制流</div><div class="line">   * 输出：是一个流</div><div class="line">   */</div><div class="line">  private static void secret(InputStream in,OutputStream out) throws Exception&#123;</div><div class="line">	  //读入输入流并输出(读到末尾是-1)</div><div class="line">	  int b=-1;</div><div class="line">	  while((b=in.read())!=-1)&#123;</div><div class="line">		 out.write(b ^ 0xff);//加密进行异或运算 </div><div class="line">	  &#125;</div><div class="line">  &#125;</div><div class="line">   @Override</div><div class="line">	protected Class&lt;?&gt; findClass(String name) throws ClassNotFoundException &#123;</div><div class="line">		//加载类之前进行解密</div><div class="line">	    //得到文件全名</div><div class="line">	    String classFileName = classDir+&quot;\\&quot;+name+&quot;.class&quot;;</div><div class="line">	    </div><div class="line">	    //得到输入流,输出流进行解密</div><div class="line">	    try &#123;</div><div class="line">			FileInputStream fis = new FileInputStream(classFileName);</div><div class="line">			ByteArrayOutputStream bos = new ByteArrayOutputStream();</div><div class="line">		    secret(fis, bos);</div><div class="line">		    fis.close();</div><div class="line">		    System.out.println(&quot;aaa&quot;);</div><div class="line">		    byte[] bytes = bos.toByteArray();</div><div class="line">		    return defineClass(bytes,0, bytes.length);</div><div class="line">	    &#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">		return null;</div><div class="line">	&#125;</div><div class="line">   public MyClassLoader()&#123;</div><div class="line">	   </div><div class="line">   &#125;</div><div class="line">   public MyClassLoader(String classDir)&#123;</div><div class="line">	   this.classDir = classDir;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/11/类加载器-四-测试编写自己的解密类加载器/" class="archive-article-date">
-  	<time datetime="2017-01-11T15:11:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-11</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-异常-Class-path-contains-multiple-SLF4J-bindings" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/">异常:Class path contains multiple SLF4J bindings</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="异常"><a href="#异常" class="headerlink" title="异常"></a>异常</h4><p>SLF4J: Class path contains multiple SLF4J bindings.<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.5.10.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: Found binding in [jar:file:/F:/focuss/focuss-78/WebRoot/WEB-INF/lib/slf4j-log4j12-1.7.12.jar!/org/slf4j/impl/StaticLoggerBinder.class]<br>SLF4J: See <a href="http://www.slf4j.org/codes.html#multiple_bindings" target="_blank" rel="external">http://www.slf4j.org/codes.html#multiple_bindings</a> for an explanation.<br>log4j:WARN No appenders could be found for logger (org.apache.http.client.protocol.RequestAddCookies).<br>log4j:WARN Please initialize the log4j system properly.</p>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>jar包冲突<br><img src="http://p1.bpimg.com/576993/2ebcd66aa2ec8a42.png" alt="Markdown"></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/11/异常-Class-path-contains-multiple-SLF4J-bindings/" class="archive-article-date">
-  	<time datetime="2017-01-10T16:27:10.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-11</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/异常/">异常</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-异常/">javaSE,异常</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/35/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/34/">34</a><a class="page-number" href="/page/35/">35</a><span class="page-number current">36</span><a class="page-number" href="/page/37/">37</a><a class="page-number" href="/page/38/">38</a><span class="space">&hellip;</span><a class="page-number" href="/page/48/">48</a><a class="extend next" rel="next" href="/page/37/">Next &raquo;</a>
@@ -872,7 +872,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.11px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 11.67px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 12.22px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
