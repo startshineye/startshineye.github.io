@@ -615,9 +615,103 @@
         chattingWeview.evalJS(&quot;receiveMessage(&apos;&quot; + e.data + &quot;&apos;)&quot;);
     }
 
- ```    
-</code></pre><h5 id="12-服务器断开后的重连机制"><a href="#12-服务器断开后的重连机制" class="headerlink" title="12 服务器断开后的重连机制"></a>12 服务器断开后的重连机制</h5><p>1.当我们连接时候,我们如果server端断开了连接,然后再发送消息时候,此时手机页面上没有渲染消息,原因就是此时websocket可能已经断开了,所以我们需要在sendMessage时候做一个判断<br>2.需要在接收消息之后:resizeChattingScreen()<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/201.png" alt=""> </p>
-<h5 id="13-chatHandler初步重构"><a href="#13-chatHandler初步重构" class="headerlink" title="13 chatHandler初步重构"></a>13 chatHandler初步重构</h5><h5 id="14-构建聊天业务模型"><a href="#14-构建聊天业务模型" class="headerlink" title="14 构建聊天业务模型"></a>14 构建聊天业务模型</h5><h5 id="15-chatHandler-处理客户端连接"><a href="#15-chatHandler-处理客户端连接" class="headerlink" title="15 chatHandler - 处理客户端连接"></a>15 chatHandler - 处理客户端连接</h5><h5 id="16-chatHandler-保存聊天消息到数据库"><a href="#16-chatHandler-保存聊天消息到数据库" class="headerlink" title="16 chatHandler - 保存聊天消息到数据库"></a>16 chatHandler - 保存聊天消息到数据库</h5><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><h5 id="9-19-客户端onopen联调，初始化用户和channel关系"><a href="#9-19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="9-19 客户端onopen联调，初始化用户和channel关系"></a>9-19 客户端onopen联调，初始化用户和channel关系</h5><h5 id="9-20-客户端发送消息与接收联调"><a href="#9-20-客户端发送消息与接收联调" class="headerlink" title="9-20 客户端发送消息与接收联调"></a>9-20 客户端发送消息与接收联调</h5><h5 id="9-21-接收方获得消息后重构渲染"><a href="#9-21-接收方获得消息后重构渲染" class="headerlink" title="9-21 接收方获得消息后重构渲染"></a>9-21 接收方获得消息后重构渲染</h5><h5 id="9-22-客户端签收消息"><a href="#9-22-客户端签收消息" class="headerlink" title="9-22 客户端签收消息"></a>9-22 客户端签收消息</h5><h5 id="9-23-websocket新增好友类型联调"><a href="#9-23-websocket新增好友类型联调" class="headerlink" title="9-23 websocket新增好友类型联调"></a>9-23 websocket新增好友类型联调</h5><h5 id="9-24-保存聊天记录到本地"><a href="#9-24-保存聊天记录到本地" class="headerlink" title="9-24 保存聊天记录到本地"></a>9-24 保存聊天记录到本地</h5><h5 id="9-25-从本地获取聊天记录"><a href="#9-25-从本地获取聊天记录" class="headerlink" title="9-25 从本地获取聊天记录"></a>9-25 从本地获取聊天记录</h5><h5 id="9-26-初始化聊天记录和渲染"><a href="#9-26-初始化聊天记录和渲染" class="headerlink" title="9-26 初始化聊天记录和渲染"></a>9-26 初始化聊天记录和渲染</h5><h5 id="9-27-聊天快照业务简单讲解"><a href="#9-27-聊天快照业务简单讲解" class="headerlink" title="9-27 聊天快照业务简单讲解"></a>9-27 聊天快照业务简单讲解</h5><h5 id="9-28-保存聊天快照到本地"><a href="#9-28-保存聊天快照到本地" class="headerlink" title="9-28 保存聊天快照到本地"></a>9-28 保存聊天快照到本地</h5><h5 id="9-29-获取聊天快照"><a href="#9-29-获取聊天快照" class="headerlink" title="9-29 获取聊天快照"></a>9-29 获取聊天快照</h5><h5 id="9-30-已读未读消息的设置与快照调用"><a href="#9-30-已读未读消息的设置与快照调用" class="headerlink" title="9-30 已读未读消息的设置与快照调用"></a>9-30 已读未读消息的设置与快照调用</h5><h5 id="9-31-展示聊天快照"><a href="#9-31-展示聊天快照" class="headerlink" title="9-31 展示聊天快照"></a>9-31 展示聊天快照</h5><h5 id="9-32-未读消息小红点标记"><a href="#9-32-未读消息小红点标记" class="headerlink" title="9-32 未读消息小红点标记"></a>9-32 未读消息小红点标记</h5><h5 id="9-33-点击快照开始聊天"><a href="#9-33-点击快照开始聊天" class="headerlink" title="9-33 点击快照开始聊天"></a>9-33 点击快照开始聊天</h5><h5 id="9-34-未读消息标记已读"><a href="#9-34-未读消息标记已读" class="headerlink" title="9-34 未读消息标记已读"></a>9-34 未读消息标记已读</h5><h5 id="9-35-开发获取未读消息列表接口"><a href="#9-35-开发获取未读消息列表接口" class="headerlink" title="9-35 开发获取未读消息列表接口"></a>9-35 开发获取未读消息列表接口</h5><h5 id="9-36-前端获取未读消息列表"><a href="#9-36-前端获取未读消息列表" class="headerlink" title="9-36 前端获取未读消息列表"></a>9-36 前端获取未读消息列表</h5><h5 id="9-37-批量签收并且展示未读消息"><a href="#9-37-批量签收并且展示未读消息" class="headerlink" title="9-37 批量签收并且展示未读消息"></a>9-37 批量签收并且展示未读消息</h5><h5 id="9-38-聊天快照左滑删除效果"><a href="#9-38-聊天快照左滑删除效果" class="headerlink" title="9-38 聊天快照左滑删除效果"></a>9-38 聊天快照左滑删除效果</h5><h5 id="9-39-聊天快照右滑删除聊天记录与快照"><a href="#9-39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="9-39 聊天快照右滑删除聊天记录与快照"></a>9-39 聊天快照右滑删除聊天记录与快照</h5>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 12 服务器断开后的重连机制</div><div class="line">1.当我们连接时候,我们如果server端断开了连接,然后再发送消息时候,此时手机页面上没有渲染消息,原因就是此时websocket可能已经断开了,所以我们需要在sendMessage时候做一个判断  </div><div class="line">2.需要在接收消息之后:resizeChattingScreen()    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/201.png) </div><div class="line">##### 13 chatHandler初步重构  </div><div class="line">1.ChatHandler中handlerAdded在客户端和服务端建立连接之后就会形成handler并添加到我们定义的ChannelGroup中   </div><div class="line">2.客户端和服务端断开时候需要进行移除chanel  </div><div class="line">3.在客户端和服务端发生异常时候,也需要关闭连接,这也需要重写eceptionCaught方法  </div><div class="line">4.channelRead0中进行channel消息的处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/202.png)  </div><div class="line">5.channelRead0</div></pre></td></tr></table></figure>
+
+
+   @Override
+protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+    //1.获取客户端传过来的消息
+    //2.根据消息类型做不同的处理
+       //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
+       //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
+       //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
+       //2.4 心跳类型消息
+}
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 14 构建聊天业务模型  </div><div class="line">###### 14.1 DataContent-业务传输的数据内容</div></pre></td></tr></table></figure>
+
+
+  public class DataContent implements Serializable{
+     /**
+      * 动作类型
+      */
+     private Integer action;
+     /**
+      * 用户聊天类型
+      */
+     private ChatMsg chatMsg;
+     /**
+       * 扩展字段
+      */
+     private String extand;
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatMsg</div></pre></td></tr></table></figure>
+
+
+ public class ChatMsg implements Serializable {
+        /**
+         * 发送者用户id
+         */
+    private String senderId;
+        /**
+         * 接受者用户id
+         */
+    private String receiverId;
+        /**
+         * 消息内容
+         */
+    private String msg;
+        /**
+         * 消息id:用于签收
+         */
+    private String msgId;
+  }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatHandler</div></pre></td></tr></table></figure>
+
+
+   @Override
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+        String content = msg.text();
+        //1.获取客户端传过来的消息
+        DataContent dataContent = JsonUtils.jsonToPojo(content, DataContent.class);
+        int action = dataContent.getAction();
+        //2.根据消息类型做不同的处理
+        if(action == MsgActionEnum.CONNECT.type){
+            //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
+
+        }else if(action == MsgActionEnum.CHAT.type){
+            //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
+        }else if(action == MsgActionEnum.SIGNED.type){
+            //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
+        }else if(action == MsgActionEnum.KEEPALIVE.type){
+            //2.4 心跳类型消息
+        }
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15 chatHandler - 处理客户端连接  </div><div class="line">##### 15.1 定义用户和channel的关联</div></pre></td></tr></table></figure>
+
+
+      /**
+     * 用户和channel关联表
+     * @author yxm
+     */
+    public class UserChannelRe {
+        private static Map&lt;String,Channel&gt; manager = new HashMap&lt;String,Channel&gt;();
+
+        public static void put(String userId,Channel channel){
+            manager.put(userId,channel);
+        }
+
+        public static Channel get(String userId){
+           return manager.get(userId);
+        }
+    }
+
+ ```
+</code></pre><h5 id="15-2-ChatHandler处理"><a href="#15-2-ChatHandler处理" class="headerlink" title="15.2 ChatHandler处理"></a>15.2 ChatHandler处理</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png" alt="">   </p>
+<h5 id="16-chatHandler-保存聊天消息到数据库"><a href="#16-chatHandler-保存聊天消息到数据库" class="headerlink" title="16 chatHandler - 保存聊天消息到数据库"></a>16 chatHandler - 保存聊天消息到数据库</h5><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><h5 id="9-19-客户端onopen联调，初始化用户和channel关系"><a href="#9-19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="9-19 客户端onopen联调，初始化用户和channel关系"></a>9-19 客户端onopen联调，初始化用户和channel关系</h5><h5 id="9-20-客户端发送消息与接收联调"><a href="#9-20-客户端发送消息与接收联调" class="headerlink" title="9-20 客户端发送消息与接收联调"></a>9-20 客户端发送消息与接收联调</h5><h5 id="9-21-接收方获得消息后重构渲染"><a href="#9-21-接收方获得消息后重构渲染" class="headerlink" title="9-21 接收方获得消息后重构渲染"></a>9-21 接收方获得消息后重构渲染</h5><h5 id="9-22-客户端签收消息"><a href="#9-22-客户端签收消息" class="headerlink" title="9-22 客户端签收消息"></a>9-22 客户端签收消息</h5><h5 id="9-23-websocket新增好友类型联调"><a href="#9-23-websocket新增好友类型联调" class="headerlink" title="9-23 websocket新增好友类型联调"></a>9-23 websocket新增好友类型联调</h5><h5 id="9-24-保存聊天记录到本地"><a href="#9-24-保存聊天记录到本地" class="headerlink" title="9-24 保存聊天记录到本地"></a>9-24 保存聊天记录到本地</h5><h5 id="9-25-从本地获取聊天记录"><a href="#9-25-从本地获取聊天记录" class="headerlink" title="9-25 从本地获取聊天记录"></a>9-25 从本地获取聊天记录</h5><h5 id="9-26-初始化聊天记录和渲染"><a href="#9-26-初始化聊天记录和渲染" class="headerlink" title="9-26 初始化聊天记录和渲染"></a>9-26 初始化聊天记录和渲染</h5><h5 id="9-27-聊天快照业务简单讲解"><a href="#9-27-聊天快照业务简单讲解" class="headerlink" title="9-27 聊天快照业务简单讲解"></a>9-27 聊天快照业务简单讲解</h5><h5 id="9-28-保存聊天快照到本地"><a href="#9-28-保存聊天快照到本地" class="headerlink" title="9-28 保存聊天快照到本地"></a>9-28 保存聊天快照到本地</h5><h5 id="9-29-获取聊天快照"><a href="#9-29-获取聊天快照" class="headerlink" title="9-29 获取聊天快照"></a>9-29 获取聊天快照</h5><h5 id="9-30-已读未读消息的设置与快照调用"><a href="#9-30-已读未读消息的设置与快照调用" class="headerlink" title="9-30 已读未读消息的设置与快照调用"></a>9-30 已读未读消息的设置与快照调用</h5><h5 id="9-31-展示聊天快照"><a href="#9-31-展示聊天快照" class="headerlink" title="9-31 展示聊天快照"></a>9-31 展示聊天快照</h5><h5 id="9-32-未读消息小红点标记"><a href="#9-32-未读消息小红点标记" class="headerlink" title="9-32 未读消息小红点标记"></a>9-32 未读消息小红点标记</h5><h5 id="9-33-点击快照开始聊天"><a href="#9-33-点击快照开始聊天" class="headerlink" title="9-33 点击快照开始聊天"></a>9-33 点击快照开始聊天</h5><h5 id="9-34-未读消息标记已读"><a href="#9-34-未读消息标记已读" class="headerlink" title="9-34 未读消息标记已读"></a>9-34 未读消息标记已读</h5><h5 id="9-35-开发获取未读消息列表接口"><a href="#9-35-开发获取未读消息列表接口" class="headerlink" title="9-35 开发获取未读消息列表接口"></a>9-35 开发获取未读消息列表接口</h5><h5 id="9-36-前端获取未读消息列表"><a href="#9-36-前端获取未读消息列表" class="headerlink" title="9-36 前端获取未读消息列表"></a>9-36 前端获取未读消息列表</h5><h5 id="9-37-批量签收并且展示未读消息"><a href="#9-37-批量签收并且展示未读消息" class="headerlink" title="9-37 批量签收并且展示未读消息"></a>9-37 批量签收并且展示未读消息</h5><h5 id="9-38-聊天快照左滑删除效果"><a href="#9-38-聊天快照左滑删除效果" class="headerlink" title="9-38 聊天快照左滑删除效果"></a>9-38 聊天快照左滑删除效果</h5><h5 id="9-39-聊天快照右滑删除聊天记录与快照"><a href="#9-39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="9-39 聊天快照右滑删除聊天记录与快照"></a>9-39 聊天快照右滑删除聊天记录与快照</h5>
       
     </div>
     <div class="article-info article-info-index">
