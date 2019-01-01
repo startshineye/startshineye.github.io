@@ -21,8 +21,7 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/185.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/186.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/187.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png">
-<meta property="og:updated_time" content="2018-12-30T16:08:39.938Z">
+<meta property="og:updated_time" content="2019-01-01T12:01:34.018Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="netty实践-二十-聊天页面制作">
 <meta name="twitter:description" content="前言构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。
@@ -540,9 +539,43 @@ protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) t
         }
     }
 
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15.2 ChatHandler处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png)   </div><div class="line"></div><div class="line">##### 16 chatHandler - 保存聊天消息到数据库  </div><div class="line">###### 16.1 saveChatMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/1.png) </div><div class="line">###### 16.2 ChatHandler  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/2.png) </div><div class="line"></div><div class="line">###### 16.3 SpringUtil</div></pre></td></tr></table></figure>
+
+
+  public class SpringUtil implements ApplicationContextAware {
+
+    private static ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        if (SpringUtil.applicationContext == null) {
+            SpringUtil.applicationContext = applicationContext;
+        }
+    }
+
+    // 获取applicationContext
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    // 通过name获取 Bean.
+    public static Object getBean(String name) {
+        return getApplicationContext().getBean(name);
+    }
+
+    // 通过class获取Bean.
+    public static &lt;T&gt; T getBean(Class&lt;T&gt; clazz) {
+        return getApplicationContext().getBean(clazz);
+    }
+
+    // 通过name,以及Clazz返回指定的Bean
+    public static &lt;T&gt; T getBean(String name, Class&lt;T&gt; clazz) {
+        return getApplicationContext().getBean(name, clazz);
+    }
+    }
+
  ```
-</code></pre><h5 id="15-2-ChatHandler处理"><a href="#15-2-ChatHandler处理" class="headerlink" title="15.2 ChatHandler处理"></a>15.2 ChatHandler处理</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png" alt="">   </p>
-<h5 id="16-chatHandler-保存聊天消息到数据库"><a href="#16-chatHandler-保存聊天消息到数据库" class="headerlink" title="16 chatHandler - 保存聊天消息到数据库"></a>16 chatHandler - 保存聊天消息到数据库</h5><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><h5 id="9-19-客户端onopen联调，初始化用户和channel关系"><a href="#9-19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="9-19 客户端onopen联调，初始化用户和channel关系"></a>9-19 客户端onopen联调，初始化用户和channel关系</h5><h5 id="9-20-客户端发送消息与接收联调"><a href="#9-20-客户端发送消息与接收联调" class="headerlink" title="9-20 客户端发送消息与接收联调"></a>9-20 客户端发送消息与接收联调</h5><h5 id="9-21-接收方获得消息后重构渲染"><a href="#9-21-接收方获得消息后重构渲染" class="headerlink" title="9-21 接收方获得消息后重构渲染"></a>9-21 接收方获得消息后重构渲染</h5><h5 id="9-22-客户端签收消息"><a href="#9-22-客户端签收消息" class="headerlink" title="9-22 客户端签收消息"></a>9-22 客户端签收消息</h5><h5 id="9-23-websocket新增好友类型联调"><a href="#9-23-websocket新增好友类型联调" class="headerlink" title="9-23 websocket新增好友类型联调"></a>9-23 websocket新增好友类型联调</h5><h5 id="9-24-保存聊天记录到本地"><a href="#9-24-保存聊天记录到本地" class="headerlink" title="9-24 保存聊天记录到本地"></a>9-24 保存聊天记录到本地</h5><h5 id="9-25-从本地获取聊天记录"><a href="#9-25-从本地获取聊天记录" class="headerlink" title="9-25 从本地获取聊天记录"></a>9-25 从本地获取聊天记录</h5><h5 id="9-26-初始化聊天记录和渲染"><a href="#9-26-初始化聊天记录和渲染" class="headerlink" title="9-26 初始化聊天记录和渲染"></a>9-26 初始化聊天记录和渲染</h5><h5 id="9-27-聊天快照业务简单讲解"><a href="#9-27-聊天快照业务简单讲解" class="headerlink" title="9-27 聊天快照业务简单讲解"></a>9-27 聊天快照业务简单讲解</h5><h5 id="9-28-保存聊天快照到本地"><a href="#9-28-保存聊天快照到本地" class="headerlink" title="9-28 保存聊天快照到本地"></a>9-28 保存聊天快照到本地</h5><h5 id="9-29-获取聊天快照"><a href="#9-29-获取聊天快照" class="headerlink" title="9-29 获取聊天快照"></a>9-29 获取聊天快照</h5><h5 id="9-30-已读未读消息的设置与快照调用"><a href="#9-30-已读未读消息的设置与快照调用" class="headerlink" title="9-30 已读未读消息的设置与快照调用"></a>9-30 已读未读消息的设置与快照调用</h5><h5 id="9-31-展示聊天快照"><a href="#9-31-展示聊天快照" class="headerlink" title="9-31 展示聊天快照"></a>9-31 展示聊天快照</h5><h5 id="9-32-未读消息小红点标记"><a href="#9-32-未读消息小红点标记" class="headerlink" title="9-32 未读消息小红点标记"></a>9-32 未读消息小红点标记</h5><h5 id="9-33-点击快照开始聊天"><a href="#9-33-点击快照开始聊天" class="headerlink" title="9-33 点击快照开始聊天"></a>9-33 点击快照开始聊天</h5><h5 id="9-34-未读消息标记已读"><a href="#9-34-未读消息标记已读" class="headerlink" title="9-34 未读消息标记已读"></a>9-34 未读消息标记已读</h5><h5 id="9-35-开发获取未读消息列表接口"><a href="#9-35-开发获取未读消息列表接口" class="headerlink" title="9-35 开发获取未读消息列表接口"></a>9-35 开发获取未读消息列表接口</h5><h5 id="9-36-前端获取未读消息列表"><a href="#9-36-前端获取未读消息列表" class="headerlink" title="9-36 前端获取未读消息列表"></a>9-36 前端获取未读消息列表</h5><h5 id="9-37-批量签收并且展示未读消息"><a href="#9-37-批量签收并且展示未读消息" class="headerlink" title="9-37 批量签收并且展示未读消息"></a>9-37 批量签收并且展示未读消息</h5><h5 id="9-38-聊天快照左滑删除效果"><a href="#9-38-聊天快照左滑删除效果" class="headerlink" title="9-38 聊天快照左滑删除效果"></a>9-38 聊天快照左滑删除效果</h5><h5 id="9-39-聊天快照右滑删除聊天记录与快照"><a href="#9-39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="9-39 聊天快照右滑删除聊天记录与快照"></a>9-39 聊天快照右滑删除聊天记录与快照</h5>
+</code></pre><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><h5 id="9-19-客户端onopen联调，初始化用户和channel关系"><a href="#9-19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="9-19 客户端onopen联调，初始化用户和channel关系"></a>9-19 客户端onopen联调，初始化用户和channel关系</h5><h5 id="9-20-客户端发送消息与接收联调"><a href="#9-20-客户端发送消息与接收联调" class="headerlink" title="9-20 客户端发送消息与接收联调"></a>9-20 客户端发送消息与接收联调</h5><h5 id="9-21-接收方获得消息后重构渲染"><a href="#9-21-接收方获得消息后重构渲染" class="headerlink" title="9-21 接收方获得消息后重构渲染"></a>9-21 接收方获得消息后重构渲染</h5><h5 id="9-22-客户端签收消息"><a href="#9-22-客户端签收消息" class="headerlink" title="9-22 客户端签收消息"></a>9-22 客户端签收消息</h5><h5 id="9-23-websocket新增好友类型联调"><a href="#9-23-websocket新增好友类型联调" class="headerlink" title="9-23 websocket新增好友类型联调"></a>9-23 websocket新增好友类型联调</h5><h5 id="9-24-保存聊天记录到本地"><a href="#9-24-保存聊天记录到本地" class="headerlink" title="9-24 保存聊天记录到本地"></a>9-24 保存聊天记录到本地</h5><h5 id="9-25-从本地获取聊天记录"><a href="#9-25-从本地获取聊天记录" class="headerlink" title="9-25 从本地获取聊天记录"></a>9-25 从本地获取聊天记录</h5><h5 id="9-26-初始化聊天记录和渲染"><a href="#9-26-初始化聊天记录和渲染" class="headerlink" title="9-26 初始化聊天记录和渲染"></a>9-26 初始化聊天记录和渲染</h5><h5 id="9-27-聊天快照业务简单讲解"><a href="#9-27-聊天快照业务简单讲解" class="headerlink" title="9-27 聊天快照业务简单讲解"></a>9-27 聊天快照业务简单讲解</h5><h5 id="9-28-保存聊天快照到本地"><a href="#9-28-保存聊天快照到本地" class="headerlink" title="9-28 保存聊天快照到本地"></a>9-28 保存聊天快照到本地</h5><h5 id="9-29-获取聊天快照"><a href="#9-29-获取聊天快照" class="headerlink" title="9-29 获取聊天快照"></a>9-29 获取聊天快照</h5><h5 id="9-30-已读未读消息的设置与快照调用"><a href="#9-30-已读未读消息的设置与快照调用" class="headerlink" title="9-30 已读未读消息的设置与快照调用"></a>9-30 已读未读消息的设置与快照调用</h5><h5 id="9-31-展示聊天快照"><a href="#9-31-展示聊天快照" class="headerlink" title="9-31 展示聊天快照"></a>9-31 展示聊天快照</h5><h5 id="9-32-未读消息小红点标记"><a href="#9-32-未读消息小红点标记" class="headerlink" title="9-32 未读消息小红点标记"></a>9-32 未读消息小红点标记</h5><h5 id="9-33-点击快照开始聊天"><a href="#9-33-点击快照开始聊天" class="headerlink" title="9-33 点击快照开始聊天"></a>9-33 点击快照开始聊天</h5><h5 id="9-34-未读消息标记已读"><a href="#9-34-未读消息标记已读" class="headerlink" title="9-34 未读消息标记已读"></a>9-34 未读消息标记已读</h5><h5 id="9-35-开发获取未读消息列表接口"><a href="#9-35-开发获取未读消息列表接口" class="headerlink" title="9-35 开发获取未读消息列表接口"></a>9-35 开发获取未读消息列表接口</h5><h5 id="9-36-前端获取未读消息列表"><a href="#9-36-前端获取未读消息列表" class="headerlink" title="9-36 前端获取未读消息列表"></a>9-36 前端获取未读消息列表</h5><h5 id="9-37-批量签收并且展示未读消息"><a href="#9-37-批量签收并且展示未读消息" class="headerlink" title="9-37 批量签收并且展示未读消息"></a>9-37 批量签收并且展示未读消息</h5><h5 id="9-38-聊天快照左滑删除效果"><a href="#9-38-聊天快照左滑删除效果" class="headerlink" title="9-38 聊天快照左滑删除效果"></a>9-38 聊天快照左滑删除效果</h5><h5 id="9-39-聊天快照右滑删除聊天记录与快照"><a href="#9-39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="9-39 聊天快照右滑删除聊天记录与快照"></a>9-39 聊天快照右滑删除聊天记录与快照</h5>
       
     </div>
     <div class="article-info article-info-index">
@@ -649,7 +682,7 @@ protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) t
   <div class="outer">
     <div id="footer-info">
     	<div class="footer-left">
-    		&copy; 2018 Startshineye
+    		&copy; 2019 Startshineye
     	</div>
       	<div class="footer-right">
       		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
