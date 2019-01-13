@@ -152,6 +152,100 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-39-SpringBoot集成jsp补充" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/">SpringBoot(39)-SpringBoot集成jsp补充</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前已经集成了jsp,但是集成了jsp后一般还有以下疑问?<br>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？<br>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？<br>例如，下面是spring中做的静态资源映射，但是在spring boot中不知道怎么处理：  </p>
+<pre><code>&lt;!-- springmvc.xml 资源映射 --&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/css/&quot; mapping=&quot;/css/**&quot;/&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/js/&quot; mapping=&quot;/js/**&quot;/&gt;  
+&lt;mvc:resources location=&quot;/WEB-INF/image/&quot; mapping=&quot;/image/**&quot;/&gt;  
+</code></pre><p>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？  </p>
+<pre><code>&lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+       &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？"><a href="#1-Spring-Boot使用jsp时，仍旧可以打成jar包的形式吗？" class="headerlink" title="1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？"></a>1.Spring Boot使用jsp时，仍旧可以打成jar包的形式吗？</h5><p> 针对第一个问题，答案是不可以的:  </p>
+<p>我们先看一段英文描述，如下：</p>
+<p>When running a Spring Boot application that uses an embedded servlet container (and is packaged as an executable archive), there are some limitations in the JSP support.</p>
+<p>With Tomcat it should work if you use war packaging, i.e. an executable war will work, and will also be deployable to a standard container (not limited to, but including Tomcat). An executable jar will not work because of a hard coded file pattern in Tomcat.<br>Jetty does not currently work as an embedded container with JSPs.<br>Undertow does not support JSPs.</p>
+<p>原文的大体意思就是：Tomcat支持war的打包方式，spring boot支持war打包方式。Jetty现在不支持JSP嵌入容器。Undertow根本就不支持JSP。</p>
+<p>所以答案就是打包成war，jsp会自然按照servlet的标准部署。但也就意味着你不可以用嵌入式的方式运行，而是Tomcat Server + war的部署方式。</p>
+<p>看到这里有些网友肯定会有疑问那什么是嵌入式的web服务器？我们这边就拿jetty来说明下。</p>
+<p>Jetty 可以非常容易的嵌入到应用程序当中而不需要程序为了使用 Jetty 做修改。</p>
+<p>从某种程度上，你也可以把 Jetty 理解为一个嵌入式的Web服务器。所以我们经常会说嵌入式jetty。</p>
+<p>Jetty有一个口号：不要把你的应用部署到Jetty中，把Jetty部署到你的应用中。Jetty可以在Java应用程序中向其他POJO一样被实例化，换句话说，以嵌入式的模式运行Jetty是指将Http模块放入你的应用程序中，而非部署你的程序到一个HTTP服务器。这就是所谓的嵌入式jetty。</p>
+<p>另外在说明一点就是JSP解析是需要JSP引擎处理的，tomcat就提供了JSP处理引擎。所以很显然JSP是依赖容器而存在的，不然就没法访问了。那么既然是依赖于tomcat的话。好了第一个问题就解说到这里，不知道是否对你有帮助？留言评论！</p>
+<p>出了这篇文章之后，有一网友找到一支持打成jar包运行的插件：</p>
+<h5 id="2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？"><a href="#2-Spring-Boot使用jsp时，比如说css，image，js-等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring-boot中具体应该怎么做？" class="headerlink" title="2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？"></a>2.Spring Boot使用jsp时，比如说css，image，js 等三种静态资源文件，应该放在什么目录下？这些静态资源映射，在spring boot中具体应该怎么做？</h5><p>只需要在src/main/resouces下新建一个static目录，然后在static下新建子目录：css,images,js目录，在images放入一张test.jpg图片，那么访问路径是：<a href="http://127.0.0.1:8080/images/test.jpg" target="_blank" rel="external">http://127.0.0.1:8080/images/test.jpg</a>  </p>
+<p>当前目录结构应该是这样子的：  </p>
+<pre><code>(1)--src/java/resources  
+  (2)--static
+     (3)--css
+     (3)--images
+     (3)--js
+</code></pre><p>那么有人会有疑问这个，打包的时候能打上嘛，答案是可以的，请看实际打包解压图：  </p>
+<h5 id="3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"><a href="#3-下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？" class="headerlink" title="3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？"></a>3.下面这个tomcat的包必须导入吗，spring-boot-starter-web中不是有一个内嵌的tomcat吗？</h5><p>如果没有这个配置的话，那么打包出来会包含tomcat的jar包，整个war文件都会变大，第二就是如果版本是一样的，比如我这里是8.0的，那么是不会报错的，如果是7.0的tomcat的话，那么就启动报错了。有另外一种配置方式如下：  </p>
+<pre><code>&lt;dependency&gt;   
+ &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;   
+ &lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;    
+&lt;exclusions&gt;   
+ &lt;exclusion&gt;   
+     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;    
+     &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;   
+ &lt;/exclusion&gt;   
+&lt;/exclusions&gt;    
+&lt;/dependency&gt; 
+</code></pre><h5 id="4-总结"><a href="#4-总结" class="headerlink" title="4.总结"></a>4.总结</h5><p>（a） 第一就是：Spring Boot使用jsp的话，是不可以打包成jar包的，需要打包成war成文件。</p>
+<p>（b）第二就是：静态资源存放在resources的static下，新建images,js,css目录即可，当然出了static还可以是resources下创建resources文件存放资源，还有就是public。具体看我的第13篇博客文章。</p>
+<p>（c）第三就是：spring-boot-starter-tomcat是必须添加的嘛，我只能说在我的这个demo中我的这个是必须添加的，不然第一占导出包大小，其次就是可能tomcat jar包会冲突，导致无法启动程序。另外要说明的就是还有别的方式使用tomcat的方式</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/21/SpringBoot-39-SpringBoot集成jsp补充/" class="archive-article-date">
+  	<time datetime="2017-10-21T05:32:48.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-21</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-work-ie8和ie9下项目不能正常运行-打开F12开发者工具后项目正常运行" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1297,64 +1391,6 @@ $(&quot;.nav-tabs&quot;).on(&quot;click&quot;, &quot;[tabclose]&quot;, function 
 
 
   
-    <article id="post-vue-31-bower简单使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/24/vue-31-bower简单使用/">vue(31)-bower简单使用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h5><h6 id="定义"><a href="#定义" class="headerlink" title="定义"></a>定义</h6><p>Bower:客户端技术的软件包管理器(前端包管理器)</p>
-<h6 id="作用"><a href="#作用" class="headerlink" title="作用"></a>作用</h6><p>可用于搜索、安装和卸载如JavaScript、HTML、CSS之类的网络资源。其他一些建立在Bower基础之上的开发工具，如YeoMan和Grunt。  </p>
-<h5 id="2-准备工作"><a href="#2-准备工作" class="headerlink" title="2.准备工作"></a>2.准备工作</h5><p>想要使用bower需要:<br>1.安装node环境:node.js<br>2.安装Git:bower从远程git仓库获取代码包  </p>
-<h5 id="3-安装bower"><a href="#3-安装bower" class="headerlink" title="3.安装bower"></a>3.安装bower</h5><p>安装:npm install bower -g (其中-g命令表示全局安装)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/32.png" alt=""><br>验证安装与否:bower -version<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/33.png" alt=""></p>
-<h5 id="4-开始使用"><a href="#4-开始使用" class="headerlink" title="4.开始使用"></a>4.开始使用</h5><h5 id="4-1-查看bower所有命令及其含义"><a href="#4-1-查看bower所有命令及其含义" class="headerlink" title="4.1 查看bower所有命令及其含义"></a>4.1 查看bower所有命令及其含义</h5><p>bower help<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/34.png" alt=""> </p>
-<h5 id="5-包的安装-bower-install-包名"><a href="#5-包的安装-bower-install-包名" class="headerlink" title="5.包的安装 bower install 包名"></a>5.包的安装 bower install 包名</h5><p>下面以安装jquery为例；<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/35.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/36.png" alt=""></p>
-<h5 id="6-包的信息-bower-info-包名"><a href="#6-包的信息-bower-info-包名" class="headerlink" title="6.包的信息 bower info 包名"></a>6.包的信息 bower info 包名</h5><p>会看到jquery的bower.json的信息，和可用的版本信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/37.png" alt="">  </p>
-<h5 id="7-包的卸载-bower-uninstall-包名"><a href="#7-包的卸载-bower-uninstall-包名" class="headerlink" title="7.包的卸载 bower uninstall 包名"></a>7.包的卸载 bower uninstall 包名</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/38.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/39.png" alt=""><br>可以看到清空了</p>
-<h5 id="8-下载特定版本"><a href="#8-下载特定版本" class="headerlink" title="8.下载特定版本"></a>8.下载特定版本</h5><p>bower install 包名@版本号</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/24/vue-31-bower简单使用/" class="archive-article-date">
-  	<time datetime="2017-09-24T04:11:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/48/">48</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
@@ -1420,7 +1456,7 @@ $(&quot;.nav-tabs&quot;).on(&quot;click&quot;, &quot;[tabclose]&quot;, function 
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
