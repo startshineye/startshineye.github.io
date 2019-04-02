@@ -259,6 +259,12 @@
 <p>3.修改彩铃文件路径  </p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/3.png" alt="">  </p>
 <p>4.拨打电话<br>5.在cc/log目录下下载生成的录音,并试听<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/4.png" alt="">  </p>
+<h5 id="11-一人多号码"><a href="#11-一人多号码" class="headerlink" title="11.一人多号码"></a>11.一人多号码</h5><h6 id="11-1-主流程"><a href="#11-1-主流程" class="headerlink" title="11.1 主流程"></a>11.1 主流程</h6><ol>
+<li>针对于一个客户多个号码的情况,客户需求:1.呼叫平台未接通,重呼一次后还没有结果,就通知java应用导入数据到ocm_buslist(外呼名单表) 进行呼叫客户下一个号码 2.平台呼叫通,机器人判断不是本人时候就通知java应用导入数据到ocm_buslist(外呼名单表)进行呼叫客户下一个号码  </li>
+<li>主流程如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/5.png" alt="">  </li>
+</ol>
+<h6 id="11-2-平台一人多号码排查"><a href="#11-2-平台一人多号码排查" class="headerlink" title="11.2 平台一人多号码排查"></a>11.2 平台一人多号码排查</h6><p>1.任务表(ocm_event):drop_cause_tid的入口就是ocm_after_call_module中id,如果任务没有配置,则默认drop_cause_tid为-1,以下3表就相当于ivr流程中：cti_flow,cti_action,cti_rootflow<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/6.png" alt=""><br>2.查看ocm_after_call_action对应的脚本是否是ivr中类型为http的action,并且对应的callback接口是否是<br>“主流程”中”临时数据导入”，如下实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/7.png" alt="">   </p>
+<p>3.在外呼任务中导入名单呼叫:ocm_after_call_module脚本执行是不会记录到dyflow中的。<br>a.从callnotify_callnotify01中查看的是外呼的数据 写入到cti_cdr表中<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/9.png" alt=""><br>b.由于平台通知java应用走的是ivr中action—-http   所以在httpg<em>httpg01</em>.log会有记录<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/8.png" alt=""> </p>
 
       
     </div>
