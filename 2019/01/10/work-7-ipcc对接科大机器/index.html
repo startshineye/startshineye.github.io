@@ -48,7 +48,9 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/10.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/11.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/12.png">
-<meta property="og:updated_time" content="2019-04-04T10:21:35.076Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/13.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/14.png">
+<meta property="og:updated_time" content="2019-04-08T11:05:30.438Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="work-7-ipcc对接科大机器">
 <meta name="twitter:description" content="前言平台对接科大机器人时候,需要机器人经过合成和识别的步骤，其中ivr系统和科大机器人交互流程如下: 
@@ -239,7 +241,12 @@
 </ol>
 <h6 id="11-2-平台一人多号码排查"><a href="#11-2-平台一人多号码排查" class="headerlink" title="11.2 平台一人多号码排查"></a>11.2 平台一人多号码排查</h6><p>1.任务表(ocm_event):drop_cause_tid的入口就是ocm_after_call_module中id,如果任务没有配置,则默认drop_cause_tid为-1,以下3表就相当于ivr流程中：cti_flow,cti_action,cti_rootflow<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/6.png" alt=""><br>2.查看ocm_after_call_action对应的脚本是否是ivr中类型为http的action,并且对应的callback接口是否是<br>“主流程”中”临时数据导入”，如下实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/7.png" alt="">   </p>
 <p>3.在外呼任务中导入名单呼叫:ocm_after_call_module脚本执行是不会记录到dyflow中的。<br>a.从callnotify_callnotify01中查看的是外呼的数据 写入到cti_cdr表中<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/9.png" alt=""><br>b.由于平台通知java应用走的是ivr中action—-http   所以在httpg<em>httpg01</em>.log会有记录<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/8.png" alt=""> </p>
-<p>4.如果在httpg<em>httpg01</em>.log中没有记录并且一人多号码时候,第一个号码没接听,但是没有调用拨打第二个号码,这个时候说嘛callnotify有问题,我们去callnotify01看日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/10.png" alt=""><br>发现脚本加载错误,我们去ocm_after_call_flow查看:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/11.png" alt=""><br>然后发现是ocm_after_call_action问题:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/12.png" alt=""></p>
+<p>4.如果在httpg<em>httpg01</em>.log中没有记录并且一人多号码时候,第一个号码没接听,但是没有调用拨打第二个号码,这个时候说嘛callnotify有问题,我们去callnotify01看日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/10.png" alt=""><br>发现脚本加载错误,我们去ocm_after_call_flow查看:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/11.png" alt=""><br>然后发现是ocm_after_call_action问题:</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/12.png" alt=""></p>
+<h5 id="12-外呼提示”系统忙”"><a href="#12-外呼提示”系统忙”" class="headerlink" title="12.外呼提示”系统忙”"></a>12.外呼提示”系统忙”</h5><p>外呼提示系统忙是因为家在的flow脚本有问题/或者脚本在呼叫客户之前没来得及加载,查看dyflow_dyflow01xxxx.log即可知道。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/13.png" alt=""></p>
+<p>在预测式外呼页面操作任务时候:先创建任务和对应的ivr流程脚本(cti_flow,cti_action),导入名单数据,然后我们通过启动任务时候,发现这个时候拨打的数据报错:”系统忙”,原因是因为此时执行脚本:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ShellUtil.excute(&quot;source /cc/bin/iniwrite.sh -w /cc/cfg/dyflow.cfg dyflow reloadocm 1&quot;);</div></pre></td></tr></table></figure>
+</code></pre><p>还没有加载时候,就已经拨打了电话。<br>我们需要在任务创建时候就执行上面脚本。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/14.png" alt=""></p>
 
       
     </div>
