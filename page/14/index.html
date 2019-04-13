@@ -152,6 +152,121 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-十一-观察粘包-并进行处理" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/28/netty实践-十一-观察粘包-并进行处理/">netty实践(十一)-观察粘包,并进行处理</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前说过,出现粘包和分包的现象是因为客户端和服务器之间没有稳定的数据结构。<br>以下我们分别建立客户端和服务端模拟。</p>
+<h5 id="1-分包-粘包"><a href="#1-分包-粘包" class="headerlink" title="1.分包,粘包"></a>1.分包,粘包</h5><h5 id="2-粘包-分包处理"><a href="#2-粘包-分包处理" class="headerlink" title="2.粘包,分包处理"></a>2.粘包,分包处理</h5><h5 id="3-思考"><a href="#3-思考" class="headerlink" title="3.思考"></a>3.思考</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-分包-粘包-1"><a href="#1-分包-粘包-1" class="headerlink" title="1.分包,粘包"></a>1.分包,粘包</h5><p>先看一个现象:建立服务端和客户端,然后客户端向服务端发送请求:打印出消息 </p>
+<p>1.服务端  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">   //服务</div><div class="line">   public class Server &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	//1.创建服务类</div><div class="line">	ServerBootstrap bootstrap = new ServerBootstrap();</div><div class="line">	</div><div class="line">	//2.创建缓冲池</div><div class="line">	ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line">	ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line">	</div><div class="line">	//3.socket工厂</div><div class="line">	bootstrap.setFactory(new NioServerSocketChannelFactory(boss, worker));</div><div class="line">	</div><div class="line">	//4.设置管道工厂</div><div class="line">	bootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">		</div><div class="line">		@Override</div><div class="line">		public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">		ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">		//管道里面加入handler</div><div class="line">		pipeline.addLast(&quot;handler1&quot;, new HelloHander());</div><div class="line">		return pipeline;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	</div><div class="line">	//5.绑定端口</div><div class="line">       bootstrap.bind(new InetSocketAddress(10101));</div><div class="line">	System.out.println(&quot;start!!!&quot;);</div><div class="line">&#125;</div><div class="line">   &#125;</div><div class="line">    </div><div class="line">    //处理器</div><div class="line">   public class HelloHander extends SimpleChannelHandler&#123;</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line">	 ChannelBuffer message = (ChannelBuffer) e.getMessage();</div><div class="line">	 byte[] array = message.array();</div><div class="line">	 //转换为字符串</div><div class="line">	 System.out.println(&quot;##&quot;+new String(array));</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>2.客户端  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">   public class Client &#123;</div><div class="line">public static void main(String[] args) throws UnknownHostException, IOException &#123;</div><div class="line">	Socket socket = new Socket(&quot;127.0.0.1&quot;, 10101);</div><div class="line">	OutputStream outputStream = socket.getOutputStream();</div><div class="line">	String message = &quot;hello&quot;;</div><div class="line">	byte[] bytes = message.getBytes();</div><div class="line">	</div><div class="line">	for(int i=0;i&lt;1000;i++)&#123;</div><div class="line">		outputStream.write(bytes);</div><div class="line">	&#125;</div><div class="line">	outputStream.close();</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>3.测试<br>先启动服务端,然后启动客户端,效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/37.png" alt=""><br>我们看到出现了粘包,分包现象。</p>
+<h5 id="2-粘包-分包处理-1"><a href="#2-粘包-分包处理-1" class="headerlink" title="2.粘包,分包处理"></a>2.粘包,分包处理</h5><p>数据结构:长度+数据  </p>
+<p>length+hello  </p>
+<p>服务端解决粘包分包需要借助一个类:FrameDecoder将数据分开读取出来。  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">   public class Client &#123;</div><div class="line">public static void main(String[] args) throws UnknownHostException, IOException &#123;</div><div class="line">	Socket socket = new Socket(&quot;127.0.0.1&quot;, 10101);</div><div class="line">	OutputStream outputStream = socket.getOutputStream();</div><div class="line">	String message = &quot;hello&quot;;</div><div class="line">	byte[] bytes = message.getBytes();</div><div class="line">	</div><div class="line">	/**</div><div class="line">	 * 处理粘包分包:就是使用：长度+数据</div><div class="line">	 */</div><div class="line">	ByteBuffer buffer = ByteBuffer.allocate(4+bytes.length);//使用allocate()静态方法,创建一个容量为4+bytes.length字节的ByteBuffer</div><div class="line">	buffer.putInt(bytes.length);</div><div class="line">	buffer.put(bytes);</div><div class="line">	byte[] array = buffer.array();</div><div class="line">	</div><div class="line">	for(int i=0;i&lt;1000;i++)&#123;</div><div class="line">		outputStream.write(array);</div><div class="line">	&#125;</div><div class="line">	outputStream.close();</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>由于有规律读数据需要在我们处理数据之前,并且pipline里面数据传递是并行的 从一个handler到下一个handler,所以我们需要在pipeline中添加myDecoder在handler之前。</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">   public class MyDecoder extends FrameDecoder &#123;</div><div class="line">@Override</div><div class="line">protected Object decode(ChannelHandlerContext ctx, Channel channel,</div><div class="line">		ChannelBuffer buffer) throws Exception &#123;</div><div class="line">	//如果可读长度比基本长度大,我们才读取数据</div><div class="line">	if(buffer.readableBytes()&gt;4)&#123;</div><div class="line">		//标记</div><div class="line">		buffer.markReaderIndex();</div><div class="line">		//长度(int为4字节)</div><div class="line">		int length = buffer.readInt();</div><div class="line">		if(buffer.readableBytes()&lt;length)&#123;</div><div class="line">			buffer.resetReaderIndex();</div><div class="line">			//缓存当前剩余的buffer数据,等待剩下数据包到来</div><div class="line">			return null;</div><div class="line">		&#125;</div><div class="line">		//读数据</div><div class="line">		byte[] bytes = new byte[length];</div><div class="line">		buffer.readBytes(bytes);</div><div class="line">		//往下传递对象</div><div class="line">		return new String(bytes);</div><div class="line">	&#125;</div><div class="line">	return null;</div><div class="line"> &#125;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   public class Server &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	//1.创建服务类</div><div class="line">	ServerBootstrap bootstrap = new ServerBootstrap();</div><div class="line">	//2.创建缓冲池</div><div class="line">	ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line">	ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line">	//3.socket工厂</div><div class="line">	bootstrap.setFactory(new NioServerSocketChannelFactory(boss, worker));</div><div class="line">	//4.设置管道工厂</div><div class="line">	bootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">		@Override</div><div class="line">		public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">		ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">		//处理消息之前对消息进行编码</div><div class="line">		pipeline.addLast(&quot;mydecoder&quot;, new MyDecoder());</div><div class="line">		//管道里面加入handler</div><div class="line">		pipeline.addLast(&quot;handler1&quot;, new HelloHander());</div><div class="line">		return pipeline;</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">	//5.绑定端口</div><div class="line">       bootstrap.bind(new InetSocketAddress(10101));</div><div class="line">	System.out.println(&quot;start!!!&quot;);</div><div class="line">  &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>由于经过编码后传给handler的是String类型的数据,并且是单线程的,线程安全,我们定义变量count 所以我们在HelloHandler里面可以如下处理:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">   public class HelloHander extends SimpleChannelHandler&#123;</div><div class="line">private int count = 1;</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line">	//经过编码器返回的就是String,所以直接输出</div><div class="line">	</div><div class="line">	System.out.println(e.getMessage()+&quot;  &quot;+count);</div><div class="line">	count++;</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>测试:正常<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/38.png" alt=""></p>
+<h5 id="3-思考-1"><a href="#3-思考-1" class="headerlink" title="3.思考"></a>3.思考</h5><p>1、为什么FrameDecoder return的对象就是往下传递的对象</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">return new String(bytes);</div></pre></td></tr></table></figure>
+</code></pre><p>2、buffer里面数据未被读取完怎么办？</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> if(buffer.readableBytes() &lt; length)&#123;</div><div class="line">	buffer.resetReaderIndex();</div><div class="line">	//缓存当前剩余的buffer数据，等待剩下数据包到来</div><div class="line">	return null;</div><div class="line">&#125;</div><div class="line"></div><div class="line">//读数据</div><div class="line">byte[] bytes = new byte[length];</div><div class="line">buffer.readBytes(bytes);</div><div class="line">//往下传递对象</div><div class="line">return new String(bytes);</div></pre></td></tr></table></figure>
+</code></pre><p>3、为什么return null就可以缓存buffer</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">   //缓存当前剩余的buffer数据，等待剩下数据包到来</div><div class="line">return null;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/28/netty实践-十一-观察粘包-并进行处理/" class="archive-article-date">
+  	<time datetime="2017-11-28T12:12:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-28</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/netty/">netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-netty实践-十一-pipline分析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/28/netty实践-十一-pipline分析/">netty实践(十一)-pipline分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/28/netty实践-十一-pipline分析/" class="archive-article-date">
+  	<time datetime="2017-11-28T12:12:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-28</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-十-自定义数据包协议客户端服务端测试" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -713,244 +828,6 @@ ul li {
 
 
   
-    <article id="post-vue-23-vue工程实例-准备" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/10/vue-23-vue工程实例-准备/">vue(23)-vue工程实例-准备</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-webpack"><a href="#1-webpack" class="headerlink" title="1.webpack"></a>1.webpack</h5><ol>
-<li>webpack 是一款模块加载及处理工具，它能把各种资源，例如JS（含JSX）、coffee、样式（含less/sass）、图片等都作为模块来使用和处理</li>
-<li>webpack 可以把ES6 语法的js 文件，sass 样式等无法直接在浏览器中使用的语言编译成浏览器支持的形式，也可以把需要的文件进行合并、压缩混淆。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/5.png" alt=""></li>
-</ol>
-<h6 id="1-1-安装webpack"><a href="#1-1-安装webpack" class="headerlink" title="1.1 安装webpack"></a>1.1 安装webpack</h6><p>在安装 Webpack 前，你本地环境需要支持 node.js。<br>由于 npm 安装速度慢,使用淘宝的镜像及其命令 cnpm</p>
-<pre><code>cnpm install webpack -g
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/6.png" alt="">  </p>
-<h6 id="1-2-创建项目"><a href="#1-2-创建项目" class="headerlink" title="1.2 创建项目"></a>1.2 创建项目</h6><p>1.创建一个目录 app<br>2.app下创建app.js文件,内容为:  </p>
-<pre><code>document.write(&quot;It works.&quot;);
-</code></pre><p>3.app下创建index.html文件,内容如下:</p>
-<pre><code>&lt;html&gt;
-  &lt;head&gt;
- &lt;meta charset = &quot;utf-8&quot;&gt;
- &lt;script src=&quot;bundle.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
- &lt;body&gt;&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>4.接下来我们使用 webpack 命令来打包<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/7.png" alt=""></p>
-<p>5.浏览器中访问<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/8.png" alt=""></p>
-<h6 id="1-3-创建第二个JS文件"><a href="#1-3-创建第二个JS文件" class="headerlink" title="1.3 创建第二个JS文件"></a>1.3 创建第二个JS文件</h6><p>接下来我们创建另外一个js文件app2.js，代码如下：  </p>
-<pre><code>module.exports=&quot;It works from app2.js&quot;
-</code></pre><p>更新app.js文件，代码如下：  </p>
-<pre><code>document.write(require(&quot;./app2.js&quot;));  
-</code></pre><p>接下来我们使用 webpack 命令来打包：</p>
-<pre><code>webpack app.js bundle..js  
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/9.png" alt="">  </p>
-<p>exports和module.exports指向同一块内存，但require()返回的是module.exports而不是exports。</p>
-<p>在浏览器访问，输出结果如下所示：  </p>
-<p> It works from app2.js</p>
-<p>webpack 根据模块的依赖关系进行静态分析，这些文件(模块)会被包含到 bundle.js 文件中。Webpack 会给每个模块分配一个唯一的 id 并通过这个 id 索引和访问模块。 在页面启动时，会先执行app.js 中的代码，其它模块会在运行 require 的时候再执行。</p>
-<h6 id="1-4-loader"><a href="#1-4-loader" class="headerlink" title="1.4 loader"></a>1.4 loader</h6><p>1.Webpack本身只能处理JavaScript模块，如果要处理其他类型的文件，就需要使用loader进行转换。<br>2.如果我们需要在应用中添加 css 文件，就需要使用到 css-loader 和 style-loader，他们做两件不同的事情，css-loader 会遍历 CSS 文件，然后找到 url() 表达式然后处理他们，style-loader 会把原来的 CSS 代码插入页面中的一个 style 标签中。  </p>
-<p>使用以下命令来安装 css-loader 和 style-loader(全局安装需要参数 -g):  </p>
-<p>执行以上命令后，会再当前目录生成 node_modules 目录，它就是 css-loader 和 style-loader 的安装目录。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/10.png" alt="">    </p>
-<p>接下来创建一个 style.css 文件，代码如下：  </p>
-<pre><code>body{
-  background:yellow;
-}
-</code></pre><p>修改app.js文件,代码如下:  </p>
-<pre><code>require(&quot;!style-loader!css-loader!./style.css&quot;);
-document.write(require(&quot;./app2.js&quot;));
-</code></pre><p>接下来我们使用 webpack 命令来打包：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/11.png" alt=""></p>
-<p>在浏览器访问，输出结果如下所示：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/12.png" alt=""></p>
-<p>require CSS 文件的时候都要写 loader 前缀 !style-loader!css-loader!，当然我们可以根据模块类型（扩展名）来自动绑定需要的 loader。 将app.js 中的 require(“!style-loader!css-loader!./style.css”) 修改为 require(“./style.css”)，效果一样</p>
-<h6 id="1-5-配置文件"><a href="#1-5-配置文件" class="headerlink" title="1.5 配置文件"></a>1.5 配置文件</h6><p>我们可以将一些编译选项放在配置文件中，以便于统一管理：<br>创建webpack.config.js文件,代码如下:  </p>
-<pre><code>module.exports={
-entry:&quot;./app.js&quot;,
-output:{
-    path:__dirname,//注意此处是两个下划线
-    filename:&quot;bundle.js&quot;
-},
-module:{
-    loaders:[
-    { test: /\.css$/, loader: &quot;style-loader!css-loader&quot; }
-    ]
-}
-}
-</code></pre><p>接下来我们只需要执行 webpack 命令即可生成 bundle.js 文件：  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/13.png" alt=""><br>webpack 命令执行后，会默认载入当前目录的 webpack.config.js 文件。</p>
-<h6 id="1-6-插件"><a href="#1-6-插件" class="headerlink" title="1.6 插件"></a>1.6 插件</h6><p>插件在 webpack 的配置信息 plugins 选项中指定，用于完成一些 loader 不能完成的工。webpack 自带一些插件，你可以通过 cnpm 安装一些插件。使用内置插件需要通过以下命令来安装：</p>
-<p>使用内置插件需要通过以下命令来安装：</p>
-<pre><code>cnpm install webpack --save-dev
-</code></pre><p>比如我们可以安装内置的 BannerPlugin 插件，用于在文件头部输出一些注释信息。  </p>
-<p>修改 webpack.config.js，代码如下：</p>
-<pre><code>var webpack=require(&apos;webpack&apos;);
-module.exports = {
-entry: &quot;./runoob1.js&quot;,
-output: {
-    path: __dirname,
-    filename: &quot;bundle.js&quot;
-},
-module: {
-    loaders: [
-        { test: /\.css$/, loader: &quot;style-loader!css-loader&quot; }
-    ]
-},
-plugins:[
-new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
-]
-};
-</code></pre><p>然后运行:  </p>
-<p>webpack  </p>
-<p>当项目逐渐变大，webpack 的编译时间会变长，可以通过参数让编译的输出内容带有进度和颜色。  </p>
-<pre><code>webpack --progress --colors
-</code></pre><p>如果不想每次修改模块后都重新编译，那么可以启动监听模式。开启监听模式后，没有变化的模块会在编译后缓存到内存中，而不会每次都被重新编译，所以监听模式的整体速度是很快的。</p>
-<pre><code>webpack --progress --colors --watch
-</code></pre><p>当然，我们可以使用 webpack-dev-server 开发服务，这样我们就能通过 localhost:8080 启动一个 express 静态资源 web 服务器，并且会以监听模式自动运行 webpack，在浏览器打开 <a href="http://localhost:8080/" target="_blank" rel="external">http://localhost:8080/</a> 或 <a href="http://localhost:8080/webpack-dev-server/" target="_blank" rel="external">http://localhost:8080/webpack-dev-server/</a> 可以浏览项目中的页面和编译后的资源输出，并且通过一个 socket.io 服务实时监听它们的变化并自动刷新页面。</p>
-<p>1、安装<br>cnpm install webpack-dev-server -g</p>
-<p>2、运行<br>webpack-dev-server –progress –colors</p>
-<p>在浏览器打开 <a href="http://localhost:8080/" target="_blank" rel="external">http://localhost:8080/</a> </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/11/10/vue-23-vue工程实例-准备/" class="archive-article-date">
-  	<time datetime="2017-11-10T09:17:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-22-组件-动态组件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/10/vue-22-组件-动态组件/">vue(22)-组件-动态组件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Vue.js 支持动态组件，即多个组件可以使用同一挂载点，根据条件来切换不同的组件。<br>使用保留标签<component>，通过绑定到is 属性的值来判断挂载哪个组件。这种场景往往运<br>用在路由控制或者tab 切换中</component></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基础用法"><a href="#1-基础用法" class="headerlink" title="1.基础用法"></a>1.基础用法</h5><p>页面切换说明动态组件基础用法。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">&lt;!--js--&gt;</div><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;ul&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;home&apos;&quot;&gt;home&lt;/li&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;list&apos;&quot;&gt;list&lt;/li&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;detail&apos;&quot;&gt;detail&lt;/li&gt;</div><div class="line">   &lt;/ul&gt;</div><div class="line">   &lt;component :is=&quot;currentView&quot;&gt;&lt;/component&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line">&lt;!--js--&gt;</div><div class="line">var vm = new Vue(&#123;</div><div class="line"> el:&quot;#app&quot;,</div><div class="line"> data:&#123;</div><div class="line">     currentView:&apos;home&apos;</div><div class="line"> &#125;,</div><div class="line"> components:&#123;</div><div class="line">     home:&#123;</div><div class="line">         template:&apos;&lt;div&gt;Home&lt;/div&gt;&apos;</div><div class="line">     &#125;,</div><div class="line">     list:&#123;</div><div class="line">         template:&apos;&lt;div&gt;List&lt;/div&gt;&apos;</div><div class="line">     &#125;,</div><div class="line">     detail:&#123;</div><div class="line">         template:&apos;&lt;div&gt;Detail&lt;/div&gt;&apos;</div><div class="line">     &#125;</div><div class="line"> &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li><p>component 标签上is 属性决定了当前采用的子组件，:is 是v-bind:is 的缩写，绑定了父<br>组件中data 的currentView 属性。顶部的ul 则起到导航的作用，点击即可修改currentView<br>值，也就修改component 标签中使用的子组件类型。</p>
-</li>
-<li><p>需要注意的事，currentView 的值需要和父组件实例中的components属性的key相对应。</p>
-</li>
-</ol>
-<h5 id="2-keep-alive"><a href="#2-keep-alive" class="headerlink" title="2.keep-alive"></a>2.keep-alive</h5><p>component 标签接受keep-alive 属性，可以将切换出去的组件保留在内存中，避免重新<br>渲染。我们将上述例子中的component 标签修改为：  </p>
-<pre><code>&lt;component :is=&quot;currentView&quot; keep-alive&gt;&lt;/component&gt;
-
- home:{
-         template:&apos;&lt;div&gt;&lt;p&gt;Home&lt;/p&gt;&lt;ul&gt;&lt;li v-for=&quot;item in items&quot;&gt;{{item}}&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;,
-         data:function(){
-             return{
-                 items:[]
-             }
-         },
-         ready:function(){
-             console.log(&quot;ready&quot;);
-             this.items=[1,2,3,4,5,6,7,8];
-         }
-     }
-</code></pre><p>在keep-alive属性下可以在home和list之间切换currentView，home组件的ready 函数只运行一次，可以看到控制台只输出了一次“fetch data”。而将keep-alive 属性去除后，再次在home 和list 组件间切换，会发现每点击到home，控制台都会输出一次“ready”。我们可以根据该特性适当地进行页面的性能优化，如果每个组件在激活时并不要求每次都实时请求数据，那使用keep-alive 可以避免一些不必要的重复渲染，导致用户看到停留时间过长的空白页面。但如果每次激活组件都需要向后端请求数据的话，就不太适合使用keepalive属性了。</p>
-<p>Vue.js 2.0 中keep-alive 属性被修改为标签，例如：</p>
-<pre><code>&lt;keep-alive&gt;
-　 &lt;component v-bind:is=&quot;view&quot;&gt;&lt;/component&gt;
-&lt;/keep-alive&gt;
-</code></pre><h5 id="3-activate钩子函数"><a href="#3-activate钩子函数" class="headerlink" title="3.activate钩子函数"></a>3.activate钩子函数</h5><p>1.Vue.js 给组件提供了activate 钩子函数，作用于动态组件切换或者静态组件初始化的过<br>程中<br>2.activate 接受一个回调函数做为参数，使用函数后组件才进行之后的渲染过程。<br>3.如下:  </p>
-<pre><code>home:{
-         template:&apos;&lt;div&gt;&lt;p&gt;Home&lt;/p&gt;&lt;ul&gt;&lt;li v-for=&quot;item in items&quot;&gt;{{item}}&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;,
-         data:function(){
-             return{
-                 items:[]
-             }
-         },
-        activate:function(done){
-            var that = this;
-            // 此处的setTimeout 用于模拟正式业务中的ajax 异步请求数据
-            setTimeout(function() {
-                that.items = [1, 2, 3, 4, 5];
-                done();
-            }, 1000);
-
-        }
-     }
-</code></pre><p>此时也可以定义两个component 作为对比，并设定其中一个属性为keep-alive ：</p>
-<pre><code>&lt;component :is=&quot;currentView&quot;&gt;&lt;/component&gt;
-&lt;component :is=&quot;currentView&quot; keep-alive&gt;&lt;/component&gt;
-</code></pre><p>可以对比出，再次激活home 后，未使用keep-alive 的component 会延迟1s 的时间才<br>渲染出列表。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/11/10/vue-22-组件-动态组件/" class="archive-article-date">
-  	<time datetime="2017-11-10T08:11:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/13/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/12/">12</a><a class="page-number" href="/page/13/">13</a><span class="page-number current">14</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="space">&hellip;</span><a class="page-number" href="/page/48/">48</a><a class="extend next" rel="next" href="/page/15/">Next &raquo;</a>
@@ -1016,7 +893,7 @@ new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringClond/" style="font-size: 10px;">SpringClond</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

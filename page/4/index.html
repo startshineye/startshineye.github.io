@@ -152,6 +152,151 @@
       <div class="body-wrap">
         
   
+    <article id="post-java爬虫-7-2-爬虫代码实现一-下载解析视频网站页面" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/06/java爬虫-7-2-爬虫代码实现一-下载解析视频网站页面/">java爬虫-7-2-爬虫代码实现一:下载解析视频网站页面</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.编写爬虫执行入口方法  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-编写爬虫执行入口方法"><a href="#1-编写爬虫执行入口方法" class="headerlink" title="1.编写爬虫执行入口方法"></a>1.编写爬虫执行入口方法</h5><ol>
+<li>新建一个start包名,在此包下存放各种爬虫执行入口方法。比如说:电视剧,电影,综艺的等等多个爬虫入口</li>
+<li><p>我们以电视剧为例讲解<br>StartDSJ</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">      /**</div><div class="line"> * 电视剧爬虫执行入口类</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class StartDSJ &#123;</div><div class="line">    /**</div><div class="line">     * 定义下载成员变量</div><div class="line">     */</div><div class="line">    private IDownLoadService downLoadService;</div><div class="line">    private IProcessService processService;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        //创建对象</div><div class="line">        StartDSJ dsj = new StartDSJ();</div><div class="line"></div><div class="line">        //定义是用哪个接口下载的,这里是httpClient</div><div class="line">        dsj.setDownLoadService(new HttpClientDownLoadSevice());</div><div class="line"></div><div class="line">        String url =&quot;http://list.youku.com/show/id_z9cd2277647d311e5b692.html?spm=a2htv.20005143.m13050845531.5~5~1~3~A&amp;from=y1.3-tv-index-2640-5143.40177.1-1&quot;;</div><div class="line">        //下载页面</div><div class="line">        Page page = dsj.downloadPage(url);</div><div class="line">       // System.out.println(&quot;下载页面:&quot;+page.getContent());</div><div class="line"></div><div class="line">        //解析页面</div><div class="line">        dsj.setProcessService(new YOUKUProcesService());</div><div class="line">        dsj.processPage(page);</div><div class="line">      //  System.out.println(&quot;解析页面:&quot;+page.getContent());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 下载页面</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public Page downloadPage(String url)&#123;</div><div class="line">       return this.downLoadService.download(url);</div><div class="line">    &#125;</div><div class="line">    /**</div><div class="line">     * 解析页面</div><div class="line">     * @param page</div><div class="line">     */</div><div class="line">    public void processPage(Page page)&#123;</div><div class="line">       this.processService.process(page);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public IDownLoadService getDownLoadService() &#123;</div><div class="line">        return downLoadService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setDownLoadService(IDownLoadService downLoadService) &#123;</div><div class="line">        this.downLoadService = downLoadService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public IProcessService getProcessService() &#123;</div><div class="line">        return processService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setProcessService(IProcessService processService) &#123;</div><div class="line">        this.processService = processService;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre></li>
+</ol>
+<h6 id="1-下载页面"><a href="#1-下载页面" class="headerlink" title="1.下载页面"></a>1.下载页面</h6><p>下载接口按照面向接口编程<br>interface:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">    /**</div><div class="line"> * 页面下载接口</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public interface IDownLoadService &#123;</div><div class="line">    public Page download(String url);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>httpClient下载方式实现类:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"> public class HttpClientDownLoadSevice implements IDownLoadService &#123;</div><div class="line"> @Override</div><div class="line"> public Page download(String url) &#123;</div><div class="line">    Page page = new Page();</div><div class="line">    page.setContent(PageDownLoadUtil.getPageContent(url));</div><div class="line">    return page;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-解析页面"><a href="#2-解析页面" class="headerlink" title="2.解析页面"></a>2.解析页面</h6><ol>
+<li>解析的时候,解析电视剧可能跟网站有关联,为了迎合优酷,土豆等网站,我们就定义了解析接口,解析接口也按照面向接口编程(定义解析接口) </li>
+<li>页面解析我们是用HtmlCleaner  </li>
+</ol>
+<p>解析页面接口:IProcessService</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface IProcessService &#123;</div><div class="line">  public void process(Page page);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>优酷类视频解析实现:YOUKUProcesService</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"> public class YOUKUProcesService implements IProcessService&#123;</div><div class="line">/**</div><div class="line"> * 定义总播放数的正则模式</div><div class="line"> */</div><div class="line">private String allNumberRegex = &quot;(?&lt;= 总播放:)[\\d,]+&quot;;</div><div class="line">private String supportNumberRegex = &quot;(?&lt;= 顶:)[\\d,]+&quot;;</div><div class="line">    </div><div class="line">  @Override</div><div class="line">  public void process(Page page) &#123;</div><div class="line">   /**</div><div class="line">    * 我们使用HtmlCleaner解析页面</div><div class="line">    */</div><div class="line">   //获取页面抓取内容</div><div class="line">   String content = page.getContent();</div><div class="line"></div><div class="line">   HtmlCleaner htmlCleaner = new HtmlCleaner();</div><div class="line">   //获取根节点</div><div class="line">   TagNode rootNode = htmlCleaner.clean(content);</div><div class="line"></div><div class="line">   //获取xPathExpression这个从打开网站,选中网站抓取节点,右键Copy-&gt;Copy XPath</div><div class="line"></div><div class="line">   String xPathExpression = &quot;/html/body[@class=&apos;w1300&apos;]/div[@class=&apos;s-body&apos;]/div[@class=&apos;yk-content&apos;]/div[@class=&apos;mod mod-new&apos;]/div[@class=&apos;mod fix&apos;]/div[@class=&apos;p-base&apos;]/ul/li[11]&quot;;</div><div class="line">   String supportNumberXPathExpression = &quot;&quot;;</div><div class="line">   try &#123;</div><div class="line"></div><div class="line">       //获取总数</div><div class="line">       Object[] nodes = rootNode.evaluateXPath(xPathExpression);</div><div class="line">       //判断此数组长度大于0才解析,不然里面没有任何内容,不解析</div><div class="line">      if(nodes.length&gt;0)&#123;</div><div class="line">          TagNode node = (TagNode)nodes[0];</div><div class="line">          //解析后输出:总播放:14,521,509,646</div><div class="line">          System.out.println(&quot;解析后输出:&quot;+node.getText().toString());</div><div class="line"></div><div class="line">          //使用java正则表达式解析:  &apos;总播放:14,521,509,646&apos;</div><div class="line">          //创建匹配方式</div><div class="line">          Pattern allNumberPattern = Pattern.compile(allNumberRegex, Pattern.DOTALL);</div><div class="line">          Matcher matcher = allNumberPattern.matcher(node.getText().toString());</div><div class="line">          if(matcher.find())&#123;</div><div class="line">              System.out.println(&quot;  总播放:&quot;+matcher.group(0));</div><div class="line">          &#125;</div><div class="line">      &#125;</div><div class="line"></div><div class="line">       Object[] supportNumberNodes = rootNode.evaluateXPath(supportNumberXPathExpression);</div><div class="line">       //判断此数组长度大于0才解析,不然里面没有任何内容,不解析</div><div class="line">       if(supportNumberNodes.length&gt;0)&#123;</div><div class="line">           TagNode supportNumberNode = (TagNode)supportNumberNodes[0];</div><div class="line">           //解析后输出:顶：20,592,919</div><div class="line">           System.out.println(&quot;解析后输出:&quot;+supportNumberNode.getText().toString());</div><div class="line"></div><div class="line">           //使用java正则表达式解析: 顶：20,592,919</div><div class="line">           //创建匹配方式</div><div class="line">           Pattern supportNumberPattern = Pattern.compile(supportNumberRegex, Pattern.DOTALL);</div><div class="line">           Matcher matcher = supportNumberPattern.matcher(supportNumberNode.getText().toString());</div><div class="line">           if(matcher.find())&#123;</div><div class="line">               System.out.println(&quot;  总播放:&quot;+matcher.group(0));</div><div class="line">           &#125;</div><div class="line">       &#125;</div><div class="line"></div><div class="line">   &#125; catch (XPatherException e) &#123;</div><div class="line">       e.printStackTrace();</div><div class="line">   &#125;</div><div class="line"></div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-代码结构图"><a href="#2-代码结构图" class="headerlink" title="2.代码结构图"></a>2.代码结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/32.png" alt="">   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/06/java爬虫-7-2-爬虫代码实现一-下载解析视频网站页面/" class="archive-article-date">
+  	<time datetime="2018-11-06T04:54:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-06</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/05/java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面/">java爬虫-7-1-爬虫代码实现一:下载解析视频网站页面</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-业务需求及技术"><a href="#1-业务需求及技术" class="headerlink" title="1.业务需求及技术"></a>1.业务需求及技术</h5><ol>
+<li>爬虫目标:优酷</li>
+<li>抓取字段:总播放数，每日播放增量，评论数，收藏数，赞，踩</li>
+<li>实现功能:下载解析页面</li>
+<li>采用技术:HttpClient，HtmlCleaner，Xpath，正则表达式  </li>
+</ol>
+<h5 id="2-创建SpringBoot项目及代码编写"><a href="#2-创建SpringBoot项目及代码编写" class="headerlink" title="2.创建SpringBoot项目及代码编写"></a>2.创建SpringBoot项目及代码编写</h5><ol>
+<li>我们进入<a href="http://start.spring.io进行SpringBoot的工程构建" target="_blank" rel="external">http://start.spring.io进行SpringBoot的工程构建</a></li>
+<li>进入:maven库(<a href="https://mvnrepository.com/)搜索出HttpClient，HtmlCleaner依赖加入pom.xml文件中" target="_blank" rel="external">https://mvnrepository.com/)搜索出HttpClient，HtmlCleaner依赖加入pom.xml文件中</a>.</li>
+</ol>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">     &lt;!--引入HttpClient依赖--&gt;</div><div class="line">   &lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.apache.httpcomponents&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;httpclient&lt;/artifactId&gt;</div><div class="line"> &lt;version&gt;4.5.2&lt;/version&gt;</div><div class="line">   &lt;/dependency&gt;</div><div class="line"></div><div class="line">      &lt;!--引入HtmlCleaner依赖--&gt;</div><div class="line">&lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;net.sourceforge.htmlcleaner&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;htmlcleaner&lt;/artifactId&gt;</div><div class="line">	&lt;version&gt;2.10&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+</code></pre><ol>
+<li>数据下载页面工具类<br>我们书写一个工具类来来获取网页信息</li>
+</ol>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">       /**</div><div class="line">     * 页面下载工具类</div><div class="line">     * @author yxm</div><div class="line">     * @date 2018/11/5 23:54:20</div><div class="line">     */</div><div class="line">    public class PageDownLoadUtil &#123;</div><div class="line">    /**</div><div class="line">     * 获取页面内容</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public static String getPageContent(String url)&#123;</div><div class="line">        //创建builder</div><div class="line">        HttpClientBuilder builder = HttpClients.custom();</div><div class="line"></div><div class="line">        //build一个CloseableHttpClient</div><div class="line">        CloseableHttpClient client = builder.build();</div><div class="line">        //创建一个Get请求</div><div class="line">        HttpGet request = new HttpGet(url);</div><div class="line">        </div><div class="line">        //执行请求并返回</div><div class="line">        String content = null;</div><div class="line">        try &#123;</div><div class="line">            CloseableHttpResponse response = client.execute(request);</div><div class="line">            HttpEntity entity = response.getEntity();</div><div class="line"></div><div class="line">            //将entity转换成String</div><div class="line">            content = EntityUtils.toString(entity);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return content;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args)&#123;</div><div class="line">        String url = &quot;http://comic.youku.com/?spm=a2hmv.20009921.topNav.5~1~3!5~A&quot;;</div><div class="line">        String content = getPageContent(url);</div><div class="line">        System.out.println(content);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><ol>
+<li><p>抓取数据封装成beans<br>抓取字段:总播放数，每日播放增量，评论数，收藏数，赞，踩 肯定需要存放在实体类里面,我们创建一个包，定义一个类来保存页面内容  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">/**</div><div class="line"> * 存储页面信息实体类</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class Page &#123;</div><div class="line">    /**</div><div class="line">     * 页面内容</div><div class="line">     */</div><div class="line">   private String content;</div><div class="line">    /**</div><div class="line">     * 总播放量</div><div class="line">     */</div><div class="line">   private String allNumber;</div><div class="line">    /**</div><div class="line">     * 每日播放量</div><div class="line">     */</div><div class="line">   private String dayNumber;</div><div class="line">    /**</div><div class="line">     * 评论数</div><div class="line">     */</div><div class="line">   private String commitNumber;</div><div class="line">    /**</div><div class="line">     * 收藏数</div><div class="line">     */</div><div class="line">   private String collectNumber;</div><div class="line">    /**</div><div class="line">     * 赞</div><div class="line">     */</div><div class="line">   private String supportNumber;</div><div class="line">    /**</div><div class="line">     * 踩</div><div class="line">     */</div><div class="line">   private String againstNumber;</div><div class="line">    /**</div><div class="line">     * 电视剧名称</div><div class="line">     */</div><div class="line">   private String tvName;</div><div class="line">    /**</div><div class="line">     * 页面url</div><div class="line">     */</div><div class="line">   private String url;</div><div class="line">    /**</div><div class="line">     * 子集信息</div><div class="line">     */</div><div class="line">   private String episodeNumber;</div><div class="line">       &#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>定义下载接口(下载有优酷,土豆,爱奇艺,我们定义接口各自去实现)<br>下载有优酷,土豆,爱奇艺,我们定义接口各自去实现，各种网站的解析模板可能是不一样的,我们后面要抓取某一个网站,我们直接实现这个接口，之前写了通过httpClient下载之后估计还有很多其他方式,我们提供一个接口,降低耦合度</p>
+</li>
+</ol>
+<p>IDownLoadService接口: </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line"> * 页面下载接口</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public interface IDownLoadService &#123;</div><div class="line">    public Page download(String url);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>HttpClientDownLoadSevice实现:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">     /**</div><div class="line"> * HttpClient方式下载</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class HttpClientDownLoadSevice implements IDownLoadService &#123;</div><div class="line">    @Override</div><div class="line">    public Page download(String url) &#123;</div><div class="line">        Page page = new Page();</div><div class="line">        page.setContent(PageDownLoadUtil.getPageContent(url));</div><div class="line">        return page;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-项目结构目录"><a href="#3-项目结构目录" class="headerlink" title="3.项目结构目录"></a>3.项目结构目录</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/31.png" alt="">   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/05/java爬虫-7-1-爬虫代码实现一-下载解析视频网站页面/" class="archive-article-date">
+  	<time datetime="2018-11-05T15:34:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java爬虫-6-部署方案" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -612,117 +757,6 @@
 
 
   
-    <article id="post-work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/17/work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案/">work(1)-部署项目时出现：Error configuring application listener of class org.springframework.web.context.解决方案</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>福州做保险项目时候,运用到监控项目,由于项目是比较老的spring2.0项目,之前项目一直是在jdk1.6环境下正常运行,但是在保险项目需要在jdk1.7下运行,但是一直报错</li>
-<li><p>错误:  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Error configuring application listener of class org.springframework.web.context.org.springframework.web.util.Log4jConfigListener</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><ol>
-<li><p>查了很多资料,网上大部分人说是缺少jar包:spring-web.jar 但是导入了jar包和更新了spring保本  还是报一样的作物,后面找到以下资料解决:<br><a href="https://blog.csdn.net/zouke314/article/details/72465772" target="_blank" rel="external">解决连接</a></p>
-</li>
-<li><p>解决方法如:右键点击项目选择properties，进入后找到deployment assembly，查看右边列表，如果没有maven dependency，那么点击add，然后点击Java build path entries，点击next，添加即可。</p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/10/17/work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案/" class="archive-article-date">
-  	<time datetime="2018-10-17T08:42:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-10-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-52-SpringBoot项目在idea目录下不正产展示" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/09/23/zyzx-52-SpringBoot项目在idea目录下不正产展示/">zyzx(52)-SpringBoot项目在idea目录下不正产展示</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>可参考:<br><a href="https://jingyan.baidu.com/article/86fae346ec143d3c49121a8e.html" target="_blank" rel="external">https://jingyan.baidu.com/article/86fae346ec143d3c49121a8e.html</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/09/23/zyzx-52-SpringBoot项目在idea目录下不正产展示/" class="archive-article-date">
-  	<time datetime="2018-09-23T04:24:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-09-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/48/">48</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -788,7 +822,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringClond/" style="font-size: 10px;">SpringClond</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
