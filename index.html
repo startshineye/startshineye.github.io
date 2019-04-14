@@ -170,7 +170,40 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        
+        <h4 id="1-微服务拆分的起点"><a href="#1-微服务拆分的起点" class="headerlink" title="1.微服务拆分的起点"></a>1.微服务拆分的起点</h4><h5 id="1-1如何拆分微服务"><a href="#1-1如何拆分微服务" class="headerlink" title="1.1如何拆分微服务?"></a>1.1如何拆分微服务?</h5><p>现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  </p>
+<ol>
+<li>1.先明白起点和终点<br>起点:既有架构的形态。<br>终点:好的架构不是设计出来的,而是进化而来的。  </li>
+<li>典型架构<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/65.png" alt=""></li>
+</ol>
+<h5 id="1-2-适合上微服务么"><a href="#1-2-适合上微服务么" class="headerlink" title="1.2 适合上微服务么?"></a>1.2 适合上微服务么?</h5><p>业务形态不适合的<br>1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)<br>2.业务相对稳定、迭代周期长<br>3.访问压力不大、可用性要求不高(中小型企业的OA)  </p>
+<h4 id="2-康威定律和微服务"><a href="#2-康威定律和微服务" class="headerlink" title="2.康威定律和微服务"></a>2.康威定律和微服务</h4><h5 id="2-1-康威定律"><a href="#2-1-康威定律" class="headerlink" title="2.1 康威定律"></a>2.1 康威定律</h5><p>除了业务形态不适合的,其实还有其他条件,很可能导致不适合迁移到微服务中去,首先我们看一下微服务理论基础:康威定律<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/66.png" alt=""></p>
+<p>一句话概括就是:沟通的问题会影响系统设计<br>所以微服务都是强调小团队开发,大的系统拆分成微服务时候,大的团队随机也会拆分成小的团队。 </p>
+<h5 id="2-2-微服务和团队结构"><a href="#2-2-微服务和团队结构" class="headerlink" title="2.2 微服务和团队结构"></a>2.2 微服务和团队结构</h5><ol>
+<li>微服务特点<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/67.png" alt=""></li>
+<li>传统vs微服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/68.png" alt=""></li>
+</ol>
+<h4 id="3-点餐业务服务拆分分析"><a href="#3-点餐业务服务拆分分析" class="headerlink" title="3.点餐业务服务拆分分析"></a>3.点餐业务服务拆分分析</h4><p>点餐系统分为:买家端 和 卖家端  </p>
+<h5 id="3-1-服务拆分"><a href="#3-1-服务拆分" class="headerlink" title="3.1 服务拆分"></a>3.1 服务拆分</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/69.png" alt=""><br>上面:服务两种方式拆分:<br>第一种(按照终端):买家端(手机端)的ui单独为一个服务放到nginx里面,卖家端(PC端)的ui单独为一个服务,两个服务同时向后端的通用服务请求数据<br>第二种(按照业务):将订单ui,商品ui,支付ui都放到一个边缘服务。</p>
+<p>以上两种都不对,如果只是自己运营的的点餐应用:团队只有一个,并且业务变化也不大,没有微服务化的必要。如果是一个快速发展的IT公司点餐部门,业务快速发展，需求不断提出，所以需要拆分成微服务。</p>
+<p>所以说:起点和团队结构,沟通方式都会决定微服务的设计。  </p>
+<h5 id="3-2-服务拆分方法论"><a href="#3-2-服务拆分方法论" class="headerlink" title="3.2 服务拆分方法论"></a>3.2 服务拆分方法论</h5><p>下图出自&lt;&lt;可扩展的艺术&gt;&gt;书籍<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/70.png" alt=""></p>
+<ol>
+<li>X轴 水平复制:通过应用程序扩展,通过负载均衡运行多个父本一样的应用程序</li>
+<li>Z轴 数据分区:将服务按数据分区、每个服务器负责一个数据子集、每个服务器运行的代码是一样的  </li>
+<li>Y轴 功能解耦:不同职责模块分成不同服务</li>
+</ol>
+<p>通过以上模型,知道服务拆分的两个关键职责:功能和数据 </p>
+<h6 id="3-2-1-如何拆”功能”"><a href="#3-2-1-如何拆”功能”" class="headerlink" title="3.2.1 如何拆”功能”"></a>3.2.1 如何拆”功能”</h6><ol>
+<li>1.单一职责(每个服务负责业务功能的单独一部分)、松耦合(服务之间耦合度低,修改一个服务不用导致另一个服务修改)、高内聚(服务内部相关行为都聚集在一个服务内,而不是分散在不同服务中心)。</li>
+<li>2.关注点分离:-按职责  -按通用性 -按粒度级别(微服务并不是越小越好,要合适)  </li>
+</ol>
+<h6 id="3-2-2-如何拆”数据”"><a href="#3-2-2-如何拆”数据”" class="headerlink" title="3.2.2 如何拆”数据”"></a>3.2.2 如何拆”数据”</h6><p>拆分功能和拆分数据是有先后顺序  </p>
+<ol>
+<li>1.先考虑业务功能、再考虑业务功能对应的数据  </li>
+<li>2.无状态服务（状态:如果一个数据要被多个服务共享才能完成一个请求,那么这个数据就称为状态,进而依赖这个状态数据的服务称为有状态服务）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png" alt=""><br>如上所示把业务数据存放到有状态服务的数据库,缓存中实现前端微服务和后端微服务质检无状态服务,数据间没有太大耦合性。  </li>
+</ol>
+<h6 id="3-2-3-点餐业务服务拆分分析"><a href="#3-2-3-点餐业务服务拆分分析" class="headerlink" title="3.2.3 点餐业务服务拆分分析"></a>3.2.3 点餐业务服务拆分分析</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png" alt=""><br>1.不要期望服务拆分一次就正确,微服务是不断演进的  </p>
+
       
     </div>
     <div class="article-info article-info-index">
