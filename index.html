@@ -269,10 +269,80 @@
 <p>name: “张三”<br>phone: “18868822111”<br>address: “总部”<br>openid: “ew3euwhd7sjw9diwkq” //用户的微信openid<br>items: [{<br>    productId: “1423113435324”,<br>    productQuantity: 2 //购买数量<br>}]</p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">返回</div></pre></td></tr></table></figure>
 <p>{<br>  “code”: 0,<br>  “msg”: “成功”,<br>  “data”: {<br>      “orderId”: “147283992738221”<br>  }<br>}</p>
-<p>```</p>
-<p>订单服务业务逻辑思路:<br>1.参数校验<br>2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)<br>3.计算总价<br>4.扣库存(调用商品服务)<br>5.订单入库   </p>
-<h5 id="5-2-编码实践"><a href="#5-2-编码实践" class="headerlink" title="5.2 编码实践"></a>5.2 编码实践</h5><h6 id="5-2-1-创建应用-注册到注册中心"><a href="#5-2-1-创建应用-注册到注册中心" class="headerlink" title="5.2.1 创建应用 注册到注册中心"></a>5.2.1 创建应用 注册到注册中心</h6><p>略(按照:client客户端创建)  </p>
-<h6 id="5-2-2-dao"><a href="#5-2-2-dao" class="headerlink" title="5.2.2 dao"></a>5.2.2 dao</h6><p>订单服务业务逻辑思路:<br>1.参数校验<br>2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)<br>3.计算总价<br>4.扣库存(调用商品服务)<br>5.订单入库   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库   </div><div class="line"></div><div class="line">##### 5.2 编码实践    </div><div class="line">###### 5.2.1 创建应用 注册到注册中心</div><div class="line">略(按照:client客户端创建)  </div><div class="line"></div><div class="line">###### 5.2.2 dao</div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库  </div><div class="line"></div><div class="line">###### 5.2.3 service  </div><div class="line">1. 由于传递的参数包含:买家信息和订单信息,所以创建订单的service需要做一个数据转换 然后insert到对应买家和订单表里面,创建dto(Data Transfer Object)包,创建OrderDTO(买家和订单详情是一对多的关系,所以里面OrderDTO里是一个买家信息加许多商品信息)    </div><div class="line">2. OrderService里面创建订单的参数和返回为:OrderDTO  </div><div class="line">3. OrderServiceImpl里面实现创建订单:分为以下四步:1.查询商品 2.计算总价 3.扣除库存 4.订单入库。由于前3步都需要调用其他商品服务,所以我们写为:TODO  </div><div class="line">4. 创建OrderMaster时候,我们需要设置买家状态:orderStatus,payStatus我们用枚举实现如下:</div></pre></td></tr></table></figure>
+<p>public enum OrderStatusEnum {<br>    NEW(0, “新订单”),<br>    FINISHED(1, “完结”),<br>    CANCEL(2, “取消”),<br>    ;<br>    private Integer code;<br>    private String message;<br>    OrderStatusEnum(Integer code, String message) {<br>        this.code = code;<br>        this.message = message;<br>    }<br>    public Integer getCode() {<br>        return code;<br>    }<br>    public String getMessage() {<br>        return message;<br>    }<br>}  </p>
+<p>public enum PayStatusEnum {<br>    WAIT(0, “等待支付”),<br>    SUCCESS(1, “支付成功”),<br>    ;<br>    private Integer code;</p>
+<pre><code>private String message;
+
+PayStatusEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+
+public Integer getCode() {
+    return code;
+}
+
+public String getMessage() {
+    return message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. OrderId是主键,我们用简单的KeyUtil生成工具生成</div></pre></td></tr></table></figure></p>
+<p>public class KeyUtil {<br>    /**</p>
+<pre><code> * 生成唯一的主键
+ * 格式: 时间+随机数
+ */
+public static synchronized  String  genUniqueKey(){
+    Random random = new Random();
+    Integer number = random.nextInt(900000)+100000;
+    return System.currentTimeMillis()+String.valueOf(number);
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. service逻辑如下:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/82.png)</div><div class="line"></div><div class="line"></div><div class="line">###### 5.2.4 controller</div><div class="line">1. controller里面需要实现的业务逻辑大部分都是在service中,此处只是多了个参数校验，所以分为以下几步:1.参数校验 2.查询商品信息(调用商品服务) 3.计算总价 4.扣库存(调用商品服务) 5.订单入库  </div><div class="line">2.  涉及很多参数时候,我们封装前端参数,此处叫:OrderForm,并在里面添加了参数校验,不用在controller方法里面(使用@NotEmpty)校验。OrderForm此处省略getter,setter也可以用lombok加上@Data注解。</div></pre></td></tr></table></figure></p>
+<p>public class OrderForm {<br>    /**</p>
+<pre><code> * 买家姓名
+ */
+@NotEmpty(message = &quot;姓名必填&quot;)
+private String name;
+
+/**
+ * 买家手机号
+ */
+@NotEmpty(message = &quot;手机号必填&quot;)
+private String phone;
+
+/**
+ * 买家地址
+ */
+@NotEmpty(message = &quot;地址必填&quot;)
+private String address;
+
+/**
+ * 买家微信openid
+ */
+@NotEmpty(message = &quot;openid必填&quot;)
+private String openid;
+
+/**
+ * 购物车
+ */
+@NotEmpty(message = &quot;购物车不能为空&quot;)
+private String items;
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 在create方法中添加@Valid注解  </div><div class="line"></div><div class="line"></div><div class="line">4. 如果参数校验有错误时候抛出异常(自定义异常)OrderException(Integer code, String message)，其中code,message不使用硬编码,定义一个枚举:ResultEnum</div></pre></td></tr></table></figure>
+<p>public class OrderException extends RuntimeException {<br>    private Integer code;<br>    public OrderException(Integer code, String message){<br>      super(message);<br>      this.code = code;<br>    }<br>    public OrderException(ResultEnum resultEnum) {<br>        super(resultEnum.getMessage());<br>        this.code = resultEnum.getCode();<br>    }<br>}</p>
+<p>@Getter<br>public enum ResultEnum {<br>    PARAM_ERROR(1, “参数错误”),<br>    CART_EMPTY(2, “购物车为空”)<br>    ;</p>
+<pre><code>private Integer code;
+
+private String message;
+
+ResultEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">5. 在controller里面将校验过的参数：OrderForm转换成OrderDTO,此处转换封装成工具类处理(其中json转换成数据使用Gson)，转换失败时候抛出异常,打印日志      </div><div class="line"></div><div class="line">```  </div><div class="line">@Slf4j</div><div class="line">public class OrderForm2OrderDTOConverter &#123;</div><div class="line">    public static OrderDTO convert(OrderForm orderForm) &#123;</div><div class="line">        Gson gson = new Gson();</div><div class="line">        OrderDTO orderDTO = new OrderDTO();</div><div class="line">        orderDTO.setBuyerName(orderForm.getName());</div><div class="line">        orderDTO.setBuyerPhone(orderForm.getPhone());</div><div class="line">        orderDTO.setBuyerAddress(orderForm.getAddress());</div><div class="line">        orderDTO.setBuyerOpenid(orderForm.getOpenid());</div><div class="line"></div><div class="line">        List&lt;OrderDetail&gt; orderDetailList = new ArrayList&lt;&gt;();</div><div class="line">        try &#123;</div><div class="line">            orderDetailList = gson.fromJson(orderForm.getItems(),</div><div class="line">                    new TypeToken&lt;List&lt;OrderDetail&gt;&gt;() &#123;</div><div class="line">                    &#125;.getType());</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            log.error(&quot;【json转换】错误, string=&#123;&#125;&quot;, orderForm.getItems());</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR);</div><div class="line">        &#125;</div><div class="line">        orderDTO.setOrderDetailList(orderDetailList);</div><div class="line">        return orderDTO;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>接口返回的结果data里面只有一个字段,所以不需要创建一个对象,一个封装一个map返回就行    </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/order&quot;)</div><div class="line">@Slf4j</div><div class="line">public class OrderController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private OrderService orderService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 1.参数校验</div><div class="line">     * 2.查询商品信息(调用商品服务)</div><div class="line">     * 3.计算总价</div><div class="line">     * 4.扣库存(调用商品服务)</div><div class="line">     * 5.订单入库</div><div class="line">     */</div><div class="line">    @PostMapping(&quot;/create&quot;)</div><div class="line">    private Object create(@Valid OrderForm orderForm,</div><div class="line">                          BindingResult bindingResult)&#123;</div><div class="line">        //检验不通过抛出自定义异常</div><div class="line">        if (bindingResult.hasErrors())&#123;</div><div class="line">            //https://www.cnblogs.com/weiapro/p/7633645.html</div><div class="line">           log.error(&quot;【创建订单】参数不正确, orderForm=&#123;&#125;&quot;, orderForm);</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),</div><div class="line">                    bindingResult.getFieldError().getDefaultMessage());</div><div class="line">        &#125;</div><div class="line">        //orderForm-&gt;orderDTO</div><div class="line">        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);</div><div class="line">        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList()))&#123;</div><div class="line">            log.error(&quot;【创建订单】购物车信息为空&quot;);</div><div class="line">            throw new OrderException(ResultEnum.CART_EMPTY);</div><div class="line">        &#125;</div><div class="line">        OrderDTO result = orderService.create(orderDTO);</div><div class="line">        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();</div><div class="line">        map.put(&quot;orderId&quot;, result.getOrderId());</div><div class="line">        return ResultVOUtil.success(map);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -634,6 +704,7 @@ server:
 <li>以上原因是超时未挂机,我们可以设置超时时间来在短时间内挂机(sessiontimeout)。<br>notify.cfg设置为:10s拨打电话 10s不接听后会自己挂机<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/19.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/20.png" alt=""><br>dyflow.cfg设置为:10s拨打电话 10s后接听后会自己挂机<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/21.png" alt="">    </li>
 </ol>
 <h5 id="14-平台升级"><a href="#14-平台升级" class="headerlink" title="14.平台升级"></a>14.平台升级</h5><p>呼叫平台升级时候,我们需要进入平台的lib目录  把测试环境下的lib里面的包 拷贝到 生产环境 如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scp root@内网ip:/cc/lib/libT*so* .</div></pre></td></tr></table></figure></p>
+<h5 id="15-平台测试环境下进行呼叫数据测试"><a href="#15-平台测试环境下进行呼叫数据测试" class="headerlink" title="15.平台测试环境下进行呼叫数据测试"></a>15.平台测试环境下进行呼叫数据测试</h5><p>平台外呼号码为:5开头的8位数字的号码   拨打时候是不会计费的  可当做测试数据使用<br>如:80000001   80000002  </p>
 
       
     </div>
