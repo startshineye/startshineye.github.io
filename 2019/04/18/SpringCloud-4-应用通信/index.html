@@ -9,9 +9,9 @@
   <meta name="description" content="1.HTTP vs RPC
 应用(微服务)间通讯方式主要有两种:HTTP和RPC
 两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
-Dubbo始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
-HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
-SpringCloud中服务间两种restful调用方式:1. RestTemp">
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
 <meta property="og:type" content="article">
 <meta property="og:title" content="SpringCloud-4-应用通信">
 <meta property="og:url" content="https://github.com/startshineye/2019/04/18/SpringCloud-4-应用通信/index.html">
@@ -19,18 +19,22 @@ SpringCloud中服务间两种restful调用方式:1. RestTemp">
 <meta property="og:description" content="1.HTTP vs RPC
 应用(微服务)间通讯方式主要有两种:HTTP和RPC
 两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
-Dubbo始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
-HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
-SpringCloud中服务间两种restful调用方式:1. RestTemp">
-<meta property="og:updated_time" content="2019-04-17T17:05:36.051Z">
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png">
+<meta property="og:updated_time" content="2019-04-19T17:11:44.044Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-4-应用通信">
 <meta name="twitter:description" content="1.HTTP vs RPC
 应用(微服务)间通讯方式主要有两种:HTTP和RPC
 两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
-Dubbo始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
-HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
-SpringCloud中服务间两种restful调用方式:1. RestTemp">
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -187,10 +191,37 @@ SpringCloud中服务间两种restful调用方式:1. RestTemp">
         <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
 <li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
 <li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
-<li>Dubbo始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
-<li>HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
+<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
+<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
 <li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
 </ol>
+<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
+<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
+<li>1.使用 “订单服务-&gt;商品服务”为例</li>
+<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
+<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
+<li>4.product端新建ServerController</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.order服务中新建ClientController<br>RestTemplate第一种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:18:18</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        //1.RestTemplate第一种方式 </div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""><br>以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</p>
+<ol>
+<li>6.RestTemplate第二种方式<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private LoadBalancerClient loadBalancerClient;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line"></div><div class="line">        //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port</div><div class="line">        /**</div><div class="line">         * SpringCloud提供了LoadBalancerClient,将其注入到Spring中</div><div class="line">         */</div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);</div><div class="line">        String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());</div><div class="line">        String response = restTemplate.getForObject(url, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>@Component<br>public class RestTemplateConfig {<br>    @Bean<br>    @LoadBalanced<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}</p>
+<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
+<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
+    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
+    log.info(&quot;response{}&quot;,response);
+    return response;
+}
+</code></pre><p>}<br>```<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""> </p>
 
       
     </div>

@@ -30,7 +30,8 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/70.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png">
-<meta property="og:updated_time" content="2019-04-18T17:08:37.150Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png">
+<meta property="og:updated_time" content="2019-04-18T17:21:39.289Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-3-服务拆分">
 <meta name="twitter:description" content="1.微服务拆分的起点1.1如何拆分微服务?现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  
@@ -225,6 +226,7 @@
 <li>1.先考虑业务功能、再考虑业务功能对应的数据  </li>
 <li>2.无状态服务（状态:如果一个数据要被多个服务共享才能完成一个请求,那么这个数据就称为状态,进而依赖这个状态数据的服务称为有状态服务）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png" alt=""><br>如上所示把业务数据存放到有状态服务的数据库,缓存中实现前端微服务和后端微服务质检无状态服务,数据间没有太大耦合性。  </li>
 </ol>
+<p>如何拆数据:<br>1.每个微服务都有单独数据存储(微服务共有数据库,有可能其中一个数据库出现问题会影响其他微服务,一个服务要获取另一个服务的数据,不能直接连接库去请求,而是调用另一个服务接口去获取数据,服务之间有隔离)<br>2.依据服务特点选择不同结构的数据库类型(如果:数据基于搜索的,那么es合适,如果是非机构化数据,那么nosql的mongodb合适)<br>3.难点在确定边界  </p>
 <h6 id="3-2-3-点餐业务服务拆分分析"><a href="#3-2-3-点餐业务服务拆分分析" class="headerlink" title="3.2.3 点餐业务服务拆分分析"></a>3.2.3 点餐业务服务拆分分析</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png" alt=""><br>1.不要期望服务拆分一次就正确,微服务是不断演进的  </p>
 <h4 id="4-商品服务"><a href="#4-商品服务" class="headerlink" title="4.商品服务"></a>4.商品服务</h4><h5 id="4-1-商品服务api和sql介绍"><a href="#4-1-商品服务api和sql介绍" class="headerlink" title="4.1 商品服务api和sql介绍"></a>4.1 商品服务api和sql介绍</h5><h3 id="商品列表"><a href="#商品列表" class="headerlink" title="商品列表"></a>商品列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET /product/list</div></pre></td></tr></table></figure>
 <p>参数</p>
@@ -309,7 +311,44 @@ ResultEnum(Integer code, String message) {
 <ol>
 <li>接口返回的结果data里面只有一个字段,所以不需要创建一个对象,一个封装一个map返回就行    </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/order&quot;)</div><div class="line">@Slf4j</div><div class="line">public class OrderController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private OrderService orderService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 1.参数校验</div><div class="line">     * 2.查询商品信息(调用商品服务)</div><div class="line">     * 3.计算总价</div><div class="line">     * 4.扣库存(调用商品服务)</div><div class="line">     * 5.订单入库</div><div class="line">     */</div><div class="line">    @PostMapping(&quot;/create&quot;)</div><div class="line">    private Object create(@Valid OrderForm orderForm,</div><div class="line">                          BindingResult bindingResult)&#123;</div><div class="line">        //检验不通过抛出自定义异常</div><div class="line">        if (bindingResult.hasErrors())&#123;</div><div class="line">            //https://www.cnblogs.com/weiapro/p/7633645.html</div><div class="line">           log.error(&quot;【创建订单】参数不正确, orderForm=&#123;&#125;&quot;, orderForm);</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),</div><div class="line">                    bindingResult.getFieldError().getDefaultMessage());</div><div class="line">        &#125;</div><div class="line">        //orderForm-&gt;orderDTO</div><div class="line">        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);</div><div class="line">        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList()))&#123;</div><div class="line">            log.error(&quot;【创建订单】购物车信息为空&quot;);</div><div class="line">            throw new OrderException(ResultEnum.CART_EMPTY);</div><div class="line">        &#125;</div><div class="line">        OrderDTO result = orderService.create(orderDTO);</div><div class="line">        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();</div><div class="line">        map.put(&quot;orderId&quot;, result.getOrderId());</div><div class="line">        return ResultVOUtil.success(map);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<pre><code>@RestController
+@RequestMapping(&quot;/order&quot;)
+@Slf4j
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    /**
+     * 1.参数校验
+     * 2.查询商品信息(调用商品服务)
+     * 3.计算总价
+     * 4.扣库存(调用商品服务)
+     * 5.订单入库
+     */
+    @PostMapping(&quot;/create&quot;)
+    private Object create(@Valid OrderForm orderForm,
+                          BindingResult bindingResult){
+        //检验不通过抛出自定义异常
+        if (bindingResult.hasErrors()){
+            //https://www.cnblogs.com/weiapro/p/7633645.html
+           log.error(&quot;【创建订单】参数不正确, orderForm={}&quot;, orderForm);
+            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),
+                    bindingResult.getFieldError().getDefaultMessage());
+        }
+        //orderForm-&gt;orderDTO
+        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);
+        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList())){
+            log.error(&quot;【创建订单】购物车信息为空&quot;);
+            throw new OrderException(ResultEnum.CART_EMPTY);
+        }
+        OrderDTO result = orderService.create(orderDTO);
+        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;orderId&quot;, result.getOrderId());
+        return ResultVOUtil.success(map);
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png" alt=""></p>
 
       
     </div>

@@ -173,10 +173,37 @@
         <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
 <li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
 <li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
-<li>Dubbo始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
-<li>HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
+<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
+<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
 <li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
 </ol>
+<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
+<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
+<li>1.使用 “订单服务-&gt;商品服务”为例</li>
+<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
+<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
+<li>4.product端新建ServerController</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.order服务中新建ClientController<br>RestTemplate第一种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:18:18</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        //1.RestTemplate第一种方式 </div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""><br>以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</p>
+<ol>
+<li>6.RestTemplate第二种方式<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private LoadBalancerClient loadBalancerClient;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line"></div><div class="line">        //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port</div><div class="line">        /**</div><div class="line">         * SpringCloud提供了LoadBalancerClient,将其注入到Spring中</div><div class="line">         */</div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);</div><div class="line">        String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());</div><div class="line">        String response = restTemplate.getForObject(url, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>@Component<br>public class RestTemplateConfig {<br>    @Bean<br>    @LoadBalanced<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}</p>
+<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
+<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
+    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
+    log.info(&quot;response{}&quot;,response);
+    return response;
+}
+</code></pre><p>}<br>```<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""> </p>
 
       
     </div>
@@ -258,6 +285,7 @@
 <li>1.先考虑业务功能、再考虑业务功能对应的数据  </li>
 <li>2.无状态服务（状态:如果一个数据要被多个服务共享才能完成一个请求,那么这个数据就称为状态,进而依赖这个状态数据的服务称为有状态服务）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png" alt=""><br>如上所示把业务数据存放到有状态服务的数据库,缓存中实现前端微服务和后端微服务质检无状态服务,数据间没有太大耦合性。  </li>
 </ol>
+<p>如何拆数据:<br>1.每个微服务都有单独数据存储(微服务共有数据库,有可能其中一个数据库出现问题会影响其他微服务,一个服务要获取另一个服务的数据,不能直接连接库去请求,而是调用另一个服务接口去获取数据,服务之间有隔离)<br>2.依据服务特点选择不同结构的数据库类型(如果:数据基于搜索的,那么es合适,如果是非机构化数据,那么nosql的mongodb合适)<br>3.难点在确定边界  </p>
 <h6 id="3-2-3-点餐业务服务拆分分析"><a href="#3-2-3-点餐业务服务拆分分析" class="headerlink" title="3.2.3 点餐业务服务拆分分析"></a>3.2.3 点餐业务服务拆分分析</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png" alt=""><br>1.不要期望服务拆分一次就正确,微服务是不断演进的  </p>
 <h4 id="4-商品服务"><a href="#4-商品服务" class="headerlink" title="4.商品服务"></a>4.商品服务</h4><h5 id="4-1-商品服务api和sql介绍"><a href="#4-1-商品服务api和sql介绍" class="headerlink" title="4.1 商品服务api和sql介绍"></a>4.1 商品服务api和sql介绍</h5><h3 id="商品列表"><a href="#商品列表" class="headerlink" title="商品列表"></a>商品列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET /product/list</div></pre></td></tr></table></figure>
 <p>参数</p>
@@ -342,7 +370,44 @@ ResultEnum(Integer code, String message) {
 <ol>
 <li>接口返回的结果data里面只有一个字段,所以不需要创建一个对象,一个封装一个map返回就行    </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/order&quot;)</div><div class="line">@Slf4j</div><div class="line">public class OrderController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private OrderService orderService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 1.参数校验</div><div class="line">     * 2.查询商品信息(调用商品服务)</div><div class="line">     * 3.计算总价</div><div class="line">     * 4.扣库存(调用商品服务)</div><div class="line">     * 5.订单入库</div><div class="line">     */</div><div class="line">    @PostMapping(&quot;/create&quot;)</div><div class="line">    private Object create(@Valid OrderForm orderForm,</div><div class="line">                          BindingResult bindingResult)&#123;</div><div class="line">        //检验不通过抛出自定义异常</div><div class="line">        if (bindingResult.hasErrors())&#123;</div><div class="line">            //https://www.cnblogs.com/weiapro/p/7633645.html</div><div class="line">           log.error(&quot;【创建订单】参数不正确, orderForm=&#123;&#125;&quot;, orderForm);</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),</div><div class="line">                    bindingResult.getFieldError().getDefaultMessage());</div><div class="line">        &#125;</div><div class="line">        //orderForm-&gt;orderDTO</div><div class="line">        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);</div><div class="line">        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList()))&#123;</div><div class="line">            log.error(&quot;【创建订单】购物车信息为空&quot;);</div><div class="line">            throw new OrderException(ResultEnum.CART_EMPTY);</div><div class="line">        &#125;</div><div class="line">        OrderDTO result = orderService.create(orderDTO);</div><div class="line">        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();</div><div class="line">        map.put(&quot;orderId&quot;, result.getOrderId());</div><div class="line">        return ResultVOUtil.success(map);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<pre><code>@RestController
+@RequestMapping(&quot;/order&quot;)
+@Slf4j
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    /**
+     * 1.参数校验
+     * 2.查询商品信息(调用商品服务)
+     * 3.计算总价
+     * 4.扣库存(调用商品服务)
+     * 5.订单入库
+     */
+    @PostMapping(&quot;/create&quot;)
+    private Object create(@Valid OrderForm orderForm,
+                          BindingResult bindingResult){
+        //检验不通过抛出自定义异常
+        if (bindingResult.hasErrors()){
+            //https://www.cnblogs.com/weiapro/p/7633645.html
+           log.error(&quot;【创建订单】参数不正确, orderForm={}&quot;, orderForm);
+            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),
+                    bindingResult.getFieldError().getDefaultMessage());
+        }
+        //orderForm-&gt;orderDTO
+        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);
+        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList())){
+            log.error(&quot;【创建订单】购物车信息为空&quot;);
+            throw new OrderException(ResultEnum.CART_EMPTY);
+        }
+        OrderDTO result = orderService.create(orderDTO);
+        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;orderId&quot;, result.getOrderId());
+        return ResultVOUtil.success(map);
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png" alt=""></p>
 
       
     </div>
@@ -658,7 +723,9 @@ server:
 <h5 id="8-平台修改科大crs地址"><a href="#8-平台修改科大crs地址" class="headerlink" title="8.平台修改科大crs地址"></a>8.平台修改科大crs地址</h5><h6 id="8-1-dyflow修改"><a href="#8-1-dyflow修改" class="headerlink" title="8.1 dyflow修改"></a>8.1 dyflow修改</h6><p>ipcc和crs系统对接时候,需要修改对接科大crs地址。在系统cfg目录下dyflow下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/4.png" alt=""><br>重启dyflow<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/5.png" alt=""> </p>
 <h6 id="8-1-httpg修改"><a href="#8-1-httpg修改" class="headerlink" title="8.1 httpg修改"></a>8.1 httpg修改</h6><p>平台和crs是通过http协议进行交互,所有交互的都需要经过httpg模块的server<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/8.png" alt=""> </p>
 <h5 id="9-平台修改tts-asr地址"><a href="#9-平台修改tts-asr地址" class="headerlink" title="9.平台修改tts,asr地址"></a>9.平台修改tts,asr地址</h5><p>修改tts和asr地址是在freeswitch模块修改<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/6.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/03/7.png" alt=""></p>
-<h5 id="9-ivr流程制作"><a href="#9-ivr流程制作" class="headerlink" title="9.ivr流程制作"></a>9.ivr流程制作</h5><h5 id="10-查看平台外呼的彩铃录音"><a href="#10-查看平台外呼的彩铃录音" class="headerlink" title="10.查看平台外呼的彩铃录音"></a>10.查看平台外呼的彩铃录音</h5><p>1.进入/usr/local/freeswitch/bin目录下,客户端连接freeswitch  </p>
+<h5 id="9-ivr流程制作"><a href="#9-ivr流程制作" class="headerlink" title="9.ivr流程制作"></a>9.ivr流程制作</h5><h5 id="10-查看平台外呼的彩铃录音"><a href="#10-查看平台外呼的彩铃录音" class="headerlink" title="10.查看平台外呼的彩铃录音"></a>10.查看平台外呼的彩铃录音</h5><p>freeswitch中开启录音命令:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">da2 record 文件目录</div></pre></td></tr></table></figure></p>
+<p>freeswitch中停止录音命令(开启录音不叫文件目录):<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">da2 record</div></pre></td></tr></table></figure></p>
+<p>1.进入/usr/local/freeswitch/bin目录下,客户端连接freeswitch  </p>
 <pre><code>./fs_cli -P 8031 -p testtest  
 </code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/1.png" alt=""></p>
 <p>2.设置fs的日志级别为1   </p>
@@ -677,6 +744,7 @@ server:
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/12.png" alt=""></p>
 <h6 id="2-深度排查"><a href="#2-深度排查" class="headerlink" title="2.深度排查"></a>2.深度排查</h6><p>1.查看notify.cfg中是否配置了httpg<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/75.png" alt=""><br>2.查看callnotify_callnotify01xx.log中是否报错”no rootflow”<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/76.png" alt="">  </p>
 <p>3.ocm_event的tid = ocm_after_call_module 的rootactid=ocm_after_call_flow表的 actid和preactid = ocm_after_call_action的id<br>ocm_after_call_param加一条默认记录<br>以event_id = 174 entid = 1278为例:<br>ocm_event<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/77.png" alt=""><br>ocm_after_call_module<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/78.png" alt=""><br>ocm_after_call_flow<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/79.png" alt=""><br>ocm_after_call_action<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/80.png" alt=""><br>ocm_after_call_param<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/81.png" alt="">  </p>
+<h6 id="3-一人多号码轮呼加上重呼-混合呼叫"><a href="#3-一人多号码轮呼加上重呼-混合呼叫" class="headerlink" title="3.一人多号码轮呼加上重呼(混合呼叫)"></a>3.一人多号码轮呼加上重呼(混合呼叫)</h6><p>一人多号码中,</p>
 <h6 id="11-3-查看shell脚本是否执行成功"><a href="#11-3-查看shell脚本是否执行成功" class="headerlink" title="11.3 查看shell脚本是否执行成功"></a>11.3 查看shell脚本是否执行成功</h6><ol>
 <li><p>通过接口创建批次(营销管理系统)时候,我们任务已经启动,但是平台没有呼叫,查看dyflow日志看到对应的脚本:</p>
  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">source /cc/bin/iniwrite.sh -w /cc/cfg/dyflow.cfg dyflow loadscript 1</div></pre></td></tr></table></figure>
@@ -705,7 +773,7 @@ server:
 </ol>
 <h5 id="14-平台升级"><a href="#14-平台升级" class="headerlink" title="14.平台升级"></a>14.平台升级</h5><p>呼叫平台升级时候,我们需要进入平台的lib目录  把测试环境下的lib里面的包 拷贝到 生产环境 如下:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">scp root@内网ip:/cc/lib/libT*so* .</div></pre></td></tr></table></figure></p>
 <h5 id="15-平台测试环境下进行呼叫数据测试"><a href="#15-平台测试环境下进行呼叫数据测试" class="headerlink" title="15.平台测试环境下进行呼叫数据测试"></a>15.平台测试环境下进行呼叫数据测试</h5><p>平台外呼号码为:5开头的8位数字的号码   拨打时候是不会计费的  可当做测试数据使用<br>如:80000001   80000002  </p>
-
+<h5 id="16-200问题"><a href="#16-200问题" class="headerlink" title="16.-200问题"></a>16.-200问题</h5>
       
     </div>
     <div class="article-info article-info-index">
