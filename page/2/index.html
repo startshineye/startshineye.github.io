@@ -152,6 +152,131 @@
       <div class="body-wrap">
         
   
+    <article id="post-work-5-cmcc系统softphone集成" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/17/work-5-cmcc系统softphone集成/">work-5-cmcc系统softphone集成</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>我们有时候需要将平台acdgate前端对应的softphone相关的js集成到crm系统中去,以此来实现和软交换平台相关的呼叫  </li>
+<li>Demo文件cbanner_wstext.4.6.1.html中拥有完整的软电话控制，只需调用页面时调用sfc_platagentinfo设置server地址和座席信息，并对呼叫事件进行处理即可。</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-获取相关softphone的js和css以及html文件"><a href="#1-获取相关softphone的js和css以及html文件" class="headerlink" title="1.获取相关softphone的js和css以及html文件"></a>1.获取相关softphone的js和css以及html文件</h5><p>拿到相关的softphone前端文件:我们以版本:sv10css_v2.0.0.4为例子,基本目录如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/176.png" alt="">  </p>
+<h5 id="2-相关js说明"><a href="#2-相关js说明" class="headerlink" title="2.相关js说明"></a>2.相关js说明</h5><ol>
+<li>SV-callbanner-common-cmclient-1.0.0.js  封装了呼叫事件  相关振铃,接通,挂断,鉴权事件都在这里面   业务:可用于做来电弹屏  小结弹屏  </li>
+<li>SV-callbanner-common-cms-4.6.1.js  为 callbanner,crm 提供通信平台相关查询类服务  </li>
+<li>SV-callbanner-common-engine-4.6.2.js  对callbanner的基本通讯、高级功能、组长功能等交互模块进行模块的逻辑控制  </li>
+<li>SV-callbanner-common-wscomm-1.0.0.js  Websocket通信js封装  </li>
+</ol>
+<p>以上在业务代码集成时候,我们可以自定义js重写SV-callbanner-common-cmclient-1.0.0.js的事件,然后降低crm和softphone相关的耦合度,减少排查问题的困难  </p>
+<h5 id="3-测试softphone是否正常"><a href="#3-测试softphone是否正常" class="headerlink" title="3.测试softphone是否正常"></a>3.测试softphone是否正常</h5><ol>
+<li>softphone前端和后端acdgate是通过java-websocket进行交互的,所以我们主要改造:cbanner_wstext.4.6.1.html(websocket和后端服务交互的主要文件)  </li>
+<li>我们先打开cbanner_wstext.4.6.1.html文件看其功能是否正常,如果是以下情况,则正常<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/177.png" alt="">  </li>
+</ol>
+<h5 id="4-修改softphone文件集成到crm系统中去"><a href="#4-修改softphone文件集成到crm系统中去" class="headerlink" title="4.修改softphone文件集成到crm系统中去"></a>4.修改softphone文件集成到crm系统中去</h5><p>我们以cmcc平台管理系统为例:</p>
+<ol>
+<li>cmcc系统的主页面是ace_main.jsp 我们从下面可以看到,通过权限控制acdInfo非空然后嵌入cbanner_wstext.4.6.1.jsp,其他系统可供参考<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/178.png" alt="">  <h6 id="4-1-集成步骤"><a href="#4-1-集成步骤" class="headerlink" title="4.1 集成步骤"></a>4.1 集成步骤</h6></li>
+<li>1.修改cbanner_wstext.4.6.1.html文件为cbanner_wstext.4.6.1.jsp页面,添加jsp相关标签即可  </li>
+<li>2.将sv10css_v2.0.0.4里面的css,images,js文件拷贝到cmcc系统的softphone文件下面,并修改cbanner_wstext.4.6.1.jsp引入js和css的路径<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/179.png" alt="">  </li>
+</ol>
+<h6 id="4-2-图片路径修改"><a href="#4-2-图片路径修改" class="headerlink" title="4.2 图片路径修改"></a>4.2 图片路径修改</h6><p>有时候,我们图片路径是有问题的,此时我们需要修改:var g_ImgPath = “./webpage/main/softphone/images”;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/180.png" alt="">  </p>
+<h5 id="5-修改拨号盘图片路径"><a href="#5-修改拨号盘图片路径" class="headerlink" title="5.修改拨号盘图片路径"></a>5.修改拨号盘图片路径</h5><p>拨号盘img的图片文件地址是从sv10css_v2.0.0.4里面的images里面加载,所以我们需要修改其路径为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/181.png" alt="">    </p>
+<h5 id="6-测试软电话"><a href="#6-测试软电话" class="headerlink" title="6.测试软电话"></a>6.测试软电话</h5><p>最后做完之后,我们以坐席登录,然后打开crm系统,如下说明集成完毕<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/182.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/12/17/work-5-cmcc系统softphone集成/" class="archive-article-date">
+  	<time datetime="2018-12-17T11:24:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-17</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-work-4-插件开发" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/17/work-4-插件开发/">work-4-插件开发</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>由于需要在工作中用到跨系统见接口计算保费,所以需要了解一个插件autofill,但是插件又不满足我们的需求,所以我们需要了解插件的使用方式:</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>干货】Chrome插件(扩展)开发全攻略地址:<a href="https://www.cnblogs.com/liuxianan/p/chrome-plugin-develop.html" target="_blank" rel="external">https://www.cnblogs.com/liuxianan/p/chrome-plugin-develop.html</a><br><a href="https://www.cnblogs.com/liuxianan/p/chrome-plugin-develop.html" target="_blank" rel="external">友情链接</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/12/17/work-4-插件开发/" class="archive-article-date">
+  	<time datetime="2018-12-17T10:43:43.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-17</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-二十-聊天页面制作" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1952,148 +2077,6 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
 
 
   
-    <article id="post-java爬虫-21-爬虫项目监控" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/19/java爬虫-21-爬虫项目监控/">java爬虫-21-爬虫项目监控</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>爬虫宕机需要进行监控,防止项目挂掉之后未有及时的应急处理.  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/67.png" alt=""><br>从以上可以知道,监控分为硬件监控和软件系统监控,硬件监控用Ganglila,软件监控用Zookeper  </p>
-<h5 id="1-Zookeper"><a href="#1-Zookeper" class="headerlink" title="1.Zookeper"></a>1.Zookeper</h5><p>zk采用多节点部署,每一个节点叫做znode,每一个节点的路径结构是唯一确定的<br><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/68.png" alt="">  </p>
-<p>Znode，利用zk的短暂Znode和持久化的Znode也有属性来实现监控功能。<br><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/69.png" alt="">  </p>
-<h5 id="2-监控结构"><a href="#2-监控结构" class="headerlink" title="2 监控结构"></a>2 监控结构</h5><p><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/70.png" alt="">    </p>
-<ol>
-<li>client1 client2 … 代表我们的爬虫服务</li>
-<li>爬虫生命周期监控:每启动一个爬虫服务client时候 我们向zookeeper节点(GroupMembers)注册一个临时节点,一旦节点挂掉和停止了,临时节点(client1)就会消失,此时我们只需要一个watcher来监控所有节点,只要有节点消失掉我们watcher就会知道   </li>
-<li>正常情况下,临时节点不会消失,只有当在有一个节点挂掉了,临时节点消失,我们可以触发监控程序,知晓哪个节点挂掉了</li>
-<li><p>根据以上结构,我们需要做一个watcher服务,用于监控爬虫服务,再建立一个client到zookeeper注册服务(Register)</p>
-<h6 id="2-1-爬虫服务注册"><a href="#2-1-爬虫服务注册" class="headerlink" title="2.1 爬虫服务注册"></a>2.1 爬虫服务注册</h6><p>在StartDSJ中的构造方法中添加:</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">    //构造函数  建立连接</div><div class="line">public StartDSJ() &#123;</div><div class="line">	//重试策略:重试3次，每次间隔时间指数增长(有具体增长公式)	</div><div class="line">	RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);</div><div class="line">	//zk地址</div><div class="line">	String hosts = ZKUtil.ZOOKEEPER_HOSTS;</div><div class="line">	CuratorFramework client = CuratorFrameworkFactory.newClient(hosts, retryPolicy);</div><div class="line">	//建立连接</div><div class="line">	client.start();</div><div class="line">	try &#123;</div><div class="line">		//获取本地ip地址</div><div class="line">		InetAddress localHost = InetAddress.getLocalHost();</div><div class="line">		String ip = localHost.getHostAddress();</div><div class="line">		//每启动一个爬虫应用，创建一个临时节点，子节点名称为当前ip</div><div class="line">		client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)</div><div class="line">			.withACL(Ids.OPEN_ACL_UNSAFE).forPath(ZKUtil.PATH+&quot;/&quot;+ip);</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="2-2-watcher服务"><a href="#2-2-watcher服务" class="headerlink" title="2.2 watcher服务"></a>2.2 watcher服务</h6><p>对于watcher服务,我们使用zookeeper的Curator,详细操作如:<a href="https://www.jianshu.com/p/70151fc0ef5d" target="_blank" rel="external">Zookeeper客户端Curator使用详解</a>  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line">      /**</div><div class="line"> * 监视器</div><div class="line"> * @author dajiangtai</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class ConfigWatcher implements Watcher &#123;</div><div class="line">	CuratorFramework client;</div><div class="line">	List&lt;String&gt; oldChildrenList = new ArrayList&lt;String&gt;();</div><div class="line"></div><div class="line">	//构造方法</div><div class="line">	public ConfigWatcher() &#123;</div><div class="line">		//重试策略:重试3次，每次间隔时间指数增长(有具体增长公式)	</div><div class="line">		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);</div><div class="line">		//zk地址</div><div class="line">		String hosts = ZKUtil.ZOOKEEPER_HOSTS;</div><div class="line">		client = CuratorFrameworkFactory.newClient(hosts,</div><div class="line">				retryPolicy);</div><div class="line">		//建立连接</div><div class="line">		client.start();</div><div class="line"></div><div class="line">		try &#123;</div><div class="line">			//获取子节点集合</div><div class="line">			oldChildrenList = client.getChildren().usingWatcher(this)</div><div class="line">					.forPath(ZKUtil.PATH);</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//具体业务实现</div><div class="line">	public void displayConfig() throws InterruptedException, KeeperException &#123;</div><div class="line">		try &#123;</div><div class="line">			List&lt;String&gt; currentChildrenList = client.getChildren()</div><div class="line">					.usingWatcher(this).forPath(ZKUtil.PATH);</div><div class="line">			for (String child : currentChildrenList) &#123;</div><div class="line">				if (!oldChildrenList.contains(child)) &#123;</div><div class="line">					System.out.println(&quot;新增加的爬虫节点为：&quot; + child);</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			for (String child : oldChildrenList) &#123;</div><div class="line">				if (!currentChildrenList.contains(child)) &#123;</div><div class="line">					System.out.println(&quot;挂掉的爬虫节点为：&quot; + child);</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			//子节点集合更新</div><div class="line">			this.oldChildrenList = currentChildrenList;</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	//监控节点变化</div><div class="line">	public void process(WatchedEvent event) &#123;</div><div class="line">		if (event.getType() == Event.EventType.NodeChildrenChanged) &#123;</div><div class="line">			try &#123;</div><div class="line">				//调用具体业务代码</div><div class="line">				displayConfig();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				// TODO Auto-generated catch block</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125; catch (KeeperException e) &#123;</div><div class="line">				// TODO Auto-generated catch block</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public static void main(String[] args) throws InterruptedException &#123;</div><div class="line">		ConfigWatcher configWatcher = new ConfigWatcher();</div><div class="line">		Thread.sleep(Long.MAX_VALUE);//然后一直监控</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/19/java爬虫-21-爬虫项目监控/" class="archive-article-date">
-  	<time datetime="2018-11-19T01:59:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-java爬虫-20-解决频繁抓取ip被封问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/17/java爬虫-20-解决频繁抓取ip被封问题/">java爬虫-20-解决频繁抓取ip被封问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>频繁爬取容易造成ip被封</li>
-<li>以下用3种方式解决ip被封问题  </li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-解决ip被封问题"><a href="#1-解决ip被封问题" class="headerlink" title="1.解决ip被封问题"></a>1.解决ip被封问题</h5><h6 id="1-1-设置每个页面抓取时间间隔"><a href="#1-1-设置每个页面抓取时间间隔" class="headerlink" title="1.1 设置每个页面抓取时间间隔"></a>1.1 设置每个页面抓取时间间隔</h6><ol>
-<li><p>设置每个页面抓取时间间隔,降低被封概率,之前我们已经采取了措施,就是设置抓取时间间隔设置成3秒,5秒,一般来说 抓取时间超过1秒才算合理</p>
-</li>
-<li><p>设置成3 5秒抓取时间比较固定,一般来说,网站能够分析出你抓取的频率,鉴定出是爬虫,我们设置随机数（1 2 3 4 5）秒 总是变化中的 让网站相信 我们是合法用户</p>
-</li>
-<li>我们在开始爬虫方法中读取配置文件的时间改成随机数:Math.random<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/62.png" alt="">  </li>
-</ol>
-<ol>
-<li><p>缺点:此种方式在【网站监测到同一个ip访问过多情况下 也会封ip情况】 并不能解决,就是不让一天访问过多,</p>
-<h6 id="1-2-购买代理ip库"><a href="#1-2-购买代理ip库" class="headerlink" title="1.2 购买代理ip库"></a>1.2 购买代理ip库</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/63.png" alt=""></p>
-</li>
-<li><p>这样的话,每个ip的抓取的数量就会大大降低,这样被封的概率也会大大降低</p>
-</li>
-<li>我们需要动态维护一个ip库,可以添加ip,获取ip 并且可以删除ip(被封的ip就会删除)  </li>
-<li><p>在RedisUtil里面添加对Set操作的方法  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">   public class RedisUtil &#123;</div><div class="line">public static String highkey = &quot;spider.highlevel&quot;;</div><div class="line">public static String lowkey = &quot;spider.lowlevel&quot;;</div><div class="line"></div><div class="line">public static String startkey=&quot;start.key&quot;;</div><div class="line">JedisPool jedisPool = null;</div><div class="line">public RedisUtil()&#123;</div><div class="line">	JedisPoolConfig poolConfig = new JedisPoolConfig();</div><div class="line">	poolConfig.setMaxIdle(10);</div><div class="line">	poolConfig.setMaxTotal(100);</div><div class="line">	poolConfig.setMaxWaitMillis(10000);</div><div class="line">	poolConfig.setTestOnBorrow(true);</div><div class="line">	jedisPool = new JedisPool(poolConfig, &quot;127.0.0.1&quot;, 6379);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 查询</div><div class="line"> * @param key</div><div class="line"> * @param start</div><div class="line"> * @param end</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">public List&lt;String&gt; lrange(String key,int start,int end)&#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	</div><div class="line">	List&lt;String&gt; list = resource.lrange(key, start, end);</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">	return list;</div><div class="line">	</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 添加list</div><div class="line"> * @param Key</div><div class="line"> * @param url</div><div class="line"> */</div><div class="line">public void add(String Key, String url) &#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	resource.lpush(Key, url);</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">/**</div><div class="line"> * 获取</div><div class="line"> * @param key</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">public String poll(String key) &#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	String result = resource.rpop(key);</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">	return result;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 添加set</div><div class="line"> * @param Key</div><div class="line"> * @param value</div><div class="line"> */</div><div class="line">public void addSet(String Key, String value) &#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	resource.sadd(Key, value);</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 随机获取Set 值</div><div class="line"> * @param key</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">public String getSet(String key) &#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	String value = resource.srandmember(key);</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">	return value;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 删除Set 随机值</div><div class="line"> * @param key</div><div class="line"> * @param value</div><div class="line"> */</div><div class="line">public void deleteSet(String key,String value)&#123;</div><div class="line">	Jedis resource = jedisPool.getResource();</div><div class="line">	resource.srem(key, value);	</div><div class="line">	jedisPool.returnResourceObject(resource);</div><div class="line">&#125;</div><div class="line"></div><div class="line">public static void main(String[] args) &#123;</div><div class="line">	RedisUtil redisUtil = new RedisUtil();</div><div class="line">	redisUtil.addSet(&quot;proxy&quot;, &quot;60.168.245.128:808&quot;);</div><div class="line">	redisUtil.addSet(&quot;proxy&quot;, &quot;110.73.4.87:8123&quot;);</div><div class="line">	redisUtil.addSet(&quot;proxy&quot;, &quot;59.37.199.227:9797&quot;);</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>ip代理库就是在用httpClient下载,在PageDownLoadUtil.java代码如下:</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">      /**</div><div class="line"> * 页面下载工具类</div><div class="line"> * @author yxm</div><div class="line"> * @date 2018/11/5 23:54:20</div><div class="line"> */</div><div class="line">public class PageDownLoadUtil &#123;</div><div class="line">    /**</div><div class="line">     * 设置用户代理，模拟浏览器</div><div class="line">     */</div><div class="line">    private final static String USER_AGENT=&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36&quot;;</div><div class="line">    /**</div><div class="line">     * 获取页面内容</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public static String getPageContent(String url)&#123;</div><div class="line">        //创建builder</div><div class="line">        HttpClientBuilder builder = HttpClients.custom();</div><div class="line"></div><div class="line">        //build一个CloseableHttpClient</div><div class="line">        CloseableHttpClient client = null;</div><div class="line"></div><div class="line">        //------------设置动态ip-----------------start</div><div class="line">        RedisUtil redisUtil = new RedisUtil();</div><div class="line">        //动态获取ip</div><div class="line">        String ip_port = redisUtil.getSet(&quot;proxy&quot;);</div><div class="line">        if(StringUtils.isNotBlank(ip_port))&#123;</div><div class="line">            String[] arr = ip_port.split(&quot;:&quot;);</div><div class="line">            String proxy_ip = arr[0];</div><div class="line">            int proxy_port = Integer.parseInt(arr[1]);</div><div class="line">            //设置代理</div><div class="line">            HttpHost proxy = new HttpHost(proxy_ip, proxy_port);</div><div class="line">            client = builder.setProxy(proxy).build();</div><div class="line">        &#125;else&#123;</div><div class="line">            client = builder.build();</div><div class="line">        &#125;</div><div class="line">        //创建一个Get请求</div><div class="line">        HttpGet request = new HttpGet(url);</div><div class="line">        //------------设置动态ip-----------------end</div><div class="line">        //执行请求并返回</div><div class="line">        String content = null;</div><div class="line">        try &#123;</div><div class="line">            //设置用户代理-模拟浏览器</div><div class="line">            request.setHeader(&quot;User-Agent&quot;,USER_AGENT);</div><div class="line">            CloseableHttpResponse response = client.execute(request);</div><div class="line">            HttpEntity entity = response.getEntity();</div><div class="line"></div><div class="line">            //将entity转换成String</div><div class="line">            content = EntityUtils.toString(entity);</div><div class="line">            //如果当前ip不可用，从动态代理ip库里面删除</div><div class="line">            redisUtil.deleteSet(&quot;proxy&quot;, ip_port);</div><div class="line">        &#125; catch (IOException e) &#123;</div><div class="line">            e.printStackTrace();</div><div class="line">        &#125;</div><div class="line">        return content;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public static void main(String[] args)&#123;</div><div class="line">        String url = &quot;http://comic.youku.com/?spm=a2hmv.20009921.topNav.5~1~3!5~A&quot;;</div><div class="line">        String content = getPageContent(url);</div><div class="line">        System.out.println(content);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>运行RedisUtil里面的main方法,然后在redis里面查看:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/65.png" alt=""></p>
-</li>
-</ol>
-<h6 id="1-3-多应用部署"><a href="#1-3-多应用部署" class="headerlink" title="1.3 多应用部署"></a>1.3 多应用部署</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/66.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/17/java爬虫-20-解决频繁抓取ip被封问题/" class="archive-article-date">
-  	<time datetime="2018-11-17T10:48:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -2159,7 +2142,7 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.05px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 13.89px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     

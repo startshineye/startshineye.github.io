@@ -152,6 +152,225 @@
       <div class="body-wrap">
         
   
+    <article id="post-pom-xml错误-Missing-artifact-com-oracle-ojdbc6-jar-10-2-0-4-0" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/05/pom-xml错误-Missing-artifact-com-oracle-ojdbc6-jar-10-2-0-4-0/">pom.xml错误:Missing artifact com.oracle:ojdbc6:jar:10.2.0.4.0</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="问题"><a href="#问题" class="headerlink" title="问题"></a>问题</h4><p>在maven加入oracle依赖时候报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/10.png" alt=""><br>错误:<br>Missing artifact com.oracle:ojdbc6:jar:11.2.0.1.0  </p>
+<p>因为oracle的ojdbc.jar是收费的，所以maven的中央仓库中没有这个资源，只能通过配置本地库才能加载到项目中去  </p>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>步骤:  </p>
+<h6 id="1-下载ojbc"><a href="#1-下载ojbc" class="headerlink" title="1.下载ojbc"></a>1.下载ojbc</h6><p>自己下载ojbc6.jar</p>
+<h6 id="2-安装到本地仓库"><a href="#2-安装到本地仓库" class="headerlink" title="2.安装到本地仓库"></a>2.安装到本地仓库</h6><p>将下载好的ojdbc6.jar复制到系统默认的用户目录下，我的用户目录是C:\Users\Administrator，然后在该目录下打开命令窗口<br>输入:mvn install:install-file -DgroupId=com.oracle -DartifactId=ojdbc6 -Dversion=11.2.0.1.0 -Dpackaging=jar -Dfile=ojdbc6.jar  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/11.png" alt="">  </p>
+<p>如果出现了BUILD SUCCESS，则说明安装到本地仓库成功了，这时去本地仓库看下，如下图所示，会发现已经被成功的安装进来了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/12.png" alt=""><br>如上图所示，已经成功安装了，并且名字都被改了。这个时候，再去项目的pom.xml中引入（要和上图中jar包名字一致），就会发现一切都正常了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/13.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/05/pom-xml错误-Missing-artifact-com-oracle-ojdbc6-jar-10-2-0-4-0/" class="archive-article-date">
+  	<time datetime="2017-10-05T02:07:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Oracle/">Oracle</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringBoot-38-SpringBoot-mybatis-动态SQL" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/05/SpringBoot-38-SpringBoot-mybatis-动态SQL/">SpringBoot(38)-SpringBoot-mybatis-动态SQL</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在mybatis中,我们有时候需要使用动态sql来简化操作,一般用下面几个标签<br>1.if标签<br>2.if+where的条件判断<br>3.if+set的更新语句<br>4.if+trim代替where/set标签<br>5.choose (when, otherwise)<br>6.foreach  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-if标签"><a href="#1-if标签" class="headerlink" title="1.if标签"></a>1.if标签</h5><p>if标签可用在许多类型的sql语句中，我们以查询为例。首先看一个很普通的查询：  </p>
+<pre><code>&lt;select id=&quot;selectByIdAndName&quot; resultType=&quot;com.yxm.web.bean.Demo&quot;&gt;
+  select * from demo where id=#{id} and name = #{name}
+&lt;/select&gt;
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/9.png" alt=""></p>
+<p>但是此时如果name或id为null，此语句很可能报错或查询结果为空。此时我们使用if动态sql语句先进行判断，如果值为null或等于空字符串，我们就不进行此条件的判断，增加灵活性。</p>
+<pre><code>&lt;select id=&quot;ifselect&quot; resultType=&quot;com.yxm.web.bean.Demo&quot;&gt;
+   select * from demo where
+   &lt;if test=&quot;id !=null and id !=&apos;&apos;&quot;&gt;
+   id=#{id}
+   &lt;/if&gt;
+   &lt;if test=&quot;name!=null and name !=&apos;&apos;&quot;&gt;
+     and name = #{name}
+   &lt;/if&gt;
+&lt;/select&gt;
+</code></pre><p> 访问<a href="http://127.0.0.1:8080/ifselect?name=zs" target="_blank" rel="external">http://127.0.0.1:8080/ifselect?name=zs</a> 能正常访问，</p>
+<p>但是如果访问：</p>
+<p><a href="http://127.0.0.1:8080/ifselect" target="_blank" rel="external">http://127.0.0.1:8080/ifselect</a><br>一运行就报错了。这时候where标签就出现了，所以技术就有存在的道理。</p>
+<h5 id="2-if-where的条件判断"><a href="#2-if-where的条件判断" class="headerlink" title="2.if+where的条件判断"></a>2.if+where的条件判断</h5><ol>
+<li><p>当where中的条件使用的if标签较多时，这样的组合可能会导致错误。上面的查询语句中，当访问：<a href="http://127.0.0.1:8080/ifselect?email=aa@qq.com" target="_blank" rel="external">http://127.0.0.1:8080/ifselect?email=aa@qq.com</a> 参数name为null，将不会进行name列的判断，则会直接导“WHERE AND”关键字多余的错误SQL。</p>
+</li>
+<li><p>这时我们可以使用where动态语句来解决。这个“where”标签会知道如果它包含的标签中有返回值的话，它就插入一个‘where’。此外，如果标签返回的内容是以AND 或OR 开头的，则它会剔除掉。</p>
+ <select id="select1" resultmap="baseResultMap"><br>     select *from demo<br>        <where><br>            <if test="name != null and name != ''"><br>                name = #{name}<br>            </if><br>            <if test="id != null and id != ''"><br>                and id =#{id }<br>            </if><br>        </where><br>  </select>
+
+</li>
+</ol>
+<p>此时访问的话，会构造不同的SQL语句：  </p>
+<p>访问1：<a href="http://127.0.0.1:8080/select1" target="_blank" rel="external">http://127.0.0.1:8080/select1</a></p>
+<pre><code>select *from demo
+</code></pre><p>访问2：<a href="http://127.0.0.1:8080/select1?name=zs" target="_blank" rel="external">http://127.0.0.1:8080/select1?name=zs</a> </p>
+<pre><code>select *from demo WHERE name = ?
+</code></pre><p>访问3：<a href="http://127.0.0.1:8080/select1?id=aa@qq.com" target="_blank" rel="external">http://127.0.0.1:8080/select1?id=aa@qq.com</a> </p>
+<pre><code>select *from demo WHERE email=?
+</code></pre><p>访问5：<a href="http://127.0.0.1:8080/select1?name=zs&amp;id=5" target="_blank" rel="external">http://127.0.0.1:8080/select1?name=zs&amp;id=5</a></p>
+<pre><code>select *from demo WHERE name = ? and email=?
+</code></pre><h5 id="3-if-set的更新语句"><a href="#3-if-set的更新语句" class="headerlink" title="3.if+set的更新语句"></a>3.if+set的更新语句</h5><p>在demo表中添加:email字段  </p>
+<ol>
+<li>当update语句中没有使用if标签时，如果有一个参数为null，都会导致错误。</li>
+<li>当在update语句中使用if标签时，如果前面的if没有执行，则会导致逗号多余错误。使用set标签可以将动态的配置SET 关键字，和剔除追加到条件末尾的任何不相关的逗号。</li>
+<li>使用if+set标签修改后，如果某项为null则不进行更新，而是保持数据库原值。如下示例： </li>
+</ol>
+<pre><code>&lt;update id=&quot;update1&quot;&gt;  
+   update demo  
+       &lt;set&gt;  
+            &lt;if test=&quot;name != null and name != &apos;&apos;&quot;&gt;  
+               name = #{name},  
+            &lt;/if&gt;  
+            &lt;if test=&quot;email != null and email != &apos;&apos;&quot;&gt;  
+                email=#{email}  
+             &lt;/if&gt;  
+         &lt;/set&gt;  
+     where id =  #{id}  
+&lt;/update&gt; 
+</code></pre><p>这样就可以单独修改name或者id，或者是同时修改name和id，但是需要注意，如果什么都不修改的话是会报错的。</p>
+<h5 id="4-if-trim代替where-set标签"><a href="#4-if-trim代替where-set标签" class="headerlink" title="4.if+trim代替where/set标签"></a>4.if+trim代替where/set标签</h5><p>trim是更灵活的去处多余关键字的标签，它可以代替where和set的效果。</p>
+<h6 id="4-1-trim-代替where"><a href="#4-1-trim-代替where" class="headerlink" title="4.1 trim 代替where"></a>4.1 trim 代替where</h6><pre><code>&lt;select id=&quot;select2&quot; resultMap=&quot;baseResultMap&quot;&gt;  
+ select *from demo  
+    &lt;trim prefix=&quot;where&quot; prefixOverrides=&quot;and|or&quot;&gt;  
+        &lt;if test=&quot;name != null and name != &apos;&apos;&quot;&gt;  
+            name = #{name}     
+        &lt;/if&gt;  
+        &lt;if test=&quot;id != null and id != &apos;&apos;&quot;&gt;  
+            and id=#{id}  
+        &lt;/if&gt;  
+    &lt;/trim&gt;  
+ &lt;/select&gt;  
+</code></pre><h6 id="4-2-trim-代替set"><a href="#4-2-trim-代替set" class="headerlink" title="4.2 trim 代替set"></a>4.2 trim 代替set</h6><pre><code>&lt;update id=&quot;update2&quot;&gt;  
+update demo  
+    &lt;trim prefix=&quot;set&quot; suffixOverrides=&quot;,&quot;&gt;  
+        &lt;if test=&quot;name != null and name != &apos;&apos;&quot;&gt;  
+            name = #{name},  
+        &lt;/if&gt;  
+        &lt;if test=&quot;email != null and email != &apos;&apos;&quot;&gt;  
+             email=#{email}  
+        &lt;/if&gt;  
+    &lt;/trim&gt;  
+where id =  #{id}  
+&lt;/update&gt;  
+</code></pre><h5 id="5-choose-when-otherwise"><a href="#5-choose-when-otherwise" class="headerlink" title="5.choose (when, otherwise)"></a>5.choose (when, otherwise)</h5><ol>
+<li>有时候我们并不想应用所有的条件，而只是想从多个选项中选择一个。而使用if标签时，只要test中的表达式为true，就会执行if标签中的条件。MyBatis提供了choose 元素。if标签是与(and)的关系，而choose标签是或（or）的关系。  </li>
+<li><p>choose标签是按顺序判断其内部when标签中的test条件出否成立，如果有一个成立，则choose结束。当choose中所有when的条件都不满则时，则执行otherwise中的sql。类似于Java 的switch 语句，choose为switch，when为case，otherwise则为default。  </p>
+</li>
+<li><p>例如下面例子，同样把所有可以限制的条件都写上，方面使用。choose会从上到下选择一个when标签的test为true的sql执行。安全考虑，我们使用where将choose包起来，放置关键字多于错误。</p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/15.png" alt=""></p>
+<p>访问测试:</p>
+<p>访问1：<a href="http://127.0.0.1:8080/select3" target="_blank" rel="external">http://127.0.0.1:8080/select3</a></p>
+<pre><code>select *from demo
+</code></pre><p>访问2：<a href="http://127.0.0.1:8080/select3?name=zs" target="_blank" rel="external">http://127.0.0.1:8080/select3?name=zs</a></p>
+<pre><code>select *from demo where name = ?
+</code></pre><p>访问3：<a href="http://127.0.0.1:8080/select3?email=aa@qq.com" target="_blank" rel="external">http://127.0.0.1:8080/select3?email=aa@qq.com</a></p>
+<pre><code>select *from demo WHERE email = ?
+</code></pre><p>访问4：<a href="http://127.0.0.1:8080/select3?" target="_blank" rel="external">http://127.0.0.1:8080/select3?</a></p>
+<pre><code>select *from demo WHERE name = ?
+</code></pre><p>这里满足了name != null and name != ‘’的条件，所以条件就是name=?。</p>
+<h5 id="6-foreach"><a href="#6-foreach" class="headerlink" title="6.foreach"></a>6.foreach</h5><ol>
+<li>对于动态SQL 非常必须的，主是要迭代一个集合，通常是用于IN 条件。List 实例将使用“list”做为键，数组实例以“array” 做为键。</li>
+<li>foreach元素是非常强大的，它允许你指定一个集合，声明集合项和索引变量，它们可以用在元素体内。它也允许你指定开放和关闭的字符串，在迭代之间放置分隔符。这个元素是很智能的，它不会偶然地附加多余的分隔符。</li>
+<li>注意：你可以传递一个List实例或者数组作为参数对象传给MyBatis。当你这么做的时候，MyBatis会自动将它包装在一个Map中，用名称在作为键。List实例将会以“list”作为键，而数组实例将会以“array”作为键。</li>
+</ol>
+<h6 id="6-1-参数为array示例的写法"><a href="#6-1-参数为array示例的写法" class="headerlink" title="6.1 参数为array示例的写法"></a>6.1 参数为array示例的写法</h6><pre><code>&lt;select id=&quot;select4&quot; resultMap=&quot;baseResultMap&quot;&gt;  
+    select *from demo where id in  
+       &lt;foreach collection=&quot;array&quot; item=&quot;id&quot; open=&quot;(&quot; separator=&quot;,&quot; close=&quot;)&quot;&gt;  
+           #{id}  
+       &lt;/foreach&gt;  
+&lt;/select&gt;  
+</code></pre><h6 id="6-2-参数为List示例的写法"><a href="#6-2-参数为List示例的写法" class="headerlink" title="6.2 参数为List示例的写法"></a>6.2 参数为List示例的写法</h6><pre><code>&lt;select id=&quot;select5&quot; resultMap=&quot;baseResultMap&quot;&gt;  
+    select *from demo where id in  
+       &lt;foreach collection=&quot;list&quot; item=&quot;id&quot; open=&quot;(&quot; separator=&quot;,&quot; close=&quot;)&quot;&gt;  
+           #{id}  
+       &lt;/foreach&gt;  
+&lt;/select&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/05/SpringBoot-38-SpringBoot-mybatis-动态SQL/" class="archive-article-date">
+  	<time datetime="2017-10-05T00:24:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringBoot-37-SpringBoot-mybatis-分页查询" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1012,62 +1231,6 @@ $(&quot;.nav-tabs&quot;).on(&quot;click&quot;, &quot;[tabclose]&quot;, function 
 
 
   
-    <article id="post-vue-30-npm介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/24/vue-30-npm介绍/">vue(30)-nmp介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题，常见的使用场景有以下几种： </p>
-<ol>
-<li>从NPM服务器下载别人编写的第三方包到本地使用  </li>
-<li>从NPM服务器下载并安装别人编写的命令行程序到本地使用</li>
-<li>将自己编写的包或命令行程序上传到NPM服务器供别人使用</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-测试安装成功与否"><a href="#1-测试安装成功与否" class="headerlink" title="1.测试安装成功与否"></a>1.测试安装成功与否</h5><p>由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。命令如下，出现版本提示表示安装成功:</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/24/vue-30-npm介绍/" class="archive-article-date">
-  	<time datetime="2017-09-24T03:53:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
     <article id="post-vue-30-nmp介绍" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1136,7 +1299,7 @@ cnpm install npm -g
 
 
   
-    <article id="post-vue-29-vue-loader" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-vue-30-npm介绍" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -1146,7 +1309,7 @@ cnpm install npm -g
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/24/vue-29-vue-loader/">vue(29)-vue-loader</a>
+      <a class="article-title" href="/2017/09/24/vue-30-npm介绍/">vue(30)-nmp介绍</a>
     </h1>
   
 
@@ -1154,427 +1317,20 @@ cnpm install npm -g
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>至此,我们的vue的基本知识已经说完了,但是开发工作中大部分vue都不是这样用的,而是使用vue-loader  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基本概念"><a href="#1-基本概念" class="headerlink" title="1.基本概念"></a>1.基本概念</h5><ol>
-<li><p>vue-loader:其实我们还听说过其他loader:比如:css-loader,url-loader,html-loader…</p>
-</li>
-<li><p>还有我们经常熟悉的webpack,webpack现如今是比较火的,很多开源的框架都是基于他来做的  </p>
-</li>
-<li><p>webpack:模块加载器,一切东西都是模块  </p>
-</li>
-<li><p>vue-loader是基于webppack    </p>
-</li>
-<li><p>我们一般都比较熟悉例如:.js,.html,.css…文件，但是很少交过.vue文件,.vue文件浏览器是读不懂的,如果我们需要让浏览器读懂,所以我们需要使用vue-loader文件  </p>
-</li>
-<li><p>.vue文件是需要是使用vue-loader,vue-loader通过webpack编译成浏览器能懂的文件.  </p>
-</li>
-</ol>
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题，常见的使用场景有以下几种： </p>
 <ol>
-<li><p>.vue文件一般存放内容:  </p>
-<p> <template>html</template>   <style>css</style>   <script>js(平常代码,ES6代码)</script><br> //ES6代码需要通过babel-loader编译成ES5代码  </p>
-</li>
+<li>从NPM服务器下载别人编写的第三方包到本地使用  </li>
+<li>从NPM服务器下载并安装别人编写的命令行程序到本地使用</li>
+<li>将自己编写的包或命令行程序上传到NPM服务器供别人使用</li>
 </ol>
-<h5 id="2-搭建vue-loader"><a href="#2-搭建vue-loader" class="headerlink" title="2.搭建vue-loader"></a>2.搭建vue-loader</h5><h6 id="2-1vue-loader需要的文件准备"><a href="#2-1vue-loader需要的文件准备" class="headerlink" title="2.1vue-loader需要的文件准备"></a>2.1vue-loader需要的文件准备</h6><p>vue-loader文件是基于webpack,所以需要一个webpack.config.js文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/40.png" alt="">  </p>
-<p>package.json 用npm init –yes 生成<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/41.png" alt=""><br>其他手动生成  </p>
-<h6 id="2-2-简单配置"><a href="#2-2-简单配置" class="headerlink" title="2.2 简单配置"></a>2.2 简单配置</h6><p>vue-loader开发模式和单独通过<script> src开发是不一样的  </p>
-<p>比如在index.html中写入:</p>
-<pre><code>&lt;app&gt;&lt;/app&gt;
-</code></pre><p>app是一个组件,但是app怎么就能展示了,肯定是需要入口的。就是main.js,但是可自定义很多.js文件,那么怎样知道哪个.js是入口文件呢?则是通过webpack里面的配置.</p>
-<p>webpack简单配置如下:<br>     //module.exports声明导出模块<br>     module.exports={<br>         entry:’./main.js’,//声明入口文件<br>         output:{//出口<br>            path:_dirname,//当前路径<br>           filename:’build.js’//将App.vue里面内容统一打包成一个模块<br>          }<br>     }</p>
-<p>打包 成的build.js需要在index.html里面引入:  </p>
-<pre><code>&lt;!--引入打包文件--&gt;
-&lt;script src=&quot;build.js&quot;&gt;&lt;/script&gt;
-</code></pre><h6 id="3-main-js修改"><a href="#3-main-js修改" class="headerlink" title="3.main.js修改"></a>3.main.js修改</h6><p>引入App:</p>
-<pre><code>import App from &apos;./App.vue&apos; 
-</code></pre><p>import是ES6里面的引入方式<br>ES6：模块化开发<br>   导出模块:<br>     export default{}<br>   引入模块:<br>     import 模块名 from 地址</p>
-<h6 id="4-webpack准备"><a href="#4-webpack准备" class="headerlink" title="4.webpack准备"></a>4.webpack准备</h6><p>1.下载<br>  cnpm install webpack  -&gt;不带服务器版本<br>  cnpm install webpack-dev-server  -&gt;带服务器版本<br>  cnpm install webpack –sava-dev  -&gt;将下载的版本依赖添加到json文件 </p>
-<p>2.运行  </p>
-<p>npm run dev</p>
-<p>以上webpack已经下载,webpack的config配置文件也已经有了,正常情况下运行是在gitbash里面直接运行:<br>webpack-dev-server  </p>
-<p>热部署:<br>webpack-dev-server –inline –hot –port<br>每次这样写会累死,所以我们需要在package.json里面配置:</p>
-<pre><code>{
-  &quot;name&quot;: &quot;vue-loader-demo&quot;,
-  &quot;version&quot;: &quot;1.0.0&quot;,
-  &quot;description&quot;: &quot;&quot;,
-  &quot;main&quot;: &quot;main.js&quot;,
-  &quot;scripts&quot;: {
-    &quot;dev&quot;: &quot;webpack-dev-server --inline --hot --port 8002&quot;
-  },
-  &quot;keywords&quot;: [],
-  &quot;author&quot;: &quot;&quot;,
-  &quot;license&quot;: &quot;ISC&quot;
-}
-</code></pre><p>然后运行:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/46.png" alt=""></p>
-<p>在App.vue中加入:  </p>
-<pre><code>&lt;template&gt;
-&lt;h1&gt;welcome to vue-loader&lt;/h1&gt;
-&lt;/template&gt;
-
-&lt;script&gt;
-
-&lt;/script&gt;
-
-&lt;style&gt;
-
-&lt;/style&gt;
-</code></pre><p>从中可以知道叫我们访问:localhost:80002<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/47.png" alt=""></p>
-<p>说明我们所需要的模块不仅仅需要:webpack还需要解析App.vue</p>
-<p>App.vue   -&gt;想要变成正常代码    使用vue-loader  </p>
-<h6 id="5-vue-loader准备"><a href="#5-vue-loader准备" class="headerlink" title="5.vue-loader准备"></a>5.vue-loader准备</h6><p>App.vue   -&gt;想要变成正常代码    需要使用vue-loader  </p>
-<p>首先为了解析需要在webpack.config.js里面配置,其实webpack.config.js里面重要的不是entry,output,而是配module中的loader</p>
-<pre><code>{test:/\.vue$/,loader:&apos;vue&apos;}// \.是转义 vue$/以vue结尾,loader用vue-loader，可以省略为vue 多个用&apos;!&apos;连接 比如:vue!css
-</code></pre></script></p>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/24/vue-29-vue-loader/" class="archive-article-date">
-  	<time datetime="2017-09-24T02:48:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-28-vue-router" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/19/vue-28-vue-router/">vue(28)-vue-router</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>vue是MVVP框架,vue是SPA应用(单页面应用)</li>
-<li>vue-router:路由:根据不同url地址,出现不同效果</li>
-<li>使用vue-router需要下载:vue-router.js </li>
-<li>路由是基于:0.7.13   </li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>1.单应用页面为:主页 home 新闻页 news<br>2.对于<a></a>属性href在vue时候是不可用了,vue-router提供了v-link<br>3.v-link={path:url}<br>4.点击v-link所在标签时候,跳转显示的页面用<router-view></router-view><br>5.转转的连接：v-link 展示内容<router-view></router-view><br>6.必须要一个根组件:以上home和news本身也是一个组件</p>
-<h5 id="1-简单入门"><a href="#1-简单入门" class="headerlink" title="1.简单入门"></a>1.简单入门</h5><p>需求：准备两个组件 主页 新闻 点击主页 新闻时候跳转到对应的主页和新闻的view(单页面应用)  </p>
-<p>view:  </p>
-<pre><code>&lt;div id=&quot;box&quot;&gt;
-&lt;!--点击部分 --&gt;
-&lt;ul&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
-    &lt;/li&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
-    &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--展示视图--&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-</code></pre><p>model:</p>
-<pre><code>//1.准备根组件
-   var App = Vue.extend();
- //2.Home,News组件
- var Home = Vue.extend({
-     template:&quot;&lt;h3&gt;我是主页&lt;/h3&gt;&quot;
- });
- var  News = Vue.extend({
-     template:&quot;&lt;h3&gt;我是新闻&lt;/h3&gt;&quot;
- });
- //3.准备路由
- var router = new VueRouter();
- //4.关联
- router.map({
-     &apos;home&apos;:{
-         component:Home
-     },
-     &apos;news&apos;:{
-         component:News
-     }
- });
- //5.启动路由
- router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
-</code></pre><p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/17.gif" alt=""></p>
-<h5 id="2-跳转"><a href="#2-跳转" class="headerlink" title="2.跳转"></a>2.跳转</h5><p>当我们一打开上面的文件时候,页面初始化时并没有跳转(页面没有任何跳转)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/26.png" alt="">  </p>
-<p>跳转:router.redirect({<br>    ‘/‘:’/home’,<br>    ‘/aaa’:’/news’<br> });</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/27.png" alt="">  </p>
-<h5 id="3-路由嵌套-多级"><a href="#3-路由嵌套-多级" class="headerlink" title="3.路由嵌套(多级)"></a>3.路由嵌套(多级)</h5><h6 id="3-1-主页嵌套"><a href="#3-1-主页嵌套" class="headerlink" title="3.1 主页嵌套"></a>3.1 主页嵌套</h6><p>需求:实现以下需求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/30.png" alt=""></p>
-<p>1.为了简洁,我们将’home’变成模板<br>2.我们点击模板之后,会加入一个class<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/28.png" alt="">    </p>
-<p>加入样式:  </p>
-<pre><code>&lt;style&gt;
-    .v-link-active{
-        font-size: 20px;
-        color: #985f0d;
-    }
-&lt;/style&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/29.png" alt="">  </p>
-<p>3.在模板下加入<a></a>  </p>
-<p>4.在home下面的模板下的路由的路径需要是:”/home/login”,”/home/reg”  </p>
-<pre><code>&lt;template id=&quot;home&quot;&gt;
-    &lt;h3&gt;我是主页&lt;/h3&gt;
-    &lt;div&gt;
-        &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
-        &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
-    &lt;/div&gt;
-    &lt;div&gt;
-        &lt;router-view&gt;&lt;/router-view&gt;
-    &lt;/div&gt;
-&lt;/template&gt;   
-</code></pre><p>5.由于登录注册的路由都是基于home的所以路由关联也是写在相应的下面:subRoutes  </p>
-<pre><code>router.map({
-        &apos;home&apos;:{
-            component:Home,
-            subRoutes:{
-                &apos;login&apos;:{
-                    component:{
-                        template:&apos;&lt;strong&gt;我是登录信息&lt;/strong&gt;&apos;
-                    }
-                },
-                &apos;reg&apos;:{
-                    component:{
-                        template:&apos;&lt;strong&gt;我是注册信息&lt;/strong&gt;&apos;
-                    }
-                }
-            }
-        }
-    });
-</code></pre><p>代码:  </p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html lang=&quot;en&quot;&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;../js/vue-router.js&quot;&gt;&lt;/script&gt;
-&lt;style&gt;
-    .v-link-active{
-        font-size: 20px;
-        color: #985f0d;
-    }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-&lt;!--点击部分 --&gt;
-&lt;ul&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
-    &lt;/li&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
-    &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--展示视图--&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;template id=&quot;home&quot;&gt;
-&lt;h3&gt;我是主页&lt;/h3&gt;
-&lt;!--其下路由应该在其模板之下--&gt;
-&lt;div&gt;
-    &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
-    &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
-&lt;/div&gt;
-&lt;!--显示其下的路由--&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/template&gt;
-&lt;template id=&quot;news&quot;&gt;
-  &lt;h3&gt;我是新闻&lt;/h3&gt;
-&lt;/template&gt;
-&lt;/body&gt;
-&lt;script&gt;
-  //1.准备根组件
-    var App = Vue.extend();
-  //2.Home,News组件
-  var Home = Vue.extend({
-      template:&quot;#home&quot;
-  });
-  var  News = Vue.extend({
-      template:&quot;#news&quot;
-  });
-  //3.准备路由
-  var router = new VueRouter();
-  //4.关联
-  router.map({
-      &apos;home&apos;:{
-          component:Home,
-          subRoutes:{
-              &apos;login&apos;:{
-                  component:{
-                      template:&quot;&lt;h3&gt;我是登录&lt;/h3&gt;&quot;
-                  }
-              },
-              &apos;reg&apos;:{
-                  component:{
-                      template:&apos;&lt;h3&gt;我是注册&lt;/h3&gt;&apos;
-                  }
-              }
-          }
-      },
-      &apos;news&apos;:{
-          component:News
-      }
-  });
-  //5.启动路由
-  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
-
-  //6.跳转
-  router.redirect({
-      &apos;/&apos;:&apos;home&apos;
-  })
-&lt;/script&gt;
-&lt;/html&gt;
-</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/18.gif" alt="">  </p>
-<h6 id="3-2-新闻嵌套"><a href="#3-2-新闻嵌套" class="headerlink" title="3.2 新闻嵌套"></a>3.2 新闻嵌套</h6><pre><code>{{$route.params | json}} -&gt; 当前参数
-{{$route.path}} -&gt;当前路径
-{{$route.query | json}} -数据
-</code></pre><p>代码:</p>
-<pre><code>head&gt;
-&lt;meta charset=&quot;UTF-8&quot;&gt;
-&lt;title&gt;Title&lt;/title&gt;
-&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;../js/vue-router.js&quot;&gt;&lt;/script&gt;
-&lt;style&gt;
-    .v-link-active{
-        font-size: 20px;
-        color: #985f0d;
-    }
-&lt;/style&gt;
-&lt;/head&gt;
-&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-&lt;!--点击部分 --&gt;
-&lt;ul&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/home&apos;}&quot;&gt;主页&lt;/a&gt;
-    &lt;/li&gt;
-    &lt;li&gt;
-        &lt;a v-link=&quot;{path:&apos;/news&apos;}&quot;&gt;新闻&lt;/a&gt;
-    &lt;/li&gt;
-&lt;/ul&gt;
-
-&lt;!--展示视图--&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;template id=&quot;home&quot;&gt;
-&lt;h3&gt;我是主页&lt;/h3&gt;
-&lt;!--其下路由应该在其模板之下--&gt;
-&lt;div&gt;
-    &lt;a v-link=&quot;{path:&apos;/home/login&apos;}&quot;&gt;登录&lt;/a&gt;
-    &lt;a v-link=&quot;{path:&apos;/home/reg&apos;}&quot;&gt;注册&lt;/a&gt;
-&lt;/div&gt;
-&lt;!--显示其下的路由--&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/template&gt;
-&lt;template id=&quot;news&quot;&gt;
-&lt;h3&gt;我是新闻&lt;/h3&gt;
-&lt;div&gt;
-    &lt;a v-link=&quot;{path:&apos;/news/detail/001&apos;}&quot;&gt;新闻001&lt;/a&gt;
-    &lt;a v-link=&quot;{path:&apos;/news/detail/002&apos;}&quot;&gt;新闻002&lt;/a&gt;
-&lt;/div&gt;
-&lt;div&gt;
-    &lt;router-view&gt;&lt;/router-view&gt;
-&lt;/div&gt;
-&lt;/template&gt;
-&lt;template id=&quot;detail&quot;&gt;
-&lt;!--id参数输出 json过滤--&gt;
-{{$route.params | json}}&lt;br&gt;
-{{$route.path}}
-&lt;/template&gt;
-&lt;/body&gt;
-&lt;script&gt;
-  //1.准备根组件
-    var App = Vue.extend();
-  //2.Home,News组件
-  var Home = Vue.extend({
-      template:&quot;#home&quot;
-  });
-  var  News = Vue.extend({
-      template:&quot;#news&quot;
-  });
-
- var Detail =  Vue.extend({
-     template:&quot;#detail&quot;
-  });
-  //3.准备路由
-  var router = new VueRouter();
-  //4.关联
-  router.map({
-      &apos;home&apos;:{
-          component:Home,
-          subRoutes:{
-              &apos;login&apos;:{
-                  component:{
-                      template:&quot;&lt;h3&gt;我是登录&lt;/h3&gt;&quot;
-                  }
-              },
-              &apos;reg&apos;:{
-                  component:{
-                      template:&apos;&lt;h3&gt;我是注册&lt;/h3&gt;&apos;
-                  }
-              }
-          }
-      },
-      &apos;news&apos;:{
-          component:News,
-          subRoutes:{
-              &apos;/detail/:id&apos;:{
-                  component:Detail
-              }
-          }
-      }
-  });
-  //5.启动路由
-  router.start(App,&apos;#box&apos;);//绑定到哪个根路由(App)的哪个容器(box)
-
-  //6.跳转
-  router.redirect({
-      &apos;/&apos;:&apos;home&apos;
-  })
- &lt;/script&gt;
-&lt;/html&gt;
-</code></pre><p>输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/19.gif" alt=""></p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-测试安装成功与否"><a href="#1-测试安装成功与否" class="headerlink" title="1.测试安装成功与否"></a>1.测试安装成功与否</h5><p>由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。命令如下，出现版本提示表示安装成功:</p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2017/09/19/vue-28-vue-router/" class="archive-article-date">
-  	<time datetime="2017-09-19T14:43:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-19</time>
+      <a href="/2017/09/24/vue-30-npm介绍/" class="archive-article-date">
+  	<time datetime="2017-09-24T03:53:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
 </a>
       
 	<div class="article-tag tagcloud">
@@ -1664,7 +1420,7 @@ cnpm install npm -g
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.05px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 13.68px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 13.89px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
