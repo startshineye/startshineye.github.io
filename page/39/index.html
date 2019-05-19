@@ -152,6 +152,89 @@
       <div class="body-wrap">
         
   
+    <article id="post-泛型-六-自定义泛型方法及应用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/07/泛型-六-自定义泛型方法及应用/">泛型(六)-自定义泛型方法及应用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="由C-模板引出自定义泛型"><a href="#由C-模板引出自定义泛型" class="headerlink" title="由C++模板引出自定义泛型"></a>由C++模板引出自定义泛型</h4><h6 id="1-如下函数的结构相似-仅类型不同"><a href="#1-如下函数的结构相似-仅类型不同" class="headerlink" title="1.如下函数的结构相似,仅类型不同"></a>1.如下函数的结构相似,仅类型不同</h6><ol>
+<li>int add(int x,int y)</li>
+<li>float add(float x,float y)</li>
+<li>double add(double x,double y)<h6 id="2-C-用模板函数解决以上重载，只写一个通用的方法，它可以适应各种类型"><a href="#2-C-用模板函数解决以上重载，只写一个通用的方法，它可以适应各种类型" class="headerlink" title="2.C++用模板函数解决以上重载，只写一个通用的方法，它可以适应各种类型"></a>2.C++用模板函数解决以上重载，只写一个通用的方法，它可以适应各种类型</h6></li>
+<li>实例代码如下:  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">template&lt;class T&gt;</div><div class="line">T add(T x,T y)&#123;</div><div class="line"> retrn(T)(x+y)</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>T代表任意类型，由所传参数决定</p>
+<h4 id="Java定义泛型方法"><a href="#Java定义泛型方法" class="headerlink" title="Java定义泛型方法"></a>Java定义泛型方法</h4><h6 id="1-java泛型和C-模板"><a href="#1-java泛型和C-模板" class="headerlink" title="1.java泛型和C++模板"></a>1.java泛型和C++模板</h6><ol>
+<li>java中泛型类型(或者泛型)类似于C++中的模板.但是这种相似性仅限于表面,Java语言中的泛型基本上完全是在编译器中实现,用于编译器执行类型检查和类型推断,然后生成普通的非泛型的字节码,这种实现技术成为擦除(erasure)(编译器使用泛型类型信息保证类型安全,然后在生成字节码之前将其擦除)。这是因为扩展虚拟机指令集来支持泛型被认为是无法接受的,这会为java厂商升级其JVM造成难以逾越的障碍。所以java的泛型采用了可以在编译器中实现的擦除方法。<h6 id="2-定义泛型方法"><a href="#2-定义泛型方法" class="headerlink" title="2.定义泛型方法"></a>2.定义泛型方法</h6></li>
+<li>java的泛型没有C++模板函数应用强大,java中的如下代码无法通过编译：<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;T&gt; T add(T x,T y)&#123;</div><div class="line">  return(T)(x+y);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><t> 用来说明T，一般在方法的返回值之前,以上方法不行，是因为传来的参数未必可以互相相加</t></p>
+<ol>
+<li><p>交换数组中两个元素的位置的泛型方法语法如下:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">static &lt;T&gt; void swap(T[]a,int i,int j)&#123;</div><div class="line">  T temp=a[i];</div><div class="line">    a[i]=a[j];</div><div class="line">    a[j]=temp;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>用于放置泛型的类型参数的尖括号应该出现在方法的修饰符之后和方法的返回类型之前,也就是紧邻返回值之前。按照惯例,类型参数通常用单个大写字母表示。</p>
+</li>
+<li><p>只有引用类型才能作为泛型方法的实际参数，swap(new int[3],3,5)语句会报告编译错误,因为int[3]里面的数据是基本类型int</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class GenericTest &#123;</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	  //1.字符串类型</div><div class="line">	  String[] a = new String[]&#123;&quot;a&quot;,&quot;b&quot;,&quot;c&quot;&#125;;</div><div class="line">	  swap(a,0,2);</div><div class="line">	  //2.int类型（非引用类型</div><div class="line">	  swap(new int[]&#123;1,2,3&#125;,0,2);//int不是引用类型</div><div class="line">  &#125;</div><div class="line">  private static &lt;T&gt; void swap(T[]a,int i,int j)&#123;</div><div class="line">	  T temp=a[i];</div><div class="line">	  a[i]=a[j];</div><div class="line">	  a[j]=temp;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>除了在应用泛型时候可以使用extends限定符,在定义泛型时候也可以使用extends限定符,例如:Class getAnnotation()方法定义。并且可以用&amp;来指定多个边界，如：<v extends="" serializable="" &="" cloneable=""> void method(){};</v></p>
+</li>
+<li>普通方法,构造方法和静态方法中都可以使用泛型。但是编译器不允许创建泛型变量的数组。</li>
+<li>也可以用类型变量来表示异常,成为参数化的异常，可以用于方法throws列表中,但是不能用于catch字据中</li>
+<li>在泛型中可以同时有多个类型参数，在定义他们的尖括号中用逗号分,例如：<br>public static <k,v> getValue(K key){return map.get(key)};</k,v></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/07/泛型-六-自定义泛型方法及应用/" class="archive-article-date">
+  	<time datetime="2017-01-07T08:22:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/泛型/">泛型</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/集合/">集合</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-泛型-五-泛型综合运用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -789,76 +872,6 @@
 
 
   
-    <article id="post-java反射-十二-内省引出javaBean" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2016/12/25/java反射-十二-内省引出javaBean/">java反射(十二)-内省引出javaBean</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h6 id="1-JavaBean"><a href="#1-JavaBean" class="headerlink" title="1.JavaBean"></a>1.JavaBean</h6><ol>
-<li>javaBean<br>JavaBean是特殊的Java类，使用J ava语言书写，并且遵守JavaBean API规范。<br>接下来给出的是JavaBean与其它Java类相比而言独一无二的特征：<br>1)必须有无参构造函数<br>2)属性必须私有， 我们称为字段<br>3)提供标准的getter和setter  <h6 id="2-JavaBean属性"><a href="#2-JavaBean属性" class="headerlink" title="2.JavaBean属性"></a>2.JavaBean属性</h6></li>
-<li>一个JavaBean对象的属性应该是可访问的。这个属性可以是任意合法的Java数据类型，包括自定义Java类。</li>
-<li>一个JavaBean对象的属性可以是可读写，或只读，或只写。JavaBean对象的属性通过JavaBean实现类中提供的两个方法来访问：<h6 id="3-javaBean例子"><a href="#3-javaBean例子" class="headerlink" title="3. javaBean例子"></a>3. javaBean例子</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * 简单javaBean</div><div class="line"> * @author yxm</div><div class="line"> * @date 2016-12-25</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Person &#123;</div><div class="line">   //属性</div><div class="line">   private String name;</div><div class="line">   private int age;</div><div class="line">   </div><div class="line">   //含默认无参构造方法</div><div class="line">   //getter,setter方法</div><div class="line">   public String getName()&#123;</div><div class="line">	   return name;</div><div class="line">   &#125;</div><div class="line">   public void setName(String name)&#123;</div><div class="line">	   this.name = name;</div><div class="line">   &#125;</div><div class="line">	public int getAge() &#123;</div><div class="line">		return age;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	public void setAge(int age) &#123;</div><div class="line">		this.age = age;</div><div class="line">	&#125;</div><div class="line">   </div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="4-访问javaBean"><a href="#4-访问javaBean" class="headerlink" title="4. 访问javaBean"></a>4. 访问javaBean</h6><ol>
-<li><p>使用import导入javaBean</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">&lt;%@ page contentType=&quot;text/html&quot; pageEncoding=&quot;UTF-8&quot;%&gt;  </div><div class="line">&lt;%@ page import=&quot;com.yxm.javabean.*&quot;%&gt;    &lt;!-- 导入com.yxm.javabean包 --&gt;  </div><div class="line">&lt;html&gt;  </div><div class="line">&lt;head&gt;&lt;title&gt;javaBean访问&lt;/title&gt;&lt;/head&gt;  </div><div class="line">&lt;body&gt;  </div><div class="line">&lt;%  </div><div class="line">    Person person = new Person();  //声明并实例化对象</div><div class="line">	person.setName(&quot;yxm&quot;);         //设置name属性  </div><div class="line">	person.setAge(25);             //设置age属性</div><div class="line">%&gt;  </div><div class="line">&lt;h3&gt;姓名：&lt;%=person.getName()%&gt;&lt;/h3&gt;            &lt;!-- 输出name属性的内容 --&gt;  </div><div class="line">&lt;h3&gt;年龄：&lt;%=person.getAge()%&gt;&lt;/h3&gt;             &lt;!-- 输出age属性的内容 --&gt;  </div><div class="line">&lt;/body&gt;  </div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
-</li>
-<li><p>使用<jsp:usebean>指令<br>除了使用import的语句之外，也可以使用JSP中提供的：<jsp:usebean>指令完成操作，指令的操作语法如下所示：<br>1.<jsp:usebean id="实例化对象名称" scope="“保存范围”" class="“包.类名称“/"><br>2.主要属性：<br>(1)id：表示实例化对象的名称<br>(2)scope：表示此对象保存的范围，一共有四种属性范围：page、request、session、application<br>(3)class：对象所对应的包.类名称<br>3.代码示例：  </jsp:usebean></jsp:usebean></jsp:usebean></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">&lt;%@ page contentType=&quot;text/html&quot; pageEncoding=&quot;UTF-8&quot;%&gt;  </div><div class="line">&lt;jsp:useBean id=&quot;person&quot; scope=&quot;page&quot; class=&quot;com.yxm.javabean.Person&quot;/&gt;    </div><div class="line">&lt;html&gt;  </div><div class="line">&lt;head&gt;&lt;title&gt;javaBean访问&lt;/title&gt;&lt;/head&gt;  </div><div class="line">&lt;body&gt;  </div><div class="line">&lt;%  </div><div class="line">	person.setName(&quot;yxm&quot;);         //设置name属性  </div><div class="line">	person.setAge(25);             //设置age属性</div><div class="line">%&gt;  </div><div class="line">&lt;h3&gt;姓名：&lt;%=person.getName()%&gt;&lt;/h3&gt;            &lt;!-- 输出name属性的内容 --&gt;  </div><div class="line">&lt;h3&gt;年龄：&lt;%=person.getAge()%&gt;&lt;/h3&gt;             &lt;!-- 输出age属性的内容 --&gt;  </div><div class="line">&lt;/body&gt;  </div><div class="line">&lt;/html&gt;</div></pre></td></tr></table></figure>
-</li>
-<li><p><jsp:usebean>指令内部实现原理<br>依靠的是反射机制完成的，在使用<jsp:usebean>指令时需要定义对象所在的“包.类“名称，而且又要求类中存在无参构造方法，这就是反射操作的前提条件，所以<jsp:usebean>的语法实际上属于反射机制的操作实现。  </jsp:usebean></jsp:usebean></jsp:usebean></p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2016/12/25/java反射-十二-内省引出javaBean/" class="archive-article-date">
-  	<time datetime="2016-12-25T08:10:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JavaSE/">JavaSE</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/反射/">反射</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/java/">java</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/38/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="page-number" href="/page/38/">38</a><span class="page-number current">39</span><a class="page-number" href="/page/40/">40</a><a class="page-number" href="/page/41/">41</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/40/">Next &raquo;</a>
@@ -924,7 +937,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 13.89px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
