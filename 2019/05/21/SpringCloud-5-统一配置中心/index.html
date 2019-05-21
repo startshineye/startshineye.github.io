@@ -4,28 +4,52 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>自己写一个apache服务器(十八)-实现资源转发-javaServer16 | Startshineye的博客</title>
+  <title>Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
+  <meta name="description" content="title: SpringCloud-5-统一配置中心date: 2019-05-21 22:42:12tags:
+ SpringCloud1.统一配置中心概述1.1 为什么需要统一配置中心之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  
+
+1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功">
 <meta property="og:type" content="article">
-<meta property="og:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
-<meta property="og:url" content="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/index.html">
+<meta property="og:title" content="Startshineye的博客">
+<meta property="og:url" content="https://github.com/startshineye/2019/05/21/SpringCloud-5-统一配置中心/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
-<meta property="og:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/e64f04f4c42322e7.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/253af750fc140865.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/da2996da681764ce.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/87b76fd935f16cff.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/dfb56fa0928cf282.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/72fe49dac1242242.png">
-<meta property="og:image" content="http://i1.piimg.com/576993/8aac1cefef8c7b03.png">
-<meta property="og:updated_time" content="2016-12-18T03:09:48.302Z">
+<meta property="og:description" content="title: SpringCloud-5-统一配置中心date: 2019-05-21 22:42:12tags:
+ SpringCloud1.统一配置中心概述1.1 为什么需要统一配置中心之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  
+
+1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/38.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/39.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/40.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/41.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/42.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/43.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/44.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/45.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/46.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/47.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/48.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/49.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/50.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/51.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/52.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/53.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/54.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/55.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/56.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/57.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/58.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png">
+<meta property="og:updated_time" content="2019-05-21T16:47:27.679Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="自己写一个apache服务器(十八)-实现资源转发-javaServer16">
-<meta name="twitter:description" content="实现资源转发-javaServer16我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了">
-<meta name="twitter:image" content="http://i1.piimg.com/576993/7ee2a1666472a075.png">
+<meta name="twitter:title" content="Startshineye的博客">
+<meta name="twitter:description" content="title: SpringCloud-5-统一配置中心date: 2019-05-21 22:42:12tags:
+ SpringCloud1.统一配置中心概述1.1 为什么需要统一配置中心之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  
+
+1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/38.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -161,47 +185,50 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-自己写一个apache服务器-十八-实现资源转发-javaServer16" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloud-5-统一配置中心" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
     
     
-      <header class="article-header">
-        
-  
-    <h1 class="article-title" itemprop="name">
-      自己写一个apache服务器(十八)-实现资源转发-javaServer16
-    </h1>
-  
-
-      </header>
-    
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="实现资源转发-javaServer16"><a href="#实现资源转发-javaServer16" class="headerlink" title="实现资源转发-javaServer16"></a>实现资源转发-javaServer16</h4><p>我们再来看这样一种情况，例如有这样一个功能，当用户登录成功之后跳转到显示员工列表页面，登录功能需要服务器端调用WebApp的LoginServlet进行处理，当LoginServlet执行结束登录成功后需要在同一个请求当中显示员工列表信息，而显示员工列表信息则需要执行另一个Servlet，例如EmpListServlet，这就相当于在同一个请求当中，先后执行了两个Servlet，先执行LoginServlet，然后再跳转到EmpListServlet继续执行，这个我们应该怎么做呢？<br>有人说，在LoginServlet中service方法执行结束的时候，由WebApp开发人员手动调用EmpListServlet中的service方法不就行了吗。这当然是不行的，因为Servlet对象的创建，包括Servlet对象上方法的调用，都是由Web服务器来管理的，WebApp开发人员无权干涉。那该怎么办呢？只好把这个Servlet对象上service方法的真正调用交给Web服务器来完成了。<br>那我们把这种机制定义为转发机制，转发过程中必须保证是在同一个请求当中，为了保证LoginServlet和EmpListServlet在同一个请求当中，必须保证LoginServlet和EmpListServlet共享同一个request对象和同一个response对象。<br>那就让我们的角色转变为Web服务器的开发人员，定义一个“请求转发器”类型，类名RequestDispatcherImpl，在转发器中定义转发方法，将request和response参数传递过去，如下图所示：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div></pre></td><td class="code"><pre><div class="line">public class RequestDispatcherImpl implements RequestDispatcher &#123;</div><div class="line">   private String uri;</div><div class="line">   </div><div class="line">   public RequestDispatcherImpl(String uri)&#123;</div><div class="line">	   this.uri=uri;</div><div class="line">   &#125;</div><div class="line">	@Override</div><div class="line">	public void forward(ServletRequest request, ServletResponse response) &#123;</div><div class="line">      if(uri.endsWith(&quot;.html&quot;) || uri.endsWith(&quot;.htm&quot;))&#123;</div><div class="line">    	  String htmlPath = uri.substring(1);</div><div class="line">    	  System.out.println(htmlPath);</div><div class="line">    	  BufferedReader br=null;</div><div class="line">    	  try &#123;</div><div class="line">    		  br=new BufferedReader(new FileReader(htmlPath));</div><div class="line">		      String temp = null;</div><div class="line">		      while((temp = br.readLine())!=null)&#123;</div><div class="line">		    	  response.getWriter().print(temp);</div><div class="line">		      &#125;</div><div class="line">    	  &#125; catch (Exception e) &#123;</div><div class="line">    		  e.printStackTrace();</div><div class="line">		  &#125;finally&#123;</div><div class="line">			  if(br!=null)&#123;//br关闭流</div><div class="line">				  try &#123;</div><div class="line">					br.close();</div><div class="line">				&#125; catch (IOException e) &#123;</div><div class="line">					e.printStackTrace();</div><div class="line">				&#125;</div><div class="line">			  &#125;</div><div class="line">		  &#125;</div><div class="line">      &#125;else&#123;</div><div class="line">    	  String s1 = uri.substring(1);</div><div class="line">    	  System.out.println(s1);</div><div class="line">    	  String webappname=&quot;&quot;;</div><div class="line">    	  if(s1.contains(&quot;/&quot;))&#123;</div><div class="line">    		  webappname=s1.split(&quot;/&quot;)[0];</div><div class="line">    	  &#125;else&#123;</div><div class="line">    		  webappname=s1;</div><div class="line">    	  &#125;</div><div class="line">    	  String servletPath = s1.substring(webappname.length());</div><div class="line">    	  if(servletPath.length()&gt;0)&#123;</div><div class="line">    		  String servletName = WebParse.servletMaps.get(webappname).get(servletPath);</div><div class="line">    	      Servlet servlet = ServletCache.get(servletName);</div><div class="line">    	      if(servlet == null)&#123;</div><div class="line">    	    	  try &#123;</div><div class="line">    	    		  servlet = (Servlet)Class.forName(servletName).newInstance();</div><div class="line">				 &#125;catch (Exception e) &#123;</div><div class="line">					 e.printStackTrace();</div><div class="line">				 &#125;</div><div class="line">    	      &#125;</div><div class="line">    	      servlet.service(request, response);</div><div class="line">    	  &#125; </div><div class="line">	  &#125;</div><div class="line">	&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<p>以上WEB服务器的开发人员将请求转发器开发之后，该请求转发器对象肯定要在WebApp中使用，所以SUN应该制定请求转发器接口，WebApp的开发人员应该面向该请求转发器接口编程，那么我们的角色转变为SUN公司，制定接口如下：<br><img src="http://i1.piimg.com/576993/7ee2a1666472a075.png" alt="Markdown"><br>角色转变为WEB服务器的开发人员，让请求转发器对象实现以上的请求转发器接口，代码如下所示：<br><img src="http://i1.piimg.com/576993/e64f04f4c42322e7.png" alt="Markdown"><br>请求转发器类型我们已经定义好了，但是这个对象对于WebApp的开发人员来说怎么能获取到呢？在Servlet类中采用new的方式吗？当然不行，因为对于WebApp的开发人员来说请求转发器类型是不可见的，也就是说WebApp的开发人员不知道有RequestDispatcherImpl这样一个类，他只知道RequestDispatcherImpl实现了SUN提供的RequestDispatcher接口。那怎么能获取到该转发器对象呢？对于WebApp的开发人员来说，一个Servlet类的service方法中有两个参数，一个是request，一个是response，WebApp的开发人员是可以调用request接口中的方法的，所以SUN可以在request接口中加入下面的方法：<br><img src="http://i1.piimg.com/576993/253af750fc140865.png" alt="Markdown"><br>SUN制定的request接口发生了变化，自然实现类需要进一步实现这个方法，开发角色转变为WEB服务器的开发人员，代码如下所示：<br><img src="http://i1.piimg.com/576993/da2996da681764ce.png" alt="Markdown"><br>转发器开发完毕，接下来我们测试一下是否可以正常使用，开发角色转变为WebApp的开发人员，分别开发AServlet、BServlet、testForward.html，AServlet执行然后转发到BServlet执行，BServlet执行再转发到testForward.html，代码和配置如下所示：<br><img src="http://i1.piimg.com/576993/87b76fd935f16cff.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/dfb56fa0928cf282.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/8922ec2e8fdce1e1.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/72fe49dac1242242.png" alt="Markdown"><br>启动httpserver，打开浏览器，输入以下访问地址，发送请求，测试结果如下所示：<br><img src="http://i1.piimg.com/576993/8aac1cefef8c7b03.png" alt="Markdown"></p>
-<h4 id="源码"><a href="#源码" class="headerlink" title="源码"></a>源码</h4><p><a href="https://github.com/startshineye/webserver#webserver">源码</a></p>
+        <hr>
+<p>title: SpringCloud-5-统一配置中心<br>date: 2019-05-21 22:42:12<br>tags:</p>
+<h2 id="SpringCloud"><a href="#SpringCloud" class="headerlink" title=" SpringCloud"></a> SpringCloud</h2><h3 id="1-统一配置中心概述"><a href="#1-统一配置中心概述" class="headerlink" title="1.统一配置中心概述"></a>1.统一配置中心概述</h3><h4 id="1-1-为什么需要统一配置中心"><a href="#1-1-为什么需要统一配置中心" class="headerlink" title="1.1 为什么需要统一配置中心"></a>1.1 为什么需要统一配置中心</h4><p>之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  </p>
+<ol>
+<li>1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功能,此时配置文件已经改的面目全非了。)</li>
+<li>2.配置内容安全与权限:一个公司线上的配置不会对开发者进行开发公开的,特别熟数据库账号密码,按理说只有运维才知道。我们需要把数据库信息隔离,不放到数据库密码里面去。  </li>
+<li>3.更新配置项目需重启:每次更新项目都要重启,线上有可能修改一些配置,比如更改项目发送短信接口次数，我们怎样做到不重启。</li>
+</ol>
+<h4 id="1-2-统一配置中心"><a href="#1-2-统一配置中心" class="headerlink" title="1.2 统一配置中心"></a>1.2 统一配置中心</h4><p>我们到时候会专门做一个项目:config-server单独的微服务,他也有server端和client端。server端,这些配置我们为了方便管理都把他放到git上,这样子版本控制起来比较方便,他会从远端git把配置给拉取下来,以下图的箭头表示配置信息流的流动方向,最开始我们把他放到远端git,远端git的话,有gitlab,github，config-server把配置拉取下来之后,会把其配置放置到本地git上,注意config&lt;-&gt;本地git之前是双向流动的,他既会把远端git放到本地git去,也可以假如远端git不能使用了,被墙了,那么他会把本地的git拿出来，后面给product和order服务使用(两个服务都会集成config-server的客户端)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/38.png" alt="">  </p>
+<h3 id="2-统一配置中心server端-config-server"><a href="#2-统一配置中心server端-config-server" class="headerlink" title="2.统一配置中心server端(config-server)"></a>2.统一配置中心server端(config-server)</h3><p>新建一个项目:</p>
+<ol>
+<li>1.Spring Initializr<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/39.png" alt=""></li>
+<li>2.填写Project Metadata<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/40.png" alt="">  </li>
+<li>3.添加依赖(本身是个微服务,需要注册到Eureka上去,所以添加Cloud Discovery中的Eureka Discovery和本身是一个配置类:作为config的server端 添加Cloud Config依赖)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/41.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/42.png" alt=""> </li>
+<li>4.创建完毕之后,删除不必要的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/44.png" alt=""> </li>
+<li>5.更改pom使各个微服务版本号统一<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/45.png" alt="">  </li>
+<li>6.在启动类中添加注解:将其注册到Eureka中去<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/46.png" alt=""> </li>
+<li>7.修改其配置文件application.yml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/47.png" alt="">  </li>
+<li>8.启用Eureka服务,再启用config服务,一下出现config服务,说明启用成功。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/48.png" alt="">  </li>
+<li>9.要成功config-server端,需要添加对应注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/49.png" alt=""><br>此时启动报错</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Caused by: java.lang.IllegalStateException: You need to configure a uri for the git repository</div></pre></td></tr></table></figure>
+<p>我们在远程github仓库创建配置文件:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/50.png" alt=""><br>在远程仓库的config-repo下添加order服务的配置信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/51.png" alt=""></p>
+<p>输入一下信息回车:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/52.png" alt=""><br>配置信息的username和password没有配置因为config-repo是公开仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/53.png" alt=""></p>
+<p>然后重启项目完之后,校验我们的配置文件是否被config-server从github仓库中拉取下来了。然后我们在浏览器输入：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/54.png" alt=""><br>为什么需要多写一个a呢?:<a href="http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。" target="_blank" rel="external">http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。</a><br>我们查看config-server启动时候的日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/55.png" alt=""><br>上面是支持properties,yml,json格式见转换的，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/56.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/57.png" alt=""><br>具体的访问配置文件格式说明:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/58.png" alt="">  </p>
+<p>查看config-server把远程的文件:order.yml拉取到了本地的哪个文件:如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png" alt=""><br>当然我们自己也可以自定义这个配置文件路径:浏览器访问:<a href="http://localhost:8083/order-a.yml然后再配置的文件下" target="_blank" rel="external">http://localhost:8083/order-a.yml然后再配置的文件下</a>:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png" alt="">  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/" class="archive-article-date">
-  	<time datetime="2016-12-18T02:06:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2016-12-18</time>
+      <a href="/2019/05/21/SpringCloud-5-统一配置中心/" class="archive-article-date">
+  	<time datetime="2019-05-21T14:42:12.871Z" itemprop="datePublished"><i class="icon-clock"></i>2019-05-21</time>
 </a>
       
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/自己写一个apache服务器/">自己写一个apache服务器</a></li></ul>
-	</div>
-
       
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/web/">web</a>
-	</div>
-
 
       <div class="clearfix"></div>
     </div>
@@ -211,18 +238,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2016/12/18/java反射-一-java反射-Class类/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          java反射-Class类
-        
-      </div>
-    </a>
   
-  
-    <a href="/2016/12/18/自己写一个apache服务器-十七-Servlet对象实现单例-javaServer15/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">自己写一个apache服务器(十七)-Servlet对象实现单例-javaServer15</div>
+    <a href="/2019/05/18/work-9-maven仓库包下载不下来/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">work-9-maven仓库包下载不下来</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -268,7 +286,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="自己写一个apache服务器-十八-实现资源转发-javaServer16" data-title="自己写一个apache服务器(十八)-实现资源转发-javaServer16" data-url="https://github.com/startshineye/2016/12/18/自己写一个apache服务器-十八-实现资源转发-javaServer16/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloud-5-统一配置中心" data-title="" data-url="https://github.com/startshineye/2019/05/21/SpringCloud-5-统一配置中心/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
