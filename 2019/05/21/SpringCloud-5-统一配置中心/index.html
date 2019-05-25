@@ -42,7 +42,12 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png">
-<meta property="og:updated_time" content="2019-05-21T16:47:27.679Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/65.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/66.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/67.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/68.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/69.png">
+<meta property="og:updated_time" content="2019-05-25T08:13:41.233Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
 <meta name="twitter:description" content="title: SpringCloud-5-统一配置中心date: 2019-05-21 22:42:12tags:
@@ -219,6 +224,19 @@
 <p>输入一下信息回车:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/52.png" alt=""><br>配置信息的username和password没有配置因为config-repo是公开仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/53.png" alt=""></p>
 <p>然后重启项目完之后,校验我们的配置文件是否被config-server从github仓库中拉取下来了。然后我们在浏览器输入：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/54.png" alt=""><br>为什么需要多写一个a呢?:<a href="http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。" target="_blank" rel="external">http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。</a><br>我们查看config-server启动时候的日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/55.png" alt=""><br>上面是支持properties,yml,json格式见转换的，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/56.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/57.png" alt=""><br>具体的访问配置文件格式说明:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/58.png" alt="">  </p>
 <p>查看config-server把远程的文件:order.yml拉取到了本地的哪个文件:如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png" alt=""><br>当然我们自己也可以自定义这个配置文件路径:浏览器访问:<a href="http://localhost:8083/order-a.yml然后再配置的文件下" target="_blank" rel="external">http://localhost:8083/order-a.yml然后再配置的文件下</a>:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png" alt="">  </p>
+<h3 id="2-统一配置中心client端"><a href="#2-统一配置中心client端" class="headerlink" title="2.统一配置中心client端"></a>2.统一配置中心client端</h3><p>我们以order服务为例集成config-client,按理来说我们把order的全部配置已经放到git上了,不应该放在order的appliaction.yml文件中了,那我们要如何使用了?老套路来了。<br>1.引入依赖  2.启动类上不需要加注解  3.添加配置 </p>
+<h4 id="2-1-引入依赖"><a href="#2-1-引入依赖" class="headerlink" title="2.1 引入依赖"></a>2.1 引入依赖</h4><pre><code>&lt;dependency&gt;
+&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;
+&lt;artifactId&gt;spring-cloud-config-client&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h4 id="2-2-启动类上不需要加注解"><a href="#2-2-启动类上不需要加注解" class="headerlink" title="2.2 启动类上不需要加注解"></a>2.2 启动类上不需要加注解</h4><p>不加注解  </p>
+<h4 id="2-3-添加配置"><a href="#2-3-添加配置" class="headerlink" title="2.3 添加配置"></a>2.3 添加配置</h4><p>我们需要找到github上的通过config-server拉取到本地的一个配置，那么就需要服务名(配置文件中应用名)加开启环境(dev)找到此配置。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/65.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/66.png" alt="">  </p>
+<p>启动应用:报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/67.png" alt="">  </p>
+<p>思路:我们的期望启动流程是:1.通过配置文件的service-id:CONFIG找到，config-server,然后config-server把这些配置拉取到本地 2.order服务拿到配置之后才能进行数据库的初始化</p>
+<p>现在我们把所有信息都写在applaction.yml文件里面,SpringBoot项目不知道哪个在前,哪个在后面,他直接找数据库相关的,那么就启动失败了。  </p>
+<p>我们希望config-client的配置先加载,先启动。SpringBoot提供了bootstrap.yml(启动引导的文件)，我们把application..yml改成bootstrap.yml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/68.png" alt="">  </p>
+<p>测试是否加载了order-dev.yml里面的配置信息:<br>我们看能不能拿去到env: dev信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/69.png" alt=""></p>
 
       
     </div>
