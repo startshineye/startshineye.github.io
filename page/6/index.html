@@ -152,6 +152,59 @@
       <div class="body-wrap">
         
   
+    <article id="post-shiro-6-授权流程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/23/shiro-6-授权流程/">shiro(6)-授权流程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>授权需要继承 AuthorizingRealm 类, 并实现其 doGetAuthorizationInfo 方法</li>
+<li>AuthorizingRealm 类继承自 AuthenticatingRealm, 但没有实现 AuthenticatingRealm 中的<br>doGetAuthenticationInfo, 所以认证和授权只需要继承 AuthorizingRealm 就可以了. 同时实现他的两个抽象方法.</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/07/23/shiro-6-授权流程/" class="archive-article-date">
+  	<time datetime="2018-07-23T15:50:52.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-07-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shiro/">shiro</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-shiro-5-授权" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1345,101 +1398,6 @@ rabbitmqctl list_permissions
       
       <a href="/2018/05/24/zyzx-52-rabbitmq安装/" class="archive-article-date">
   	<time datetime="2018-05-23T16:42:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-51-springBoot实现邮件发送" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/23/zyzx-51-springBoot实现邮件发送/">zyzx(51)-springBoot实现邮件发送</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>SpringBoot结合，mailsend发送邮件</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-依赖"><a href="#1-依赖" class="headerlink" title="1.依赖"></a>1.依赖</h5><pre><code>&lt;!--加入邮件依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-mail&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h6 id="2-加入邮件配置"><a href="#2-加入邮件配置" class="headerlink" title="2.加入邮件配置"></a>2.加入邮件配置</h6><pre><code>spring.mail.host=smtp.qq.com
-spring.mail.username=123456
-spring.mail.password=1qaz2we34
-spring.mail.properties.mail.smtp.auth=true
-spring.mail.properties.mail.smtp.starttls.enable=true
-spring.mail.properties.mail.smtp.starttls.required=true
-</code></pre><h6 id="3-依赖注入到测试类"><a href="#3-依赖注入到测试类" class="headerlink" title="3.依赖注入到测试类"></a>3.依赖注入到测试类</h6><pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class ApplicationTests {
-    @Autowired
-    private JavaMailSender   javaMailSender;
-
-    @Test
-    public void contextLoads() {
-
-
-        //1.发送一个简单文件
-        SimpleMailMessage simpleMailMessage = new SimpleMailMessage();
-        simpleMailMessage.setFrom(&quot;928667654@qq.com&quot;);
-        simpleMailMessage.setTo(&quot;79021218@qq.com&quot;);
-        simpleMailMessage.setSubject(&quot;主题：测试邮件发送，简单发送&quot;);
-        simpleMailMessage.setText(&quot;邮件简单发送测试&quot;);
-        javaMailSender.send(simpleMailMessage);
-
-        //发送一个带有附件的邮件
-        MimeMessage message=javaMailSender.createMimeMessage();
-
-         MimeMessageHelper helper=new MimeMessageHelper(message,true);
-         helper.setFrom(&quot;928667654@qq.com&quot;);
-         helper.setTo(&quot;79021218@qq.com&quot;);
-         helper.setSubject(&quot;主题：测试邮件发送，带有附件的发送&quot;);
-         //helper.setText(&quot;测试邮件简单发送的内容，带有附件&quot;);
-         helper.setText(&quot;&lt;html&gt;&lt;body&gt;&lt;img src=\&quot;cid:tupian\&quot;&gt;&lt;/body&gt;&lt;/html&gt;&quot;,true);
-
-         FileSystemResource file=new FileSystemResource(new File(&quot;/Users/zhangyong/Documents/test/aePicture1.jpg&quot;));
-         //helper.addAttachment(&quot;图片.jpg&quot;, file);
-         helper.addInline(&quot;tupian&quot;, file);
-         javaMailSender.send(message);
-    }
-}
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/23/zyzx-51-springBoot实现邮件发送/" class="archive-article-date">
-  	<time datetime="2018-05-23T13:01:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-23</time>
 </a>
       
 	<div class="article-tag tagcloud">
