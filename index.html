@@ -183,24 +183,10 @@
 <ol>
 <li>1.添加热rabbitmq依赖<br>在order服务中server子模块添加以下依赖:</li>
 </ol>
-<pre><code>&lt;!--引入RabbitMQ依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><ol>
-<li><p>2.添加配置到github远程仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/94.png" alt="">  </p>
-</li>
-<li><p>3.创建MQ消息接收方<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/95.png" alt="">  </p>
-</li>
-<li><p>4.创建mq发送方进行测试<br>我们在测试test文件目录下创建测试类:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/97.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/96.png" alt=""> </p>
-</li>
-</ol>
-<p>测试出现了上面问题,原因是因为没有myQueue队列<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/98.png" alt=""><br>此时正常启动。  </p>
-<p>这个时候一切正常。  </p>
-<ol>
-<li>5.以上是我们自己在RabbitMQ中创建的队列。我们是否可以自动创建队列,然后再调用队列接口。</li>
-</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&lt;!--引入RabbitMQ依赖--&gt;</div><div class="line">&lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;  </div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">2. 2.添加配置到github远程仓库  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/94.png)  </div><div class="line"></div><div class="line">3. 3.创建MQ消息接收方  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/95.png)  </div><div class="line"></div><div class="line">4. 4.创建mq发送方进行测试</div><div class="line">我们在测试test文件目录下创建测试类: </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/97.png)   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/96.png) </div><div class="line"></div><div class="line">测试出现了上面问题,原因是因为没有myQueue队列  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/98.png) </div><div class="line">此时正常启动。  </div><div class="line"></div><div class="line">这个时候一切正常。  </div><div class="line"></div><div class="line">5. 5.以上是我们自己在RabbitMQ中创建的队列。我们是否可以自动创建队列,然后再调用队列接口。</div></pre></td></tr></table></figure>
+<p> @RabbitListener(queuesToDeclare = @Queue(“myQueue1”)) //自动创建队列myQueue1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.自动创建并且和队列绑定</div></pre></td></tr></table></figure></p>
+<p>  @RabbitListener(bindings =@QueueBinding(value =@Queue(“myQueue”),exchange =@Exchange(“myExchange”)))<br>```</p>
+<h4 id="2-2-什么情况下需要用到exchange"><a href="#2-2-什么情况下需要用到exchange" class="headerlink" title="2.2 什么情况下需要用到exchange"></a>2.2 什么情况下需要用到exchange</h4><p><a href="1.png"></a><br>我们现在是一个小小点餐系统,但是如果后面,我们什么都卖,又卖水果,又卖数码,同时对这两种商品下单,商品变多了,人也多了，订单服务是单独的人来维护,数码供应商、水果供应商都是由单独的人来维护。订单服务要根据不同的商品类型发出不同的MQ消息。相对应的、数码供应商只关注数码订单、水果及其他订单不关注。此时就牵涉到消息的分组。 演示如下:<br>1.我们接收方模拟两个接收服务(a.数码服务 b.水果服务)<br>exchange因为都是订单,我们我们叫做myOrder<br>想要分组归类,我们用key<br><a href="2.png"></a><br>2.我们发送方 (类似订单服务)如下:<br><a href="3.png"></a>  </p>
 
       
     </div>
@@ -328,6 +314,7 @@
       
         <p>有时候,我们通过配置本地maven后发现对应的包下载不下来,可参考如下:<a href="https://www.jianshu.com/p/7861c6f2b517" target="_blank" rel="external">https://www.jianshu.com/p/7861c6f2b517</a>  </p>
 <p>java对应的日志操作：<a href="https://blog.csdn.net/u010598111/article/details/80556437" target="_blank" rel="external">https://blog.csdn.net/u010598111/article/details/80556437</a>  </p>
+<p><a href="https://www.cnblogs.com/bigdataZJ/p/spring-boot-log4j2.html" target="_blank" rel="external">https://www.cnblogs.com/bigdataZJ/p/spring-boot-log4j2.html</a></p>
 
       
     </div>
