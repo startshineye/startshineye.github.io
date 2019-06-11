@@ -211,7 +211,27 @@ public void process(){
 <p>上面我们可以看到消息是:OrderDTO对象,如果我们需要在MQ中获取的消息是json格式:则在stream的配置中添加：content-type: application/json<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/16.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/15.png" target="_blank" rel="external"></a>    </p>
 <p>有时候我们的消费者：StreamReceiver消费完消息之后,我们需要给发送者一个通知,传统的做法是在业务逻辑里面后面做处理。<br>现在我们加上注解即可:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/17.png" target="_blank" rel="external"></a>  </p>
 <p>总结:使用Stream可以降低对消息中间件的复杂度,让开发者更多的关注业务开发。  </p>
-
+<h3 id="4-商品和订单服务中使用MQ"><a href="#4-商品和订单服务中使用MQ" class="headerlink" title="4.商品和订单服务中使用MQ"></a>4.商品和订单服务中使用MQ</h3><h4 id="4-1-引言"><a href="#4-1-引言" class="headerlink" title="4.1 引言"></a>4.1 引言</h4><p>我们结合点餐业务来使用mq<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/18.png" target="_blank" rel="external"></a>  </p>
+<ol>
+<li>1.之前我们按照上面图提示到:一旦有库存的变化(商品)、都会发布一个消息、订单拿到这个消息之后,会把库存的消息记录到自己的服务里面(这里我们把他记录到redis里面)</li>
+<li>2.导致库存的变化有很多种:a.第一次商品上线的时候,会填写库存,这个时候库存就变化了。b.还有就是货物快卖完的时候需要补货。相当于加库存。我们以扣库存为例,使用消息队列进行通信。</li>
+</ol>
+<h4 id="4-2-product服务接入到配置中心"><a href="#4-2-product服务接入到配置中心" class="headerlink" title="4.2 product服务接入到配置中心"></a>4.2 product服务接入到配置中心</h4><ol>
+<li>1.添加配置中心的依赖<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/19.png" target="_blank" rel="external"></a>  </li>
+<li><p>2.修改appliaction.yml文件为:bootstrap.yml文件,并修改其中的配置<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/21.png" target="_blank" rel="external"></a> </p>
+</li>
+<li><p>3.在github上建立对应的product-dev.yml文件,并将共有的信息拷贝到里面去<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/20.png" target="_blank" rel="external"></a> </p>
+</li>
+<li>4.在config服务中看是否可以访问到此配置文件。  </li>
+<li>5.启动时候正常启动:说明我们已经把product服务接入到配置中心了。  </li>
+</ol>
+<h4 id="4-3-product服务在扣库存时候发送队列消息"><a href="#4-3-product服务在扣库存时候发送队列消息" class="headerlink" title="4.3 product服务在扣库存时候发送队列消息"></a>4.3 product服务在扣库存时候发送队列消息</h4><ol>
+<li><p>1.添加springBoot里面的amqp依赖<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/22.png" target="_blank" rel="external"></a> </p>
+</li>
+<li><p>2.在统一配置中心中添加mq的连接信息<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/23.png" target="_blank" rel="external"></a>  </p>
+</li>
+</ol>
+<h4 id="4-4-product服务在扣库存地方操作消息队列"><a href="#4-4-product服务在扣库存地方操作消息队列" class="headerlink" title="4.4 product服务在扣库存地方操作消息队列"></a>4.4 product服务在扣库存地方操作消息队列</h4>
       
     </div>
     <div class="article-info article-info-index">
