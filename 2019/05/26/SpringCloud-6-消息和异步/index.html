@@ -28,7 +28,7 @@
 2.异步的常见形态
 1.通知
 2.请求/异步响应:客户端发送请求">
-<meta property="og:updated_time" content="2019-06-11T16:06:58.470Z">
+<meta property="og:updated_time" content="2019-06-12T16:56:11.739Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
 <meta name="twitter:description" content="title: SpringCloud-6-消息和异步date: 2019-05-26 18:44:01tags:
@@ -254,7 +254,12 @@ public void process(){
 <li><p>2.在统一配置中心中添加mq的连接信息<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/23.png" target="_blank" rel="external"></a>  </p>
 </li>
 </ol>
-<h4 id="4-4-product服务在扣库存地方操作消息队列"><a href="#4-4-product服务在扣库存地方操作消息队列" class="headerlink" title="4.4 product服务在扣库存地方操作消息队列"></a>4.4 product服务在扣库存地方操作消息队列</h4>
+<h4 id="4-4-product服务在扣库存地方操作消息队列"><a href="#4-4-product服务在扣库存地方操作消息队列" class="headerlink" title="4.4 product服务在扣库存地方操作消息队列"></a>4.4 product服务在扣库存地方操作消息队列</h4><p>我们在扣库存的service中添加扣库存(decreaseStock)后消息通知:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/24.png" target="_blank" rel="external"></a>  </p>
+<p>然后我们使用postman测试:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/25.png" target="_blank" rel="external"></a><br>数据库里面的库存从33变成32,数据库扣除成功了<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/26.png" target="_blank" rel="external"></a><br>但是我们登录mq的管理后端却发现没有对应的amqpTemplate的productInfo队列，<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/27.png" target="_blank" rel="external"></a><br>为什么没有这个队列呢?原因是因为我们压根就没有创建队列，只有在接收方添加注解:@RabbitListener注解才会自动创建，我们 上面只有发送方,所以我们先手动创建下:然后点几次发送,后面发现我们在消息队列中有了相应的消息:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/28.png" target="_blank" rel="external"></a></p>
+<p>以上就完成了消息的发送,现在消息已经从商品服务发送到消息队列里面了,接下来我们要在订单服务接收消息。<br>在Order服务的message包下面添加接收消息:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/29.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/30.png" target="_blank" rel="external"></a>  </p>
+<p>我们先删除之前的productInfo队列,然后重启服务会发现会自动创建队列<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/31.png" target="_blank" rel="external"></a> </p>
+<h4 id="4-4-Order服务获取到扣库存信息存储到redis"><a href="#4-4-Order服务获取到扣库存信息存储到redis" class="headerlink" title="4.4 Order服务获取到扣库存信息存储到redis"></a>4.4 Order服务获取到扣库存信息存储到redis</h4><p>我们order服务获取到了product服务发送的信息,现在需要把这些信息存储到redis中  </p>
+
       
     </div>
     <div class="article-info article-info-index">
