@@ -152,6 +152,71 @@
       <div class="body-wrap">
         
   
+    <article id="post-mysql优化-1-准备" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/01/23/mysql优化-1-准备/">mysql优化-1-准备</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们以电商项目为例来说明数据库优化方案  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基础"><a href="#1-基础" class="headerlink" title="1.基础"></a>1.基础</h5><p>1.mysql实例<br>推荐使用MySQL5.7版本  </p>
+<p>2.MySQL图形客户端程序<br>推荐使用SQLyog  </p>
+<p>3.操作基础<br>linux命令和Shell脚本的基础知识 </p>
+<h5 id="2-电商项目简介"><a href="#2-电商项目简介" class="headerlink" title="2.电商项目简介"></a>2.电商项目简介</h5><p>电商项目流程如下:用户登录后选购商品,然后把商品加入购物车,加入购物车时候查看商品库存,有商品的话提交订单,支付方式是货到付款则发货,不是的话,订单付款再发货。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/52.png" alt="">  </p>
+<h5 id="3-电商项目模块简介"><a href="#3-电商项目模块简介" class="headerlink" title="3.电商项目模块简介"></a>3.电商项目模块简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/53.png" alt="">  </p>
+<h5 id="4-数据库设计规范"><a href="#4-数据库设计规范" class="headerlink" title="4.数据库设计规范"></a>4.数据库设计规范</h5><h6 id="4-1-现实中数据库设计"><a href="#4-1-现实中数据库设计" class="headerlink" title="4.1 现实中数据库设计"></a>4.1 现实中数据库设计</h6><p>1.在通常情况下数据库设计是按照:先进行逻辑设计再进行物理设计。<br>2.现实工作中:逻辑设计和物理设计结合起来进行设计。<br>3.物理设计时候基本就是对:表名 字段名 字段类型进行设计。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/54.png" alt="">    </p>
+<h6 id="4-2-数据库设计规范"><a href="#4-2-数据库设计规范" class="headerlink" title="4.2 数据库设计规范"></a>4.2 数据库设计规范</h6><p>如果公司中已经有了数据库设计规范,我们最好是按照此数据库设计规范进行设计。我们一般按照以下六个规范来进行数据库设计。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/55.png" alt="">   </p>
+<h6 id="1-数据库命名规范"><a href="#1-数据库命名规范" class="headerlink" title="1.数据库命名规范"></a>1.数据库命名规范</h6><p>1.所有数据库对象名称必须使用小写字母并用下划线分隔。(由于:mysql在默认情况下是对大小写敏感的,在linux系统下,数据库和表就是linux系统下的一个文件,linux系统本身是对英文字母的大小敏感的,则以下数据库:DbName和dbname是两个不同的数据库名。数据库表:TABLE,Table和table是不同的表)<br>2.所有数据库对象名称禁止使用MySQL保留关键字(由于我们数据库关键字在sql执行时候有特定的含义,如果我们使用关键字将会是sql执行有误,比如使用from字段,则查询时候:select from from table),通过以下网址可以查看到mysql的关键字:<a href="http://dev.mysql.com/doc/refman/5.7/en/keywords.html" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.7/en/keywords.html</a><br>3.数据库对象的命名要见名识义,并且最好不要超过32个字符。<br>4.临时表必须以temp为前缀并以日期为后缀。<br>5.备份库,备份表必须以bak为前缀并以日期为后缀。<br>6.所有存储相同数据的列名和列类型必须一致。(由于:这虽然是一条命名规范,但是对数据库的查询性能是非常重要的,因为这些列通常都作为关联了来使用,如果两个关联列的数据类型不同时,并且有时根据此列进行数据库关联时候,他会进行数据类型的转换导致索引失效,查询效率大幅度降低)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/56.png" alt="">   </p>
+<h6 id="2-数据库基本设计规范"><a href="#2-数据库基本设计规范" class="headerlink" title="2.数据库基本设计规范"></a>2.数据库基本设计规范</h6><p>1.所有表必须使用Innodb存储引擎<br>Mysql5.5使用之前Myisam(默认存储引擎)情况,默认数据库存储引擎必须使用Innodb存储引擎,除非有特殊用途(原因:1.mysql5.6版本之后,Innodb存储引擎成为了mysql的默认引擎,进行了很多优化 2.innodb存储引擎支持事务,行级锁,更好的恢复性,高并发下性能更好。)<br>2.数据库和表的字符集统一使用UTF-8(utf-8兼容性更好,几乎支持常用的所有字符,如果在表列中存储短信符号,那么使用utf-8的扩展字符集才可以,还可以避免字符集转换产生的一些乱码)–注意:Mysql中utf-8字符集汉字为3个自己,ASCII码占用1个字节<br>3.所有表和字段都需要添加注释(便于维护)<br>4.尽量控制单表数据量的大小,建议控制在500万以内(1.数据太大,查询效率有影响 2.修改表结构,备份,回复都会有很大问题 3.500万并不是MySQL数据库的限制 4.Mysql最多可以存储多少万条数据:没有规定 5.可以用历史数据归档,分库分表等手段来控制数据量的大小进而保证单表数据量在500万以内)<br>5.谨慎使用MySQL分区表(1. 误解:因为分区表在物理上表现为多个文件,在逻辑上表现为一个表,利用磁盘的io 提高查询性能,但是io的更好利用是有条件的,最好情况下分区表分区文件存放在不同分区文件上,如果把所有分区文件放到一起,实际上对io优化效果不是那么好,如果硬要选择分区:谨慎选择分区键,跨分区查询效率可能更低 2.建议采用物理分表的方式管理大数据)<br>6.尽量做到冷热数据分离,减少表的宽度/减少字段数(MySQL限制最多存储4096列,每一行数据大小不能超过65535)<br>7.禁止在表中建立预留字段(很多开发人员都容易违反,在表中预留很大的varchar类型的不确定字段,后续使用,实际上:1预留字段的命名很难做到见名识义 2.预留字段无法确认存储的数据类型,所以无法选择合适的类型 3.后期对预留字段类型的修改,也会对表进行锁定,mysql修改一个字段成本大于新增一个字段)<br>8.禁止在数据库中存储数据图片,文件等二进制数据(1.过多影响数据性能,往往这些数据都是很大的数据 2.将文件图片存储到文件服务器,数据库中值存储文件图片信息)<br>9.禁止在线上做数据库的压力测试<br>10.禁止从开发环境,测试环境直连生产环境数据库  </p>
+<h6 id="3-数据库索引设计规范"><a href="#3-数据库索引设计规范" class="headerlink" title="3.数据库索引设计规范"></a>3.数据库索引设计规范</h6><p>索引对数据库的查询性能来说是非常重要的,但是索引也是双刃剑,使用不好反而会降低数据库的性能,不要滥用索引  </p>
+<p>1.限制每张表上的索引数量,建议单张表索引不超过5个(一般来说索引数量和列数量成正比的,列越多索引越多,所以规范中不能使用较多的列数量)。<br>2.</p>
+<h6 id="4-数据库字段设计规范"><a href="#4-数据库字段设计规范" class="headerlink" title="4.数据库字段设计规范"></a>4.数据库字段设计规范</h6><p>字段类型设计</p>
+<h6 id="5-数据库SQL开发规范"><a href="#5-数据库SQL开发规范" class="headerlink" title="5.数据库SQL开发规范"></a>5.数据库SQL开发规范</h6><p>编写sql语句时候,所指定的规范  </p>
+<h6 id="6-数据库操作行为规范"><a href="#6-数据库操作行为规范" class="headerlink" title="6.数据库操作行为规范"></a>6.数据库操作行为规范</h6><p>针对于数据库运维人员,减少数据库故障  </p>
+<h6 id="7-MySql5-6使用validate-password-插件加强密码强度的安装及使用方法"><a href="#7-MySql5-6使用validate-password-插件加强密码强度的安装及使用方法" class="headerlink" title="7.MySql5.6使用validate password 插件加强密码强度的安装及使用方法"></a>7.MySql5.6使用validate password 插件加强密码强度的安装及使用方法</h6><p><a href="https://www.jb51.net/article/87773.htm" target="_blank" rel="external">https://www.jb51.net/article/87773.htm</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/01/23/mysql优化-1-准备/" class="archive-article-date">
+  	<time datetime="2019-01-23T15:58:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-01-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-work-7-ipcc对接科大机器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -2036,152 +2101,6 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
 
 
   
-    <article id="post-netty实践-十六-使用MUI和H5-构建移动端app" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/07/netty实践-十六-使用MUI和H5-构建移动端app/">netty实践-十六-使用MUI和H5+构建移动端app</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在介绍下文之前,我们可以想一下如何开发一个app,可参考:<a href="https://blog.csdn.net/rth362147773/article/details/77124691" target="_blank" rel="external">https://blog.csdn.net/rth362147773/article/details/77124691</a><br><a href="https://blog.csdn.net/rth362147773/article/details/77124691" target="_blank" rel="external">友情链接</a></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>我们前端会采用mui去做  </p>
-<h5 id="1-前端技术"><a href="#1-前端技术" class="headerlink" title="1.前端技术"></a>1.前端技术</h5><h6 id="1-1-MUI"><a href="#1-1-MUI" class="headerlink" title="1.1.MUI"></a>1.1.MUI</h6><ol>
-<li>基于css的库,是一个css框架 同时也集成了js(把大量的js做了整合和封装),所以他是一个ui的库,类似layui  </li>
-<li>最接近原生APP体验的高性能前端框架  </li>
-<li>官网:<a href="http://www.dcloud.io/" target="_blank" rel="external">http://www.dcloud.io/</a></li>
-</ol>
-<h6 id="1-2-H5-PLUS-H5"><a href="#1-2-H5-PLUS-H5" class="headerlink" title="1.2 H5 PLUS(H5+)"></a>1.2 H5 PLUS(H5+)</h6><ol>
-<li>js工具封装集合,通过h5+我们可以通过js的方式去调用我们手机端上的原生组件  </li>
-<li>官方网站:<a href="http://www.html5plus.org/doc/" target="_blank" rel="external">http://www.html5plus.org/doc/</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/40.png" alt=""><br>从上面我们看到,h5+提供了大量的api来调用手机:Camera Downloader Audio等  </li>
-</ol>
-<h6 id="1-3-Hbuilder开发工具"><a href="#1-3-Hbuilder开发工具" class="headerlink" title="1.3 Hbuilder开发工具"></a>1.3 Hbuilder开发工具</h6><p>集成开发工具和打包工具  </p>
-<p>1.进入官网点击进入5+Runtime-增强版的手机浏览器引擎，让HTML5达到原生水平！ H5+和手机端演示 然后我们拉到最下面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/36.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/37.png" alt="">  </p>
-<p>点击5+然后在点击以下的:Hello mui我们就可以进入到下载demo的例子,然后安装到手机即可体验<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/38.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/39.png" alt="">  </p>
-<h5 id="2-前端移动app代码"><a href="#2-前端移动app代码" class="headerlink" title="2.前端移动app代码"></a>2.前端移动app代码</h5><h6 id="2-1-创建App工程"><a href="#2-1-创建App工程" class="headerlink" title="2.1 创建App工程"></a>2.1 创建App工程</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/41.png" alt="">   </p>
-<ol>
-<li>创建标题:mui提供了添加标签的快捷键，在mui文档的代码块菜单栏下可以看到,如添加head的快捷键是mhe<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/42.png" alt="">  </li>
-</ol>
-<p>添加标题后,浏览器展示如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/44.png" alt="">  </p>
-<p>但是我们要做成黑底白字的样式,我们需要自定义样式覆盖  </p>
-<p>header.css</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">   .title&#123;</div><div class="line"> background:black;</div><div class="line"> &#125;</div><div class="line">	</div><div class="line"> .title-color&#123;</div><div class="line">color: white;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>index.html 引入header.css</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;link rel=&quot;stylesheet&quot; href=&quot;css/header.css&quot; /&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>header标签中加入样式  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">   &lt;!--1.添加标题栏:快捷键mhe--&gt;</div><div class="line">&lt;header class=&quot;mui-bar mui-bar-nav title&quot;&gt;</div><div class="line">  &lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">&lt;/header&gt;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-2-手机端测试"><a href="#2-2-手机端测试" class="headerlink" title="2.2 手机端测试"></a>2.2 手机端测试</h6><p>在工具栏中我们可以看到在没有连接手机的情况下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/45.png" alt="">  </p>
-<p>连接手机后点击如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/46.png" alt="">  </p>
-<p>然后点击手机里面的HBuilder手机展示如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/47.png" alt=""> </p>
-<h5 id="3-功能开发"><a href="#3-功能开发" class="headerlink" title="3.功能开发"></a>3.功能开发</h5><h6 id="3-1-设置title"><a href="#3-1-设置title" class="headerlink" title="3.1 设置title"></a>3.1 设置title</h6><ol>
-<li><p>设置最上面背景色和header背景色相同<br>在html5plus文档中navigator:用于管理浏览器运行环境信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/48.png" alt=""> </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">//移动设备就绪后</div><div class="line">mui.plusReady(function()&#123;</div><div class="line">   plus.navigator.setStatusBarStyle(&quot;light&quot;);</div><div class="line">   plus.navigator.setStatusBarBackground(&quot;#000000&quot;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="3-2-设置最下面的选项卡"><a href="#3-2-设置最下面的选项卡" class="headerlink" title="3.2 设置最下面的选项卡"></a>3.2 设置最下面的选项卡</h6><p>1.寻找文档对应的组件<br>在代码块中找到一下选项卡,我们选择mTab底部选项卡   </p>
-<p>组件    触发字符<br>mTab(底部选项卡)    mta b<br>mTabSegmented(div选项卡)    mta bsegmented<br>mTabSegmented(可左右拖动的选项卡)    mta bviewpage  </p>
-<p>2.添加代码  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">    &lt;!--2.构建底部选项卡--&gt;</div><div class="line">&lt;nav class=&quot;mui-bar mui-bar-tab&quot;&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item mui-active&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon mui-icon-home&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;首页&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon mui-icon-phone&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;电话&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon mui-icon-email&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;邮件&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon mui-icon-gear&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;设置&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">&lt;/nav&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>3.效果如下:</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/49.png" alt=""> </p>
-<p>4.替换选项卡图标(icon)<br>由于上面选项卡图标不符合咱们的Appchat,所以我们需要替换对应图标<br>UI组件–&gt;icon(图标)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/50.png" alt="">  </p>
-<p>找到对应图标,然后替换上面的代码的css  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   &lt;!--2.构建底部选项卡--&gt;</div><div class="line">&lt;nav class=&quot;mui-bar mui-bar-tab&quot;&gt;</div><div class="line">  &lt;a class=&quot;mui-tab-item mui-active&quot;&gt;</div><div class="line">      &lt;span class=&quot;mui-icon mui-icon-weixin&quot;&gt;&lt;/span&gt;</div><div class="line">      &lt;span class=&quot;mui-tab-label&quot;&gt;魔晶&lt;/span&gt;</div><div class="line">  &lt;/a&gt;</div><div class="line">  &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">      &lt;span class=&quot;mui-icon mui-icon-phone&quot;&gt;&lt;/span&gt;</div><div class="line">      &lt;span class=&quot;mui-tab-label&quot;&gt;通讯录&lt;/span&gt;</div><div class="line">  &lt;/a&gt;</div><div class="line">  &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">      &lt;span class=&quot;mui-icon mui-icon-search&quot;&gt;&lt;/span&gt;</div><div class="line">      &lt;span class=&quot;mui-tab-label&quot;&gt;发现&lt;/span&gt;</div><div class="line">  &lt;/a&gt;</div><div class="line">  &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">      &lt;span class=&quot;mui-icon mui-icon-person&quot;&gt;&lt;/span&gt;</div><div class="line">      &lt;span class=&quot;mui-tab-label&quot;&gt;我&lt;/span&gt;</div><div class="line">  &lt;/a&gt;</div><div class="line">&lt;/nav&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/51.png" alt="">  </p>
-<h6 id="3-3-自定义图标库"><a href="#3-3-自定义图标库" class="headerlink" title="3.3 自定义图标库"></a>3.3 自定义图标库</h6><p>有时候,我们不想使用mui自带的icon,而是想使用阿里巴巴的iconfont字体库  </p>
-<ol>
-<li>进入<a href="http://www.iconfont.cn" target="_blank" rel="external">http://www.iconfont.cn</a>  </li>
-<li>选择图标–&gt;添加入库  </li>
-<li>添加到项目<br>一般来说,我们的图标后期可能还会加入很多,所以我们新加一个项目<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/52.png" alt="">  </li>
-<li><p>下载至本地<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/53.png" alt="">  </p>
-</li>
-<li><p>点击demo查看使用方式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/54.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/55.png" alt="">  </p>
-</li>
-<li><p>引入css  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;link rel=&quot;stylesheet&quot; href=&quot;fonticon/iconfont.css&quot; /&gt;</div></pre></td></tr></table></figure>
-</li>
-<li><p>修改index.html  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   &lt;!--2.构建底部选项卡--&gt;</div><div class="line">&lt;nav class=&quot;mui-bar mui-bar-tab&quot;&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item mui-active&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-shandian&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;魔晶&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-tongxunlu&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;通讯录&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-iconset0394&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;发现&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-person&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;我&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">&lt;/nav&gt;</div></pre></td></tr></table></figure>
-</li>
-<li><p>设置点击时候和背景色颜色一致<br>修改mui-active样式,在header.css下修改样式  </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">  .mui-bar-tab .mui-tab-item.mui-active&#123;</div><div class="line">color: #000000;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/57.png" alt="">  </p>
-</li>
-</ol>
-<h6 id="3-4-展示子页面"><a href="#3-4-展示子页面" class="headerlink" title="3.4 展示子页面"></a>3.4 展示子页面</h6><p>现在我们的选项卡已经有了,切换不同选项时候,颜色也有所更改,我们点击不同的选项卡时候,应该显示不同的webview </p>
-<ol>
-<li>1.创建聊天列表webview[chatlist.html,contact.html,discover.html,me.html]<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/58.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/59.png" alt="">  </li>
-</ol>
-<ol>
-<li>2.点击某一个页面时候此页面展示,其他页面隐藏  </li>
-</ol>
-<p>实现这些功能,我们需要编写相应的js代码:将子页面加载进去,然后做相应控制，对webView的操作查看文档WebView对象  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/60.png" alt=""> </p>
-<p>在index.html中写入:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line">     &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	//1.定义标识4个页面的json数组,json包含:pageId和pageUrl:一般pageId和pageUrl是等同的</div><div class="line">	var subPageArray=[</div><div class="line">	   &#123;</div><div class="line">	 	pageId:&quot;chatlist.html&quot;,</div><div class="line">	 	pageUrl:&quot;chatlist.html&quot;</div><div class="line">	   &#125;,</div><div class="line">	   &#123;</div><div class="line">	 	pageId:&quot;contact.html&quot;,</div><div class="line">	 	pageUrl:&quot;contact.html&quot;</div><div class="line">	   &#125;,</div><div class="line">	   &#123;</div><div class="line">	 	pageId:&quot;discover.html&quot;,</div><div class="line">	 	pageUrl:&quot;discover.html&quot;</div><div class="line">	   &#125;,</div><div class="line">	   &#123;</div><div class="line">	 	pageId:&quot;me.html&quot;,</div><div class="line">	 	pageUrl:&quot;me.html&quot;</div><div class="line">	   &#125;</div><div class="line">	];</div><div class="line">	</div><div class="line">	//2.有了这些数组之后,我们需要循环创建页面,然后添加到当前页面中</div><div class="line">	//页面添加也在mui进行的,但是mui对设备进行操作,就需要用plus</div><div class="line">	//当mui加载完plus之后我们进行添加操作  </div><div class="line">	mui.plusReady(function()&#123;</div><div class="line">		//循环创建每一个webView对象并且创建完毕之后隐藏  </div><div class="line">		</div><div class="line">		//1.获取当前webview对象</div><div class="line">		var indexWebView = plus.webview.currentWebview();</div><div class="line">		</div><div class="line">		//2.向当前的主页webview追加</div><div class="line">		for(var i=0;i&lt;subPageArray.length;i++)&#123;</div><div class="line">			</div><div class="line">			var subPage = plus.webview.create(subPageArray[i].pageUrl,subPageArray[i].pageId);</div><div class="line">			</div><div class="line">			//创建完之后先隐藏</div><div class="line">			subPage.hide();</div><div class="line">			</div><div class="line">			//追加每一个子页到当前页</div><div class="line">			indexWebView.append(subPage);</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">		//默认展示第一页</div><div class="line">		plus.webview.show(subPageArray[0].pageId);</div><div class="line">		</div><div class="line">	&#125;)</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>然后打开浏览器显示为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/61.png" alt=""><br>并没有像我们展示出默认的页面,原因是:plus是手机端的设置对象,而不是浏览器可以解析的DOM对象,所以我们需要用真机测试,连接iphone,点击工具栏中的:HBuilder的基座运行, 打开手机端的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/62.png" alt="">   </p>
-<p>此时我们的其他页面被遮挡了,这说明聊天记录页面没有做好样式,因此我们需要把聊天记录的离顶部的高度和离底部的高度设置一下  </p>
-<p>定义子页面样式:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">    //定义子页面样式</div><div class="line">var subPageStyle = &#123;</div><div class="line">	top:&quot;44px&quot;,</div><div class="line">	bottom:&quot;50px&quot;</div><div class="line">&#125;;</div></pre></td></tr></table></figure>
-</code></pre><p>在创建webview时候,传递样式值  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var subPage = plus.webview.create(subPageArray[i].pageUrl,subPageArray[i].pageId,subPageStyle);</div></pre></td></tr></table></figure>
-</code></pre><p>真机测试效果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/63.png" alt="">   </p>
-<h6 id="3-5-页面切换显示"><a href="#3-5-页面切换显示" class="headerlink" title="3.5 页面切换显示"></a>3.5 页面切换显示</h6><ol>
-<li>在上面我们知道,我们在创建子页面后,不能够点击底部选项卡进行切换</li>
-<li>点击事件:不显示的hide,显示的show</li>
-<li>此时我们用到了mui批量绑定,查看mui文档事件绑定    </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/64.png" alt=""><br>在手机中我们的点击事件/触摸事件不建议用click 为了和web区分,我们用tap事件</p>
-<ol>
-<li><p>给每一个选项卡绑定tabindex属性</p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">    &lt;!--2.构建底部选项卡--&gt;</div><div class="line">&lt;nav class=&quot;mui-bar mui-bar-tab&quot;&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item mui-active tabindex=&quot;0&quot;&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-shandian&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;魔晶&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot; tabindex=&quot;1&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-tongxunlu&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;通讯录&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot; tabindex=&quot;2&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-iconset0394&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;发现&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">    &lt;a class=&quot;mui-tab-item&quot; tabindex=&quot;3&quot;&gt;</div><div class="line">        &lt;span class=&quot;mui-icon iconfont icon-person&quot;&gt;&lt;/span&gt;</div><div class="line">        &lt;span class=&quot;mui-tab-label&quot;&gt;我&lt;/span&gt;</div><div class="line">    &lt;/a&gt;</div><div class="line">&lt;/nav&gt;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>js代码添加操作:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">  //批量绑定tap事件,展示不同的页面  </div><div class="line">mui(&quot;.mui-bar-tab&quot;).on(&quot;tap&quot;,&quot;a&quot;,function()&#123;</div><div class="line">	//获取当前点击的tabindex</div><div class="line">	var tabindex = this.getAttribute(&quot;tabindex&quot;);</div><div class="line">	</div><div class="line">	//显示点击的tab选项所随影的页面</div><div class="line">	plus.webview.show(subPageArray[tabindex].pageId,&quot;fade-in&quot;,200);</div><div class="line">	</div><div class="line">	//隐藏其他子页面</div><div class="line">	for(var i=0;i&lt;subPageArray.length;i++)&#123;</div><div class="line">		if(i != tabindex)&#123;</div><div class="line">			plus.webview.hide(subPageArray[i].pageId,&quot;fade-out&quot;,200);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>真机测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/65.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/66.png" alt="">  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/12/07/netty实践-十六-使用MUI和H5-构建移动端app/" class="archive-article-date">
-  	<time datetime="2018-12-07T03:55:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -2247,7 +2166,7 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.67px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     

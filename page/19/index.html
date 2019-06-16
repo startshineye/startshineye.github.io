@@ -152,6 +152,301 @@
       <div class="body-wrap">
         
   
+    <article id="post-jeecg-4-tab也关闭时候给出提示" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/25/jeecg-4-tab也关闭时候给出提示/">jeecg(4)-tab也关闭时候给出提示</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>运用jeecg框架时候,有以下需求<br>需求:点击特定编辑区的关闭’x’时候给出提示</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>jeecg的编辑区<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/42.png" alt=""><br>采用bootstrap-tab.js  </p>
+<pre><code>var addTabs = function (options) {
+//var rand = Math.random().toString();
+//var id = rand.substring(rand.indexOf(&apos;.&apos;) + 1);
+//var url = window.location.protocol + &apos;//&apos; + window.location.host;
+//options.url = url + options.url;
+
+id = &quot;tab_&quot; + options.id;
+$(&quot;.active&quot;).removeClass(&quot;active&quot;);
+//如果TAB不存在，创建一个新的TAB
+if (!$(&quot;#&quot; + id)[0]) {
+    //固定TAB中IFRAME高度
+    //mainHeight = $(document.body).height();
+    mainHeight = 683;//Ace 右侧高度默认
+    //创建新TAB的title
+    title = &apos;&lt;li role=&quot;presentation&quot; id=&quot;tab_&apos; + id + &apos;&quot;&gt;&lt;a href=&quot;#&apos; + id + &apos;&quot; aria-controls=&quot;&apos; + id + &apos;&quot; role=&quot;tab&quot; data-toggle=&quot;tab&quot;&gt;&apos; + options.title;
+    //是否允许关闭
+    if (options.close) {
+        title += &apos; &lt;i class=&quot;icon-remove&quot; tabclose=&quot;&apos; + id + &apos;&quot;&gt;&lt;/i&gt;&apos;;
+    }
+    title += &apos;&lt;/a&gt;&lt;/li&gt;&apos;;
+    //是否指定TAB内容
+    if (options.content) {
+        content = &apos;&lt;div role=&quot;tabpanel&quot; class=&quot;tab-pane&quot; id=&quot;&apos; + id + &apos;&quot;&gt;&apos; + options.content + &apos;&lt;/div&gt;&apos;;
+    } else {//没有内容，使用IFRAME打开链接
+        content = &apos;&lt;div role=&quot;tabpanel&quot; class=&quot;tab-pane&quot; id=&quot;&apos; + id + &apos;&quot;&gt;&lt;iframe src=&quot;&apos; + options.url + &apos;&quot; width=&quot;100%&quot; height=&quot;&apos; + mainHeight +
+                &apos;&quot; frameborder=&quot;no&quot; border=&quot;0&quot; marginwidth=&quot;0&quot; marginheight=&quot;0&quot; scrolling=&quot;yes&quot; allowtransparency=&quot;yes&quot;&gt;&lt;/iframe&gt;&lt;/div&gt;&apos;;
+    }
+    //加入TABS
+    $(&quot;.nav-tabs&quot;).append(title);
+    $(&quot;.tab-content&quot;).append(content);
+}
+//激活TAB
+$(&quot;#tab_&quot; + id).addClass(&apos;active&apos;);
+$(&quot;#&quot; + id).addClass(&quot;active&quot;);
+
+var last = $(&quot;#tabs&gt;ul&gt;li:last&quot;);
+/*$(&quot;.contextMenuPlugin&quot;).mouseout(function(){
+ $(&quot;.contextMenuPlugin&quot;).remove();
+ })
+ $(&quot;.contextMenuPlugin&quot;).mouseup(function(){
+ alert(&quot;aaa&quot;);
+ })*/
+last.contextPopup({
+    title: &apos;菜单&apos;,
+    items: [
+        {
+            label:&apos;刷新缓存&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            //last就是当前选中的元素
+            var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+            //$(&quot;#tabs&quot;).find(&quot;li[aria-controls=&apos;&quot;+tab+&quot;&apos;]&quot;).remove();
+            var div = $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;);
+            div.find(&quot;iframe&quot;).attr(&quot;src&quot;,options.url);
+            //tabs.tabs(&quot;refresh&quot;);
+        }
+        },
+        {
+            label:&apos;关闭&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            //last就是当前选中的元素
+            var closeText = last.children(&quot;a&quot;).text().trim();
+            var nowText = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;).children(&quot;a&quot;).text().trim();
+            if(closeText==nowText){
+                //关闭的是当前页的时候，显示前一页，如果没有前一页了，就提示
+                var prevCount = last.prevAll().size();
+                if(prevCount==0){
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    last.remove();
+                    $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).remove();
+                }else{
+                    //显示前一个tab
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    var prev = last.prevAll().first();
+                    last.remove();
+                    $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).remove();
+                    prev.addClass(&quot;active&quot;);
+                    var id = prev.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+id+&quot;&apos;]&quot;).addClass(&quot;active&quot;);
+                }
+            }else{
+                //关闭的不是当前页，关闭就好了╮(╯_╰)╭
+                var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                last.remove();
+                $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).remove();
+            }
+        }
+        },
+        {
+            label:&apos;全部关闭&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            $(&quot;#tabs&gt;ul&gt;li&quot;).remove();
+            $(&quot;#tabs&gt;div&gt;div&quot;).remove();
+            //tabs.tabs(&quot;refresh&quot;);
+        }
+        },
+        {
+            label:&apos;除此之外全部关闭&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            var closeText = last.children(&quot;a&quot;).text().trim();
+            var nowText = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;).children(&quot;a&quot;).text().trim();
+            //此是当前页则关闭，如果不是当前页面，要激活选择页面
+            if(closeText==nowText){
+                //此是当前页面
+                var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                $(&quot;#tabs&gt;ul&gt;li&quot;).not(last).remove();
+                $(&quot;#tabs&gt;div&gt;div&quot;).not($(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;)).remove();
+            }else{
+                var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                $(&quot;#tabs&gt;ul&gt;li&quot;).not(last).remove();
+                $(&quot;#tabs&gt;div&gt;div&quot;).not($(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;)).remove();
+                last.addClass(&quot;active&quot;);
+                var id = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+id+&quot;&apos;]&quot;).addClass(&quot;active&quot;);
+            }
+            //tabs.tabs(&quot;refresh&quot;);
+        }
+        },
+        null,
+        {
+            label:&apos;当前页右侧全部关闭&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            var closeText = last.children(&quot;a&quot;).text().trim();
+            var nowText = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;).children(&quot;a&quot;).text().trim();
+            if(closeText==nowText){
+                //当前页面
+                var nextAll = last.nextAll();
+                if(nextAll.length!=0){
+                    nextAll.remove();
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    //$(&quot;#tabs&gt;ul&gt;li&quot;).not(shouye).remove();
+                    $(&quot;#tabs&gt;div&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).nextAll().remove();
+                    //tabs.tabs(&quot;refresh&quot;);
+                }else{
+                    layer.msg(&apos;&lt;b&gt;右侧没有啦&lt;/b&gt;&apos;);
+                }
+            }else{
+                //不是当前页，当前页的active去掉
+                var now = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;);
+                var nowid = now.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                now.removeClass(&quot;active&quot;);
+                $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+nowid+&quot;&apos;]&quot;).removeClass(&quot;active&quot;);
+                var nextAll = last.nextAll();
+                if(nextAll.length!=0){
+                    nextAll.remove();
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    //$(&quot;#tabs&gt;ul&gt;li&quot;).not(shouye).remove();
+                    $(&quot;#tabs&gt;div&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).nextAll().remove();
+                    last.addClass(&quot;active&quot;);
+                    var id = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+id+&quot;&apos;]&quot;).addClass(&quot;active&quot;);
+                    //tabs.tabs(&quot;refresh&quot;);
+                }else{
+                    layer.msg(&apos;&lt;b&gt;右侧没有啦&lt;/b&gt;&apos;);
+                }
+            }
+        }
+        },
+        {
+            label:&apos;当前页左侧全部关闭&apos;,icon:&apos;plug-in/diy/icons/shopping-basket.png&apos;,action:function(){
+            var closeText = last.children(&quot;a&quot;).text().trim();
+            var nowText = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;).children(&quot;a&quot;).text().trim();
+            if(closeText==nowText){
+                //当前页面
+                var prevAll = last.prevAll();
+                if(prevAll.length!=0){
+                    prevAll.remove();
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    //$(&quot;#tabs&gt;ul&gt;li&quot;).not(shouye).remove();
+                    $(&quot;#tabs&gt;div&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).prevAll().remove();
+                    //tabs.tabs(&quot;refresh&quot;);
+                }else{
+                    layer.msg(&apos;&lt;b&gt;左侧没有啦&lt;/b&gt;&apos;);
+                }
+            }else{
+                //不是当前页，当前页的active去掉
+                var now = $(&quot;#tabs&quot;).find(&quot;li[class=&apos;active&apos;]&quot;);
+                var nowid = now.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                now.removeClass(&quot;active&quot;);
+                $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+nowid+&quot;&apos;]&quot;).removeClass(&quot;active&quot;);
+                var prevAll = last.prevAll();
+                if(prevAll.length!=0){
+                    prevAll.remove();
+                    var tab = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    //$(&quot;#tabs&gt;ul&gt;li&quot;).not(shouye).remove();
+                    $(&quot;#tabs&gt;div&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).prevAll().remove();
+                    last.addClass(&quot;active&quot;);
+                    var id = last.children(&quot;a&quot;).attr(&quot;aria-controls&quot;).toString();
+                    $(&quot;#tabs&quot;).find(&quot;div[id=&apos;&quot;+id+&quot;&apos;]&quot;).addClass(&quot;active&quot;);
+                    //tabs.tabs(&quot;refresh&quot;);
+                }else{
+                    layer.msg(&apos;&lt;b&gt;左侧没有啦&lt;/b&gt;&apos;);
+                }
+            }
+            /*var prevAll = last.prevAll();
+             if(prevAll.length!=0){
+             prevAll.remove();
+             }else{
+             layer.msg(&apos;&lt;b&gt;左侧没有啦&lt;/b&gt;&apos;);
+             }
+             var tab = last.attr(&quot;aria-controls&quot;).toString();
+             //$(&quot;#tabs&gt;ul&gt;li&quot;).not(shouye).remove();
+             $(&quot;#tabs&gt;div&quot;).find(&quot;div[id=&apos;&quot;+tab+&quot;&apos;]&quot;).prevAll().remove();*/
+            //tabs.tabs(&quot;refresh&quot;);
+        }
+        }
+    ]
+});
+};
+var closeTab = function (id) {
+//如果关闭的是当前激活的TAB，激活他的前一个TAB
+if ($(&quot;li.active&quot;).attr(&apos;id&apos;) == &quot;tab_&quot; + id) {
+    $(&quot;#tab_&quot; + id).prev().addClass(&apos;active&apos;);
+    $(&quot;#&quot; + id).prev().addClass(&apos;active&apos;);
+}
+//关闭TAB
+$(&quot;#tab_&quot; + id).remove();
+$(&quot;#&quot; + id).remove();
+};
+$(function () {
+mainHeight = $(document.body).height();
+$(&apos;.main-left,.main-right&apos;).height(mainHeight);
+$(&quot;[addtabs]&quot;).click(function () {
+    addTabs({ id: $(this).attr(&quot;id&quot;), title: $(this).attr(&apos;title&apos;), close: true });
+});
+
+$(&quot;.nav-tabs&quot;).on(&quot;click&quot;, &quot;[tabclose]&quot;, function (e) {
+    id = $(this).attr(&quot;tabclose&quot;);
+    closeTab(id);
+});
+});
+</code></pre><p>想要实现需求就需要在 $(“[addtabs]”).click()方法时候判断是否是指定的编辑页.</p>
+<pre><code>$(&quot;.nav-tabs&quot;).on(&quot;click&quot;, &quot;[tabclose]&quot;, function (e) {
+    id = $(this).attr(&quot;tabclose&quot;);
+
+    /**************************yxm start****************************/
+    var index = $(this).parent().html().indexOf(&quot;在线流程编辑&quot;);
+    if(index&gt;=0){
+        var result = confirm(&quot;确定关闭吗？关闭前确认ivr流程已经保存&quot;);
+        if(result){
+             closeTab(id);
+        }else{
+            $(this).tab(&apos;show&apos;); //此处使用return还是不能阻止继续执行,所以写了不存在的$(this).tab(&apos;show&apos;); 让其报错停止
+        }
+    }else{
+         closeTab(id);
+    }
+    /*************************yxm end**********************************/
+});
+</code></pre><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/22.gif" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/25/jeecg-4-tab也关闭时候给出提示/" class="archive-article-date">
+  	<time datetime="2017-09-25T08:53:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Jeecg/">Jeecg</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-31-bower简单使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -186,62 +481,6 @@
       
       <a href="/2017/09/24/vue-31-bower简单使用/" class="archive-article-date">
   	<time datetime="2017-09-24T04:11:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-30-npm介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/24/vue-30-npm介绍/">vue(30)-nmp介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题，常见的使用场景有以下几种： </p>
-<ol>
-<li>从NPM服务器下载别人编写的第三方包到本地使用  </li>
-<li>从NPM服务器下载并安装别人编写的命令行程序到本地使用</li>
-<li>将自己编写的包或命令行程序上传到NPM服务器供别人使用</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-测试安装成功与否"><a href="#1-测试安装成功与否" class="headerlink" title="1.测试安装成功与否"></a>1.测试安装成功与否</h5><p>由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。命令如下，出现版本提示表示安装成功:</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/24/vue-30-npm介绍/" class="archive-article-date">
-  	<time datetime="2017-09-24T03:53:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
 </a>
       
 	<div class="article-tag tagcloud">
@@ -309,6 +548,62 @@ cnpm install npm -g
     <div class="article-info article-info-index">
       
       <a href="/2017/09/24/vue-30-nmp介绍/" class="archive-article-date">
+  	<time datetime="2017-09-24T03:53:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-vue-30-npm介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/24/vue-30-npm介绍/">vue(30)-nmp介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>NPM是随同NodeJS一起安装的包管理工具，能解决NodeJS代码部署上的很多问题，常见的使用场景有以下几种： </p>
+<ol>
+<li>从NPM服务器下载别人编写的第三方包到本地使用  </li>
+<li>从NPM服务器下载并安装别人编写的命令行程序到本地使用</li>
+<li>将自己编写的包或命令行程序上传到NPM服务器供别人使用</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-测试安装成功与否"><a href="#1-测试安装成功与否" class="headerlink" title="1.测试安装成功与否"></a>1.测试安装成功与否</h5><p>由于新版的nodejs已经集成了npm，所以之前npm也一并安装好了。同样可以通过输入 “npm -v” 来测试是否成功安装。命令如下，出现版本提示表示安装成功:</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/24/vue-30-npm介绍/" class="archive-article-date">
   	<time datetime="2017-09-24T03:53:02.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-24</time>
 </a>
       
@@ -1505,56 +1800,6 @@ public RedisTemplate&lt;String,String&gt; redisTemplate(RedisConnectionFactory f
 
 
   
-    <article id="post-SpringBoot-30-SpringBootApplication注解" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/16/SpringBoot-30-SpringBootApplication注解/">SpringBoot(30)-SpringBootApplication注解</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>很多Spring Boot开发者总是使用 @Configuration ， @EnableAutoConfiguration 和 @ComponentScan 注解他们的main类。由于这些注解被如此频繁地一块使用（特别是你遵循以上最佳实践时），Spring Boot提供一个方便的 @SpringBootApplication 选择。该 @SpringBootApplication 注解等价于以默认属性使用 @Configuration ， @EnableAutoConfiguration 和 @ComponentScan 。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/16/SpringBoot-30-SpringBootApplication注解/" class="archive-article-date">
-  	<time datetime="2017-09-16T03:35:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/18/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/20/">Next &raquo;</a>
@@ -1620,7 +1865,7 @@ public RedisTemplate&lt;String,String&gt; redisTemplate(RedisConnectionFactory f
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.67px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
