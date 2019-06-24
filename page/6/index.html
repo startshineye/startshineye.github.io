@@ -152,6 +152,56 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-52-SpringBoot项目在idea目录下不正产展示" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/09/23/zyzx-52-SpringBoot项目在idea目录下不正产展示/">zyzx(52)-SpringBoot项目在idea目录下不正产展示</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>可参考:<br><a href="https://jingyan.baidu.com/article/86fae346ec143d3c49121a8e.html" target="_blank" rel="external">https://jingyan.baidu.com/article/86fae346ec143d3c49121a8e.html</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/09/23/zyzx-52-SpringBoot项目在idea目录下不正产展示/" class="archive-article-date">
+  	<time datetime="2018-09-23T04:24:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-09-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-c-1-gcc编译过程" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1261,122 +1311,6 @@ public List&lt;EsBlog&gt; list(@RequestParam(value=&quot;title&quot;,required=fa
 
 
   
-    <article id="post-zyzx-53-springboot使用消息中间件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/24/zyzx-53-springboot使用消息中间件/">zyzx(53)-springboot使用消息中间件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>使用SpringBoot集成rabbitmq实现一个发送和接收  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--加入mq依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-application-properties"><a href="#2-application-properties" class="headerlink" title="2.application.properties"></a>2.application.properties</h5><pre><code>#rabbitmq配置
-spring.application.name=springboot-mq
-spring.rabbitmq.host=192.168.17.129
-spring.rabbitmq.port=5672
-spring.rabbitmq.username=mytest
-spring.rabbitmq.password=mytest
-</code></pre><h5 id="3-rabbitmap配置类"><a href="#3-rabbitmap配置类" class="headerlink" title="3.rabbitmap配置类"></a>3.rabbitmap配置类</h5><pre><code>import org.springframework.amqp.core.Queue;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
-
-@Configuration
-public class RabbitMQConfig {
-
-    @Bean
-    public Queue mqQueue(){
-        return new Queue(&quot;mqboot&quot;);
-    }
-}
-</code></pre><h5 id="4-发送类"><a href="#4-发送类" class="headerlink" title="4.发送类"></a>4.发送类</h5><pre><code>@Component
-public class Sender {
-
-    @Autowired
-    private AmqpTemplate rabbitTemplate;
-
-    public void send(){
-        String content = &quot;send: hello&quot;+new Date();
-        System.out.println(&quot;Sender:&quot;+content)
-        this.rabbitTemplate.convertAndSend(&quot;mqboot&quot;,content);
-    }
-}
-</code></pre><h5 id="5-接收类"><a href="#5-接收类" class="headerlink" title="5.接收类"></a>5.接收类</h5><pre><code>@Component
-@RabbitListener(queues = &quot;mqboot&quot;)
-public class Receiver {
-
-    @RabbitHandler
-    public  void process(String data){
-        System.out.println(&quot;Receiver:&quot;+data);
-    }
-}
-</code></pre><h5 id="6-测试"><a href="#6-测试" class="headerlink" title="6.测试"></a>6.测试</h5><p>启动springBoot  </p>
-<p>如下显示表明:连接成功:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/46.png" alt=""></p>
-<pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class ApplicationTests {
-    @Autowired
-    private TeacherRepository teacherRepository;
-
-    /*@Autowired
-    private JavaMailSender   javaMailSender;*/
-
-    @Autowired
-   private Sender sender;
-
-    @Test
-    public void contextLoads() {
-        //mq测试
-        sender.send();
-    }
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/47.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/48.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/24/zyzx-53-springboot使用消息中间件/" class="archive-article-date">
-  	<time datetime="2018-05-24T15:14:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -1442,7 +1376,7 @@ public class ApplicationTests {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.67px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.67px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
