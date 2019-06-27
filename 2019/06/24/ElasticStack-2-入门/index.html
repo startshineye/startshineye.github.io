@@ -43,7 +43,26 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/92.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/93.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/94.png">
-<meta property="og:updated_time" content="2019-06-25T16:54:39.777Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/95.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/96.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/97.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/98.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/99.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/100.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/101.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/102.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/103.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/104.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/105.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/106.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/107.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/108.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/109.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/110.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/111.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/112.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/113.png">
+<meta property="og:updated_time" content="2019-06-27T16:11:06.849Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-2-入门">
 <meta name="twitter:description" content="1.内容简介: 
@@ -263,7 +282,72 @@
 <li>4.Winlogbeat Window 数据—Window的日志数据。</li>
 <li>5.Heartbeat—健康检查<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/94.png" alt=""><br>如上图我们知道：Beat处于数据的起始端、他们可以将数据直接存储到Elasticsearch中、也可以传输到logstash,然后logstash通过分析或者转换把数据传送到Elasticsearch中、最后通过Kibana对数据进行展示。</li>
 </ol>
-<h4 id="3-2Filebeat简介"><a href="#3-2Filebeat简介" class="headerlink" title="3.2Filebeat简介"></a>3.2Filebeat简介</h4>
+<h4 id="3-2Filebeat简介"><a href="#3-2Filebeat简介" class="headerlink" title="3.2Filebeat简介"></a>3.2Filebeat简介</h4><p>Filebeat主要是对日志文件进行处理的，如下为处理流程:<br>Filebeat输入日志文件、拿到日志文件后进行简单处理(Filter)、然后输出OutPut</p>
+<p>我们用以下图查看Filebeat的构成:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/95.png" alt="">  </p>
+<ol>
+<li>1.左边是Filebeat,右边是Filebeat的输出对象。我们可以看到输出对象有:Elasticsearch、Logstash、Kafka、Redis</li>
+<li>2.从左边可以看到Filebeat包含两个部分：Prospect(观察者)和Harvester(收割者)<br>Prospect针对/var/log/*.log文件可以探测其文件是否有变化、如果有变化  Harvester就需要收集新的日志。将日志从每一个日志文件中取出来、然后发送到output对象。</li>
+<li>3.一个Filebeat可以有多个Prospect(观察者)和Harvester(收割者)、上面的Prospect(观察者)和Harvester(收割者)针对的日志文件是不同”的。</li>
+<li>4.Prospect(观察者)针对于不同的配置文件(system.log和wifi.log)会启动多个Harvester。也就是一个Harvester针对于一个配置文件。</li>
+</ol>
+<h4 id="3-3-Filebeat配置简介"><a href="#3-3-Filebeat配置简介" class="headerlink" title="3.3 Filebeat配置简介"></a>3.3 Filebeat配置简介</h4><h5 id="3-3-1-Filebeat-Input配置简介"><a href="#3-3-1-Filebeat-Input配置简介" class="headerlink" title="3.3.1 Filebeat Input配置简介"></a>3.3.1 Filebeat Input配置简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/96.png" alt=""> </p>
+<ol>
+<li>2.使用yml语法、跟之前elasticsearch一致。  </li>
+<li>2.Filebeat其中一个组成是Prospect、在其配置文件中有一个Prospect配置。  </li>
+<li>3.之前说了Prospect是不止一个的、可以配置多个。所以是个数组。yml的数组格式使用”-“隔离的。上图是配置了两个Prospect</li>
+<li>4每一个Prospect有自己的输入类型、这里是log、说明是配置文件。paths也是一个数组、用于指定日志的路径的。</li>
+<li>5.目前input_type有两个类型:一个是log、另一个是stdin(标准输入)</li>
+</ol>
+<h5 id="3-3-2-Filebeat-Output配置简介"><a href="#3-3-2-Filebeat-Output配置简介" class="headerlink" title="3.3.2 Filebeat Output配置简介"></a>3.3.2 Filebeat Output配置简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/97.png" alt=""></p>
+<ol>
+<li>1.Filebeat Output支持以下类型对象:Console(标准输出)、Elasticsearch、Logstash、Kafka、Redis、File(指把一个日志文件输出到另一个日志文件中)。</li>
+</ol>
+<h5 id="3-3-3-Filebeat-Filter配置简介"><a href="#3-3-3-Filebeat-Filter配置简介" class="headerlink" title="3.3.3 Filebeat Filter配置简介"></a>3.3.3 Filebeat Filter配置简介</h5><p>对读入的内容进行一定的处理、当然他的处理能力相对较弱。例如:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/98.png" alt=""><br>例子:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/99.png" alt=""></p>
+<h4 id="3-4Filebeat高级使用简介"><a href="#3-4Filebeat高级使用简介" class="headerlink" title="3.4Filebeat高级使用简介"></a>3.4Filebeat高级使用简介</h4><ol>
+<li><p>1.从上面我们知道Filebea缺乏数据转换的能力。针对于这个问题，Elasticsearch增加了一个Node类型、Elasticsearch Ingest Node<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/100.png" alt=""></p>
+</li>
+<li><p>2.Filebeat Module简介:Filebeat本身想把数据快速存放到Elasticsearch中大致要做一些处理，首先要写合适的Filebeat配置文件。然后去配置Ingest Node中的pipeline、然后对存储的数据进行kibana的合理的可视化配置。Filebeat看到了这些数据做起来是比较复杂的。所以官方推出了一些模块、把常用的日志格式做了统一化的处理达到开箱急用的配置。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/101.png" alt=""></p>
+</li>
+</ol>
+<h4 id="3-5-Filebeat演示"><a href="#3-5-Filebeat演示" class="headerlink" title="3.5 Filebeat演示"></a>3.5 Filebeat演示</h4><p>实际演示Filebeat收集nginx log<br>1.我们通过stdin收集日志。<br>2.通过console输出结果。  </p>
+<p>实践  </p>
+<ol>
+<li>1.下载Filebeat(Filebeat是基于go开发、需要下载不同的安装包)  </li>
+<li><p>2.查看我们需要收集的nginx日志<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/102.png" alt="">  </p>
+</li>
+<li><p>3.配置我们的filebeat<br>a.input_type: stdin (我们从标准输入流获取数据)<br>b.output.console: pretty: true  </p>
+</li>
+<li><p>4.接下来用filebeat:收集nginx的两条数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/103.png" alt="">  </p>
+</li>
+<li><p>5.最后获取到的信息是:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/104.png" alt="">  </p>
+</li>
+</ol>
+<h4 id="3-6-Packetbeat简介"><a href="#3-6-Packetbeat简介" class="headerlink" title="3.6 Packetbeat简介"></a>3.6 Packetbeat简介</h4><h5 id="3-6-1-简介"><a href="#3-6-1-简介" class="headerlink" title="3.6.1 简介"></a>3.6.1 简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/105.png" alt=""><br>拥有了Packetbeat类似于就拥有了轻量级的wireshake<br>1.实时抓取网络包<br>2.自动解析应用层协议  </p>
+<h5 id="3-6-2-demo抓取es的网络数据包"><a href="#3-6-2-demo抓取es的网络数据包" class="headerlink" title="3.6.2 demo抓取es的网络数据包"></a>3.6.2 demo抓取es的网络数据包</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/106.png" alt="">  </p>
+<p>1 1.指定网卡:lo0  </p>
+<ol>
+<li>2.protocols:指定协议  </li>
+<li>3.ports:指定端口  </li>
+<li>4.send_request:true 指定request请求的body,默认为false   </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/107.png" alt="">  </p>
+<h4 id="3-7-Packetbeat演示"><a href="#3-7-Packetbeat演示" class="headerlink" title="3.7 Packetbeat演示"></a>3.7 Packetbeat演示</h4><ol>
+<li>1.下载包  </li>
+<li>2.我们抓取es的包、首先我们把es跑起来  </li>
+<li>3.检查配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/108.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/109.png" alt="">  </li>
+<li><p>4.运行paketbeat：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/110.png" alt="">  </p>
+</li>
+<li><p>5.查看paketbeat输出<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/111.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="4、Logstash入门"><a href="#4、Logstash入门" class="headerlink" title="4、Logstash入门"></a>4、Logstash入门</h3><h4 id="4-1-Logstash简介"><a href="#4-1-Logstash简介" class="headerlink" title="4.1 Logstash简介"></a>4.1 Logstash简介</h4><ol>
+<li>1.Logstash定义为一个:Data Shipper、他比Beats的定义少了一个light-weight<br>也就是说Logstash不是轻量级的、会比Beats占用更多的资源。所以会占用一定的资源、当然功能 也会越强大。</li>
+<li><p>2.Logstash其实就是具备ETL的功能、对数据进行以下操作:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/112.png" alt="">  </p>
+</li>
+<li><p>3.处理流程(其实就是3步:input、Filter、Output)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/113.png" alt="">  </p>
+</li>
+</ol>
+
       
     </div>
     <div class="article-info article-info-index">
