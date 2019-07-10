@@ -152,6 +152,789 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-二十-聊天页面制作" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/16/netty实践-二十-聊天页面制作/">netty实践-二十-聊天页面制作</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。</p>
+<p>1.聊天页面讲解与展示<br>2.header动态改为好友昵称，动态滚动到最新消息<br>3 发送按钮的颜色状态改变<br>4 弹出软键盘重新设置聊天窗口高度<br>5 发送消息前置条件网络状态判断<br>6 监听网络连接事件<br>7 发送消息html渲染<br>8 接收消息html渲染<br>9 发送消息与接收消息时的铃声播放<br>10 手机端websocket模型定义和发送消息<br>11 websocket接受消息的渲染_x264<br>12 服务器断开后的重连机制<br>13 chatHandler初步重构<br>14 构建聊天业务模型<br>15 chatHandler - 处理客户端连接<br>16 chatHandler - 保存聊天消息到数据库<br>17 chatHandler - 处理消息发送<br>18 chatHandler - 签收单条或多条消息<br>19 客户端onopen联调，初始化用户和channel关系<br>20 客户端发送消息与接收联调<br>21 接收方获得消息后重构渲染<br>22 客户端签收消息<br>23 websocket新增好友类型联调<br>24 保存聊天记录到本地<br>25 从本地获取聊天记录<br>26 初始化聊天记录和渲染<br>27 聊天快照业务简单讲解<br>28 保存聊天快照到本地<br>29 获取聊天快照<br>30 已读未读消息的设置与快照调用<br>31 展示聊天快照<br>32 未读消息小红点标记<br>33 点击快照开始聊天<br>34 未读消息标记已读<br>35 开发获取未读消息列表接口<br>36 前端获取未读消息列表<br>37 批量签收并且展示未读消息<br>38 聊天快照左滑删除效果<br>39 聊天快照右滑删除聊天记录与快照  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-聊天页面讲解与展示"><a href="#1-聊天页面讲解与展示" class="headerlink" title="1 聊天页面讲解与展示"></a>1 聊天页面讲解与展示</h5><ol>
+<li><p>新增chat.css和chatting.html  </p>
+<h6 id="1-1-聊天页面代码"><a href="#1-1-聊天页面代码" class="headerlink" title="1.1 聊天页面代码"></a>1.1 聊天页面代码</h6>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">     &lt;!DOCTYPE html&gt;</div><div class="line">     &lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;utf-8&quot;&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;link href=&quot;css/mui.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/header.css&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/chat.css&quot; /&gt;</div><div class="line">	&lt;style&gt;</div><div class="line">		html,</div><div class="line">		body &#123;</div><div class="line">			height: 100%;</div><div class="line">			margin: 0px;</div><div class="line">			padding: 0px;</div><div class="line">			overflow: hidden;</div><div class="line">			-webkit-touch-callout: none;</div><div class="line">			-webkit-user-select: none;</div><div class="line">		&#125;</div><div class="line">	&lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body contextmenu=&quot;return false;&quot;&gt;</div><div class="line">	&lt;header class=&quot;mui-bar mui-bar-nav title&quot; style=&quot;position: fixed;&quot;&gt;</div><div class="line">		&lt;a class=&quot;mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color&quot;&gt;&lt;/a&gt;</div><div class="line">		&lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b id=&quot;chatting-nickname&quot;&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">	&lt;/header&gt;</div><div class="line">	</div><div class="line">	&lt;div id=&quot;msg-outter&quot; class=&quot;mui-content&quot;&gt;</div><div class="line">		</div><div class="line">		&lt;!--消息div--&gt;</div><div class="line">		&lt;div id=&apos;msg&apos;&gt;</div><div class="line">			</div><div class="line">			&lt;!--朋友消息--&gt;</div><div class="line">			&lt;div class=&quot;friend_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper right&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-left-white&quot;&gt;你是谁？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">	</div><div class="line">              &lt;!--我发送的消息--&gt;</div><div class="line">			&lt;div class=&quot;me_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper left&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-right-green&quot;&gt;Zero？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	&lt;footer&gt;</div><div class="line">		&lt;!--文本输入框--&gt;</div><div class="line">		&lt;div class=&quot;footer-center&quot;&gt;</div><div class="line">			&lt;textarea id=&apos;msg-text&apos; type=&quot;text&quot; class=&apos;input-text&apos;&gt;&lt;/textarea&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">		&lt;!--发送框--&gt;</div><div class="line">		&lt;label for=&quot;&quot; class=&quot;footer-right&quot;&gt;</div><div class="line">			&lt;button type=&quot;button&quot; class=&quot;mui-btn mui-btn-gray&quot; id=&quot;send&quot;&gt;发送&lt;/button&gt;</div><div class="line">		&lt;/label&gt;</div><div class="line">	&lt;/footer&gt;</div><div class="line">	&lt;script src=&quot;js/mui.min.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;application/javascript&quot; src=&quot;js/app.js&quot;&gt;&lt;/script&gt;</div><div class="line">  &lt;/body&gt;</div><div class="line">    &lt;/html&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="1-2-聊天页面展示效果"><a href="#1-2-聊天页面展示效果" class="headerlink" title="1.2 聊天页面展示效果"></a>1.2 聊天页面展示效果</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/174.png" alt="">  </p>
+<h6 id="1-3-通讯录点击打开聊天页面"><a href="#1-3-通讯录点击打开聊天页面" class="headerlink" title="1.3 通讯录点击打开聊天页面"></a>1.3 通讯录点击打开聊天页面</h6><ol>
+<li>在通讯录–&gt;点击好友列表时候展示对应的聊天页面–&gt;进行聊天  </li>
+<li>我们在通讯录之前页面做一个动态绑定,之前在展示通讯录时候,我们队展示出来的列表并没有做聊天页面打开绑定,现在我们自定义一个class<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/175.png" alt="">  </li>
+<li><p>我们在通讯录列表加载完毕之后绑定一个打击事件  </p>
+</li>
+<li><p>此时点击通讯录时候会进入到聊天页面,在tap里面传递好友基本信息  </p>
+</li>
+</ol>
+<ol>
+<li>聊天页面对于不同的人不同(具有唯一性):      </li>
+</ol>
+<h5 id="2-header动态改为好友昵称，动态滚动到最新消息"><a href="#2-header动态改为好友昵称，动态滚动到最新消息" class="headerlink" title="2 header动态改为好友昵称，动态滚动到最新消息"></a>2 header动态改为好友昵称，动态滚动到最新消息</h5><h6 id="2-1-header动态改为好友昵称"><a href="#2-1-header动态改为好友昵称" class="headerlink" title="2.1 header动态改为好友昵称"></a>2.1 header动态改为好友昵称</h6><ol>
+<li>打开聊天页面时候,最上面展示的应该是朋友的昵称图标,而不是app名称  </li>
+<li><p>我们在contact.html页面时候,通讯录列表里面绑定了:friendUserId  friendNickname  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">      //为好友通讯录批量绑定点击事件  </div><div class="line">mui(&quot;#contactList&quot;).on(&quot;tap&quot;,&quot;.chat-with-friend&quot;,function(e)&#123;</div><div class="line">	var friendUserId = this.getAttribute(&quot;friendUserId&quot;);</div><div class="line">	var friendNickname = this.getAttribute(&quot;friendNickname&quot;);</div><div class="line">	var friendFaceImage = this.getAttribute(&quot;friendFaceImage&quot;);</div><div class="line">	</div><div class="line">	 //好友点击通讯录时候,会打开聊天页面  </div><div class="line">	 mui.openWindow(&#123;</div><div class="line">	 	url:&quot;chatting.html&quot;,</div><div class="line">	 	id:&quot;chatting.html&quot;,</div><div class="line">	 	extras:&#123;</div><div class="line">	 		friendUserId:friendUserId,</div><div class="line">	 		friendNickname:friendNickname,</div><div class="line">	 		friendFaceImage:friendFaceImage</div><div class="line">	 	&#125;</div><div class="line">	 &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</li>
+<li><p>在chatting.html页面上做获取contact.html的数据,并到:chatting.html页面上修改昵称  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    &lt;script&gt;</div><div class="line">	//创建命名空间  </div><div class="line">	(function($,doc)&#123;</div><div class="line">		mui.plusReady(function()&#123;</div><div class="line">			//获取我自己的用户信息</div><div class="line">			var me = app.getGlobalUserInfo();</div><div class="line">			</div><div class="line">			//获取聊天页面webview</div><div class="line">			var chattingWebview = plus.webview.currentWebview();</div><div class="line">			</div><div class="line">			//设置聊天页面的软键盘样式</div><div class="line">			chattingWebview.setStyle(&#123;softinputMode:&quot;adjustResize&quot;&#125;);</div><div class="line">			</div><div class="line">			// 获取上一个页面传入的好友属性值</div><div class="line">			var friendUserId = chattingWebview.friendUserId;</div><div class="line">			var friendNickname = chattingWebview.friendNickname;</div><div class="line">			var friendFaceImage = chattingWebview.friendFaceImage;</div><div class="line">			</div><div class="line">			//标题改为朋友昵称</div><div class="line">			document.getElementById(&quot;chatting-nickname&quot;).innerHTML = friendNickname;</div><div class="line">		&#125;);</div><div class="line">	&#125;(mui,document));</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/183.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/184.png" alt="">  </p>
+</li>
+</ol>
+<h6 id="2-2-动态滚动到最新消息"><a href="#2-2-动态滚动到最新消息" class="headerlink" title="2.2 动态滚动到最新消息"></a>2.2 动态滚动到最新消息</h6><ol>
+<li>现在我们如果页面列表消息比较多的时候,打开contact时候的chatting.html页面时候,显示的消息没有滚动到最后一条<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/185.png" alt="">  </li>
+<li><p>我们现在需要设置id=”msg”的页面消息框的聊天信息在最下面  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">     var areaMsgList = document.getElementById(&quot;msg&quot;);</div><div class="line">			// 设置聊天记录进入页面的时候自动滚动到最后一条</div><div class="line">areaMsgList.scrollTop = areaMsgList.scrollHeight + areaMsgList.offsetHeight;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="3-发送按钮的颜色状态改变"><a href="#3-发送按钮的颜色状态改变" class="headerlink" title="3 发送按钮的颜色状态改变"></a>3 发送按钮的颜色状态改变</h5><ol>
+<li>目前我们在发送消息输入框输入文字时候,其颜色也是没有变化的,我们需要在聊天框输入消息时候,其对应的发送框的按钮颜色是变化成有颜色的。    </li>
+<li>我们可以监控发送框的input输入事件,有输入时候,设置发送按钮的样式。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/186.png" alt="">  </li>
+</ol>
+<h5 id="4-弹出软键盘重新设置聊天窗口高度"><a href="#4-弹出软键盘重新设置聊天窗口高度" class="headerlink" title="4 弹出软键盘重新设置聊天窗口高度"></a>4 弹出软键盘重新设置聊天窗口高度</h5><ol>
+<li>软件盘打开时候,其对应的聊天页面里面消息并没有滚动到最底端<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/187.png" alt="">  </li>
+<li>我们在打开软键盘时候,聊天消息应该滚动到最后一条</li>
+<li><p>当我们的软键盘弹出时候,其实我们窗口,相当于由全屏变成了半屏,此时会触发resize事件(window窗口触发resize事件)   </p>
+   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    // 对当前的窗口监听resize事件</div><div class="line">window.addEventListener(&quot;resize&quot;,function()&#123;</div><div class="line">	resizeChattingScreen();</div><div class="line">&#125;);</div><div class="line">	</div><div class="line">   </div><div class="line">   function resizeChattingScreen()&#123;</div><div class="line">var areaMsgList = document.getElementById(&quot;msg&quot;);</div><div class="line">// 设置聊天记录进入页面的时候自动滚动到最后一条</div><div class="line">areaMsgList.scrollTop = areaMsgList.scrollHeight + areaMsgList.offsetHeight;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>即使那样设置了,但是我们的最后一条消息还是被我们的footer给挡住了  </p>
+   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">	      </div><div class="line">	      // 对当前的窗口监听resize事件</div><div class="line">						window.addEventListener(&quot;resize&quot;,function()&#123;</div><div class="line">							resizeChattingScreen();</div><div class="line">							doc.getElementById(&quot;msg-outter&quot;).style.paddingBottom = &quot;50px&quot;;</div><div class="line">						&#125;);</div><div class="line">       </div><div class="line">      ```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 5 发送消息前置条件网络状态判断  </div><div class="line"></div><div class="line">###### 5.1 原理</div><div class="line">1. 我们在文本框中输入消息之后,点击发送时候,在发送之前我们需要做一些判断,主要有两块需要判断:1.判断整个手机的网络状态(网络飞行模式或者没有连接时候,给出提醒),2.我们发的消息内容不能是空字符串  </div><div class="line"></div><div class="line">2. 其实h5+已经给我们做了处理封装:在h5+的device模块里面有networkinfo信息  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/188.png)  </div><div class="line"></div><div class="line">3. 通过以下方法getCurrentType() 可以获取到手机网络状态,其返回值就是上面的常量 是一个int类型  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/189.png)</div><div class="line"></div><div class="line">4. 如果是:CONNECTION_UNKNOW: 网络连接状态未知 CONNECTION_NONE: 未连接网络  我们需要给出提示  </div><div class="line"></div><div class="line">###### 5.2 代码  </div><div class="line">1. 给send发送按钮绑定一个tap点击事件做相关操作</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<pre><code>      //发送消息前置条件网络状态判断
+       send.addEventListener(&quot;tap&quot;,function(){
+           var networkStatus = plus.networkinfo.getCurrentType();
+           if(networkStatus==0 || networkStatus == 1){
+               app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
+               return;
+           }
+
+           // 判断消息内容，如果长度等于0，则return
+           if(msg_text.value.length==0){
+               return;
+           }
+
+       });
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 断开手机网络后效果  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/190.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 6 监听网络连接事件  </div><div class="line">1. 我们在我们的网络首页index.html页面,需要做一个网络连接的判断,我们的所有页面都包含在我们的index.html页面上  </div><div class="line">2.  在index.html中添加  </div><div class="line">  </div><div class="line">js    </div><div class="line">     </div><div class="line">     ```  </div><div class="line">      </div><div class="line">        //对整个网络连接进行事件监听</div><div class="line">			netChangeSwitch();</div><div class="line">	  		</div><div class="line">        </div><div class="line">          //监听网络状态更改   </div><div class="line">	  	function netChangeSwitch()&#123;</div><div class="line">	  		document.addEventListener(&quot;netchange&quot;,function()&#123;</div><div class="line">	  			 //网络状态获取和判断</div><div class="line">	  			 var connectionStatus = plus.networkinfo.getCurrentType();</div><div class="line">	  		     if(connectionStatus !=0 &amp;&amp; connectionStatus != 1)&#123;</div><div class="line">	  		     	//重新打开网络连接</div><div class="line">	  		     	var magic_title = document.getElementById(&quot;magic_title&quot;);</div><div class="line">	  		     	magic_title.innerHTML=&quot;&lt;b&gt;魔晶&lt;/b&gt;&quot;;</div><div class="line">	  		     &#125;else&#123;</div><div class="line">	  		     	//重新打开网络连接</div><div class="line">	  		     	var magic_title = document.getElementById(&quot;magic_title&quot;);</div><div class="line">	  		     	magic_title.innerHTML = &quot;&lt;b&gt;魔晶(未连接)&lt;/b&gt;&quot;;</div><div class="line">	  		     &#125;</div><div class="line">	  		&#125;);</div><div class="line">	  	&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>html</p>
+<pre><code> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">      </div><div class="line">       &lt;!--1.添加标题栏:快捷键mhe--&gt;</div><div class="line">		&lt;header class=&quot;mui-bar mui-bar-nav title&quot;&gt;</div><div class="line">		    &lt;h1 id=&quot;magic_title&quot; class=&quot;mui-title title-color&quot;&gt;&lt;b&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">		&lt;/header&gt;</div><div class="line">      </div><div class="line">     ```  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/191.png)  </div><div class="line"></div><div class="line">##### 7 发送消息html渲染  </div><div class="line">1. 点击发送按钮时候,我们将消息拼接渲染到我们的html页面  </div><div class="line">2. 发送消息时候要携带发送人头像  </div><div class="line"></div><div class="line">###### 7.1 js</div><div class="line"></div><div class="line">1.定义发送js方法:</div></pre></td></tr></table></figure>
+
+
+   function sendMessage(faceImg,msg){
+          var msgHtml=&apos;&lt;div class=&quot;me_lists&quot;&gt;&apos;+
+             &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
+                &apos;&lt;img src=&quot;&apos; + faceImg + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos;+
+             &apos;&lt;/div&gt;&apos;+
+            &apos;&lt;div class=&quot;msg-wrapper left&quot;&gt;&apos;+
+                &apos;&lt;p class=&quot;msg-right-green&quot;&gt;&apos;+msg+&apos;&lt;/p&gt;&apos;+
+            &apos;&lt;/div&gt;&apos;+
+            &apos;&lt;/div&gt;&apos;;
+            var msg_list = document.getElementById(&quot;msg&quot;);
+            //拼接到msg后面,相当于append
+            msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在send监听中调用</div></pre></td></tr></table></figure>
+
+
+  //发送消息前置条件网络状态判断
+    send.addEventListener(&quot;tap&quot;,function(){
+        var networkStatus = plus.networkinfo.getCurrentType();
+        if(networkStatus==0 || networkStatus == 1){
+            app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
+            return;
+        }
+        // 判断消息内容，如果长度等于0，则return
+        if(msg_text.value.length==0){
+            return;
+        }
+        //发送消息,渲染html消息到msg的div下
+        sendMessage(app.imgServerUrl+me.faceImage,msg_text.value);
+    });
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/192.png)  </div><div class="line">##### 8 接收消息html渲染  </div><div class="line">1. 接收聊天服务是friend发送的,所以其头像已经获取到了  </div><div class="line">2. 拼接对应的接收即可得到条件所示  </div><div class="line"></div><div class="line">###### 8.1 js</div><div class="line"></div><div class="line">1.定义发送js方法:</div></pre></td></tr></table></figure>
+
+
+   function receiveMessage(msg){
+                var msgHtml = &apos;&lt;div class=&quot;friend_lists&quot;&gt;&apos;+
+                &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
+                    &apos;&lt;img src=&quot;&apos; + app.imgServerUrl + friendFaceImage + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos; +
+                &apos;&lt;/div&gt;&apos;+
+                &apos;&lt;div class=&quot;msg-wrapper right&quot;&gt;&apos;+
+                    &apos;&lt;p class=&quot;msg-left-white&quot;&gt;&apos;+msg+&apos;/p&gt;&apos;+
+                &apos;&lt;/div&gt;&apos;+
+               &apos;&lt;/div&gt;&apos;;
+               var msg_list = document.getElementById(&quot;msg&quot;);
+                //拼接到msg后面,相当于append
+                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在send监听中调用</div></pre></td></tr></table></figure>
+
+
+  //发送消息前置条件网络状态判断
+    send.addEventListener(&quot;tap&quot;,function(){
+        var networkStatus = plus.networkinfo.getCurrentType();
+        if(networkStatus==0 || networkStatus == 1){
+            app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
+            return;
+        }
+        // 判断消息内容，如果长度等于0，则return
+        if(msg_text.value.length==0){
+            return;
+        }
+        //模拟接收消息
+        receiveMessage(&quot;模拟接收消息...&quot;);
+    });
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/193.png)  </div><div class="line"></div><div class="line">##### 9 发送消息与接收消息时的铃声播放</div><div class="line">1. 我们在发送完消息之后需要播放一个消息发送铃声  </div><div class="line">2. 我们在接收到消息之后也需要播放一个接收消息的铃声  </div><div class="line">###### 9.1 添加外部引入的mp3文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/194.png)    </div><div class="line">h5+的api</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/195.png)    </div><div class="line">播报语音对象  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/196.png)</div></pre></td></tr></table></figure>
+
+
+  function sendMessage(faceImg,msg){
+              var msgHtml=&apos;&lt;div class=&quot;me_lists&quot;&gt;&apos;+
+                 &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
+                    &apos;&lt;img src=&quot;&apos; + faceImg + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos;+
+                 &apos;&lt;/div&gt;&apos;+
+                &apos;&lt;div class=&quot;msg-wrapper left&quot;&gt;&apos;+
+                    &apos;&lt;p class=&quot;msg-right-green&quot;&gt;&apos;+msg+&apos;&lt;/p&gt;&apos;+
+                &apos;&lt;/div&gt;&apos;+
+                &apos;&lt;/div&gt;&apos;;
+                var msg_list = document.getElementById(&quot;msg&quot;);
+                //拼接到msg后面,相当于append
+                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
+
+                playSendMessageSound();
+            }
+
+            /**
+             * 发送消息播放  
+             */
+            function playSendMessageSound(){
+                var audioPlayer = plus.audio.createPlayer(&quot;/mp3/send.mp3&quot;);
+                audioPlayer.play();
+            }
+
+
+          /**
+             * 接收消息
+             * @param {Object} msg
+             */
+            function receiveMessage(msg){
+                var msgHtml = &apos;&lt;div class=&quot;friend_lists&quot;&gt;&apos;+
+                &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
+                    &apos;&lt;img src=&quot;&apos; + app.imgServerUrl + friendFaceImage + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos; +
+                &apos;&lt;/div&gt;&apos;+
+                &apos;&lt;div class=&quot;msg-wrapper right&quot;&gt;&apos;+
+                    &apos;&lt;p class=&quot;msg-left-white&quot;&gt;&apos;+msg+&apos;/p&gt;&apos;+
+                &apos;&lt;/div&gt;&apos;+
+               &apos;&lt;/div&gt;&apos;;
+               var msg_list = document.getElementById(&quot;msg&quot;);
+                //拼接到msg后面,相当于append
+                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
+
+                playReceiveMessage();
+            }
+            /**
+             * 播报接收语音  
+             */
+            function playReceiveMessage(){
+                var audioPlayer = plus.audio.createPlayer(&quot;/mp3/di_didi.mp3&quot;);  
+                audioPlayer.play();
+            }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 10 手机端websocket模型定义和发送消息</div><div class="line">##### 10.1  chatlist.html页面websocket模型定义  </div><div class="line">1.构造webIM对象,在初始化方法中,重写onopen,onmessage,onerror,onclose方法  </div><div class="line">2.在init时候判断此socket是不是已经可用了,可用不创建  </div><div class="line">3.在plusReady中进行调用</div></pre></td></tr></table></figure>
+
+
+ //构建聊天业务CHAT
+            window.webIM={
+            socket:null,
+            init:function(){
+                if(window.WebSocket){//判断浏览器是否支撑websocket
+                    //判断socket状态,再确认是否初始化
+                    if(webIM.socket != null 
+                      &amp;&amp; webIM.socket != undefined
+                      &amp;&amp; webIM.socket.readyState == WebSocket.OPEN){
+                        return false;
+                    }
+
+                    webIM.socket = new WebSocket(app.nettyServerUrl);
+                    //websocket的 生命周期方法
+                    webIM.socket.onopen = webIM.wsopen,
+                    webIM.socket.onmessage = webIM.wsmessage,
+                    webIM.onclose = webIM.wsclose,
+                    webIM.onerror = webIM.wsonerror;
+                }else{
+                    //先手机浏览器一般都支持websocket协议  
+                    alert(&quot;手机设备过旧,请升级手机...&quot;);
+                }
+            },
+            sendMessage:function(msg){
+                webIM.socket.send(msg);
+            },
+            wsopen:function(){
+                console.log(&quot;建立连接&quot;);
+            },
+            wsmessage:function(e){
+                console.log(&quot;消息为:&quot;+e.data);
+                //将消息填充到接收消息处
+                var receiveMsg = document.getElementById(&quot;receiveMsg&quot;);
+                var html = receiveMsg.innerHTML;
+                receiveMsg.innerHTML = html+&quot;&lt;br/&gt;&quot;+ e.data;
+            },
+            wsclose:function(){
+                console.log(&quot;断开连接&quot;);
+            },
+            wsonerror:function(){
+                console.log(&quot;断开连接&quot;);
+            }
+        }     
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/197.png)  </div><div class="line"></div><div class="line">##### 10.2 chatting.html页面websocket发送消息  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/198.png)   </div><div class="line">手机端接收:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/199.png)   </div><div class="line">server端接收:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/200.png)   </div><div class="line">##### 11 websocket接受消息的渲染_x264</div><div class="line">1.由于websocket对象是在chatlist.html页面,所以后端返回消息的时候消息是在chatlist.html中的wsmessage里面,但是渲染消息的方法是在chatting.html页面里面,所以我们需要获取chatting.html里面receiveMessage(msg)在chatlist.html调用  </div><div class="line">2.获取webview,然后调用receiveMessage(msg)  </div><div class="line">3.在通讯录里面:contact.html里面通过mui.openWindow()打开chatting-friendUserId,目前先写死;</div></pre></td></tr></table></figure>
+
+
+  wsmessage:function(e){
+                console.log(&quot;消息为:&quot;+e.data);
+                //将消息填充到接收消息处
+                //TODO 我们先把动态的chatting.html 页面webview的id先写死    id:&quot;chatting-&quot;+friendUserId    181210CDNSNRBCZC
+                var chattingWeview = plus.webview.getWebviewById(&quot;chatting-181210CDNSNRBCZC&quot;);
+                    //在Webview窗口中执行JS脚本,将JS脚本发送到Webview窗口中运行，可用于实现Webview窗口间的数据通讯。
+                chattingWeview.evalJS(&quot;receiveMessage(&apos;&quot;+e.data+&apos;)&quot;);
+            }
+
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4.此时chatlist.html需要调用chatting.html页面里面的方法,我们需要把命名空间去掉。</div></pre></td></tr></table></figure>
+
+
+  wsmessage:function(e){
+        console.log(&quot;消息为:&quot;+e.data);
+        //将消息填充到接收消息处
+        //TODO 我们先把动态的chatting.html 页面webview的id先写死    id:&quot;chatting-&quot;+friendUserId    181210CDNSNRBCZC
+        var chattingWeview = plus.webview.getWebviewById(&quot;chatting-181210CDNSNRBCZC&quot;);
+
+            //在Webview窗口中执行JS脚本,将JS脚本发送到Webview窗口中运行，可用于实现Webview窗口间的数据通讯。
+
+        chattingWeview.evalJS(&quot;receiveMessage(&apos;&quot; + e.data + &quot;&apos;)&quot;);
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 12 服务器断开后的重连机制</div><div class="line">1.当我们连接时候,我们如果server端断开了连接,然后再发送消息时候,此时手机页面上没有渲染消息,原因就是此时websocket可能已经断开了,所以我们需要在sendMessage时候做一个判断  </div><div class="line">2.需要在接收消息之后:resizeChattingScreen()    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/201.png) </div><div class="line">##### 13 chatHandler初步重构  </div><div class="line">1.ChatHandler中handlerAdded在客户端和服务端建立连接之后就会形成handler并添加到我们定义的ChannelGroup中   </div><div class="line">2.客户端和服务端断开时候需要进行移除chanel  </div><div class="line">3.在客户端和服务端发生异常时候,也需要关闭连接,这也需要重写eceptionCaught方法  </div><div class="line">4.channelRead0中进行channel消息的处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/202.png)  </div><div class="line">5.channelRead0</div></pre></td></tr></table></figure>
+
+
+   @Override
+protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+    //1.获取客户端传过来的消息
+    //2.根据消息类型做不同的处理
+       //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
+       //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
+       //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
+       //2.4 心跳类型消息
+}
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 14 构建聊天业务模型  </div><div class="line">###### 14.1 DataContent-业务传输的数据内容</div></pre></td></tr></table></figure>
+
+
+  public class DataContent implements Serializable{
+     /**
+      * 动作类型
+      */
+     private Integer action;
+     /**
+      * 用户聊天类型
+      */
+     private ChatMsg chatMsg;
+     /**
+       * 扩展字段
+      */
+     private String extand;
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatMsg</div></pre></td></tr></table></figure>
+
+
+ public class ChatMsg implements Serializable {
+        /**
+         * 发送者用户id
+         */
+    private String senderId;
+        /**
+         * 接受者用户id
+         */
+    private String receiverId;
+        /**
+         * 消息内容
+         */
+    private String msg;
+        /**
+         * 消息id:用于签收
+         */
+    private String msgId;
+  }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatHandler</div></pre></td></tr></table></figure>
+
+
+   @Override
+    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
+        String content = msg.text();
+        //1.获取客户端传过来的消息
+        DataContent dataContent = JsonUtils.jsonToPojo(content, DataContent.class);
+        int action = dataContent.getAction();
+        //2.根据消息类型做不同的处理
+        if(action == MsgActionEnum.CONNECT.type){
+            //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
+
+        }else if(action == MsgActionEnum.CHAT.type){
+            //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
+        }else if(action == MsgActionEnum.SIGNED.type){
+            //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
+        }else if(action == MsgActionEnum.KEEPALIVE.type){
+            //2.4 心跳类型消息
+        }
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15 chatHandler - 处理客户端连接  </div><div class="line">##### 15.1 定义用户和channel的关联</div></pre></td></tr></table></figure>
+
+
+      /**
+     * 用户和channel关联表
+     * @author yxm
+     */
+    public class UserChannelRe {
+        private static Map&lt;String,Channel&gt; manager = new HashMap&lt;String,Channel&gt;();
+
+        public static void put(String userId,Channel channel){
+            manager.put(userId,channel);
+        }
+
+        public static Channel get(String userId){
+           return manager.get(userId);
+        }
+    }
+
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15.2 ChatHandler处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png)   </div><div class="line"></div><div class="line">##### 16 chatHandler - 保存聊天消息到数据库  </div><div class="line">###### 16.1 saveChatMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/1.png) </div><div class="line">###### 16.2 ChatHandler  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/2.png) </div><div class="line"></div><div class="line">###### 16.3 SpringUtil</div></pre></td></tr></table></figure>
+
+
+  public class SpringUtil implements ApplicationContextAware {
+
+    private static ApplicationContext applicationContext;
+
+    @Override
+    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+        if (SpringUtil.applicationContext == null) {
+            SpringUtil.applicationContext = applicationContext;
+        }
+    }
+
+    // 获取applicationContext
+    public static ApplicationContext getApplicationContext() {
+        return applicationContext;
+    }
+
+    // 通过name获取 Bean.
+    public static Object getBean(String name) {
+        return getApplicationContext().getBean(name);
+    }
+
+    // 通过class获取Bean.
+    public static &lt;T&gt; T getBean(Class&lt;T&gt; clazz) {
+        return getApplicationContext().getBean(clazz);
+    }
+
+    // 通过name,以及Clazz返回指定的Bean
+    public static &lt;T&gt; T getBean(String name, Class&lt;T&gt; clazz) {
+        return getApplicationContext().getBean(name, clazz);
+    }
+    }
+
+ ```
+</code></pre><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/2.png" alt=""> </p>
+<h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><p>1.签收:不是用户行为,用户行为只是已读和未读状态,签收是我们把消息 发送到用户手机上,用户接受到了消息<br>2.消息签收时候,需要把客户已经收到的消息的id集合发送到后端,后端批量更新magic_chat_msg表的sign_flag=1<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/3.png" alt="">   </p>
+<p>3.update语句<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/4.png" alt="">  </p>
+<h5 id="19-客户端onopen联调，初始化用户和channel关系"><a href="#19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="19 客户端onopen联调，初始化用户和channel关系"></a>19 客户端onopen联调，初始化用户和channel关系</h5><h6 id="19-1-app-js中构建模型"><a href="#19-1-app-js中构建模型" class="headerlink" title="19.1.app.js中构建模型"></a>19.1.app.js中构建模型</h6><p>在前端:构建后端对应的模型(ChatMsg,DataContent,MsgActionEnum)对象到前端的app.js中<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/5.png" alt="">  </p>
+<h6 id="19-2-onopen中进行connect消息发送"><a href="#19-2-onopen中进行connect消息发送" class="headerlink" title="19.2.onopen中进行connect消息发送"></a>19.2.onopen中进行connect消息发送</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/6.png" alt="">  </p>
+<h6 id="19-3-channelRead0消息打印"><a href="#19-3-channelRead0消息打印" class="headerlink" title="19.3.channelRead0消息打印"></a>19.3.channelRead0消息打印</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/7.png" alt="">  </p>
+<h5 id="20-客户端发送消息与接收联调"><a href="#20-客户端发送消息与接收联调" class="headerlink" title="20 客户端发送消息与接收联调"></a>20 客户端发送消息与接收联调</h5><p>1.发送消息是执行MsgActionEnum.CHAT<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/8.png" alt="">  </p>
+<h5 id="21-接收方获得消息后重构渲染"><a href="#21-接收方获得消息后重构渲染" class="headerlink" title="21 接收方获得消息后重构渲染"></a>21 接收方获得消息后重构渲染</h5><p>1.接收消息就是在接收方的wsmessage进行渲染<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/9.png" alt="">  </p>
+<h5 id="22-客户端签收消息"><a href="#22-客户端签收消息" class="headerlink" title="22 客户端签收消息"></a>22 客户端签收消息</h5><p>1.消息的签收,分为单签和多签<br>2.单签:聊天过程中,朋友发送一条,自己签收一条,在wsmessage出签收<br>3.多签:朋友刚开始没有聊天,没有打开手机,在朋友首次打开手机时候,会有多条消息推送过来,此时会有一个统一的批量签收,这样子就是多签和批量签收  </p>
+<h6 id="22-1-客户端单签收消息"><a href="#22-1-客户端单签收消息" class="headerlink" title="22.1 客户端单签收消息"></a>22.1 客户端单签收消息</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/10.png" alt=""> </p>
+<h5 id="23-websocket新增好友类型联调"><a href="#23-websocket新增好友类型联调" class="headerlink" title="23 websocket新增好友类型联调"></a>23 websocket新增好友类型联调</h5><p>1.我们进行好友请求时候,好友的关系是双方的,请求方发送消息之后,接受方一旦同意了我们的请求之后,接受方会查询自己的记录,然后在通讯录进行相应渲染，代码如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/11.png" alt=""></p>
+<p>2.对于接受者没有问题了,但是对于发送者,其实也需要获取到朋友通知,然后更新好友列表,此时我们需要使用netty的channel发送一份请求。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/12.png" alt=""></p>
+<p>3.前端app.js补充消息类型<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/13.png" alt="">  </p>
+<p>4.在前端消息处,获取消息是DataContent,做一个判断,拉取好友列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/14.png" alt=""> </p>
+<p>5.在后端发送消息统一用DataContent,而不是ChatMsg<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/15.png" alt=""> </p>
+<p>6.注册SpringUtil在Spring容器里面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/16.png" alt=""><br>可以看到获取的applicationContext为空,原因就是SpringUtil没有在Spring中创建对象管理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/17.png" alt=""> </p>
+<h5 id="24-保存聊天记录到本地"><a href="#24-保存聊天记录到本地" class="headerlink" title="24 保存聊天记录到本地"></a>24 保存聊天记录到本地</h5><p>在两种情况下会触发保存消息<br>1.用户发送聊天消息出去<br>2.websocket中在接收到用户消息时候:wsmessage会把消息保存到本地<br>3.以上两种消息是不同的我们会分开定义:我的消息,朋友的消息<br>4.保存到本地的消息我们需要缓存的key:我的消息:my+msgId  朋友消息:friend+msgId  </p>
+<h6 id="24-1-我们在app-js中做保存"><a href="#24-1-我们在app-js中做保存" class="headerlink" title="24.1 我们在app.js中做保存"></a>24.1 我们在app.js中做保存</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/18.png" alt=""> </p>
+<h5 id="25-从本地获取聊天记录"><a href="#25-从本地获取聊天记录" class="headerlink" title="25 从本地获取聊天记录"></a>25 从本地获取聊天记录</h5><p>用户在打开聊天记录之后,会获取聊天记录进行渲染  </p>
+<h6 id="1-在app-js中获取聊天记录"><a href="#1-在app-js中获取聊天记录" class="headerlink" title="1.在app.js中获取聊天记录"></a>1.在app.js中获取聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/19.png" alt="">   </p>
+<h6 id="2-在接收消息出保存聊天记录"><a href="#2-在接收消息出保存聊天记录" class="headerlink" title="2.在接收消息出保存聊天记录"></a>2.在接收消息出保存聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/20.png" alt=""></p>
+<h6 id="3-在发送消息出保存聊天记录"><a href="#3-在发送消息出保存聊天记录" class="headerlink" title="3.在发送消息出保存聊天记录"></a>3.在发送消息出保存聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/21.png" alt=""></p>
+<h5 id="26-初始化聊天记录和渲染"><a href="#26-初始化聊天记录和渲染" class="headerlink" title="26 初始化聊天记录和渲染"></a>26 初始化聊天记录和渲染</h5><p>1.把我们的html代码做一个整合,之前的聊天信息做一个动态的配置。 把chatting.html中的<div id="msg">下的代码做了一个删除,然后动态绑定。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/28.png" alt=""><br>2.定义一个初始化聊天消息的方法,动态拼接上面的聊天信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/29.png" alt=""><br>3.在初始化时候调用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/30.png" alt="">  </div></p>
+<h5 id="27-聊天快照业务简单讲解"><a href="#27-聊天快照业务简单讲解" class="headerlink" title="27 聊天快照业务简单讲解"></a>27 聊天快照业务简单讲解</h5><p>1.在app首页会展示和哪个朋友的聊天信息,针对最新的聊天记录会逐个显示,并且对于只会显示一条最新的最近的记录,我们叫做快照。<br>2.只要我们和谁进行过聊天,就会把最新的聊天消息展示到顶端。  </p>
+<h5 id="28-保存聊天快照到本地"><a href="#28-保存聊天快照到本地" class="headerlink" title="28 保存聊天快照到本地"></a>28 保存聊天快照到本地</h5><p>1.之前我们保存用户聊天记录到本地,现在我们需要保存用户聊天快照到本地<br>2.保存聊天快照时候,需要查看此朋友的聊天快照是否含有,没有的话就添加到首部,有的话删除原来的,再添加到首部<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/31.png" alt=""> </p>
+<h5 id="29-获取聊天快照"><a href="#29-获取聊天快照" class="headerlink" title="29 获取聊天快照"></a>29 获取聊天快照</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/32.png" alt=""> </p>
+<h5 id="30-已读未读消息的设置与快照调用"><a href="#30-已读未读消息的设置与快照调用" class="headerlink" title="30 已读未读消息的设置与快照调用"></a>30 已读未读消息的设置与快照调用</h5><p>1.之前我们保存用户聊天历史消息时候是在两个地方: a.发送用户消息  b.接收用户消息<br>2.保存用户快照信息:a.发送用户消息(消息从我发送出去,此时消息肯定是已读)  b.接收用户消息(两种情况:用户加入停留在当前页面/首页/聊天快照页面,此时聊天消息是未读的,如果当前是聊天页面互动时候,此时聊天页面是已读的)  </p>
+<h6 id="30-1-发送用户消息"><a href="#30-1-发送用户消息" class="headerlink" title="30.1 发送用户消息"></a>30.1 发送用户消息</h6><p>消息从我发送出去,此时消息肯定是已读<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/33.png" alt=""></p>
+<h6 id="30-2-接收用户消息"><a href="#30-2-接收用户消息" class="headerlink" title="30.2 接收用户消息"></a>30.2 接收用户消息</h6><p>两种情况:用户加入停留在当前页面/首页/聊天快照页面,此时聊天消息是未读的,如果当前是聊天页面互动时候,此时聊天页面是已读的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/34.png" alt="">  </p>
+<h5 id="31-展示聊天快照"><a href="#31-展示聊天快照" class="headerlink" title="31 展示聊天快照"></a>31 展示聊天快照</h5><p>1.聊天信息是在chatlist.html里面进行展示的,所以我们在这里面添加对应的方法loadingChatSnapshot.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/42.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/37.png" alt=""><br>2.在app.js中根据聊天的frendId从本地联系人列表的缓存中拿到相关信息:getFriendFromContactList<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/38.png" alt=""><br>3.我们在接收到消息和发送消息时候需要加载快照:loadingChatSnapshot<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/39.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/40.png" alt=""></p>
+<p>4.效果图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/41.png" alt="">  </p>
+<h5 id="32-未读消息小红点标记"><a href="#32-未读消息小红点标记" class="headerlink" title="32 未读消息小红点标记"></a>32 未读消息小红点标记</h5><p>1.聊天时候,如果我们的消息不是在聊天框所在页面里面时候,我们的消息就是未读消息,我们用一个小红点标记消息是不是已读/未读<br>2.添加red-point样式来标识未读消息    </p>
+<p>3.在聊天朋友页面上加上一个span标签,并且添加上red-point样式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/43.png" alt="">    </p>
+<p>4.在loadingChatSnapshot里面写方法,获取isRead,如果是未读的:添加两块html代码<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/44.png" alt="">    </p>
+<h5 id="33-点击快照开始聊天"><a href="#33-点击快照开始聊天" class="headerlink" title="33 点击快照开始聊天"></a>33 点击快照开始聊天</h5><p>1.在contact.html中我们绑定了一个事件:点击通讯录时候会打开一个新的页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/45.png" alt=""><br>2.我们把上面代码拷贝到chatlist.html页面中,然后点击快照时候绑定一个事件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/46.png" alt=""><br>3.绑定到li标签,所以添加class=’’，由于绑定标签之后需要获取朋友的friendUserId，friendNickname，friendFaceImage所以我们需要在loadingChatSnapshot时候拼接上朋友信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/47.png" alt="">  </p>
+<h5 id="34-未读消息标记已读"><a href="#34-未读消息标记已读" class="headerlink" title="34 未读消息标记已读"></a>34 未读消息标记已读</h5><h5 id="35-开发获取未读消息列表接口"><a href="#35-开发获取未读消息列表接口" class="headerlink" title="35 开发获取未读消息列表接口"></a>35 开发获取未读消息列表接口</h5><h5 id="36-前端获取未读消息列表"><a href="#36-前端获取未读消息列表" class="headerlink" title="36 前端获取未读消息列表"></a>36 前端获取未读消息列表</h5><h5 id="37-批量签收并且展示未读消息"><a href="#37-批量签收并且展示未读消息" class="headerlink" title="37 批量签收并且展示未读消息"></a>37 批量签收并且展示未读消息</h5><h5 id="38-聊天快照左滑删除效果"><a href="#38-聊天快照左滑删除效果" class="headerlink" title="38 聊天快照左滑删除效果"></a>38 聊天快照左滑删除效果</h5><h5 id="39-聊天快照右滑删除聊天记录与快照"><a href="#39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="39 聊天快照右滑删除聊天记录与快照"></a>39 聊天快照右滑删除聊天记录与快照</h5>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/12/16/netty实践-二十-聊天页面制作/" class="archive-article-date">
+  	<time datetime="2018-12-16T11:50:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-netty实践-十九-发现页面与通讯录相关功能开发" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/12/12/netty实践-十九-发现页面与通讯录相关功能开发/">netty实践-十九-发现页面与通讯录相关功能开发</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>用户可以通过搜索其他用户账号进行好友添加，或者通过用户的唯一二维码进行扫码添加，发送添加请求后其他用户可以拒绝或者同意好友请求<br>1 发现页面编码<br>2 搜索朋友账号接口<br>3 搜索朋友前后端联调<br>4 搜索结果页讲解以及webview传参<br>5 发送添加好友请求接口编码<br>6 前后端连天发送好友请求<br>7 查询好友请求接口<br>8 朋友接受到请求页面联调开发<br>9 同意或忽略事件动态绑定<br>10 同意或忽略controller<br>11 同意或忽略的service编写<br>12 好友请求忽略或拒绝前后台联调<br>13 构建扫描器<br>14 扫码器颜色自定义<br>15 扫码添加好友联调<br>16 延时加载预处理数据<br>17 mui 自带索引列表模板讲解<br>18 通讯录列表整合<br>19 图文列表和通讯录整合增加用户头像显示<br>20 查询用户的所有好友列表接口<br>21 手机端获取好友列表保存到本地<br>22 定义通讯录好友列表模型<br>23 通讯录列表渲染展现<br>24 好友请求接收方更新通讯录  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-发现页面编码"><a href="#1-发现页面编码" class="headerlink" title="1 发现页面编码"></a>1 发现页面编码</h5><p>实现仿微信的朋友圈<br>实现添加好友<br>实现扫一扫加好友  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">   &lt;!doctype html&gt;</div><div class="line">   &lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;UTF-8&quot;&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;link href=&quot;css/mui.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body&gt;</div><div class="line">	&lt;!--添加content--&gt;</div><div class="line">	&lt;div class=&quot;mui-content&quot;&gt;</div><div class="line">	    &lt;!--添加左边图片,右边文字的list--&gt;</div><div class="line">	    &lt;!--朋友圈--&gt;</div><div class="line">	    &lt;ul class=&quot;mui-table-view&quot;&gt;</div><div class="line">	        &lt;li class=&quot;mui-table-view-cell mui-media&quot;&gt;</div><div class="line">	                &lt;img class=&quot;mui-media-object mui-pull-left&quot; src=&quot;image/friends.png&quot; style=&quot;max-width: 24px;height: 24px;&quot;&gt;</div><div class="line">	                &lt;p class=&quot;mui-ellipsis&quot; style=&quot;line-height: 24px;color: #000000;font-size: 16px;&quot;&gt;朋友圈&lt;/p&gt;</div><div class="line">	        &lt;/li&gt;</div><div class="line">	    &lt;/ul&gt;</div><div class="line">	    &lt;br /&gt;</div><div class="line">	    &lt;!--添加朋友--&gt;</div><div class="line">	    &lt;ul class=&quot;mui-table-view&quot;&gt;</div><div class="line">	        &lt;li class=&quot;mui-table-view-cell mui-media&quot;&gt;</div><div class="line">	                &lt;img class=&quot;mui-media-object mui-pull-left&quot; src=&quot;image/addfriends.png&quot; style=&quot;max-width: 24px;height: 24px;&quot;&gt;</div><div class="line">	                &lt;p class=&quot;mui-ellipsis&quot; style=&quot;line-height: 24px;color: #000000;font-size: 16px;&quot;&gt;添加好友&lt;/p&gt;</div><div class="line">	        &lt;/li&gt;</div><div class="line">	        &lt;li class=&quot;mui-table-view-cell mui-media&quot;&gt;</div><div class="line">	                &lt;img class=&quot;mui-media-object mui-pull-left&quot; src=&quot;image/scanscan.png&quot; style=&quot;max-width: 24px;height: 24px;&quot;&gt;</div><div class="line">	                &lt;p class=&quot;mui-ellipsis&quot; style=&quot;line-height: 24px;color: #000000;font-size: 16px;&quot;&gt;扫一扫&lt;/p&gt;</div><div class="line">	        &lt;/li&gt;</div><div class="line">	    &lt;/ul&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	&lt;script src=&quot;js/mui.min.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">		mui.init()</div><div class="line">	&lt;/script&gt;</div><div class="line">&lt;/body&gt;</div><div class="line"> &lt;/html&gt;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/151.png" alt="">  </p>
+<h5 id="2-搜索朋友账号接口"><a href="#2-搜索朋友账号接口" class="headerlink" title="2 搜索朋友账号接口"></a>2 搜索朋友账号接口</h5><p>UserController:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">   @RequestMapping(value = &quot;/searchFriends&quot;,method =  RequestMethod.GET)</div><div class="line">public R searchFriends(String myUserId,String friendUsername) throws Exception&#123;</div><div class="line">    //1.判断是否为空</div><div class="line">    if(StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername))&#123;</div><div class="line">         return R.errorMsg(&quot;&quot;);</div><div class="line">    &#125;</div><div class="line">     // 前置条件 - 1. 搜索的用户如果不存在，返回[无此用户]</div><div class="line">     // 前置条件 - 2. 搜索账号是你自己，返回[不能添加自己]</div><div class="line">     // 前置条件 - 3. 搜索的朋友已经是你的好友，返回[该用户已经是你的好友]</div><div class="line">    Integer status = userServiceSV.getStatusSearchFriends(myUserId,friendUsername);</div><div class="line">    if(status == (int)SearchFriendsStatusEnum.SUCCESS.status)&#123;</div><div class="line">        //返回VO</div><div class="line">        Users friendUsers = userServiceSV.queryUsersByUsername(friendUsername);</div><div class="line">        UsersVO userVO = new UsersVO();</div><div class="line">        BeanUtils.copyProperties(friendUsers, userVO);</div><div class="line">        return R.ok(userVO);</div><div class="line">    &#125;else&#123;</div><div class="line">        String msg = SearchFriendsStatusEnum.getMsgByKey(status);</div><div class="line">        return R.errorMsg(msg);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>IUserServiceSV:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> /**</div><div class="line"> * 获取搜索朋友状态</div><div class="line"> * @param myUserId</div><div class="line"> * @param friendUsername</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">Integer getStatusSearchFriends(String myUserId, String friendUsername);</div><div class="line">/**</div><div class="line"> * 根据用户名查询用户</div><div class="line"> * @param username</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">Users queryUsersByUsername(String username);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> @Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public Integer getStatusSearchFriends(String myUserId, String friendUsername) &#123;</div><div class="line">    // 前置条件 - 1. 搜索的用户如果不存在，返回[无此用户]</div><div class="line">    Users users = queryUsersByUsername(friendUsername);</div><div class="line">    if(null == users)&#123;</div><div class="line">       return SearchFriendsStatusEnum.USER_NOT_EXIST.status;</div><div class="line">    &#125;</div><div class="line">    // 前置条件 - 2. 搜索账号是你自己，返回[不能添加自己]</div><div class="line">    if(myUserId.equals(users.getId()))&#123;</div><div class="line">        return SearchFriendsStatusEnum.ALREADY_FRIENDS.status;</div><div class="line">    &#125;</div><div class="line">    // 前置条件 - 3. 搜索的朋友已经是你的好友，返回[该用户已经是你的好友]</div><div class="line">    MyFriends myFriends =  myFriendsMapper.selectByUserIdAndFriendId(myUserId,users.getId());</div><div class="line">    if(null != myFriends)&#123;</div><div class="line">        return  SearchFriendsStatusEnum.ALREADY_FRIENDS.status;</div><div class="line">    &#125;</div><div class="line">    return SearchFriendsStatusEnum.SUCCESS.status;</div><div class="line">&#125;</div><div class="line">	</div><div class="line">@Override</div><div class="line">public Users queryUsersByUsername(String username)&#123;</div><div class="line">    return usersMapper.selectByUsername(username);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-搜索朋友前后端联调"><a href="#3-搜索朋友前后端联调" class="headerlink" title="3 搜索朋友前后端联调"></a>3 搜索朋友前后端联调</h5><h6 id="3-1-前端"><a href="#3-1-前端" class="headerlink" title="3.1 前端"></a>3.1 前端</h6><p>1.点击添加好友会跳转到searchFriends.html页面,此页面部署和设置昵称相似  </p>
+<p>2.在discover.html中对于添加朋友绑定tap事件  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">    mui.plusReady(function()&#123;</div><div class="line">	</div><div class="line">	//添加好友跳转</div><div class="line">	var link_add_friends = document.getElementById(&quot;link_add_friends&quot;);</div><div class="line">	link_add_friends.addEventListener(&quot;tap&quot;,function()&#123;</div><div class="line">		mui.openWindow(&quot;searchFriends.html&quot;,&quot;searchFriends.html&quot;);</div><div class="line">	&#125;);</div><div class="line">	</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-搜索朋友前后端联调-1"><a href="#3-搜索朋友前后端联调-1" class="headerlink" title="3 搜索朋友前后端联调"></a>3 搜索朋友前后端联调</h5><h6 id="3-1-搜索朋友前后端联调"><a href="#3-1-搜索朋友前后端联调" class="headerlink" title="3.1 搜索朋友前后端联调"></a>3.1 搜索朋友前后端联调</h6><p>1.在searchFriends.html中实现以下页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/152.png" alt="">  </p>
+<p>点击搜索调用后台查询朋友接口,返回返回200就再次跳转到朋友页面:searchFriendsResult.html</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	mui.init();</div><div class="line">	mui.plusReady(function()&#123; </div><div class="line">		//1.跳转到本页面的时候,默认加载已存在的nickname</div><div class="line">		var user = app.getGlobalUserInfo();</div><div class="line">		</div><div class="line">		//2.绑定tap事件  </div><div class="line">		var link_submit_search = document.getElementById(&quot;link_submit_search&quot;);</div><div class="line">		link_submit_search.addEventListener(&quot;tap&quot;,function()&#123;</div><div class="line">			searchUsername();</div><div class="line">		&#125;);</div><div class="line">		</div><div class="line">		//3.查询用户</div><div class="line">		function searchUsername()&#123;</div><div class="line">			var txt_your_friend_username = document.getElementById(&quot;txt_your_friend_username&quot;);</div><div class="line">			var newFriendname = txt_your_friend_username.value;</div><div class="line">			//3.1 参数校验 </div><div class="line">			if(newFriendname.length&lt;1)&#123;</div><div class="line">				app.showToast(&quot;昵称长度太短&quot;,&quot;error&quot;);</div><div class="line">				return false;</div><div class="line">			&#125;</div><div class="line">			if(newFriendname.length&gt;8)&#123;</div><div class="line">				app.showToast(&quot;昵称不能超过8位&quot;,&quot;error&quot;);</div><div class="line">				return false;</div><div class="line">			&#125;</div><div class="line">			</div><div class="line">			//3.2展示等待按钮</div><div class="line">			plus.nativeUI.showWaiting(&quot;稍后...&quot;);</div><div class="line">			</div><div class="line">			//3.3 mui上传</div><div class="line">			mui.ajax(app.serverUrl + &quot;/user/searchFriends?myUserId=&quot;+user.id+&quot;&amp;friendUsername=&quot;+newFriendname,&#123;</div><div class="line">				data:&#123;&#125;,</div><div class="line">				dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">				type:&apos;post&apos;,//HTTP请求类型</div><div class="line">				timeout:10000,//超时时间设置为10秒；</div><div class="line">				headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">				success:function(data)&#123;</div><div class="line">					 //3.4 关闭等待</div><div class="line">					 plus.nativeUI.closeWaiting();</div><div class="line">					 console.log(JSON.stringify(data));</div><div class="line">					 if(data.status==200)&#123;</div><div class="line">					 	//获取成功  之后搜索到朋友页面</div><div class="line">					 	//通过extras可以把朋友数据携带过去  </div><div class="line">					 	mui.openWindow(&#123;</div><div class="line">					 		url:&quot;searchFriendsResult.html&quot;,</div><div class="line">					 		id:&quot;searchFriendsResult.html&quot;,</div><div class="line">					 		styles: &#123;&#125;,</div><div class="line">					 		extras: &#123;</div><div class="line">								willBeFriend: data.data</div><div class="line">							&#125;</div><div class="line">					 	&#125;);</div><div class="line">						//mui.back();</div><div class="line">					 &#125;else&#123;</div><div class="line">					 	//3.6给出提示</div><div class="line">					 	app.showToast(data.msg,&quot;error&quot;);</div><div class="line">					 &#125;</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>2.searchFriendsResult.html效果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/153.png" alt="">  </p>
+<h5 id="4-搜索结果页讲解以及webview传参"><a href="#4-搜索结果页讲解以及webview传参" class="headerlink" title="4 搜索结果页讲解以及webview传参"></a>4 搜索结果页讲解以及webview传参</h5><p>searchFriendsResult.html代码如下:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    &lt;!--头部资料--&gt;  </div><div class="line">&lt;header class=&quot;mui-bar mui-bar-nav title&quot; style=&quot;position: fixed;&quot;&gt;</div><div class="line">	&lt;a class=&quot;mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color&quot;&gt;&lt;/a&gt;</div><div class="line">	&lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b id=&quot;chatting-nickname&quot;&gt;详细资料&lt;/b&gt;&lt;/h1&gt;</div><div class="line">&lt;/header&gt;</div><div class="line"></div><div class="line">&lt;!--内容体--&gt;</div><div class="line">&lt;div class=&quot;mui-content&quot;&gt;</div><div class="line">	</div><div class="line">	&lt;ul class=&quot;mui-table-view&quot;&gt;</div><div class="line">	    &lt;li class=&quot;mui-table-view-cell mui-media&quot; style=&quot;padding-top: 10px;&quot;&gt;</div><div class="line">	        &lt;a href=&quot;javascript:;&quot;&gt;</div><div class="line">	            &lt;img id=&quot;img_friend_face&quot; class=&quot;mui-media-object mui-pull-left&quot; src=&quot;&quot; </div><div class="line">	            	style=&quot;border-radius: 8%;line-height: 50px;max-width: 50px;height: 50px;&quot;&gt;</div><div class="line">	            &lt;div class=&quot;mui-media-body&quot;&gt;</div><div class="line">	               	&lt;label id=&quot;lab_friend_nickname&quot;&gt;&lt;/label&gt;</div><div class="line">	                &lt;p id=&quot;p_friend_username&quot; class=&quot;mui-ellipsis&quot;&gt;&lt;/p&gt;</div><div class="line">	            &lt;/div&gt;</div><div class="line">	        &lt;/a&gt;</div><div class="line">	    &lt;/li&gt;</div><div class="line">	&lt;/ul&gt;</div><div class="line">	</div><div class="line">	&lt;br /&gt;</div><div class="line">	&lt;div style=&quot;text-align: center;&quot;&gt;</div><div class="line">		&lt;button id=&quot;btn_add_friend&quot; type=&quot;button&quot; class=&quot;mui-btn mui-btn-block&quot; </div><div class="line">			style=&quot;color: white;width: 90%;display: inline;padding: 12px 0&quot;&gt;添加好友&lt;/button&gt;</div><div class="line">		&lt;button id=&quot;btn_back&quot; type=&quot;button&quot; class=&quot;mui-btn mui-btn-block&quot; </div><div class="line">			style=&quot;width: 90%;display: inline;padding: 12px 0&quot;&gt;返回&lt;/button&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>searchFriendsResult.html中对应的js如下:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">    &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	mui.init();</div><div class="line">	</div><div class="line">	mui.plusReady(function()&#123;</div><div class="line">		var meInfo = app.getGlobalUserInfo();</div><div class="line">		</div><div class="line">		//获取上一个页面传入的对象,并且对本页面相应dom赋值</div><div class="line">		//上一个页面通过extras传值  这个页面从webview中获取  </div><div class="line">		var currentWebview = plus.webview.currentWebview();</div><div class="line">		var youFriend = currentWebview.willBeFriend;</div><div class="line">		</div><div class="line">		//赋值</div><div class="line">		var img_friend_face = document.getElementById(&quot;img_friend_face&quot;);</div><div class="line">		var lab_friend_nickname = document.getElementById(&quot;lab_friend_nickname&quot;);</div><div class="line">		var p_friend_username = document.getElementById(&quot;p_friend_username&quot;);</div><div class="line">		</div><div class="line">		img_friend_face.src=app.imgServerUrl+youFriend.faceImage;</div><div class="line">		lab_friend_nickname.innerHTML = youFriend.nickname;</div><div class="line">		p_friend_username.innerHTML = &quot;魔晶号:&quot;+youFriend.username;</div><div class="line">		</div><div class="line">	&#125;);</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="5-发送添加好友请求接口编码"><a href="#5-发送添加好友请求接口编码" class="headerlink" title="5 发送添加好友请求接口编码"></a>5 发送添加好友请求接口编码</h5><p>UserController  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> /**</div><div class="line"> * 发送添加好友请求</div><div class="line"> * @param myUserId</div><div class="line"> * @param friendUsername</div><div class="line"> * @return R</div><div class="line"> */</div><div class="line">@RequestMapping(value = &quot;/addFriendRequest&quot;,method = RequestMethod.POST)</div><div class="line">public R addFriendRequest(String myUserId,String friendUsername)&#123;</div><div class="line">    //1.判空</div><div class="line">    if(StringUtils.isBlank(myUserId) || StringUtils.isBlank(friendUsername))&#123;</div><div class="line">      return R.errorMsg(&quot;朋友名不能为空&quot;);</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">    //2.添加好友</div><div class="line">     userServiceSV.sendFriendRequest(myUserId, friendUsername);</div><div class="line">     return R.ok();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>IUserServiceSV:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">void sendFriendRequest(String myUserId, String friendUsername);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">   @Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public void sendFriendRequest(String myUserId, String friendUsername) &#123;</div><div class="line">    //根据用户名把朋友信息查询出来</div><div class="line">    Users friendUsers = usersMapper.selectByUsername(friendUsername);</div><div class="line">	</div><div class="line">    // 1. 查询发送好友请求记录表</div><div class="line">    FriendsRequest friendsRequestResult = friendsRequestMapper.selectBySendUserIdAndReceiveUserId(myUserId,friendUsers.getId());</div><div class="line">	</div><div class="line">    // 2.如果不是你的好友,并且好友记录中没有添加,则新增好友请求记录</div><div class="line">    if(null == friendsRequestResult)&#123;</div><div class="line">        FriendsRequest friendsRequest = new FriendsRequest();</div><div class="line">        String requestId = sid.nextShort();</div><div class="line">	</div><div class="line">        friendsRequest.setId(requestId);</div><div class="line">        friendsRequest.setSendUserId(myUserId);</div><div class="line">        friendsRequest.setReceiveUserId(friendUsers.getId());</div><div class="line">        friendsRequest.setRequestDataTime(new Date());</div><div class="line">        friendsRequestMapper.insert(friendsRequest);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="6-前后端连天发送好友请求"><a href="#6-前后端连天发送好友请求" class="headerlink" title="6 前后端连天发送好友请求"></a>6 前后端连天发送好友请求</h5><p>searchFriendsResult.html中对应的js如下:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">    &lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	mui.init();</div><div class="line">	</div><div class="line">	mui.plusReady(function()&#123;</div><div class="line">		var meInfo = app.getGlobalUserInfo();</div><div class="line">		</div><div class="line">		//获取上一个页面传入的对象,并且对本页面相应dom赋值</div><div class="line">		//上一个页面通过extras传值  这个页面从webview中获取  </div><div class="line">		var currentWebview = plus.webview.currentWebview();</div><div class="line">		var youFriend = currentWebview.willBeFriend;</div><div class="line">		</div><div class="line">		//赋值</div><div class="line">		var img_friend_face = document.getElementById(&quot;img_friend_face&quot;);</div><div class="line">		var lab_friend_nickname = document.getElementById(&quot;lab_friend_nickname&quot;);</div><div class="line">		var p_friend_username = document.getElementById(&quot;p_friend_username&quot;);</div><div class="line">		</div><div class="line">		img_friend_face.src=app.imgServerUrl+youFriend.faceImage;</div><div class="line">		lab_friend_nickname.innerHTML = youFriend.nickname;</div><div class="line">		p_friend_username.innerHTML = &quot;魔晶号:&quot;+youFriend.username;</div><div class="line">		</div><div class="line">		</div><div class="line">		var btn_add_friend = document.getElementById(&quot;btn_add_friend&quot;);</div><div class="line">		btn_add_friend.addEventListener(&quot;tap&quot;,function()&#123;</div><div class="line">			addFriendRequest();</div><div class="line">		&#125;);</div><div class="line">		//添加好友</div><div class="line">		function addFriendRequest()&#123;</div><div class="line">			var myUserId = meInfo.id;</div><div class="line">			var friendUsername = youFriend.username;</div><div class="line">                      plus.nativeUI.showWaiting(&quot;请稍后...&quot;);</div><div class="line">		    mui.ajax(app.serverUrl+&apos;/user/addFriendRequest&apos;,&#123;</div><div class="line">					data:&#123;</div><div class="line">						myUserId:myUserId,</div><div class="line">						friendUsername:friendUsername</div><div class="line">					&#125;,</div><div class="line">					//dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">					type:&apos;post&apos;,//HTTP请求类型</div><div class="line">					timeout:10000,//超时时间设置为10秒；</div><div class="line">					//headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">					success:function(data)&#123;</div><div class="line">						//服务器返回响应，根据响应结果，分析是否登录成功；</div><div class="line">						//打印到集成开发工具的控制台</div><div class="line">						console.log(JSON.stringify(data));</div><div class="line">						</div><div class="line">						if(data.status==200)&#123;</div><div class="line">                                  app.showToast(&quot;好友请求已发送...&quot;, &quot;success&quot;);</div><div class="line">							//页面跳转</div><div class="line">							mui.openWindow(&quot;index.html&quot;,&quot;index.html&quot;);</div><div class="line">						&#125;else&#123;</div><div class="line">						 //失败给出提示</div><div class="line">						    app.showToast(data.msg,&quot;error&quot;)</div><div class="line">						&#125;</div><div class="line">					&#125;</div><div class="line">				&#125;);</div><div class="line">			&#125;</div><div class="line">		</div><div class="line">		</div><div class="line">		</div><div class="line">		//绑定返回</div><div class="line">		var btn_back = document.getElementById(&quot;btn_back&quot;);</div><div class="line">		btn_back.addEventListener(&quot;tap&quot;,function()&#123;</div><div class="line">			mui.back();</div><div class="line">		&#125;);</div><div class="line">		</div><div class="line">	&#125;);</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="7-查询好友请求接口"><a href="#7-查询好友请求接口" class="headerlink" title="7 查询好友请求接口"></a>7 查询好友请求接口</h5><ol>
+<li>我们用户发送好友请求后,被发送人登录后会收到好友信息。  </li>
+<li>我们通过magic_users表和magic_friends_request进行关联,查找出主动请求人信息,然后展示到被请求人页面上  </li>
+<li>后端需要提供查询被登录用户的所有请求加好友的人  </li>
+</ol>
+<p>UserController:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">  @RequestMapping(value = &quot;/queryFriendRequests&quot;,method = RequestMethod.POST)</div><div class="line">public R queryFriendRequests(String userId)&#123;</div><div class="line">    //1.判空</div><div class="line">    if(StringUtils.isBlank(userId))&#123;</div><div class="line">        return R.errorMsg(&quot;用户名不能为空&quot;);</div><div class="line">    &#125;</div><div class="line">    //2.添加好友</div><div class="line">    List&lt;FriendRequestVO&gt; friendRequestVO = userServiceSV.queryFriendRequests(userId);</div><div class="line">    return R.ok(friendRequestVO);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>IUserServiceSV:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">List&lt;FriendRequestVO&gt; queryFriendRequests(String userId);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">public List&lt;FriendRequestVO&gt; queryFriendRequests(String userId) &#123;</div><div class="line">  return friendsRequestMapper.selectFriendsByUserId(userId);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="8-朋友接受到请求页面联调开发"><a href="#8-朋友接受到请求页面联调开发" class="headerlink" title="8 朋友接受到请求页面联调开发"></a>8 朋友接受到请求页面联调开发</h5><p>在chatlist.html做处理:</p>
+<ol>
+<li><p>打开页面时候,先查询可用的添加好友请求  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">     &lt;!doctype html&gt;</div><div class="line">     &lt;html&gt;</div><div class="line"></div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;UTF-8&quot;&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;link href=&quot;css/mui.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">&lt;/head&gt;</div><div class="line"></div><div class="line">&lt;body&gt;</div><div class="line">&lt;!--	&lt;h1&gt;聊天记录&lt;/h1&gt;--&gt;</div><div class="line">	</div><div class="line">	&lt;div class=&quot;mui-content&quot;&gt;</div><div class="line">		&lt;ul class=&quot;mui-table-view&quot; id=&quot;ul_friend_request_list&quot; style=&quot;margin-bottom: 10px;&quot;&gt;</div><div class="line">		&lt;/ul&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	&lt;script src=&quot;js/app.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script src=&quot;js/mui.min.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">		mui.init();</div><div class="line">		</div><div class="line">		//页面加载完后执行  </div><div class="line">		mui.plusReady(function()&#123;</div><div class="line">			</div><div class="line">			var user = app.getGlobalUserInfo();</div><div class="line">			</div><div class="line">			//获取当前页的webview,然后为当前页绑定show事件  </div><div class="line">			var currentWebview = plus.webview.currentWebview();</div><div class="line">			currentWebview.addEventListener(&quot;show&quot;,function()&#123;</div><div class="line">				loadingFriendRequests();</div><div class="line">			&#125;);</div><div class="line">		&#125;);</div><div class="line">		</div><div class="line">		</div><div class="line">		/**</div><div class="line">		 * 加载好友请求  </div><div class="line">		 */</div><div class="line">		function loadingFriendRequests()&#123;</div><div class="line">			var user = app.getGlobalUserInfo();</div><div class="line">			mui.ajax(app.serverUrl+&apos;/user/queryFriendRequests&apos;,&#123;</div><div class="line">						data:&#123;</div><div class="line">							userId:user.id</div><div class="line">						&#125;,</div><div class="line">						//dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">						type:&apos;post&apos;,//HTTP请求类型</div><div class="line">						timeout:10000,//超时时间设置为10秒；</div><div class="line">						//headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">						success:function(data)&#123;</div><div class="line">							 </div><div class="line">							//服务器返回响应，根据响应结果，分析是否登录成功；</div><div class="line">							//打印到集成开发工具的控制台</div><div class="line">							console.log(JSON.stringify(data));</div><div class="line">							var friend_requests_list = data.data;</div><div class="line">							var ul_friend_request_list = document.getElementById(&quot;ul_friend_request_list&quot;);</div><div class="line">							var showHtml = &quot;&quot;;</div><div class="line">						   if(data.status==200)&#123;</div><div class="line">								if (friend_requests_list != null &amp;&amp; friend_requests_list.length &gt; 0) &#123;</div><div class="line">								// 登录或者注册成功之后，保存全局用户对象到本地缓存</div><div class="line">								for(var i=0;i&lt;friend_requests_list.length;i++)&#123;</div><div class="line">									showHtml+=appendFriendRequests(friend_requests_list[i]) </div><div class="line">								&#125;</div><div class="line">								</div><div class="line">								ul_friend_request_list.innerHTML=showHtml;</div><div class="line">							&#125;else&#123;</div><div class="line">							  ul_friend_request_list.innerHTML=&quot;&quot;;</div><div class="line">							&#125;</div><div class="line">						&#125;</div><div class="line">					&#125;</div><div class="line">				&#125;);</div><div class="line">		   &#125;</div><div class="line">		</div><div class="line">		// 用于拼接单个朋友的请求</div><div class="line">		function appendFriendRequests(friend) &#123;</div><div class="line">			var html = &quot;&quot;;</div><div class="line">			</div><div class="line">			html = &apos;&lt;li class=&quot;btnOper mui-table-view-cell mui-media&quot;&gt;&apos; +</div><div class="line">				        &apos;&lt;a href=&quot;javascript:;&quot;&gt;&apos; +</div><div class="line">				            &apos;&lt;img class=&quot;mui-media-object mui-pull-left&quot; src=&quot;&apos; + app.imgServerUrl + friend.sendFaceImage + &apos;&quot;&gt;&apos; +</div><div class="line">				            &apos;&lt;span id=&quot;span_nickname&quot; class=&quot;mui-pull-right&quot;&gt;&apos; +</div><div class="line">				            	&apos;&lt;button friendId=&quot;&apos; + friend.sendUserId + &apos;&quot; type=&quot;button&quot; class=&quot;ignoreRequest mui-btn mui-btn-grey&quot; style=&quot;padding: 4px 10px;margin-right:5px;&quot;&gt;忽略&lt;/button&gt;&apos; +</div><div class="line">				            	&apos;&lt;button friendId=&quot;&apos; + friend.sendUserId + &apos;&quot; type=&quot;button&quot; class=&quot;passRequest mui-btn mui-btn-danger&quot; style=&quot;padding: 4px 10px;&quot;&gt;通过&lt;/button&gt;&apos; +</div><div class="line">				            &apos;&lt;/span&gt;&apos; +</div><div class="line">				            &apos;&lt;div class=&quot;mui-media-body&quot;&gt;&apos; +</div><div class="line">				               &apos;&lt;label&gt;&apos; + friend.sendNickname + &apos;&lt;/label&gt;&apos; +</div><div class="line">				                &apos;&lt;p class=&quot;mui-ellipsis&quot;&gt;请求添加你为朋友&lt;/p&gt;&apos; +</div><div class="line">				            &apos;&lt;/div&gt;&apos; +</div><div class="line">				        &apos;&lt;/a&gt;&apos; +</div><div class="line">					&apos;&lt;/li&gt;&apos;;</div><div class="line">			return html;</div><div class="line">		&#125;</div><div class="line">	 &lt;/script&gt;</div><div class="line">   &lt;/body&gt;</div><div class="line">     &lt;/html&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/154.png" alt=""></p>
+<h5 id="9-同意或忽略事件动态绑定"><a href="#9-同意或忽略事件动态绑定" class="headerlink" title="9 同意或忽略事件动态绑定"></a>9 同意或忽略事件动态绑定</h5><h5 id="10-同意或忽略controller"><a href="#10-同意或忽略controller" class="headerlink" title="10 同意或忽略controller"></a>10 同意或忽略controller</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> /**</div><div class="line"> * 处理好友请求:忽略/同意</div><div class="line"> * @param sendUserId</div><div class="line"> * @param receiveUserId</div><div class="line"> * @param handleType</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">@RequestMapping(value = &quot;/handleFriendRequest&quot;,method = RequestMethod.POST)</div><div class="line">public R  handleFriendRequest(String sendUserId,String receiveUserId,Integer handleType)&#123;</div><div class="line">    //1.判空</div><div class="line">    if(StringUtils.isBlank(sendUserId) || StringUtils.isBlank(receiveUserId))&#123;</div><div class="line">        return R.errorMsg(&quot;&quot;);</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">    if(StringUtils.isBlank(HandleFriendRequestTypeEnum.getMsgByType(handleType)))&#123;</div><div class="line">      return R.errorMsg(&quot;&quot;);</div><div class="line">    &#125;</div><div class="line">	</div><div class="line">    //2.处理忽略或者同意</div><div class="line">    if(handleType == (int)HandleFriendRequestTypeEnum.IGNORE.type)&#123;</div><div class="line">      //2.1 忽略好友请求,删除magic_friends_request</div><div class="line">        userServiceSV.deleteFriendRequest(sendUserId,receiveUserId);</div><div class="line">    &#125;else if(handleType==(int)HandleFriendRequestTypeEnum.PASS.type)&#123;</div><div class="line">      //2.2 同意好友请求 判断如果是通过好友请求，则互相增加好友记录到数据库对应的表</div><div class="line">        //然后删除好友请求的数据库表记录</div><div class="line">        userServiceSV.passFriendRequest(sendUserId,receiveUserId);</div><div class="line">    &#125;</div><div class="line">    return R.ok();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="11-同意或忽略的service编写"><a href="#11-同意或忽略的service编写" class="headerlink" title="11 同意或忽略的service编写"></a>11 同意或忽略的service编写</h5><p>IUserServiceSV  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">  /**</div><div class="line"> * 删除好友请求</div><div class="line"> * @param sendUserId</div><div class="line"> * @param receiveUserId</div><div class="line"> */</div><div class="line">void deleteFriendRequest(String sendUserId, String receiveUserId);</div><div class="line">	</div><div class="line">/**</div><div class="line"> * 通过好友请求</div><div class="line"> * @param sendUserId</div><div class="line"> * @param receiveUserId</div><div class="line"> */</div><div class="line">void passFriendRequest(String sendUserId, String receiveUserId);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public void deleteFriendRequest(String sendUserId, String receiveUserId) &#123;</div><div class="line">    friendsRequestMapper.deleteBySendUserIdAndReceiveUserId(sendUserId,receiveUserId);</div><div class="line">&#125;</div><div class="line">	</div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public void passFriendRequest(String sendUserId, String receiveUserId) &#123;</div><div class="line">    //1.互相保存朋友到 magic_my_friends</div><div class="line">    saveFriends(sendUserId,receiveUserId);</div><div class="line">    saveFriends(receiveUserId,sendUserId);</div><div class="line">    //2.删除magic_friends_request记录</div><div class="line">    deleteFriendRequest(sendUserId,receiveUserId);</div><div class="line">&#125;</div><div class="line">	</div><div class="line">private void saveFriends(String sendUserId, String receiveUserId)&#123;</div><div class="line">    MyFriends myFriends = new MyFriends();</div><div class="line">    String id = sid.nextShort();</div><div class="line">    myFriends.setId(id);</div><div class="line">    myFriends.setMyUserId(receiveUserId);</div><div class="line">    myFriends.setMyFriendId(sendUserId);</div><div class="line">    myFriendsMapper.insert(myFriends);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="12-好友请求忽略或拒绝前后台联调"><a href="#12-好友请求忽略或拒绝前后台联调" class="headerlink" title="12 好友请求忽略或拒绝前后台联调"></a>12 好友请求忽略或拒绝前后台联调</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">        /**</div><div class="line"> * 加载好友请求  </div><div class="line"> */</div><div class="line">function loadingFriendRequests()&#123;</div><div class="line">	var user = app.getGlobalUserInfo();</div><div class="line">	mui.ajax(app.serverUrl+&apos;/user/queryFriendRequests&apos;,&#123;</div><div class="line">				data:&#123;</div><div class="line">					userId:user.id</div><div class="line">				&#125;,</div><div class="line">				//dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">				type:&apos;post&apos;,//HTTP请求类型</div><div class="line">				timeout:10000,//超时时间设置为10秒；</div><div class="line">				//headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">				success:function(data)&#123;</div><div class="line">					 </div><div class="line">					//服务器返回响应，根据响应结果，分析是否登录成功；</div><div class="line">					//打印到集成开发工具的控制台</div><div class="line">					console.log(JSON.stringify(data));</div><div class="line">					var friend_requests_list = data.data;</div><div class="line">					var ul_friend_request_list = document.getElementById(&quot;ul_friend_request_list&quot;);</div><div class="line">					var showHtml = &quot;&quot;;</div><div class="line">				   if(data.status==200)&#123;</div><div class="line">						if (friend_requests_list != null &amp;&amp; friend_requests_list.length &gt; 0) &#123;</div><div class="line">						// 登录或者注册成功之后，保存全局用户对象到本地缓存</div><div class="line">						for(var i=0;i&lt;friend_requests_list.length;i++)&#123;</div><div class="line">							showHtml+=appendFriendRequests(friend_requests_list[i]) </div><div class="line">						&#125;</div><div class="line">						</div><div class="line">						ul_friend_request_list.innerHTML=showHtml;</div><div class="line">						//动态对忽略和通过按钮进行事件绑定  </div><div class="line">						mui(&quot;.btnOper&quot;).on(&quot;tap&quot;,&quot;.ignoreRequest&quot;,function(e)&#123;</div><div class="line">							var friendId = this.getAttribute(&quot;friendId&quot;);</div><div class="line">							handleFriendRequest(friendId,user.id,0);</div><div class="line">						&#125;);</div><div class="line">						mui(&quot;.btnOper&quot;).on(&quot;tap&quot;,&quot;.passRequest&quot;,function(e)&#123;</div><div class="line">							var friendId = this.getAttribute(&quot;friendId&quot;);</div><div class="line">							handleFriendRequest(friendId,user.id,1);</div><div class="line">						&#125;);</div><div class="line">					&#125;else&#123;</div><div class="line">						 ul_friend_request_list.innerHTML=&quot;&quot;;</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">		&#125;);</div><div class="line">   &#125;</div><div class="line">       </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        /**</div><div class="line"> * 处理好友请求  </div><div class="line"> */</div><div class="line">function handleFriendRequest(sendUserId,receiveUserId,handleType)&#123;</div><div class="line">		mui.ajax(app.serverUrl + &quot;/user/handleFriendRequest&quot;,&#123;</div><div class="line">		data:&#123;</div><div class="line">			sendUserId:sendUserId,</div><div class="line">			receiveUserId:receiveUserId,</div><div class="line">			handleType:handleType</div><div class="line">		&#125;,</div><div class="line">		//dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">		type:&apos;post&apos;,//HTTP请求类型</div><div class="line">		timeout:10000,//超时时间设置为10秒；</div><div class="line">		//headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">		success:function(data)&#123;</div><div class="line">			// 重新加载好友请求记录</div><div class="line">			loadingFriendRequests();</div><div class="line">		&#125;</div><div class="line">	&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="13-构建扫描器"><a href="#13-构建扫描器" class="headerlink" title="13 构建扫描器"></a>13 构建扫描器</h5><ol>
+<li>接下来我们实现扫码添加朋友,扫码实现如下所示功能<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/155.png" alt="">  </li>
+<li>要实现如上功能,需要使用h5+的原生API:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/156.png" alt="">    </li>
+</ol>
+<p>使用以下对象进行扫描<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/157.png" alt="">  </p>
+<p>#######  13.1 创建scanme.html文件  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">     &lt;!doctype html&gt;</div><div class="line">     &lt;html&gt;</div><div class="line">	</div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;UTF-8&quot;&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;script src=&quot;js/mui.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;link href=&quot;css/mui.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/header.css&quot; /&gt;</div><div class="line">	&lt;style&gt;</div><div class="line">			 scanComponent &#123;</div><div class="line">				width: 100%;</div><div class="line">				position: absolute;</div><div class="line">				top: 44px;</div><div class="line">				bottom: 0px;</div><div class="line">				background:;</div><div class="line">				text-align: center;</div><div class="line">			&#125;</div><div class="line">	&lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">	</div><div class="line">&lt;body &gt;</div><div class="line">	</div><div class="line">	&lt;header class=&quot;mui-bar mui-bar-nav title&quot; style=&quot;position: fixed;&quot;&gt;</div><div class="line">		&lt;a class=&quot;mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color&quot;&gt;&lt;/a&gt;</div><div class="line">		&lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b id=&quot;chatting-nickname&quot;&gt;扫一扫&lt;/b&gt;&lt;/h1&gt;</div><div class="line">	&lt;/header&gt;</div><div class="line">	</div><div class="line">	&lt;!--定义扫描容器--&gt;</div><div class="line">	 &lt;div id= &quot;scanComponent&quot;&gt;</div><div class="line">	 	</div><div class="line">	 	</div><div class="line">	 &lt;/div&gt;</div><div class="line">	</div><div class="line">	&lt;script type=&quot;application/javascript&quot; src=&quot;js/app.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">		mui.init();</div><div class="line">		</div><div class="line">		mui.plusReady(function()&#123; </div><div class="line">		   //为了防止,在低版本手机时候扫描出现卡顿,我们延迟500ms时候再启动</div><div class="line">		   setTimeout(&quot;startScan()&quot;,&quot;500&quot;);</div><div class="line">		&#125;);</div><div class="line">		</div><div class="line">		var scan = null;</div><div class="line">		function startScan()&#123;</div><div class="line">			scan = new plus.barcode.Barcode(&apos;scanComponent&apos;);</div><div class="line">            scan.onmarked = onmarked;//绑定的事件,在扫描完毕之后做处理</div><div class="line">            scan.start();//开启扫描  </div><div class="line">		&#125;</div><div class="line">		</div><div class="line">		</div><div class="line">		function onmarked( type, result ) &#123;</div><div class="line">           alert( text+result );</div><div class="line">            &#125;</div><div class="line">	&lt;/script&gt;</div><div class="line">   &lt;/body&gt;</div><div class="line">     &lt;/html&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="14-扫码器颜色自定义"><a href="#14-扫码器颜色自定义" class="headerlink" title="14 扫码器颜色自定义"></a>14 扫码器颜色自定义</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/159.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/158.png" alt="">    </p>
+<h5 id="15-扫码添加好友联调"><a href="#15-扫码添加好友联调" class="headerlink" title="15 扫码添加好友联调"></a>15 扫码添加好友联调</h5><p>我们用手机去扫一扫之前的二维码出现以下情况:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/160.png" alt=""><br>此时是执行以下事件:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">function onmarked( type, result ) &#123;</div><div class="line">      alert( text+result );</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>我们在搜索添加好友中已经实现了添加好友操作<br>现在我们在扫一扫中直接执行那个方法就可以了  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">   function onmarked( type, result ) &#123;</div><div class="line">         //alert( text+result );</div><div class="line">         if(type==0)&#123;</div><div class="line">         var content = result.split(&quot;muxin_qrcode:&quot;);</div><div class="line">         if (content.length != 2) &#123;</div><div class="line">			mui.alert(result)</div><div class="line">		&#125; else &#123;</div><div class="line">			addFriend(content[1]);</div><div class="line">			//扫描之后会结束,我们再次开启  </div><div class="line">			scan.start();</div><div class="line">		&#125;</div><div class="line">         	</div><div class="line">         &#125;</div><div class="line">          &#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 扫描添加好友</div><div class="line"> * @param &#123;Object&#125; newFriendname</div><div class="line"> */</div><div class="line">function addFriend(newFriendname)&#123;</div><div class="line">	var user = app.getGlobalUserInfo();</div><div class="line">	mui.ajax(app.serverUrl + &quot;/user/searchFriends?myUserId=&quot;+user.id+&quot;&amp;friendUsername=&quot;+newFriendname,&#123;</div><div class="line">			data:&#123;&#125;,</div><div class="line">			dataType:&apos;json&apos;,//服务器返回json格式数据</div><div class="line">			type:&apos;post&apos;,//HTTP请求类型</div><div class="line">			timeout:10000,//超时时间设置为10秒；</div><div class="line">			headers:&#123;&apos;Content-Type&apos;:&apos;application/json&apos;&#125;,	              </div><div class="line">			success:function(data)&#123;</div><div class="line">				 //3.4 关闭等待</div><div class="line">				 plus.nativeUI.closeWaiting();</div><div class="line">				 console.log(JSON.stringify(data));</div><div class="line">				 if(data.status==200)&#123;</div><div class="line">				 	//获取成功  之后搜索到朋友页面</div><div class="line">				 	//通过extras可以把朋友数据携带过去  </div><div class="line">				 	mui.openWindow(&#123;</div><div class="line">				 		url:&quot;searchFriendsResult.html&quot;,</div><div class="line">				 		id:&quot;searchFriendsResult.html&quot;,</div><div class="line">				 		styles: &#123;&#125;,</div><div class="line">				 		extras: &#123;</div><div class="line">							willBeFriend: data.data</div><div class="line">						&#125;</div><div class="line">				 	&#125;);</div><div class="line">					//mui.back();</div><div class="line">				 &#125;else&#123;</div><div class="line">				 	//3.6给出提示</div><div class="line">				 	app.showToast(data.msg,&quot;error&quot;);</div><div class="line">				 &#125;</div><div class="line">			&#125;</div><div class="line">		&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="16-延时加载预处理数据"><a href="#16-延时加载预处理数据" class="headerlink" title="16 延时加载预处理数据"></a>16 延时加载预处理数据</h5><ol>
+<li>我们卸载我们手机基座时候,其他人发送了加我为好友的请求,按理说:我应该在重新安装基座时候,会收到其他好友请求。 但是我们重装后没有立马收到请求而是在点击其他页面再回点时候出现。  </li>
+<li><p>因为我们只是给chatlist.html当前时间绑定了show事件，而不是refresh时间<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/161.png" alt="">  </p>
+</li>
+<li><p>还有我们在index.html时候要做一个延迟加载,当好友请求发送过来之后,在显示此时聊天页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/162.png" alt="">  </p>
+</li>
+</ol>
+<h5 id="17-mui-自带索引列表模板讲解"><a href="#17-mui-自带索引列表模板讲解" class="headerlink" title="17 mui 自带索引列表模板讲解"></a>17 mui 自带索引列表模板讲解</h5><p>在开发通讯录列表时候,mui其实自己已经自带了这样的列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/163.png" alt=""><br>这里面携带了很多mui自带的demo列表,如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/164.png" alt="">    </p>
+<p>然后我们可以下拉到索引列表,然后点击如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/165.png" alt=""><br>然后列表为<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/166.png" alt=""><br>并自带可搜索功能<br>在indexed-list.html中就是展示了对应的列表  </p>
+<h5 id="18-通讯录列表整合"><a href="#18-通讯录列表整合" class="headerlink" title="18 通讯录列表整合"></a>18 通讯录列表整合</h5><p>参考着indexed-list.html我们把响应的文件拷贝到我们自己的前端项目工程中  </p>
+<ol>
+<li>拷贝mui.indexedlist.css  </li>
+<li>拷贝mui.indexedlist.js  </li>
+<li>在contact.html中引入css和js  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/167.png" alt=""> </p>
+<h5 id="19-图文列表和通讯录整合增加用户头像显示"><a href="#19-图文列表和通讯录整合增加用户头像显示" class="headerlink" title="19 图文列表和通讯录整合增加用户头像显示"></a>19 图文列表和通讯录整合增加用户头像显示</h5><ol>
+<li>目前我们已经集成了通讯录列表,但是没有列表头像,我们要在其左边设置头像，并且我们将其设置为图文标签机上class:mui-media  </li>
+<li>并且给图片img好文字div以及li设置样式  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/168.png" alt=""> </p>
+<h5 id="20-查询用户的所有好友列表接口"><a href="#20-查询用户的所有好友列表接口" class="headerlink" title="20 查询用户的所有好友列表接口"></a>20 查询用户的所有好友列表接口</h5><p>controller:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">  /**</div><div class="line"> * 根据userId查询我的好友:需要返回朋友信息,我们可以定义一个VO</div><div class="line"> * @param userId</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">@RequestMapping(value = &quot;/queryMyFriends&quot;,method = RequestMethod.POST)</div><div class="line">public R queryMyFriends(String userId)&#123;</div><div class="line">        if(StringUtils.isBlank(userId))&#123;</div><div class="line">            return R.errorMsg(&quot;userId不能为空&quot;);</div><div class="line">        &#125;</div><div class="line">        List&lt;MyFriendsVO&gt;  myFriends =  userServiceSV.queryMyFriends(userId);</div><div class="line">        return R.ok(myFriends);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>IServiceSV:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> /**</div><div class="line"> * 查询我的朋友列表</div><div class="line"> * @param userId</div><div class="line"> * @return</div><div class="line"> */</div><div class="line">List&lt;MyFriendsVO&gt; queryMyFriends(String userId);</div></pre></td></tr></table></figure>
+</code></pre><p>UserServiceSVImpl:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"> @Transactional(rollbackFor = Exception.class)</div><div class="line">@Override</div><div class="line">public List&lt;MyFriendsVO&gt; queryMyFriends(String userId) &#123;</div><div class="line">   return myFriendsMapper.queryMyFriends(userId);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>mapper.xml:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">&lt;select id=&quot;queryMyFriends&quot; resultType=&quot;com.cc.pojo.vo.MyFriendsVO&quot; parameterType=&quot;java.lang.String&quot;&gt;</div><div class="line">  select</div><div class="line">    u.id as friendUserId,</div><div class="line">    u.username as friendUsername,</div><div class="line">    u.face_image as friendFaceImage,</div><div class="line">    u.nickname as friendNickname</div><div class="line">   from  magic_my_friends mf</div><div class="line">   left join magic_users u</div><div class="line">     on u.id = mf.my_friend_id</div><div class="line">    where mf.my_user_id = #&#123;userId&#125;</div><div class="line"> &lt;/select&gt;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="21-手机端获取好友列表保存到本地"><a href="#21-手机端获取好友列表保存到本地" class="headerlink" title="21 手机端获取好友列表保存到本地"></a>21 手机端获取好友列表保存到本地</h5><h6 id="21-1-手机端获取好友列表"><a href="#21-1-手机端获取好友列表" class="headerlink" title="21.1 手机端获取好友列表"></a>21.1 手机端获取好友列表</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">       ///获取后端好友列表  </div><div class="line">function fetchContactList()&#123;</div><div class="line">	  alert(&quot;fetchContactList&quot;);</div><div class="line">	    var user = app.getGlobalUserInfo();</div><div class="line">		mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,&#123;</div><div class="line">				data:&#123;</div><div class="line">					userId:user.id</div><div class="line">				&#125;,</div><div class="line">				type:&apos;post&apos;,//HTTP请求类型</div><div class="line">				timeout:10000,//超时时间设置为10秒；</div><div class="line">				success:function(data)&#123;</div><div class="line">					if(data.status==200)&#123;</div><div class="line">						//获取到好友列表后,保存到全局</div><div class="line">						app.setContactList(data.data);</div><div class="line">						 console.log(JSON.stringify(data));</div><div class="line">					&#125;else&#123;</div><div class="line">					 //失败给出提示</div><div class="line">					    app.showToast(data.msg,&quot;error&quot;)</div><div class="line">					&#125;</div><div class="line">				&#125;</div><div class="line">			&#125;);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="21-2-好友列表保存到本地"><a href="#21-2-好友列表保存到本地" class="headerlink" title="21.2 好友列表保存到本地"></a>21.2 好友列表保存到本地</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/169.png" alt="">  </p>
+<h5 id="22-定义通讯录好友列表模型"><a href="#22-定义通讯录好友列表模型" class="headerlink" title="22 定义通讯录好友列表模型"></a>22 定义通讯录好友列表模型</h5><ol>
+<li><p>通讯录好友模型我们用二维数据表示:前面表示字母A,B,C,D,…,Z 第二维是表示具体的friend对象  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">var contact = [</div><div class="line">    [],[],[]</div><div class="line">]</div></pre></td></tr></table></figure>
+</li>
+<li><p>获取到联系人列表后,我们就需要把其丢到之前的二维数组里面去,那么我们需要获取到联系人昵称,根据昵称找到联系人首字母  </p>
+</li>
+<li>在获取首字母之前,我们需要根据昵称获取拼音,然后截取第一个字符  </li>
+<li><p>根据昵称获取拼音使用:nickname.js插件,引入nickname.js<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/170.png" alt="">  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">      &lt;script src=&quot;js/nickname.js&quot;&gt;&lt;/script&gt;  </div><div class="line"></div><div class="line">&lt;script type=&quot;text/javascript&quot;&gt;</div><div class="line">	mui.init();</div><div class="line">	//26个字母外加 # 号 </div><div class="line">	var enWords=[</div><div class="line">	  &apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;D&apos;,&apos;E&apos;,&apos;F&apos;,&apos;G&apos;,</div><div class="line">	  &apos;H&apos;,&apos;I&apos;,&apos;J&apos;,&apos;K&apos;,&apos;L&apos;,&apos;M&apos;,&apos;N&apos;,</div><div class="line">	  &apos;O&apos;,&apos;P&apos;,&apos;Q&apos;,&apos;R&apos;,&apos;S&apos;,&apos;T&apos;,&apos;U&apos;,</div><div class="line">	  &apos;V&apos;,&apos;W&apos;,&apos;X&apos;,&apos;Y&apos;,&apos;Z&apos;,&apos;#&apos;</div><div class="line">	];</div><div class="line">	//存储的二维数组</div><div class="line">	var contactArray = [</div><div class="line">	 [],[],[],[],[],[],[],</div><div class="line">	 [],[],[],[],[],[],[]</div><div class="line">	];</div><div class="line">	</div><div class="line">	mui.plusReady(function()&#123;</div><div class="line">		</div><div class="line">		fetchContactList();</div><div class="line">		//在当前页面show的时候,加载出列表</div><div class="line">		var thisWebview = plus.webview.currentWebview();</div><div class="line">		thisWebview.addEventListener(&quot;show&quot;,function()&#123;</div><div class="line">			showList();</div><div class="line">		&#125;);</div><div class="line">	&#125;);</div><div class="line">	</div><div class="line">	//从缓存中获取联系人列表,并且渲染到页面  </div><div class="line">	function renderContactPage()&#123;</div><div class="line">		//1.获取联系人列表</div><div class="line">		var friendList = app.getContactList();</div><div class="line">		//2.循环好友列表,转换为拼音  </div><div class="line">		for(var i=0;i&lt;friendList.length;i++)&#123;</div><div class="line">			var friend = friendList[i];</div><div class="line">			//2.1转换拼音</div><div class="line">			var pinyin = words.getPingYinFromWords(friend.friendNickname);</div><div class="line">			// 2.2 截取拼音的首字母</div><div class="line">			var firstChar = pinyin.substr(0,1).toUpperCase();</div><div class="line">			//2.3 获取首字母在二维数组中的位置</div><div class="line">			var order = getOrderOfEnWords(firstChar);</div><div class="line">			// 2.4 获得顺序之后，塞入朋友</div><div class="line">			contactArray[order].push(friend);</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">          function getOrderOfEnWords(enChar)&#123;</div><div class="line">          	//获取英文字母在27个字母的位置,我们首先需要构造27个字母数组</div><div class="line">          	for(var i=0;i&lt;enWords.length;i++)&#123;</div><div class="line">          		if(enChar[i]==enChar)&#123;</div><div class="line">          		 return i;	</div><div class="line">          		&#125;</div><div class="line">          	&#125;</div><div class="line">          	//没有匹配到(数字,表情,其他特殊字符):把数组长度26返回出去</div><div class="line">          	return enWords.length-1;</div><div class="line">          &#125;</div><div class="line">          </div><div class="line">          </div><div class="line">	///获取后端好友列表  </div><div class="line">	function fetchContactList()&#123;</div><div class="line">		  alert(&quot;fetchContactList&quot;);</div><div class="line">		    var user = app.getGlobalUserInfo();</div><div class="line">			mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,&#123;</div><div class="line">					data:&#123;</div><div class="line">						userId:user.id</div><div class="line">					&#125;,</div><div class="line">					type:&apos;post&apos;,//HTTP请求类型</div><div class="line">					timeout:10000,//超时时间设置为10秒；</div><div class="line">					success:function(data)&#123;</div><div class="line">						if(data.status==200)&#123;</div><div class="line">							//获取到好友列表后,保存到全局</div><div class="line">							app.setContactList(data.data);</div><div class="line">							 console.log(JSON.stringify(data));</div><div class="line">						&#125;else&#123;</div><div class="line">						 //失败给出提示</div><div class="line">						    app.showToast(data.msg,&quot;error&quot;)</div><div class="line">						&#125;</div><div class="line">					&#125;</div><div class="line">				&#125;);</div><div class="line">	&#125;</div><div class="line">	/**</div><div class="line">	 * 展示列表</div><div class="line">	 */</div><div class="line">	function showList()&#123;</div><div class="line">		var list = document.getElementById(&quot;list&quot;);</div><div class="line">		list.style.height = document.body.offsetHeight+&quot;px&quot;;</div><div class="line">		window.indexedList = new mui.IndexedList(list);</div><div class="line">	&#125;</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h5 id="23-通讯录列表渲染展现"><a href="#23-通讯录列表渲染展现" class="headerlink" title="23 通讯录列表渲染展现"></a>23 通讯录列表渲染展现</h5><ol>
+<li>其实就是根据我们的二维数组做一个双重循环  </li>
+<li><p>双重循环时候对以下基本元素进行拼接  </p>
+  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">         &lt;li data-group=&quot;A&quot; class=&quot;mui-table-view-divider mui-indexed-list-group&quot;&gt;A&lt;/li&gt;</div><div class="line">&lt;li class=&quot;mui-media  mui-table-view-cell mui-indexed-list-item&quot; style=&quot;padding: 8px 10px;&quot;&gt;</div><div class="line">&lt;img  class=&quot;mui-media-object mui-pull-left&quot; style=&quot;max-width: 35px;height: 35px;&quot; src=&quot;css/registLogin/arrow.jpg&quot;/&gt;</div><div class="line">&lt;div class=&quot;mui-media-body&quot; style=&quot;line-height: 35px;&quot;&gt;yxm&lt;/div&gt;</div><div class="line">&lt;/li&gt;</div></pre></td></tr></table></figure>
+</li>
+<li><p>为了以后方便,我们在li标签之上,做上相应的属性标识,用于以后传值:比如:friendUserId,friendNickname,friendFaceImage  </p>
+</li>
+<li>因为其二维数组是累加的,所以需要在我们渲染完毕之后做一个清空,清空就是重新赋空值  </li>
+<li>ul绑定id=”contactList” 进行渲染  </li>
+</ol>
+<pre><code>```
+
+ &lt;script type=&quot;text/javascript&quot;&gt;
+       mui.init();
+       //26个字母外加 # 号 
+       var enWords=[
+         &apos;A&apos;,&apos;B&apos;,&apos;C&apos;,&apos;D&apos;,&apos;E&apos;,&apos;F&apos;,&apos;G&apos;,
+         &apos;H&apos;,&apos;I&apos;,&apos;J&apos;,&apos;K&apos;,&apos;L&apos;,&apos;M&apos;,&apos;N&apos;,
+         &apos;O&apos;,&apos;P&apos;,&apos;Q&apos;,&apos;R&apos;,&apos;S&apos;,&apos;T&apos;,&apos;U&apos;,
+         &apos;V&apos;,&apos;W&apos;,&apos;X&apos;,&apos;Y&apos;,&apos;Z&apos;,&apos;#&apos;
+       ];
+       //存储的二维数组
+       var contactArray = [
+        [],[],[],[],[],[],[],
+        [],[],[],[],[],[],[]
+       ];
+
+       mui.plusReady(function(){
+
+           fetchContactList();
+           //在当前页面show的时候,加载出列表
+           var thisWebview = plus.webview.currentWebview();
+           thisWebview.addEventListener(&quot;show&quot;,function(){
+               //alert(&quot;contact show&quot;);
+               // 从缓存中获取联系人列表，并且渲染到页面
+               renderContactPage();
+               // 显示通讯录
+               showList();
+           });
+       });
+
+       //从缓存中获取联系人列表,并且渲染到页面  
+       function renderContactPage(){
+           //1.获取联系人列表
+           var friendList = app.getContactList();
+           console.log(&quot;app.getContactList:&quot;+JSON.stringify(friendList));
+           //2.循环好友列表,转换为拼音  
+           for(var i=0;i&lt;friendList.length;i++){
+               //alert(i);
+               var friend = friendList[i];
+               //2.1转换拼音
+               var pinyin = words.getPingYinFromWords(friend.friendNickname);
+               // 2.2 截取拼音的首字母
+               var firstChar = pinyin.substr(0,1).toUpperCase();
+               //2.3 获取首字母在二维数组中的位置
+               var order = getOrderOfEnWords(firstChar);
+               // 2.4 获得顺序之后，塞入朋友
+               contactArray[order].push(friend);
+           };
+
+           // 3. 构建通讯录html进行渲染
+           var contactHtml = &quot;&quot;;
+           for(var i=0;i&lt;contactArray.length;i++){
+               //获取每一个order下的friend数组
+               var friendArray = contactArray[i];
+               //判断非空
+               if(friendArray.length&gt;0){
+                   var nicknameStarter = enWords[i];
+                   contactHtml +=&apos;&lt;li data-group=&quot;&apos;+nicknameStarter+&apos;&quot; class=&quot;mui-table-view-divider mui-indexed-list-group&quot;&gt;&apos;+nicknameStarter+&apos;&lt;/li&gt;&apos;;
+                    for(var j=0;j&lt;friendArray.length;j++){
+                        contactHtml +=&apos;&lt;li friendUserId=&quot;&apos; + friendArray[j].friendUserId + &apos;&quot; friendNickname=&quot;&apos; + friendArray[j].friendNickname + &apos;&quot; friendFaceImage=&quot;&apos; + friendArray[j].friendFaceImage + &apos;&quot; class=&quot;mui-media  mui-table-view-cell mui-indexed-list-item&quot; style=&quot;padding: 8px 10px;&quot;&gt;&apos;+
+                       &apos;&lt;img  class=&quot;mui-media-object mui-pull-left&quot; style=&quot;max-width: 35px;height: 35px;&quot; src=&quot;&apos;+ app.imgServerUrl + friendArray[j].friendFaceImage+&apos;&quot;/&gt;&apos;+
+                       &apos;&lt;div class=&quot;mui-media-body&quot; style=&quot;line-height: 35px;&quot;&gt;&apos; + friendArray[j].friendNickname + &apos;&lt;/div&gt;&apos;+
+                       &apos;&lt;/li&gt;&apos;;
+                    }
+               }
+           }
+
+           //渲染列表
+           document.getElementById(&quot;contactList&quot;).innerHTML = contactHtml;
+           // 清空数组
+           clearContactArray();
+       }
+
+       function getOrderOfEnWords(enChar){
+           //获取英文字母在27个字母的位置,我们首先需要构造27个字母数组
+           for(var i=0;i&lt;enWords.length;i++){
+               if(enChar[i]==enChar){
+                return i;    
+               }
+           }
+           //没有匹配到(数字,表情,其他特殊字符):把数组长度26返回出去
+           return enWords.length-1;
+       }
+
+       /**
+        * 清空数组
+        */
+       function clearContactArray(){
+           contactArray = [
+          [],[],[],[],[],[],[],
+          [],[],[],[],[],[],[]
+         ];
+       }
+
+       ///获取后端好友列表  
+       function fetchContactList(){
+             // alert(&quot;fetchContactList&quot;);
+               var user = app.getGlobalUserInfo();
+               mui.ajax(app.serverUrl+&apos;/user/queryMyFriends&apos;,{
+                       data:{
+                           userId:user.id
+                       },
+                       type:&apos;post&apos;,//HTTP请求类型
+                       timeout:10000,//超时时间设置为10秒；
+                       success:function(data){
+                           if(data.status==200){
+                               //获取到好友列表后,保存到全局
+                                app.setContactList(data.data);
+                                console.log(&quot;contactList:&quot;+JSON.stringify(data));
+                           }else{
+                            //失败给出提示
+                               app.showToast(data.msg,&quot;error&quot;)
+                           }
+                       }
+                   });
+       }
+       /**
+        * 展示列表
+        */
+       function showList(){
+           var list = document.getElementById(&quot;list&quot;);
+           list.style.height = document.body.offsetHeight+&quot;px&quot;;
+           window.indexedList = new mui.IndexedList(list);
+       }
+   &lt;/script&gt;
+
+```      
+</code></pre><h5 id="24-好友请求接收方更新通讯录"><a href="#24-好友请求接收方更新通讯录" class="headerlink" title="24 好友请求接收方更新通讯录"></a>24 好友请求接收方更新通讯录</h5><ol>
+<li><p>之前遗留的小问题:我们之前在chatlist.html中操作好友请求时候<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/171.png" alt="">  </p>
+</li>
+<li><p>通过好友请求之后,对于我自己的通讯录,我们要做一次更新<br>我们需要在上面进行一次查询,我们需要在下面接口中进行一次查询返回<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/172.png" alt="">  </p>
+</li>
+<li><p>前端重新获取,并保存到全局缓存中。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/173.png" alt=""> </p>
+</li>
+<li><p>此时发送方的好友列表,我们暂时还是不做,默认为TODO.等到websocket做完之后,我们再次实现。    </p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/12/12/netty实践-十九-发现页面与通讯录相关功能开发/" class="archive-article-date">
+  	<time datetime="2018-12-12T14:56:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-十八-用户注册-登录-个人信息" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1311,102 +2094,9 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
 
 
   
-    <article id="post-java爬虫-19-数据可视化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/17/java爬虫-19-数据可视化/">java爬虫-19-数据可视化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/17/java爬虫-19-数据可视化/" class="archive-article-date">
-  	<time datetime="2018-11-17T09:33:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-java爬虫-18-全文检索" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/17/java爬虫-18-全文检索/">java爬虫-18-全文检索</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/17/java爬虫-18-全文检索/" class="archive-article-date">
-  	<time datetime="2018-11-17T09:29:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-17</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/49/">49</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
     </nav>
   
 
@@ -1469,7 +2159,7 @@ public void onApplicationEvent(ContextRefreshedEvent crt) {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 10.56px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 11.67px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.11px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.56px;">websocket</a> <a href="/tags/work/" style="font-size: 14.44px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.56px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 10.53px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
