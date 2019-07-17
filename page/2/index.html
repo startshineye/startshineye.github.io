@@ -931,7 +931,9 @@ server:
 <li>出现上面问题的原因如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/86.png" alt=""> </li>
 </ol>
 <h5 id="17-系统变量"><a href="#17-系统变量" class="headerlink" title="17.系统变量"></a>17.系统变量</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">setSessionParam(index, &quot;callid&quot;, sinfo.sid.substr(0, sinfo.sid.length() - 5), sinfo);</div><div class="line">setSessionParam(index, &quot;caller&quot;, sinfo.caller, sinfo);</div><div class="line">setSessionParam(index, &quot;called&quot;, sinfo.called, sinfo);</div><div class="line">setSessionParam(index, &quot;callop&quot;, sinfo.callop, sinfo);</div><div class="line">setSessionParam(index, &quot;dropcause&quot;, ::FunUtil::intToString(sinfo.dropcause), sinfo);</div><div class="line">setSessionParam(index, &quot;starttime&quot;, sinfo.iamtime, sinfo);</div><div class="line">setSessionParam(index, &quot;starttimesec&quot;, ::FunUtil::intToString(sinfo.iamtimestp), sinfo);</div><div class="line">setSessionParam(index, &quot;endtime&quot;,sinfo.reltime, sinfo);</div><div class="line">setSessionParam(index, &quot;anctime&quot;, sinfo.anctime, sinfo);</div><div class="line">setSessionParam(index, &quot;entid&quot;, ::FunUtil::intToString(sinfo.entid), sinfo);</div><div class="line">setSessionParam(index, &quot;notifyid&quot;, ::FunUtil::intToString(sinfo.vsTask.notifyid), sinfo);</div><div class="line">setSessionParam(index, &quot;memberid&quot;, ::FunUtil::intToString(sinfo.vsTask.memberid), sinfo);</div><div class="line">setSessionParam(index, &quot;userid&quot;, ::FunUtil::intToString(sinfo.vsTask.userid), sinfo);</div><div class="line">setSessionParam(index, &quot;extend&quot;, sinfo.vsTask.extinfo, sinfo);</div></pre></td></tr></table></figure>
-<h5 id="18-平台搭建"><a href="#18-平台搭建" class="headerlink" title="18.平台搭建"></a>18.平台搭建</h5><p>我们有时候需要搭建新的平台环境,常见的方法是从其他环境上整理数据,然后拷贝数据到新的环境下。  </p>
+<h5 id="18-平台搭建"><a href="#18-平台搭建" class="headerlink" title="18.平台搭建"></a>18.平台搭建</h5><p>搭建平台之前我们需要安装数据库:<br><a href="https://www.cnblogs.com/freely/p/8087885.html" target="_blank" rel="external">https://www.cnblogs.com/freely/p/8087885.html</a>  </p>
+<p>我们有时候需要搭建新的平台环境,常见的方法是从其他环境上整理数据,然后拷贝数据到新的环境下。  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">tar -zcvf cc.tar.gz /cc --exclude=/cc/log --exclude=/cc/data --exclude=/cc/freeswitch/bin/da_record  --exclude=/cc/bin/log  --exclude=/cc/apps  --exclude=/cc/tomcat-acdgate --exclude=/cc/tomcat-loglook</div></pre></td></tr></table></figure>
 <ol>
 <li><p>1、压缩文件:cc下面除了log、data两个别压，其他都压。data里面的 全程录音别压、压缩后文件如下(大概900M):<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/91.png" alt="">   </p>
 </li>
@@ -950,15 +952,20 @@ server:
 <p>修改freeswitch连接数据库:freeswitch/scripts/user.lua<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/4.png" alt="">   </p>
 <p>修改ipcc呼叫数据源配置:<br>将acd.cfg、dyflow.cfg、notify.cfg,fsg.cfg、dialout.cfg文件里面数据库用户密码改一下<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/5.png" alt=""></p>
 <ol>
-<li>6、安装数据库(在数据库服务器上装、一定要安装配置日志，避免数据丢失)、odbc并配置、先配置数据库试试 （数据库导入脚本 数据库脚本找小叶要一份最新的）<br>数据配置后要配置odbc yccc数据源（具体安装时候根据情况配置）<br>安装数据库按照基本的数据库安装<br>mysql-odbc驱动安装:  </li>
+<li>6、安装数据库(在数据库服务器上装、一定要安装配置日志，避免数据丢失)、odbc并配置、先配置数据库试试 （数据库导入脚本 数据库脚本找小叶要一份最新的）<br>数据配置后要配置odbc yccc数据源（具体安装时候根据情况配置）</li>
 </ol>
+<p>配置是否成功，执行以下指令:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">isql yccc</div></pre></td></tr></table></figure>
+<p>如果连接失败、查看一下地方:<br>a./etc/odbc.ini(内网访问尽量用127.0.0.1、127不用寻找路由)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/28.png" alt=""><br>b./etc/odbcinst.ini<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/27.png" alt=""><br>c.连接成功的情况<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/29.png" alt=""><br>安装数据库按照基本的数据库安装<br>mysql-odbc驱动安装:  </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">yum install mysql-connector-odbc</div></pre></td></tr></table></figure>
-<p>/etc/odbc.ini  </p>
+<p>/etc/odbc.ini<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/25.png" alt=""></p>
 <ol>
 <li><p>7、安装gdb  yum install gdb （不是必须）  安装gc++: yum install gcc++</p>
 </li>
 <li><p>8、配置jdk 1.8环境 JAVA_HOME CLASSPATH等<br>1）执行：vi /etc/profile 在文件末尾添加<br>export JAVA_HOME=/cc/jdk1.8/jdk1.8.0_141<br>　　 export JRE_HOME=$JAVA_HOME/jre<br>　　 export CLASSPATH=.:$JAVA_HOME/lib:$JRE_HOME/lib<br>　　 export PATH=$JAVA_HOME/bin:$PATH</p>
 <p>2）使配置生效：source /etc/profile<br>3）执行java -version 确认配置生效</p>
+</li>
+<li><p>9.修改ag.cfg里面的sidhead前缀、这个是用于表示区分集群每个节点数据、将ag重启一下、这样数据就不重复了 将来合库cdr不会有重复。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/26.png" alt=""> </p>
 </li>
 </ol>
 <h6 id="9-dyflow启动失败解决方案"><a href="#9-dyflow启动失败解决方案" class="headerlink" title="9.dyflow启动失败解决方案:"></a>9.dyflow启动失败解决方案:</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/6.png" alt=""></p>
@@ -1021,6 +1028,7 @@ server:
       
         <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.搭建jenkins环境时候,关联马原账号老是出错,以下是解决方法</p>
 <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>参考:<a href="https://blog.csdn.net/zzpzheng/article/details/52132311" target="_blank" rel="external">https://blog.csdn.net/zzpzheng/article/details/52132311</a></p>
+<p><a href="https://www.jianshu.com/p/5f671aca2b5a" target="_blank" rel="external">https://www.jianshu.com/p/5f671aca2b5a</a><br><a href="https://www.cnblogs.com/rslai/p/8135460.html" target="_blank" rel="external">https://www.cnblogs.com/rslai/p/8135460.html</a><br><a href="https://www.cnblogs.com/along21/p/9724036.html" target="_blank" rel="external">https://www.cnblogs.com/along21/p/9724036.html</a>  </p>
 
       
     </div>

@@ -191,6 +191,7 @@
 <li><p>7.同步文件夹<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/15.png" alt=""> </p>
 </li>
 </ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ossutil cp -r /cc/data/ivrrecord2/20190619   oss://fz-oss/picccallcenter/ivrrecord2/20190619</div></pre></td></tr></table></figure>
 
       
     </div>
@@ -251,6 +252,55 @@
 </li>
 </ol>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class AddResponseHeaderFilter extends ZuulFilter&#123;</div><div class="line">    @Override</div><div class="line">    public String filterType() &#123;</div><div class="line">        return POST_TYPE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int filterOrder() &#123;</div><div class="line">        return SEND_RESPONSE_FILTER_ORDER - 1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean shouldFilter() &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public Object run() &#123;</div><div class="line">        RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">        HttpServletResponse response = requestContext.getResponse();</div><div class="line">        response.setHeader(&quot;X-Foo&quot;, UUID.randomUUID().toString());</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="8-2-Zuul-限流"><a href="#8-2-Zuul-限流" class="headerlink" title="8.2 Zuul:限流"></a>8.2 Zuul:限流</h4><h5 id="8-2-1-限流基本理论"><a href="#8-2-1-限流基本理论" class="headerlink" title="8.2.1 限流基本理论"></a>8.2.1 限流基本理论</h5><ol>
+<li>1.Zuul充当的是api网关的角色、每个请求都会经过它、在他上面做api限流保护、防止攻击。比如我们的api是发短信的、我们需要限制客户端请求速度、从而在一定程序上抵制短信大攻击、降低损失。</li>
+<li>2.Zuul的限流是放在前置过滤去去做的、更具体来说、时机是在请求被转发之前调用。如果前置过滤器有多个操作、限流放到最靠前那个。比如:Zuul前置过滤器里面有限流、鉴权。那么限流应该早于鉴权。</li>
+<li>3.限流方案很多，这里以一种来说:令牌桶流。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/16.png" target="_blank" rel="external"></a><br>a.中间桶(token bucket)：是存放令牌的、所以叫做令牌桶。<br>b.最上面会以固定的速率往令牌桶中添加令牌、如果已经放满了就丢掉。<br>c.外部请求过来、会从令牌桶中获取令牌、拿到令牌之后才可以继续往前走。如果拿不到令牌直接被拒绝。其实是和买房一样。 </li>
+</ol>
+<h5 id="8-2-2-限流代码实现"><a href="#8-2-2-限流代码实现" class="headerlink" title="8.2.2 限流代码实现"></a>8.2.2 限流代码实现</h5><h6 id="1-新建RateFilter类"><a href="#1-新建RateFilter类" class="headerlink" title="1.新建RateFilter类"></a>1.新建RateFilter类</h6><p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/17.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a>   </p>
+<h4 id="8-3-Zuul-鉴权和添加用户服务"><a href="#8-3-Zuul-鉴权和添加用户服务" class="headerlink" title="8.3 Zuul:鉴权和添加用户服务"></a>8.3 Zuul:鉴权和添加用户服务</h4><h5 id="8-3-1-Zuul权限校验"><a href="#8-3-1-Zuul权限校验" class="headerlink" title="8.3.1 Zuul权限校验"></a>8.3.1 Zuul权限校验</h5><p>我们使用Zuul的权限校验实现下面3个功能。</p>
+<ol>
+<li>1./order/create 只能买家访问(创建订单)  </li>
+<li>2./order/finish 只能卖家访问(完结订单) </li>
+<li><p>3./product/list 都可以访问(商品列表)  </p>
+</li>
+<li><p>1.新建鉴权Filter(AuthFilter)<br>新建鉴权Filter、用来区分买家和卖家</p>
+</li>
+</ol>
+<ol>
+<li>2.实现逻辑<br>怎样区分买家和卖家呢?有些人想到cookie、既然想到了cookie那么必须买家和卖家登录了之后才能获取到信息。那么登录功能写到哪里了，就需要有一个用户服务。</li>
+</ol>
+<h5 id="8-3-2-添加用户服务"><a href="#8-3-2-添加用户服务" class="headerlink" title="8.3.2 添加用户服务"></a>8.3.2 添加用户服务</h5><ol>
+<li><p>1.API接口登录区分<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a> </p>
+</li>
+<li><p>2.数据库  </p>
+</li>
+</ol>
+<pre><code>CREATE TABLE `user_info` (
+  `id` varchar(32) NOT NULL,
+  `username` varchar(32) DEFAULT &apos;&apos;,
+  `password` varchar(32) DEFAULT &apos;&apos;,
+  `openid` varchar(64) DEFAULT &apos;&apos; COMMENT &apos;微信openid&apos;,
+  `role` tinyint(1) NOT NULL COMMENT &apos;1买家2卖家&apos;,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &apos;创建时间&apos;,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &apos;修改时间&apos;,
+  PRIMARY KEY (`id`)
+);
+</code></pre><ol>
+<li><p>3.创建应用<br>选择的依赖组件:<br>1.配置:Cloud Config–&gt;Config Cient<br>2.注册中心:Cloud Discovery–&gt;Eureka Discovery<br>3.数据库:SQL–&gt;Mysql/JPA<br>4.缓存:NoSQL–&gt;redis  </p>
+</li>
+<li><p>4.修改版本依赖</p>
+</li>
+<li><p>5.统一配置中心远端服务器创建user-dev.yml文件<br>我们只添加数据库连接信息和redis连接信息，其他信息在bootstrap.yml文件里面  </p>
+</li>
+</ol>
+<ol>
+<li><p>6.在config服务中访问:<a href="http://localhost:8083/user-dev.yml可以查看到对应文件" target="_blank" rel="external">http://localhost:8083/user-dev.yml可以查看到对应文件</a></p>
+</li>
+<li><p>7.因为user服务后面肯定会对外提供接口的、所以我们将其改造成多模块</p>
+</li>
+</ol>
+
       
     </div>
     <div class="article-info article-info-index">
@@ -429,6 +479,28 @@
 <li>2.output是指标准输出、指定的编码是:rubydebug  </li>
 </ol>
 <h5 id="4-2-2-Filter配置"><a href="#4-2-2-Filter配置" class="headerlink" title="4.2.2 Filter配置"></a>4.2.2 Filter配置</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/115.png" alt=""><br>实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/116.png" alt="">  </p>
+<h4 id="4-3-Logstash演示"><a href="#4-3-Logstash演示" class="headerlink" title="4.3 Logstash演示"></a>4.3 Logstash演示</h4><p>我们使用Logstash收集nginx log  经过logstash输出日志会是怎样子?<br>我们正常下载Logstash，然后解压，最后我们进入:nginx_logstash.conf,主要是需要配置3个地方。logstash有3大配置:input配置、filter配置、output配置。</p>
+<ol>
+<li>1.input<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/20.png" alt=""><br>标准输入</li>
+<li>2.filter<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/21.png" alt=""></li>
+<li>3.output</li>
+</ol>
+<p>我们启动logstash<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/22.png" alt="">  </p>
+<h3 id="5、案例实战"><a href="#5、案例实战" class="headerlink" title="5、案例实战"></a>5、案例实战</h3><h4 id="5-1-实战目标和方案介绍"><a href="#5-1-实战目标和方案介绍" class="headerlink" title="5.1 实战目标和方案介绍"></a>5.1 实战目标和方案介绍</h4><p>我们此次实践的目标:  </p>
+<ol>
+<li>1.收集Elasticsearch集群的查询语句。  </li>
+<li>2.分析查询语句的常用语句、相应时长等。</li>
+</ol>
+<p>方案:</p>
+<ol>
+<li>1.应用Packetbeat+Logstash完成数据收集工作  </li>
+<li>2.使用Kibaba+Elasticsearch完成数据分析工作  </li>
+</ol>
+<p>架构图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/23.png" alt="">  </p>
+<ol>
+<li>1.Production cluster就是我们业务集群  我们现在监控他的es查询语句情况  </li>
+<li>2.做法:我们用Packetbeat监听Production cluster端口、然后所有的查询语句通过网络抓包的形式都可以获取到、然后Packetbeat将所有数据发送到logstash、然后发送给监控集群、最后通过监控集群发送给Kibana。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/24.png" alt="">   </li>
+</ol>
 
       
     </div>
