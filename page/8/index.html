@@ -152,6 +152,147 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-48-SpringBoot整合spring-security" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/">zyzx(48)-SpringBoot整合spring-security</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--spring security依赖--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
+&lt;/dependency&gt;   
+
+&lt;!--以thymeleaf渲染页面--&gt;
+&lt;dependency&gt;
+    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+    &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
+&lt;/dependency&gt;
+</code></pre><h5 id="2-配置类"><a href="#2-配置类" class="headerlink" title="2.配置类"></a>2.配置类</h5><pre><code>@Configuration
+@EnableWebSecurity // 注解开启Spring Security的功能
+//WebSecurityConfigurerAdapter:重写它的方法来设置一些web的安全西街
+public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
+    @Override
+    protected void configure(HttpSecurity http) throws Exception {
+        http
+                .authorizeRequests()  //定义哪些url需要保护，哪些url不需要保护
+                .antMatchers(&quot;/&quot;, &quot;/message/&quot;).permitAll()    //定义不需要认证就可以访问
+                .anyRequest().authenticated()
+                .and()
+                .formLogin()
+                .loginPage(&quot;/login&quot;)  //定义当需要用户登录时候，转到的登录页面
+                .permitAll()
+                .and()
+                .logout()
+                .permitAll();
+        http.csrf().disable();
+    }
+    @Autowired
+    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
+        auth.inMemoryAuthentication().withUser(&quot;user&quot;).password(&quot;password&quot;).roles(&quot;USER&quot;);
+        //在内存中创建了一个用户，该用户的名称为user，密码为password，用户角色为USER
+    }
+}
+</code></pre><p>以上定义除了”/“, “/message/“ 访问时候不需要跳过login页面,其他登录都会要经过login页面<br>当用户名/密码:user/password时候 认证通过</p>
+<h5 id="3-演示测试"><a href="#3-演示测试" class="headerlink" title="3.演示测试"></a>3.演示测试</h5><p>1.新建LoginController类:</p>
+<pre><code>@Controller
+public class LoginController {
+
+    @RequestMapping(value = &quot;/login&quot;)
+    public String login(){
+     return &quot;login&quot;;
+    }
+}
+</code></pre><p>2.在resources下新建template存放前端页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/26.png" alt=""></p>
+<p>hello.html</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;/&gt;
+&lt;title&gt;Hello World!&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+    &lt;h1&gt;Hello world!&lt;/h1&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>index.html</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;head&gt;
+&lt;meta charset=&quot;UTF-8&quot;/&gt;
+&lt;title&gt;Security&lt;/title&gt;
+&lt;/head&gt;
+&lt;body&gt;
+        &lt;h1&gt;Spring Security!&lt;/h1&gt;
+        &lt;p&gt;点击&lt;a th:href=&quot;@{/hello}&quot;&gt;这里&lt;/a&gt;到碗里来！&lt;/p&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>login.html</p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;
+      xmlns:th=&quot;http://www.thymeleaf.org&quot;
+      xmlns:sec=&quot;http://www.thymeleaf.org/thymeleaf-extras-springsecurity3&quot;&gt;
+    &lt;head&gt;
+        &lt;title&gt;Spring Security Example &lt;/title&gt;
+    &lt;/head&gt;
+    &lt;body&gt;
+        &lt;div th:if=&quot;${param.error}&quot;&gt;
+            用户名或密码错
+        &lt;/div&gt;
+        &lt;div th:if=&quot;${param.logout}&quot;&gt;
+            您已注销成功
+        &lt;/div&gt;
+        &lt;form th:action=&quot;@{/login}&quot; method=&quot;post&quot;&gt;
+            &lt;div&gt;&lt;label&gt; 用户名 : &lt;input type=&quot;text&quot; name=&quot;username&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;label&gt; 密  码 : &lt;input type=&quot;password&quot; name=&quot;password&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
+            &lt;div&gt;&lt;input type=&quot;submit&quot; value=&quot;登录&quot;/&gt;&lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/" class="archive-article-date">
+  	<time datetime="2018-05-19T09:58:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-46-SpringBoot日志配置详解" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1084,107 +1225,6 @@ public void contextLoads() {
       
       <a href="/2018/05/01/zyzx-35-springBoot使用Spring-data-jpa访问数据库/" class="archive-article-date">
   	<time datetime="2018-05-01T06:47:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-01</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-34-springBoot使用jdbcTemplate访问数据库" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/01/zyzx-34-springBoot使用jdbcTemplate访问数据库/">zyzx(34)-springBoot使用jdbcTemplate访问数据库</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-添加依赖"><a href="#1-添加依赖" class="headerlink" title="1.添加依赖"></a>1.添加依赖</h5><pre><code>&lt;!--jdbc访问mysql--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-jdbc&lt;/artifactId&gt;
-&lt;/dependency&gt;
-
-&lt;dependency&gt;
-    &lt;groupId&gt;mysql&lt;/groupId&gt;
-    &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-    &lt;version&gt;5.1.21&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-配置mysql连接"><a href="#2-配置mysql连接" class="headerlink" title="2.配置mysql连接"></a>2.配置mysql连接</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/2.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/3.png" alt=""></p>
-<h5 id="3-创建service及其实现"><a href="#3-创建service及其实现" class="headerlink" title="3.创建service及其实现"></a>3.创建service及其实现</h5><p>1.service  </p>
-<pre><code>public interface IUserService {
-    void createUser(String name,Integer age);
-    void deleteByName(String name);
-}
-</code></pre><p>2.impl</p>
-<pre><code>@Service
-public class UserServiceImpl implements IUserService {
-
-    @Autowired
-    private JdbcTemplate jdbcTemplate;
-
-    @Override
-    public void createUser(String name,Integer age) {
-       jdbcTemplate.update(&quot;insert into user(name,age) values(?,?)&quot;,name,age);
-    }
-
-    @Override
-    public void deleteByName(String name) {
-        jdbcTemplate.update(&quot;delete from user where name=?&quot;,name);
-    }
-}
-</code></pre><h5 id="4-Test"><a href="#4-Test" class="headerlink" title="4.Test"></a>4.Test</h5><pre><code>@RunWith(SpringRunner.class)
-@SpringBootTest
-public class XxxxSpringbootApplicationTests {
-    @Autowired
-    private Student stu;
-    @Autowired
-    private IUserService userService;
-    @Test
-    public void contextLoads() {
-
-        //System.out.println(&quot;student name:&quot;+stu.getName()+&quot; student age:&quot;+stu.getAge());
-        //userService.createUser(&quot;zs&quot;,23);
-        userService.deleteByName(&quot;zs&quot;);
-    }
-}
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/4.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/5.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/01/zyzx-34-springBoot使用jdbcTemplate访问数据库/" class="archive-article-date">
-  	<time datetime="2018-05-01T04:18:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-01</time>
 </a>
       
 	<div class="article-tag tagcloud">
