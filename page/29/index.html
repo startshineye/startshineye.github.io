@@ -152,6 +152,76 @@
       <div class="body-wrap">
         
   
+    <article id="post-JVM-二-JVM运行机制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/10/JVM-二-JVM运行机制/">JVM(二)-JVM运行机制</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本篇主要介绍以下内容：</p>
+<h5 id="1-JVM启动流程"><a href="#1-JVM启动流程" class="headerlink" title="1.JVM启动流程"></a>1.JVM启动流程</h5><h5 id="2-JVM基本结构"><a href="#2-JVM基本结构" class="headerlink" title="2.JVM基本结构"></a>2.JVM基本结构</h5><h5 id="3-内存模型"><a href="#3-内存模型" class="headerlink" title="3.内存模型"></a>3.内存模型</h5><h5 id="4-编译和解释运行的概念"><a href="#4-编译和解释运行的概念" class="headerlink" title="4.编译和解释运行的概念"></a>4.编译和解释运行的概念</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="JVM启动流程"><a href="#JVM启动流程" class="headerlink" title="JVM启动流程"></a>JVM启动流程</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/04.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/21.png" alt=""></p>
+<h5 id="JVM基本结构"><a href="#JVM基本结构" class="headerlink" title="JVM基本结构"></a>JVM基本结构</h5><h6 id="1-图"><a href="#1-图" class="headerlink" title="1.图"></a>1.图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/22.png" alt=""><br>例子：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/01.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/02.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/03.png" alt=""></p>
+<h6 id="2-PC寄存器"><a href="#2-PC寄存器" class="headerlink" title="2.PC寄存器"></a>2.PC寄存器</h6><p>1.每个线程拥有一个PC寄存器<br>2.在线程创建时 创建<br>3.指向下一条指令的地址<br>4.执行本地方法时，PC的值为undefined  </p>
+<h6 id="3-方法区"><a href="#3-方法区" class="headerlink" title="3.方法区"></a>3.方法区</h6><p>1.保存装载的类信息<br>2.类型的常量池<br>3.字段，方法信息<br>4.方法字节码<br>5.通常和永久区(Perm)关联在一起  </p>
+<h6 id="4-Java堆"><a href="#4-Java堆" class="headerlink" title="4.Java堆"></a>4.Java堆</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/23.png" alt=""></p>
+<h6 id="Java栈"><a href="#Java栈" class="headerlink" title="Java栈"></a>Java栈</h6><h5 id="1-C-栈上分配"><a href="#1-C-栈上分配" class="headerlink" title="1.C++栈上分配"></a>1.C++栈上分配</h5><p>public void method(){<br>   BcmBasicString str;<br>   …<br>}<br>直接声明引用,在栈内存中,不需要直接在堆中创建对象,所以永远不可能出现内存泄露  </p>
+<h5 id="2-Java栈上分配"><a href="#2-Java栈上分配" class="headerlink" title="2.Java栈上分配"></a>2.Java栈上分配</h5><p>我们可以吧C++栈上分配思想借鉴到java栈中</p>
+<h6 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">public class OnStackTest &#123;</div><div class="line">public static void alloc()&#123;</div><div class="line">    byte[] b=new byte[2];</div><div class="line">    b[0]=1;</div><div class="line">&#125;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    long b=System.currentTimeMillis();</div><div class="line">    for(int i=0;i&lt;100000000;i++)&#123;</div><div class="line">        alloc();</div><div class="line">    &#125;</div><div class="line">    long e=System.currentTimeMillis();</div><div class="line">    System.out.println(e-b);</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-结果"><a href="#2-结果" class="headerlink" title="2.结果"></a>2.结果</h6><p>设置1：<br>-server -Xmx10m -Xms10m<br>-XX:+DoEscapeAnalysis -XX:+PrintGC<br>输出:5<br>设置2：<br>-server -Xmx10m -Xms10m<br>-XX:-DoEscapeAnalysis -XX:+PrintGC<br>输出：<br>……<br>[GC 3550K-&gt;478K(10240K), 0.0000977 secs]<br>[GC 3550K-&gt;478K(10240K), 0.0001361 secs]<br>[GC 3550K-&gt;478K(10240K), 0.0000963 secs]<br>564<br>第二种说明是在堆上分配的,由于内存的不足,所以有大量的GC日志输出,第一种是在栈上分配的  </p>
+<h6 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h6><p>1.栈上分配适合小对象(一般几十个bytes)因为栈的空间本来就没有堆那么大，栈一般在几百k到1M就封顶了,在没有逃逸(在Java中每一个对象都有一定的作用域，理论上，一个对象在一块代码中构造，那么也应该在这块代码中被回收，但是实际上，我们经常会让一个对象存活更长的时间，超过定义它的代码块，这就好比一个人逃出了生他养他的地方，我们将这种现象称为逃逸)情况下，可以直接分配在栈上。具有逃逸的情况是可以共享的,但是栈是私有的,一个对象一个栈<br>2.栈上分配好处,在函数调用结束之后,系统会自动把栈移掉,函数调用之后,栈帧移除,栈上所有内容将消除,所有可以自动移除,减轻GC压力<br>3.大对象或者是逃逸对象 无法在栈上分配</p>
+<h5 id="栈-堆-方法区交互"><a href="#栈-堆-方法区交互" class="headerlink" title="栈,堆,方法区交互"></a>栈,堆,方法区交互</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/15.png" alt=""><br>Sample类信息:包括类的描述等<br>三者关系是:由栈指向堆,堆指向方法区(因为方法执行时候需要用到对象,对象的描述信息又在方法区中)</p>
+<h5 id="java内存模型"><a href="#java内存模型" class="headerlink" title="java内存模型"></a>java内存模型</h5><p>1.每一个线程有一个工作内存和主存独立<br>2.工作内存存放主存中变量的值得拷贝<br>每一个线程有一个工作内存和主存独立,主存是大家共享的内存区间,可以理解成堆空间,所以得线程都共享,这里面可以存储数据,但是为了考虑效率的问题每一个线程都有自己的工作区间,也就是工作内存,工作内存和主存之间需要有一个同步关系,所有的变量在主存中有一份,在工作内存中有一份变量的拷贝。工作内存和主存的同步主要是通过assign,user,read,load,store,write<br>3.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/16.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/17.png" alt=""><br>4.线程,本地内存,主内存关系<br>线程总是在本地内存中存储变量,本地内存是“共享变量”的副本,而“共享变量是”是在主内存的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/18.png" alt=""></p>
+<h5 id="volatile"><a href="#volatile" class="headerlink" title="volatile"></a>volatile</h5><p>1.之前说到,线程中修改一个变量之后，想让另外一个线程立即可见需要用到volatile标示符<br>以下代码是一个线程监听stop，而另一个线程修改stop，修改之后推出while执行下面,如果不用volatile关键字,线程是永远不会停止的，原因： 我们的线程t只在本地存储间去查看值,没有做到及时更新</p>
+<p>2.volatile一般比重量级的锁性能要好,但是不能代替锁,因为其不是线程安全的,如果有多个线程对共享数据进行修改时,其实是线程不安全的<br>3.选择使用volatile的条件是：语义是否满足应用</p>
+<h5 id="内存相关的一些概念"><a href="#内存相关的一些概念" class="headerlink" title="内存相关的一些概念"></a>内存相关的一些概念</h5><h6 id="1-可见性"><a href="#1-可见性" class="headerlink" title="1.可见性"></a>1.可见性</h6><ol>
+<li>一个线程修改了一个变量,其他线程能够立即世道(注意：不是能够知道)</li>
+<li>保证可见性方法<br>1.volatile关键字<br>2.synchronized(unlock之前,写变量值回主存)<br>3.final(一旦初始化完成,其他线程就可见)  <h6 id="2-有序性"><a href="#2-有序性" class="headerlink" title="2.有序性"></a>2.有序性</h6>1.在一个线程之中,所有的指令和操作都是有序执行的<br>2.在线程之外(多线程的条件下,在另外一个线程去观察这个线程的行为)有可能就是无序的（无序的原因：指令重排,主内存同步延时）</li>
+</ol>
+<h6 id="3-指令重排"><a href="#3-指令重排" class="headerlink" title="3.指令重排"></a>3.指令重排</h6><p>1.编译系统尽可能的让系统性能更加好,为了让其更加好,可能让指令顺序做一些调整<br>2.比如:a=1;b=2，是可重排的,因为不管谁先运行,结果不受影响,但是对于a=1,a=2是不可以，存在结果的不同<br>3.指令重排条件:条件是指令谁先执行对结果都不会有影响<br>4.指令重排弊端-破坏线程间的有序性<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/19.png" alt=""><br>编译器对线程A中很多可能flag=true比a=1先执行,因为无冲突,以上可以知道,假如A.B线程执行读写方法时候,如果:a=1;flag=true;会出现不一样线程调用结果<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/20.png" alt=""><br>6.指令重拍原则:<br>程序顺序原则：一个线程内保证语义的串行性<br>volatile规则：volatile变量的写，先发生于读<br>锁规则：解锁(unlock)必然发生在随后的加锁(lock)前<br>传递性：A先于B，B先于C 那么A必然先于C<br>线程的start方法先于它的每一个动作<br>线程的所有操作先于线程的终结（Thread.join()）<br>线程的中断（interrupt()）先于被中断线程的代码<br>对象的构造函数执行结束先于finalize()方法  </p>
+<h4 id="编译和解释执行概念"><a href="#编译和解释执行概念" class="headerlink" title="编译和解释执行概念"></a>编译和解释执行概念</h4><p>1.解释执行<br>解释执行以解释方式运行字节码<br>解释执行的意思是：读一句执行一句<br>2.编译运行（JIT）<br>将字节码编译成机器码<br>直接执行机器码<br>运行时编译<br>编译后性能有数量级的提升  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/10/JVM-二-JVM运行机制/" class="archive-article-date">
+  	<time datetime="2017-06-10T14:27:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-JVM-一-初始JVM" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -815,76 +885,6 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 
 
   
-    <article id="post-netty实践-五-构建多线程NIO系统" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/25/netty实践-五-构建多线程NIO系统/">netty实践(五)-构建多线程NIO系统</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>在前面我们已经知道,socketIO传输是单线程阻塞的OIO传输,为了提高效率,我们是创建一个线程池,然后创建一个任务放在里面执行,然而之前说的NIO是单线程的,但是为了提高效率,我们可否可以通过创建一个线程池,把任务 放到里面去,有那么简单吗？</li>
-<li>一个NIO是不是只能有一个selector？<br>不是，一个系统可以有多个selector  </li>
-<li>selector是不是只能注册一个ServerSocketChannel？<br>不是，可以注册多个<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4></li>
-</ol>
-<h5 id="1-传统socketIO"><a href="#1-传统socketIO" class="headerlink" title="1.传统socketIO"></a>1.传统socketIO</h5><h6 id="1-结构图"><a href="#1-结构图" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/socketIO.png" alt=""></p>
-<h6 id="2-分析"><a href="#2-分析" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
-<li>一个线程就是一个服务生</li>
-<li>对于有多个客人(socket客户端)我们需要创建多个服务生为其服务</li>
-</ol>
-<h5 id="2-NIO"><a href="#2-NIO" class="headerlink" title="2.NIO"></a>2.NIO</h5><h6 id="1-结构图-1"><a href="#1-结构图-1" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/f1d028a762950f82ae68236c36bc9d07eef8d954/2017/5/NIO.png" alt=""></p>
-<h6 id="2-分析-1"><a href="#2-分析-1" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
-<li>一个线程+selector才是一个服务生</li>
-<li>此一个服务生干的事情很多,既要看大门,接受其OP_ACCEPT,又需要为客人服务，执行OP_READ时间</li>
-</ol>
-<h5 id="3-NettyIO"><a href="#3-NettyIO" class="headerlink" title="3.NettyIO"></a>3.NettyIO</h5><p>其实NettyIO就是一个多线程条件下的NIO，因为直接通过构建线程池,创建一个任务让线程池去执行此任务是会报”NullPoint Exception”<br>原因:一个客户端请求过来进行了两次处理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/%E6%88%AA%E5%9B%BE05.png" alt=""></p>
-<h6 id="1-结构图-2"><a href="#1-结构图-2" class="headerlink" title="1.结构图"></a>1.结构图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/5/NettyIO.png" alt=""></p>
-<h6 id="2-分析-2"><a href="#2-分析-2" class="headerlink" title="2.分析"></a>2.分析</h6><ol>
-<li>我们为每一片区域都加入一个服务员,并且给看大门的也加入服务员,每一个服务员就是一个线程</li>
-<li>每一个服务员就负责他的那一块</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/25/netty实践-五-构建多线程NIO系统/" class="archive-article-date">
-  	<time datetime="2017-05-25T15:01:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/28/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/27/">27</a><a class="page-number" href="/page/28/">28</a><span class="page-number current">29</span><a class="page-number" href="/page/30/">30</a><a class="page-number" href="/page/31/">31</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><a class="extend next" rel="next" href="/page/30/">Next &raquo;</a>
@@ -950,7 +950,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 11.05px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 11.05px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
