@@ -152,6 +152,359 @@
       <div class="body-wrap">
         
   
+    <article id="post-websocket-9-多人聊天-用户登录" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/25/websocket-9-多人聊天-用户登录/">websocket(9)-多人聊天-用户登录</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="java"><a href="#java" class="headerlink" title="java"></a>java</h5><p>1.bean  </p>
+<pre><code>public class User {
+private String name;
+private String password;
+public User(){
+
+}
+public User(String name,String password){
+    this.name=name;
+    this.password=password;
+}
+public String getName() {
+    return name;
+}
+public void setName(String name) {
+    this.name = name;
+}
+public String getPassword() {
+    return password;
+}
+public void setPassword(String password) {
+    this.password = password;
+}
+}
+</code></pre><p>2.controller</p>
+<pre><code>@Controller
+public class V6UserController {
+private static Map&lt;String,String&gt; userMap = new HashMap&lt;String,String&gt;();
+public static Map&lt;String,User&gt; onlineUserMap = new HashMap&lt;String,User&gt;();
+static {
+    userMap.put(&quot;admin&quot;,&quot;123456&quot;);
+    userMap.put(&quot;zs&quot;,&quot;123456&quot;);
+    userMap.put(&quot;lisi&quot;,&quot;123456&quot;);
+    userMap.put(&quot;wangwu&quot;,&quot;123456&quot;);
+    onlineUserMap.put(&quot;123&quot;,new User(&quot;admin&quot;,&quot;123456&quot;));
+}
+@RequestMapping(value = &quot;login&quot;, method= RequestMethod.POST)
+public String login(@RequestParam(value = &quot;username&quot;,required=true) String username, @RequestParam(value = &quot;pwd&quot;,required = true) String pwd, HttpSession session){
+    String password = userMap.get(username);
+    if(pwd.equals(password)){
+        User user = new User(username, pwd);
+        String sessionId = session.getId();
+        onlineUserMap.put(sessionId,user);
+        return &quot;redirect:/v6/chat.html&quot;;
+    }else{
+        return &quot;redirect:/v6/error.html&quot;;
+    }
+}
+}
+</code></pre><h5 id="前端"><a href="#前端" class="headerlink" title="前端"></a>前端</h5><p>1.index.html </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
+&lt;head&gt;
+&lt;title&gt;Hello WebSocket&lt;/title&gt;
+&lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;link href=&quot;/v6/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot; method=&apos;post&apos;  action=&quot;/login&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;input type=&quot;text&quot; name=&quot;username&quot; class=&quot;form-control&quot; placeholder=&quot;用户名&quot;&gt;
+                &lt;input type=&quot;password&quot; name=&quot;pwd&quot; class=&quot;form-control&quot; placeholder=&quot;密码&quot;&gt;
+                &lt;input type=&quot;submit&quot; class=&quot;default&quot; value=&quot;登录&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre><p>2.app.js  </p>
+<pre><code>var stompClient = null;
+
+function setConnected(connected) {
+    $(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
+    $(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
+    if (connected) {
+        $(&quot;#conversation&quot;).show();
+    }
+    else {
+        $(&quot;#conversation&quot;).hide();
+    }
+    $(&quot;#notice&quot;).html(&quot;&quot;);
+}
+
+function connect() {
+    var socket = new SockJS(&apos;/websocket&apos;);
+    stompClient = Stomp.over(socket);
+    stompClient.connect({}, function (frame) {
+        setConnected(true);
+        console.log(&apos;Connected: &apos; + frame);
+
+        //订阅群聊消息
+        stompClient.subscribe(&apos;/topic/chat&apos;, function (result) {
+            showContent(JSON.parse(result.body));
+        });
+
+        //订阅在线用户消息
+        stompClient.subscribe(&apos;/topic/onlineuser&apos;, function (result) {
+            showOnlieUser(JSON.parse(result.body));
+        });
+    });
+}
+
+
+//断开连接
+function disconnect() {
+    if (stompClient !== null) {
+        stompClient.disconnect();
+    }
+    setConnected(false);
+    console.log(&quot;Disconnected&quot;);
+}
+
+//发送聊天记录
+function sendContent() {
+    stompClient.send(&quot;/app/v6/chat&quot;, {}, JSON.stringify({&apos;content&apos;: $(&quot;#content&quot;).val()}));
+
+}
+
+//显示聊天记录
+function showContent(body) {
+    $(&quot;#record&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+//显示实时在线用户
+function showOnlieUser(body) {
+    $(&quot;#online&quot;).html(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
+}
+
+
+$(function () {
+
+    connect();//自动上线
+
+    $(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
+        e.preventDefault();
+    });
+
+    $( &quot;#disconnect&quot; ).click(function() { disconnect(); });
+    $( &quot;#send&quot; ).click(function() {
+        sendContent(); 
+    });
+});
+</code></pre><p>3.error.html  </p>
+<pre><code>&lt;!DOCTYPE html&gt;
+&lt;html&gt;
+&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
+&lt;head&gt;
+    &lt;title&gt;Hello WebSocket&lt;/title&gt;
+    &lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
+    &lt;link href=&quot;/v6/main.css&quot; rel=&quot;stylesheet&quot;&gt;
+    &lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
+&lt;/head&gt;
+&lt;body&gt;
+
+&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
+&lt;div class=&quot;row&quot;&gt;
+    &lt;div class=&quot;col-md-6&quot;&gt;
+       请重新登录
+    &lt;/div&gt;
+
+    &lt;div class=&quot;col-md-6&quot;&gt;
+        &lt;form class=&quot;form-inline&quot; method=&apos;post&apos;  action=&quot;/login&quot;&gt;
+            &lt;div class=&quot;form-group&quot;&gt;
+                &lt;input type=&quot;text&quot; name=&quot;username&quot; class=&quot;form-control&quot; placeholder=&quot;用户名&quot;&gt;
+                &lt;input type=&quot;password&quot; name=&quot;pwd&quot; class=&quot;form-control&quot; placeholder=&quot;密码&quot;&gt;
+                &lt;input type=&quot;submit&quot; class=&quot;default&quot; value=&quot;登录&quot; /&gt;
+            &lt;/div&gt;
+        &lt;/form&gt;
+    &lt;/div&gt;
+&lt;/div&gt;
+&lt;/div&gt;
+&lt;/body&gt;
+&lt;/html&gt;
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/03/25/websocket-9-多人聊天-用户登录/" class="archive-article-date">
+  	<time datetime="2018-03-25T14:23:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-websocket-8-websocket结合Spring的握手拦截器" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/03/25/websocket-8-websocket结合Spring的握手拦截器/">websocket(8)-websocket结合Spring的握手拦截器</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-编写类"><a href="#1-编写类" class="headerlink" title="1.编写类"></a>1.编写类</h5><p>1、编写一个类，实现一个接口HandshakeInterceptor；  </p>
+<pre><code>public class HttpHandShakeInterceptor implements HandshakeInterceptor {
+@Override
+public boolean beforeHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, Map&lt;String, Object&gt; attributes) throws Exception {
+
+    if(serverHttpRequest instanceof ServletServerHttpRequest){
+        ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) serverHttpRequest;
+        //获取sessionId传递
+        HttpSession session =  serverRequest.getServletRequest().getSession();
+        String sessionId = session.getId();
+        attributes.put(&quot;sessionId&quot;,sessionId);
+        System.out.println(&quot;握手拦截器: beforeHandshake&quot;+sessionId);
+    }
+    return true;
+}
+
+@Override
+public void afterHandshake(ServerHttpRequest serverHttpRequest, ServerHttpResponse serverHttpResponse, WebSocketHandler webSocketHandler, @Nullable Exception e) {
+    if(serverHttpRequest instanceof ServletServerHttpRequest){
+        ServletServerHttpRequest serverRequest = (ServletServerHttpRequest) serverHttpRequest;
+        //获取sessionId传递
+        HttpSession session =  serverRequest.getServletRequest().getSession();
+        String sessionId = session.getId();
+        System.out.println(&quot;握手拦截器: afterHandshake&quot;+sessionId);
+    }
+}
+}
+</code></pre><h5 id="2-WebsocketConfig添加拦截器"><a href="#2-WebsocketConfig添加拦截器" class="headerlink" title="2.WebsocketConfig添加拦截器"></a>2.WebsocketConfig添加拦截器</h5><p>2.写完之后需要在websocket配置里面启用.addInterceptors(new HttpHandShakeIntecepter())</p>
+<p>3、实现两个方法beforeHandshake和afterHandshake，在里面可以获取resuest和response</p>
+<pre><code>@Configuration
+@EnableWebSocketMessageBroker
+public class WebsocketConfig implements WebSocketMessageBrokerConfigurer {
+/**
+ * 注册端点，发布或者订阅消息的时候需要连接此端点
+ * setAllowedOrigins 非必须，*表示允许其他域进行连接
+ * withSockJS  表示开始sockejs支持
+ */
+@Override
+public void registerStompEndpoints(StompEndpointRegistry registry) {
+   // registry.addEndpoint(&quot;websocket&quot;).withSockJS();
+    registry.addEndpoint(&quot;websocket&quot;).addInterceptors(new HttpHandShakeInterceptor()).setAllowedOrigins(&quot;*&quot;).withSockJS();
+}
+/**
+ * 配置消息代理(中介)
+ * enableSimpleBroker 服务端推送给客户端的路径前缀
+ * setApplicationDestinationPrefixes  客户端发送数据给服务器端的一个前缀
+ */
+@Override
+public void configureMessageBroker(MessageBrokerRegistry config) {
+   config.enableSimpleBroker(&quot;/topic&quot;,&quot;/chat&quot;,&quot;/monitor&quot;);
+   config.setApplicationDestinationPrefixes(&quot;/app&quot;);
+}
+}
+</code></pre><h5 id="4-获取参数"><a href="#4-获取参数" class="headerlink" title="4.获取参数"></a>4.获取参数</h5><p>4.在监听器里面获取到拦截器传递的参数</p>
+<pre><code>@Component
+public class SubscribeEventListener implements ApplicationListener&lt;SessionSubscribeEvent&gt;{
+/**
+ * 在事件触发的时候调用这个方法
+ *
+ * StompHeaderAccessor  简单消息传递协议中处理消息头的基类，
+ * 通过这个类，可以获取消息类型(例如:发布订阅，建立连接断开连接)，会话id等
+ *
+ */
+@Override
+public void onApplicationEvent(SessionSubscribeEvent event) {
+    StompHeaderAccessor wrap = StompHeaderAccessor.wrap(event.getMessage());
+    System.out.println(&quot;[SubscribeEventListener 监听器类]&quot;+wrap.getCommand().getMessageType());
+
+    //在订阅事件中获取sessionId
+    Object sessionId = wrap.getSessionAttributes().get(&quot;sessionId&quot;);
+    System.out.println(&quot;[SubscribeEventListener 监听器类] 获取sessionId为:&quot;+sessionId);
+}
+}
+</code></pre><h5 id="5-效果"><a href="#5-效果" class="headerlink" title="5.效果"></a>5.效果</h5><p>因为事件订阅是websocket连接节后进行的,websocket连接时候需要发送http请求,http请求是在拦截器里面进行的,所以如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/84.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/03/25/websocket-8-websocket结合Spring的握手拦截器/" class="archive-article-date">
+  	<time datetime="2018-03-24T16:51:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-websocket-7-websocket实现jvm的实时监控" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -858,118 +1211,6 @@ Javascript and reload this page!&lt;/h2&gt;&lt;/noscript&gt;
       
       <a href="/2018/03/19/linux-17-管道符/" class="archive-article-date">
   	<time datetime="2018-03-18T16:24:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-16-多命令执行符" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/19/linux-16-多命令执行符/">linux(16)-多命令执行符</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="多命令执行符"><a href="#多命令执行符" class="headerlink" title="多命令执行符"></a>多命令执行符</h5><p>分号(:)–&gt;多个命令顺序执行  </p>
-<p>逻辑与(&amp;&amp;) –&gt;当命令1执行正确,命令2才会执行,当命令1执行错误,命令2不会执行  </p>
-<p>逻辑或 -&gt; ||<br>当命令1执行不正确,才会执行命令2,当命令1执行完毕,命令2不会执行      </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/19/linux-16-多命令执行符/" class="archive-article-date">
-  	<time datetime="2018-03-18T16:01:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-15-yum源码包安装" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/18/linux-15-yum源码包安装/">linux(15)-yum源码包安装</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-源码包和rpm包区别"><a href="#1-源码包和rpm包区别" class="headerlink" title="1.源码包和rpm包区别"></a>1.源码包和rpm包区别</h5><p>概念上:rpm包是编译好的包,而源码包是没有编译好的包,是可以看到源码的<br>安装位置上:<br>Rpm包的默认安装位置如下:<img src="71.png" alt=""> 这只是仅仅默认安装位置,但是80%以上的安装包不是这样的安装目录。<br>源码包一定要指定安装路径,一般有以下规范,但是你自己也可以不按照以下:<br>/usr/local/软件  </p>
-<h5 id="2-启动"><a href="#2-启动" class="headerlink" title="2. 启动"></a>2. 启动</h5><ol>
-<li>Rpm包启动方法:service 包名 start<br>关闭方法:service 包名 stop  </li>
-<li>apachectl start</li>
-</ol>
-<h5 id="3-源码包安装步骤"><a href="#3-源码包安装步骤" class="headerlink" title="3.源码包安装步骤:"></a>3.源码包安装步骤:</h5><p>1．    解压<br>$ tar –zxvf httpd-2.2.34<br>2．    制定安装位置并安装: /usr/local/软件<br>比如:安装apache<br>$./configure –prefix=/usr/local/apache<br>3.编译<br>$ make install  </p>
-<p>如果重新安装:切记一定要记住清除编译 make clear 清除编译缓存</p>
-<ol>
-<li>启动<br>进入apache安装源码目录下,进入安装说明:<br>$ vi INSTALL<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/72.png" alt=""></li>
-</ol>
-<p>查看到安装说明,一般软件代码都有此说明的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/73.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/18/linux-15-yum源码包安装/" class="archive-article-date">
-  	<time datetime="2018-03-18T15:48:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
