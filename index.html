@@ -235,10 +235,37 @@
 </li>
 </ol>
 <ol>
-<li>3.通过minimum_should_match参数可以控制需要匹配的单词数(至少包含查询语句的几个term)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/77.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/78.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/79.png" alt=""></li>
-<li>2.kibana示例  </li>
+<li>3.通过minimum_should_match参数可以控制需要匹配的单词数(至少包含查询语句的几个term)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/77.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/78.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/79.png" alt=""> </li>
 </ol>
 <h4 id="4-2-Match-Query-流程"><a href="#4-2-Match-Query-流程" class="headerlink" title="4.2 Match Query 流程"></a>4.2 Match Query 流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/73.png" alt="">  </p>
+<h3 id="5-相关性算法"><a href="#5-相关性算法" class="headerlink" title="5.相关性算法"></a>5.相关性算法</h3><ol>
+<li><p>1.相关性算分是指文档与查询语句间的相关度,英文为:relevance<br>-通过倒排索引可以获取与查询语句相匹配的文档列表,那么如何将符合用户查询需求的文档放到前列呢?<br>-本质是一个排序问题,排序的依据是相关性算分。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/80.png" alt="">  </p>
+</li>
+<li><p>2.相关性算分的几个重要概念如下:<br>-Term Frequency(TF)词频,即单词在该文档中出现的次数,词频越高,相关性越高。<br>-Document Frequency(DF)文档频率,即单词出现的文档数。<br>-Inverse Document Frequency(IDF)逆向文档频率,与文档频率相反,简单理解为:1/DF,即单词出现的文档数越少,相似度越高。这个词在所在文档越少,说明这个单词越重要。<br>-Field-length Norm 文档越短,相似度越高。  </p>
+</li>
+<li><p>3.ES目前主要有两个相关性算分模型,如下：<br>-TF/IDF模型<br>-BM25模型 5.x之后的默认模型  </p>
+</li>
+</ol>
+<h4 id="5-1-TF-IDF模型"><a href="#5-1-TF-IDF模型" class="headerlink" title="5.1 TF/IDF模型"></a>5.1 TF/IDF模型</h4><ol>
+<li><p>1.TF/IDF模型计算法则<br>注意:q–代表query  d–document  t–term<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/81.png" alt=""></p>
+</li>
+<li><p>2.如果想要深入指导TF/IDF模型计算法则，我们可以通过explain参数来查看具体的计算方法,但要注意:<br>-es的算法是按照shard进行的,即shard的分数计算是相互独立的,所以在使用explain的时候注意分片数。  </p>
+</li>
+</ol>
+<p>-可以通过设置索引的分片数为1来避免这个问题<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/82.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/83.png" alt=""> </p>
+<h4 id="5-2-BM25模型"><a href="#5-2-BM25模型" class="headerlink" title="5.2 BM25模型"></a>5.2 BM25模型</h4><ol>
+<li><p>1.BM25模型中BM指Best Match,25指迭代了25次才计算方法,是针对TF/ID的一个优化,其计算公式如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/84.png" alt="">  </p>
+</li>
+<li><p>2.BM25相比TF/IDF的一大优化是降低了tf在过大时的权重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/85.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="6-match-phrase-Query"><a href="#6-match-phrase-Query" class="headerlink" title="6.match_phrase Query"></a>6.match_phrase Query</h3><ol>
+<li><p>1.对字段作检索,有顺序要求,API示例如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/86.png" alt=""><br>查询后返回：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/87.png" alt="">  </p>
+</li>
+<li><p>2.通过slop参数可以控制单词间的间隔<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/88.png" alt=""></p>
+</li>
+<li>3.kibana演示<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/89.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/90.png" alt="">  </li>
+</ol>
 
       
     </div>
