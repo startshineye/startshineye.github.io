@@ -152,6 +152,138 @@
       <div class="body-wrap">
         
   
+    <article id="post-zyzx-31-SpringBoot结合Swagger2构建RESTful-API测试体系" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/04/25/zyzx-31-SpringBoot结合Swagger2构建RESTful-API测试体系/">zyzx(31)-SpringBoot结合Swagger2构建RESTful API测试体系</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>为了实现测试,开发,以及后期的接口梳理,我们这里使用swagger2实现</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-pom-xml添加依赖"><a href="#1-pom-xml添加依赖" class="headerlink" title="1.pom.xml添加依赖"></a>1.pom.xml添加依赖</h5><pre><code>&lt;!--swagger2依赖--&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;io.springfox&lt;/groupId&gt;
+        &lt;artifactId&gt;springfox-swagger2&lt;/artifactId&gt;
+        &lt;version&gt;2.2.2&lt;/version&gt;
+    &lt;/dependency&gt;
+    &lt;dependency&gt;
+        &lt;groupId&gt;io.springfox&lt;/groupId&gt;
+        &lt;artifactId&gt;springfox-swagger-ui&lt;/artifactId&gt;
+        &lt;version&gt;2.2.2&lt;/version&gt;
+    &lt;/dependency&gt;
+
+    &lt;dependency&gt;
+        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
+        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
+        &lt;version&gt;3.0.1&lt;/version&gt;
+    &lt;/dependency&gt;
+</code></pre><h5 id="2-书写配置类"><a href="#2-书写配置类" class="headerlink" title="2.书写配置类"></a>2.书写配置类</h5><pre><code>@Configuration
+@EnableSwagger2
+public class Swagger2Config {
+@Bean
+public Docket createRestApi(){
+    return new Docket(DocumentationType.SWAGGER_2).apiInfo(apiInfo()).select().apis(RequestHandlerSelectors.basePackage(&quot;com.xxxx.service.web&quot;)).paths(PathSelectors.any()).build();
+}
+
+private ApiInfo apiInfo(){
+    return new ApiInfoBuilder().title(&quot;swagger使用 结合测试&quot;).description(&quot;欢迎光临yxm&quot;).termsOfServiceUrl(&quot;https://www.baidu.com&quot;).contact(&quot;走在山间小路上&quot;).version(&quot;1.0&quot;).build();
+}
+}
+</code></pre><h5 id="3-controller中配置说明"><a href="#3-controller中配置说明" class="headerlink" title="3.controller中配置说明"></a>3.controller中配置说明</h5><pre><code>@RestController
+@RequestMapping(&quot;/user&quot;)
+public class UserController {
+
+static Map&lt;Integer, User&gt; Users = Collections.synchronizedMap(new HashMap&lt;Integer, User&gt;());
+
+
+@ApiOperation(value=&quot;获取用户列表&quot;,notes = &quot;用户管理&quot;)
+@RequestMapping(value=&quot;/&quot;,method=RequestMethod.GET)
+public List&lt;User&gt; getUserList(){
+    List&lt;User&gt; User=new ArrayList&lt;User&gt;(Users.values());
+    return User;
+}
+
+
+@ApiOperation(value=&quot;创建用户&quot;,notes = &quot;用户管理&quot;)
+@ApiImplicitParam(name = &quot;user&quot;, value = &quot;用户实体&quot;, required = true, dataType = &quot;User&quot;)
+@RequestMapping(value=&quot;/&quot;,method=RequestMethod.POST)
+public String addUsers(User User){
+    Users.put(User.getId(), User);
+    return Users.size()+&quot;&quot;;
+}
+
+@ApiOperation(value=&quot;根据id获取用户信息&quot;)
+@ApiImplicitParam(name = &quot;id&quot;, value = &quot;用户ID&quot;, required = true, dataType = &quot;Integer&quot;,paramType=&quot;path&quot;)
+@RequestMapping(value=&quot;/{id}&quot;,method=RequestMethod.GET)
+public User getUser(Integer id){
+    return Users.get(id);
+}
+
+@ApiOperation(value=&quot;根据id更新用户信息&quot;)
+@ApiImplicitParams({
+        @ApiImplicitParam(name = &quot;id&quot;, value = &quot;用户ID&quot;, required = true, dataType = &quot;Integer&quot;,paramType=&quot;path&quot;),
+        @ApiImplicitParam(name = &quot;user&quot;, value = &quot;用户实体&quot;, required = true, dataType = &quot;User&quot;)
+})
+@RequestMapping(value=&quot;/{id}&quot;, method=RequestMethod.PUT)
+public String updateUser(@PathVariable Integer id, @ModelAttribute User s) {
+    User User = Users.get(id);
+    User.setName(s.getName());
+    User.setAge(s.getAge());
+    Users.put(id, User);
+    return &quot;success&quot;;
+}
+
+@ApiOperation(value=&quot;根据id删除用户信息&quot;)
+@ApiImplicitParam(name = &quot;id&quot;, value = &quot;用户ID&quot;, required = true, dataType = &quot;Integer&quot;,paramType=&quot;path&quot;)
+@RequestMapping(value=&quot;/{id}&quot;, method=RequestMethod.DELETE)
+public String deleteUser(@PathVariable Integer id) {
+    Users.remove(id);
+    return &quot;success&quot;;
+}
+}
+</code></pre><h5 id="4-效果"><a href="#4-效果" class="headerlink" title="4.效果"></a>4.效果</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/04/36.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/04/25/zyzx-31-SpringBoot结合Swagger2构建RESTful-API测试体系/" class="archive-article-date">
+  	<time datetime="2018-04-25T14:26:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-04-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-30-SpringBoot简单介绍以及基于restful的web服务快速搭建" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1075,242 +1207,9 @@ public void sendChatMessage(InMessage message) {
 
 
   
-    <article id="post-websocket-11-实现在线用户定时推送" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/03/26/websocket-11-实现在线用户定时推送/">websocket(11)-实现在线用户定时推送</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>使用schdule注解，推送在线用户接口开发</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-java后台代码"><a href="#1-java后台代码" class="headerlink" title="1.java后台代码"></a>1.java后台代码</h6><pre><code>@Controller
-public class V6UserController {
-@Autowired
-private WebsocketService ws;
-
-private static Map&lt;String,String&gt; userMap = new HashMap&lt;String,String&gt;();
-public static Map&lt;String,User&gt; onlineUserMap = new HashMap&lt;String,User&gt;();
-static {
-    userMap.put(&quot;admin&quot;,&quot;123456&quot;);
-    userMap.put(&quot;zs&quot;,&quot;123456&quot;);
-    userMap.put(&quot;lisi&quot;,&quot;123456&quot;);
-    userMap.put(&quot;wangwu&quot;,&quot;123456&quot;);
-    onlineUserMap.put(&quot;123&quot;,new User(&quot;admin&quot;,&quot;123456&quot;));
-}
-@RequestMapping(value = &quot;login&quot;, method= RequestMethod.POST)
-public String login(@RequestParam(value = &quot;username&quot;,required=true) String username, @RequestParam(value = &quot;pwd&quot;,required = true) String pwd, HttpSession session){
-    String password = userMap.get(username);
-    if(pwd.equals(password)){
-        User user = new User(username, pwd);
-        String sessionId = session.getId();
-        onlineUserMap.put(sessionId,user);
-        return &quot;redirect:/v6/chat.html&quot;;
-    }else{
-        return &quot;redirect:/v6/error.html&quot;;
-    }
-}
-
-/**
- * 定时向用户端推送坐席个数
- */
-@Scheduled(fixedRate = 2000)
-public void onlinUser(){
-      ws.sendOnlineUser(onlineUserMap);
-}
-}
-</code></pre><p>2.service</p>
-<pre><code> public void sendOnlineUser(Map&lt;String, User&gt; onlineUserMap) {
-    String msg = &quot;&quot;;
-    for (Map.Entry&lt;String,User&gt; entry:onlineUserMap.entrySet()) {
-        msg = msg.concat(entry.getValue().getName()+&quot;||&quot;);
-    }
-    template.convertAndSend(&quot;/topic/online/user&quot;,new OutMessage(msg));
-}
-</code></pre><h6 id="2-前端"><a href="#2-前端" class="headerlink" title="2.前端"></a>2.前端</h6><p>1.app.js</p>
-<pre><code>var stompClient = null;
-
-    function setConnected(connected) {
-        $(&quot;#connect&quot;).prop(&quot;disabled&quot;, connected);
-        $(&quot;#disconnect&quot;).prop(&quot;disabled&quot;, !connected);
-        if (connected) {
-            $(&quot;#conversation&quot;).show();
-        }
-        else {
-            $(&quot;#conversation&quot;).hide();
-        }
-        $(&quot;#notice&quot;).html(&quot;&quot;);
-    }
-
-    function connect() {
-        var socket = new SockJS(&apos;/websocket&apos;);
-        stompClient = Stomp.over(socket);
-        stompClient.connect({}, function (frame) {
-            setConnected(true);
-            console.log(&apos;Connected: &apos; + frame);
-
-            //订阅群聊消息
-            stompClient.subscribe(&apos;/topic/chat&apos;, function (result) {
-                showContent(JSON.parse(result.body));
-            });
-
-            stompClient.subscribe(&apos;/topic/online/user&apos;,function(result){
-               showOnlineUser(JSON.parse(result.body));
-            });
-        });
-    }
-
-
-    //断开连接
-    function disconnect() {
-        if (stompClient !== null) {
-            stompClient.disconnect();
-        }
-        setConnected(false);
-        console.log(&quot;Disconnected&quot;);
-    }
-
-    //发送聊天记录
-    function sendContent() {
-        stompClient.send(&quot;/app/v6/chat&quot;, {}, JSON.stringify({&apos;content&apos;: $(&quot;#content&quot;).val()}));
-
-    }
-
-    //显示聊天记录
-    function showContent(body) {
-        $(&quot;#record&quot;).append(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
-    }
-
-    //显示实时在线用户
-    function showOnlineUser(body) {
-        $(&quot;#online&quot;).html(&quot;&lt;tr&gt;&lt;td&gt;&quot; + body.content + &quot;&lt;/td&gt; &lt;td&gt;&quot;+new Date(body.time).toLocaleTimeString()+&quot;&lt;/td&gt;&lt;/tr&gt;&quot;);
-    }
-
-
-    $(function () {
-
-        connect();//自动上线
-
-        $(&quot;form&quot;).on(&apos;submit&apos;, function (e) {
-            e.preventDefault();
-        });
-
-        $( &quot;#disconnect&quot; ).click(function() { disconnect(); });
-        $( &quot;#send&quot; ).click(function() {
-            sendContent(); 
-        });
-    });
-</code></pre><p>2.chat.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;meta http-equiv=&quot;Content-Type&quot; content=&quot;text/html; charset=UTF-8&quot; /&gt;
-&lt;head&gt;
-&lt;title&gt;devsq聊天室&lt;/title&gt;
-&lt;link href=&quot;/webjars/bootstrap/css/bootstrap.min.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;link href=&quot;/v6/main.css&quot; rel=&quot;stylesheet&quot;&gt;
-&lt;script src=&quot;/webjars/jquery/jquery.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/webjars/sockjs-client/sockjs.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/webjars/stomp-websocket/stomp.min.js&quot;&gt;&lt;/script&gt;
-&lt;script src=&quot;/v6/app.js&quot;&gt;&lt;/script&gt;
-&lt;/head&gt;
-&lt;body&gt;
-
-&lt;div id=&quot;main-content&quot; class=&quot;container&quot;&gt;
-&lt;div class=&quot;row&quot;&gt;
-    &lt;div class=&quot;col-md-6&quot;&gt;
-        &lt;form class=&quot;form-inline&quot;&gt;
-            &lt;div class=&quot;form-group&quot;&gt;
-                &lt;label for=&quot;connect&quot;&gt;建立连接通道:&lt;/label&gt;
-                &lt;button id=&quot;connect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;Connect&lt;/button&gt;
-                &lt;button id=&quot;disconnect&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot; disabled=&quot;disabled&quot;&gt;Disconnect
-                &lt;/button&gt;
-            &lt;/div&gt;
-        &lt;/form&gt;
-    &lt;/div&gt;
-    &lt;div class=&quot;col-md-6&quot;&gt;
-        &lt;form class=&quot;form-inline&quot;&gt;
-            &lt;div class=&quot;form-group&quot;&gt;
-                &lt;input type=&quot;text&quot; id=&quot;content&quot; class=&quot;form-control&quot; placeholder=&quot;请输入...&quot;&gt;
-            &lt;/div&gt;
-            &lt;button id=&quot;send&quot; class=&quot;btn btn-default&quot; type=&quot;submit&quot;&gt;发送&lt;/button&gt;
-        &lt;/form&gt;
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;div class=&quot;row&quot;&gt;
-    &lt;div class=&quot;col-md-6&quot;&gt;
-        &lt;table id=&quot;conversation&quot; class=&quot;table table-striped&quot;&gt;
-            &lt;thead&gt;
-            &lt;tr&gt;
-                &lt;th&gt;实时在线用户列表&lt;/th&gt;
-            &lt;/tr&gt;
-            &lt;/thead&gt;
-            &lt;tbody id=&apos;online&apos;&gt;
-            &lt;/tbody&gt;
-        &lt;/table&gt;
-    &lt;/div&gt;
-
-     &lt;div class=&quot;col-md-6&quot;&gt;
-        &lt;table id=&quot;conversation&quot; class=&quot;table table-striped&quot;&gt;
-            &lt;thead&gt;
-            &lt;tr&gt;
-                &lt;th&gt;聊天记录&lt;/th&gt;
-            &lt;/tr&gt;
-            &lt;/thead&gt;
-            &lt;tbody id=&apos;record&apos;&gt;
-            &lt;/tbody&gt;
-        &lt;/table&gt;
-    &lt;/div&gt;
-
-
-&lt;/div&gt;
-&lt;/div&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><h6 id="3-效果"><a href="#3-效果" class="headerlink" title="3.效果"></a>3.效果</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/03/86.png" alt="">   </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/03/26/websocket-11-实现在线用户定时推送/" class="archive-article-date">
-  	<time datetime="2018-03-26T14:25:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-03-26</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/9/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="page-number current">10</span><a class="page-number" href="/page/11/">11</a><a class="page-number" href="/page/12/">12</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/11/">Next &raquo;</a>
     </nav>
   
 
@@ -1373,7 +1272,7 @@ public void onlinUser(){
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.63px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

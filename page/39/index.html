@@ -152,6 +152,67 @@
       <div class="body-wrap">
         
   
+    <article id="post-代理-四-动态代理类的设计原理与结构" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/15/代理-四-动态代理类的设计原理与结构/">代理(四)-动态代理类的设计原理与结构</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="动态生成的类成为目标类的代理"><a href="#动态生成的类成为目标类的代理" class="headerlink" title="动态生成的类成为目标类的代理"></a>动态生成的类成为目标类的代理</h4><h6 id="1-动态代理类的工作原理图"><a href="#1-动态代理类的工作原理图" class="headerlink" title="1.动态代理类的工作原理图"></a>1.动态代理类的工作原理图</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/82.png" alt=""><br>分析:<br>1.客户端调用代理,代理的构造方法接受一个InvocationHandler,然后客户端调用代理的各个方法，各个方法会把调用请求转发给通过构造方法传进去的InvocationHander对象,而各个InvocationHandler对象又会把各个请求转发给目标对象Target。<br>2.图中log()被硬编码，我们把代理代码直接写在代理类中,以后别人想要修改代码将会不方便<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/83.png" alt=""><br>3.我们应该将那个代码作为参数传递进去,而不是硬编码(系统功能代码以参数形式传递过去)<br>4.在javascript中传递代码是用eval()函数解析,但是java中没有这样的用法，所以我们不能直接传递字符串进去,而是传递一个对象，我们到时候就调用对象的方法log(),以上“圈”就是一个对象,这就是现象切面编程(把切面的代码用对象进行封装,然后以对象的方式传递给你,你执行对象就相当于执行了切面的代码)</p>
+<h6 id="2-怎样将目标类传进去"><a href="#2-怎样将目标类传进去" class="headerlink" title="2.怎样将目标类传进去?"></a>2.怎样将目标类传进去?</h6><ol>
+<li>直接在InvocationHandler实现类中创建目标类的实例对象,可以看运行效果和加入日志代理,但是没有实际意义.</li>
+<li>为InvocationHandler实现类注入目标类的实例对象,不能采用匿名内部类的形式了.</li>
+<li>让匿名的InvocationHandler实现类访问外面方法中的目标类实例对象的final类型的引用变量<h6 id="3-将创建代理的过程改为一种更优雅的方式"><a href="#3-将创建代理的过程改为一种更优雅的方式" class="headerlink" title="3.将创建代理的过程改为一种更优雅的方式"></a>3.将创建代理的过程改为一种更优雅的方式</h6></li>
+<li>myeclipse重构出一个getProxy方法绑定接收目标同时返回代理对象,让调用者更懒惰,更方便,调用者甚至不用接触任何代理的API</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/15/代理-四-动态代理类的设计原理与结构/" class="archive-article-date">
+  	<time datetime="2017-01-15T03:34:40.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/代理/">代理</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/java代理/">java代理</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-代理-三-InvocationHander对象内部功能" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -746,80 +807,9 @@
 
 
   
-    <article id="post-类加载器-三-编写对class文件进行加密的工具类" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/10/类加载器-三-编写对class文件进行加密的工具类/">类加载器(三)-编写对class文件进行加密的工具类</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="编写一个对文件内容进行简单加密的程序"><a href="#编写一个对文件内容进行简单加密的程序" class="headerlink" title="编写一个对文件内容进行简单加密的程序"></a>编写一个对文件内容进行简单加密的程序</h4><ol>
-<li>写一个加密程序,用于对类的class文件进行加密(加密算法就是^oxfff)</li>
-<li>myeclipse下找到ClassLoaderAttachment的class文件<br><img src="http://i1.piimg.com/576993/606c8025bfca8584.png" alt="Markdown"></li>
-<li>找到class文件下某个文件所对应的具体路径<br><img src="http://i1.piimg.com/576993/606c8025bfca8584.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/c64e4474a5e520e0.png" alt="Markdown"></li>
-<li>myeclipse下传递参数配置<br><img src="http://i1.piimg.com/576993/f386c3561ad6d425.png" alt="Markdown"><br><img src="http://i1.piimg.com/576993/26e86ca5f1cfa7ce.png" alt="Markdown"></li>
-<li>用加密的(classlib下)覆盖(bin目录下)<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">Exception in thread &quot;main&quot; java.lang.ClassFormatError: Incompatible magic value 889275713 in class file com/yxm/ClassLoaderAttachment</div><div class="line">	at java.lang.ClassLoader.defineClass1(Native Method)</div><div class="line">	at java.lang.ClassLoader.defineClass(ClassLoader.java:621)</div><div class="line">	at java.security.SecureClassLoader.defineClass(SecureClassLoader.java:124)</div><div class="line">	at java.net.URLClassLoader.defineClass(URLClassLoader.java:260)</div><div class="line">	at java.net.URLClassLoader.access$000(URLClassLoader.java:56)</div><div class="line">	at java.net.URLClassLoader$1.run(URLClassLoader.java:195)</div><div class="line">	at java.security.AccessController.doPrivileged(Native Method)</div><div class="line">	at java.net.URLClassLoader.findClass(URLClassLoader.java:188)</div><div class="line">	at java.lang.ClassLoader.loadClass(ClassLoader.java:307)</div><div class="line">	at sun.misc.Launcher$AppClassLoader.loadClass(Launcher.java:301)</div><div class="line">	at java.lang.ClassLoader.loadClass(ClassLoader.java:252)</div><div class="line">	at java.lang.ClassLoader.loadClassInternal(ClassLoader.java:320)</div><div class="line">	at com.yxm.classloader.MyClassLoader.main(MyClassLoader.java:41)</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>以上说明加密成功</p>
-<h4 id="代码过程及实例"><a href="#代码过程及实例" class="headerlink" title="代码过程及实例"></a>代码过程及实例</h4><h6 id="1-：找到ClassLoaderAttachment对其进行加密-然后放入将-class文件放到classlib下"><a href="#1-：找到ClassLoaderAttachment对其进行加密-然后放入将-class文件放到classlib下" class="headerlink" title="1.：找到ClassLoaderAttachment对其进行加密,然后放入将.class文件放到classlib下"></a>1.：找到ClassLoaderAttachment对其进行加密,然后放入将.class文件放到classlib下</h6><ol>
-<li>工程布局<br><img src="http://i1.piimg.com/576993/4ac914d9ad9c3a1b.png" alt="Markdown"><h6 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h6></li>
-<li><p>ClassLoaderAttachment代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">public class ClassLoaderAttachment extends Date&#123;</div><div class="line">    public String toString()&#123;</div><div class="line">    	return &quot;hello yxm&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>MyClassLoader代码</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">/*</div><div class="line"> * MyClassLoader既作为类加载器也作为加密工具</div><div class="line"> */</div><div class="line">public class MyClassLoader &#123;</div><div class="line">	/**</div><div class="line">	 * 目标：找到ClassLoaderAttachment对其进行加密,然后放入到classlib下</div><div class="line">	 * @param args</div><div class="line">	 * @throws Exception</div><div class="line">	 */</div><div class="line">  public static void main(String[] args) throws Exception&#123;</div><div class="line">	/**</div><div class="line">	 * 对文件进行加密：</div><div class="line">	 * 1.把目标文件读到内存（InputStream就是一个管道,吸入）</div><div class="line">	 * 2.内存中把文件读到硬盘(OutputStram就是一个输出管道，呼出)</div><div class="line">	 */</div><div class="line">	  //F:\MVC\webserver\loaderclass\bin\com\yxm\ClassLoaderAttachment.class </div><div class="line">	  String srcPath = args[0];</div><div class="line">	  String destDir = args[1];</div><div class="line">	  </div><div class="line">	  //目标.class文件</div><div class="line">	  int lastIndexOf = srcPath.lastIndexOf(&quot;\\&quot;);</div><div class="line">	  String destFileName = srcPath.substring(lastIndexOf+1);</div><div class="line">	  String destPath = destDir+&quot;\\&quot;+destFileName;</div><div class="line">	  </div><div class="line">	  FileInputStream fis = new FileInputStream(srcPath);</div><div class="line">	  FileOutputStream fos = new FileOutputStream(destPath);</div><div class="line">	  secret(fis, fos);</div><div class="line">	  fis.close();</div><div class="line">	  fos.close();</div><div class="line">	 </div><div class="line">	  //再正常输出那个类</div><div class="line">	  System.out.println((new ClassLoaderAttachment()).toString());</div><div class="line">  &#125;</div><div class="line">  /**</div><div class="line">   * 加密类，对输入流进行加密，然后输出到输出流中</div><div class="line">   * 输入：是一个二进制流</div><div class="line">   * 输出：是一个流</div><div class="line">   */</div><div class="line">  private static void secret(InputStream in,OutputStream out) throws Exception&#123;</div><div class="line">	  //读入输入流并输出(读到末尾是-1)</div><div class="line">	  int b=-1;</div><div class="line">	  while((b=in.read())!=-1)&#123;</div><div class="line">		 out.write(b ^ 0xff);//加密进行异或运算 </div><div class="line">	  &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/10/类加载器-三-编写对class文件进行加密的工具类/" class="archive-article-date">
-  	<time datetime="2017-01-10T14:20:54.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Myeclipse/">Myeclipse</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/38/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="page-number" href="/page/38/">38</a><span class="page-number current">39</span><a class="page-number" href="/page/40/">40</a><a class="page-number" href="/page/41/">41</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><a class="extend next" rel="next" href="/page/40/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/38/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="page-number" href="/page/38/">38</a><span class="page-number current">39</span><a class="page-number" href="/page/40/">40</a><a class="page-number" href="/page/41/">41</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/40/">Next &raquo;</a>
     </nav>
   
 
@@ -882,7 +872,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.63px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

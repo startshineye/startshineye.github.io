@@ -152,6 +152,98 @@
       <div class="body-wrap">
         
   
+    <article id="post-ElasticStack-6-Elasticsearch篇SearchAPI" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/11/ElasticStack-6-Elasticsearch篇SearchAPI/">ElasticStack-6-Elasticsearch篇SearchAPI</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本章会讲解搜索特性，详细讲解 Search API 的组成和分类，带领大家逐个了解、掌握 API 的使用方法和技巧。</p>
+<h3 id="1-Search-API概述"><a href="#1-Search-API概述" class="headerlink" title="1.Search API概述"></a>1.Search API概述</h3><ol>
+<li><p>1.Search API实现对es中存储的数据进行查询分析,endpoint为_search,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/57.png" alt="">  </p>
+</li>
+<li><p>2.查询主要有两种形式<br>a.URI Search<br>-操作简便,方便通过命令行测试<br>-仅包含部分查询语法<br>b.Request Body.Search<br>-es提供的完备查询语法Query DSL(Domain Specific Language)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/58.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="2-URISearch详解与演示"><a href="#2-URISearch详解与演示" class="headerlink" title="2.URISearch详解与演示"></a>2.URISearch详解与演示</h3><ol>
+<li>1.通过url query参数来实现搜索,常见参数如下:<br>-q 指定查询的语句，语法为 Query String Syntax<br>-df q中不指定字段时默认查询的字段，如果不指定，es会查询所有字段<br>-sort 排序<br>-timeout 指定超时时间,默认不超时<br>-from,size用于分页<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/59.png" alt="">  </li>
+</ol>
+<h4 id="2-1-Query-String-Syntax"><a href="#2-1-Query-String-Syntax" class="headerlink" title="2.1 Query String Syntax"></a>2.1 Query String Syntax</h4><h5 id="2-1-1-基本查询"><a href="#2-1-1-基本查询" class="headerlink" title="2.1.1 基本查询"></a>2.1.1 基本查询</h5><ol>
+<li><p>1.term与phrase<br>-alfred way 等效于alfred OR way<br>-“alfred way”词语查询，要求先后顺序  </p>
+</li>
+<li><p>2.泛查询<br>-alfred等效于在所有字段去匹配该term  </p>
+</li>
+<li>3.指定字段<br>-name:alfred </li>
+<li><p>4.Group分组设定,使用括号指定匹配的优先级规则<br>-(quick Or brown) AND fox<br>-status:(active OR pending) title:(full text search)  </p>
+</li>
+<li><p>1.创建索引  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">   PUT test_search_index</div><div class="line">&#123;</div><div class="line">  &quot;settings&quot;: &#123;</div><div class="line">    &quot;index&quot;:&#123;</div><div class="line">      &quot;number_of_shards&quot;:&quot;1&quot;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.创建多个文档</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">   //创建多个文档</div><div class="line">POST test_search_index/_doc/_bulk</div><div class="line">&#123;&quot;index&quot;:&#123;&quot;_id&quot;:&quot;1&quot;&#125;&#125;</div><div class="line">&#123;&quot;username&quot;:&quot;alfred  way&quot;,&quot;job&quot;:&quot;java engineer&quot;,&quot;age&quot;:18,&quot;birth&quot;:&quot;1990-01-02&quot;,&quot;isMarried&quot;:false&#125;</div><div class="line">&#123;&quot;index&quot;:&#123;&quot;_id&quot;:&quot;2&quot;&#125;&#125;</div><div class="line">&#123;&quot;username&quot;:&quot;alfred&quot;,&quot;job&quot;:&quot;java senior engineer and java specialist&quot;,&quot;age&quot;:28,&quot;birth&quot;:&quot;1980-05-07&quot;,&quot;isMarried&quot;:true&#125;</div><div class="line">&#123;&quot;index&quot;:&#123;&quot;_id&quot;:&quot;3&quot;&#125;&#125;</div><div class="line">&#123;&quot;username&quot;:&quot;lee&quot;,&quot;job&quot;:&quot;java and ruby engineer&quot;,&quot;age&quot;:22,&quot;birth&quot;:&quot;1985-05-07&quot;,&quot;isMarried&quot;:false&#125;</div><div class="line">&#123;&quot;index&quot;:&#123;&quot;_id&quot;:&quot;4&quot;&#125;&#125;</div><div class="line">&#123;&quot;username&quot;:&quot;alfred junior way&quot;,&quot;job&quot;:&quot;ruby engineer&quot;,&quot;age&quot;:23,&quot;birth&quot;:&quot;1989-05-07&quot;,&quot;isMarried&quot;:false&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>3.查询<br>a.查询所有包含alfred的文档：<br>-GET test_search_index/_search?q=alfred<br>-查看实际执行的详情语句使用:GET test_search_index/_search?q=alfred{“profile”:true}<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/60.png" alt="">  </p>
+</li>
+</ol>
+<p>b.查询文档字段username中包好alfred的文档<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/61.png" alt="">  </p>
+<p>c.查询文档字段username中包好alfred或者way的文档<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/62.png" alt="">  </p>
+<p>d.查询文档字段username中包好”alfred way“字符的文档<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/63.png" alt="">  </p>
+<h5 id="2-2-2-布尔操作符"><a href="#2-2-2-布尔操作符" class="headerlink" title="2.2.2 布尔操作符"></a>2.2.2 布尔操作符</h5><ol>
+<li>1.布尔操作符<br>-AND(&amp;&amp;),OR(||),NOT(!)<br>a.name:(tom NOT lee)–表示name包含tom 不包含 lee<br>b.注意大写,不能小写  </li>
+</ol>
+<p>-+-分别对应must和must_not<br> a.name:(tom+lee-alfred)–表示name一定包含lee一定不包含alfred可以包含tom<br> b.name:(lee &amp;&amp; !alfred) || (tom &amp;&amp; lee &amp;&amp; !alfred)<br> c.+在url中会被解析为空格,要使用encode后的结果才可以,为%2B  </p>
+<ol>
+<li>2.实例<br>a.获取username字段中包含alfred但是不包含way的<br>-GET test_search_index/_search?q=username:(alfred NOT way)<br>{<br>“profile”: true<br>}<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/64.png" alt=""><br>b.返回username中一定有way但是不一定有alfred的文档<br>-GET test_search_index/_search?q=username:(alfred + way)<br>{<br>“profile”: true<br>}<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/65.png" alt=""><br>所以我们用%2B替代<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/66.png" alt="">  </li>
+</ol>
+<h5 id="2-2-3-范围查询"><a href="#2-2-3-范围查询" class="headerlink" title="2.2.3 范围查询"></a>2.2.3 范围查询</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/67.png" alt="">  </p>
+<h5 id="2-2-4-通配符查询"><a href="#2-2-4-通配符查询" class="headerlink" title="2.2.4 通配符查询"></a>2.2.4 通配符查询</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/68.png" alt=""></p>
+<h5 id="2-2-5-正则表达式"><a href="#2-2-5-正则表达式" class="headerlink" title="2.2.5 正则表达式"></a>2.2.5 正则表达式</h5><ol>
+<li>1.正则表达式<br>-name:/[mb]oat/  </li>
+</ol>
+<h5 id="2-2-6-其他条件查询"><a href="#2-2-6-其他条件查询" class="headerlink" title="2.2.6 其他条件查询"></a>2.2.6 其他条件查询</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/69.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/08/11/ElasticStack-6-Elasticsearch篇SearchAPI/" class="archive-article-date">
+  	<time datetime="2019-08-11T11:15:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-08-11</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-ElasticStack-5-Elasticsearch篇之Mapping设置" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -911,117 +1003,9 @@
 
 
   
-    <article id="post-SpringCloud-8-Zuul综合使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/07/SpringCloud-8-Zuul综合使用/">SpringCloud-8-Zuul综合使用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>项目整体架构图如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/8.png" target="_blank" rel="external"></a>   </p>
-<h4 id="8-1-Zuul-Pre和Post过滤器"><a href="#8-1-Zuul-Pre和Post过滤器" class="headerlink" title="8.1 Zuul:Pre和Post过滤器"></a>8.1 Zuul:Pre和Post过滤器</h4><ol>
-<li>1.所有的请求都会到Zuul,然后到ServicreA、然后到ServiceB、再到ServiceC、现在我们对整体服务做一个权限校验。假如没有zuul服务、那么ServicreA、ServicreB、ServicreC都得校验一次做的太多受不了。所以权限校验我们放在Zuul里面统一处理。</li>
-<li>2.我们以:<a href="http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。" target="_blank" rel="external">http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。</a>  <h5 id="8-1-1-Zuul统一校验"><a href="#8-1-1-Zuul统一校验" class="headerlink" title="8.1.1 Zuul统一校验"></a>8.1.1 Zuul统一校验</h5></li>
-<li><p>1.新建TokenFilter做PRE过滤  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Component</div><div class="line">public class TokenFilter extends ZuulFilter&#123;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public String filterType() &#123;</div><div class="line">       return PRE_TYPE;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public int filterOrder() &#123;</div><div class="line">       /**</div><div class="line">        * filter的顺序:对应的值越低优先级越高</div><div class="line">        * 我们把此Filter放在PRE_DECORATION_FILTER_ORDER前面</div><div class="line">        */</div><div class="line">       return PRE_DECORATION_FILTER_ORDER-1;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public boolean shouldFilter() &#123;</div><div class="line">       /**</div><div class="line">        * 开启过滤</div><div class="line">        */</div><div class="line">       return true;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public Object run() throws ZuulException &#123;</div><div class="line">       RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">       HttpServletRequest request = requestContext.getRequest();</div><div class="line">	</div><div class="line">       //这里从url参数里面获取,也可以从cookie,header里获取</div><div class="line">       String token = request.getParameter(&quot;token&quot;);</div><div class="line">       if(StringUtils.isEmpty(token))&#123;</div><div class="line">           requestContext.setSendZuulResponse(false);</div><div class="line">           requestContext.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());</div><div class="line">       &#125;</div><div class="line">       return null;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>2.新建Post过滤器    </p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class AddResponseHeaderFilter extends ZuulFilter&#123;</div><div class="line">    @Override</div><div class="line">    public String filterType() &#123;</div><div class="line">        return POST_TYPE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int filterOrder() &#123;</div><div class="line">        return SEND_RESPONSE_FILTER_ORDER - 1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean shouldFilter() &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public Object run() &#123;</div><div class="line">        RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">        HttpServletResponse response = requestContext.getResponse();</div><div class="line">        response.setHeader(&quot;X-Foo&quot;, UUID.randomUUID().toString());</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<h4 id="8-2-Zuul-限流"><a href="#8-2-Zuul-限流" class="headerlink" title="8.2 Zuul:限流"></a>8.2 Zuul:限流</h4><h5 id="8-2-1-限流基本理论"><a href="#8-2-1-限流基本理论" class="headerlink" title="8.2.1 限流基本理论"></a>8.2.1 限流基本理论</h5><ol>
-<li>1.Zuul充当的是api网关的角色、每个请求都会经过它、在他上面做api限流保护、防止攻击。比如我们的api是发短信的、我们需要限制客户端请求速度、从而在一定程序上抵制短信大攻击、降低损失。</li>
-<li>2.Zuul的限流是放在前置过滤去去做的、更具体来说、时机是在请求被转发之前调用。如果前置过滤器有多个操作、限流放到最靠前那个。比如:Zuul前置过滤器里面有限流、鉴权。那么限流应该早于鉴权。</li>
-<li>3.限流方案很多，这里以一种来说:令牌桶流。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/16.png" target="_blank" rel="external"></a><br>a.中间桶(token bucket)：是存放令牌的、所以叫做令牌桶。<br>b.最上面会以固定的速率往令牌桶中添加令牌、如果已经放满了就丢掉。<br>c.外部请求过来、会从令牌桶中获取令牌、拿到令牌之后才可以继续往前走。如果拿不到令牌直接被拒绝。其实是和买房一样。 </li>
-</ol>
-<h5 id="8-2-2-限流代码实现"><a href="#8-2-2-限流代码实现" class="headerlink" title="8.2.2 限流代码实现"></a>8.2.2 限流代码实现</h5><h6 id="1-新建RateFilter类"><a href="#1-新建RateFilter类" class="headerlink" title="1.新建RateFilter类"></a>1.新建RateFilter类</h6><p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/17.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a>   </p>
-<h4 id="8-3-Zuul-鉴权和添加用户服务"><a href="#8-3-Zuul-鉴权和添加用户服务" class="headerlink" title="8.3 Zuul:鉴权和添加用户服务"></a>8.3 Zuul:鉴权和添加用户服务</h4><h5 id="8-3-1-Zuul权限校验"><a href="#8-3-1-Zuul权限校验" class="headerlink" title="8.3.1 Zuul权限校验"></a>8.3.1 Zuul权限校验</h5><p>我们使用Zuul的权限校验实现下面3个功能。</p>
-<ol>
-<li>1./order/create 只能买家访问(创建订单)  </li>
-<li>2./order/finish 只能卖家访问(完结订单) </li>
-<li><p>3./product/list 都可以访问(商品列表)  </p>
-</li>
-<li><p>1.新建鉴权Filter(AuthFilter)<br>新建鉴权Filter、用来区分买家和卖家</p>
-</li>
-</ol>
-<ol>
-<li>2.实现逻辑<br>怎样区分买家和卖家呢?有些人想到cookie、既然想到了cookie那么必须买家和卖家登录了之后才能获取到信息。那么登录功能写到哪里了，就需要有一个用户服务。</li>
-</ol>
-<h5 id="8-3-2-添加用户服务"><a href="#8-3-2-添加用户服务" class="headerlink" title="8.3.2 添加用户服务"></a>8.3.2 添加用户服务</h5><ol>
-<li><p>1.API接口登录区分<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a> </p>
-</li>
-<li><p>2.数据库  </p>
-</li>
-</ol>
-<pre><code>CREATE TABLE `user_info` (
-  `id` varchar(32) NOT NULL,
-  `username` varchar(32) DEFAULT &apos;&apos;,
-  `password` varchar(32) DEFAULT &apos;&apos;,
-  `openid` varchar(64) DEFAULT &apos;&apos; COMMENT &apos;微信openid&apos;,
-  `role` tinyint(1) NOT NULL COMMENT &apos;1买家2卖家&apos;,
-  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &apos;创建时间&apos;,
-  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &apos;修改时间&apos;,
-  PRIMARY KEY (`id`)
-);
-</code></pre><ol>
-<li><p>3.创建应用<br>选择的依赖组件:<br>1.配置:Cloud Config–&gt;Config Cient<br>2.注册中心:Cloud Discovery–&gt;Eureka Discovery<br>3.数据库:SQL–&gt;Mysql/JPA<br>4.缓存:NoSQL–&gt;redis  </p>
-</li>
-<li><p>4.修改版本依赖</p>
-</li>
-<li><p>5.统一配置中心远端服务器创建user-dev.yml文件<br>我们只添加数据库连接信息和redis连接信息，其他信息在bootstrap.yml文件里面  </p>
-</li>
-</ol>
-<ol>
-<li><p>6.在config服务中访问:<a href="http://localhost:8083/user-dev.yml可以查看到对应文件" target="_blank" rel="external">http://localhost:8083/user-dev.yml可以查看到对应文件</a></p>
-</li>
-<li><p>7.因为user服务后面肯定会对外提供接口的、所以我们将其改造成多模块</p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/07/SpringCloud-8-Zuul综合使用/" class="archive-article-date">
-  	<time datetime="2019-07-07T04:13:24.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/50/">50</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 
@@ -1084,7 +1068,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.63px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
