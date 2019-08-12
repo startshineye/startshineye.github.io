@@ -33,7 +33,17 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/67.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/68.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/69.png">
-<meta property="og:updated_time" content="2019-08-11T16:21:07.010Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/70.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/71.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/72.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/75.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/74.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/76.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/77.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/78.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/79.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/73.png">
+<meta property="og:updated_time" content="2019-08-12T14:32:42.708Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-6-Elasticsearch篇SearchAPI">
 <meta name="twitter:description" content="本章会讲解搜索特性，详细讲解 Search API 的组成和分类，带领大家逐个了解、掌握 API 的使用方法和技巧。
@@ -238,6 +248,32 @@
 <li>1.正则表达式<br>-name:/[mb]oat/  </li>
 </ol>
 <h5 id="2-2-6-其他条件查询"><a href="#2-2-6-其他条件查询" class="headerlink" title="2.2.6 其他条件查询"></a>2.2.6 其他条件查询</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/69.png" alt="">  </p>
+<h3 id="3-QueryDSL简介"><a href="#3-QueryDSL简介" class="headerlink" title="3.QueryDSL简介"></a>3.QueryDSL简介</h3><h4 id="3-1-Request-Body-Search"><a href="#3-1-Request-Body-Search" class="headerlink" title="3.1 Request Body Search"></a>3.1 Request Body Search</h4><ol>
+<li>1.将查询语句通过http request body 发送到es,主要包含如下参数<br>-query 符合Query DSL语法的查询语句<br>-from,size<br>-timeout<br>-sort<br>-…<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/70.png" alt="">  </li>
+</ol>
+<h4 id="3-2-QueryDSL"><a href="#3-2-QueryDSL" class="headerlink" title="3.2 QueryDSL"></a>3.2 QueryDSL</h4><ol>
+<li>1.基于JSON定义的查询语句,主要包含如下两种类型:<br>-字段类查询  <blockquote>
+<p>如term(针对词查询),match(针对全文检索查询),range(范围查询)等，只针对某一字段进行查询<br>-复合查询<br>如bool查询等,包含一个或多个字段类查询或者复合查询语句  </p>
+</blockquote>
+</li>
+</ol>
+<h3 id="4-字段类查询与match-query查询"><a href="#4-字段类查询与match-query查询" class="headerlink" title="4.字段类查询与match-query查询"></a>4.字段类查询与match-query查询</h3><ol>
+<li>1.字段类查询主要包括以下两类：<br>-全文匹配  <blockquote>
+<p>针对text类型的字段进行全文检索,会对查询语句先进行分词处理,如match,match_phrase等query类型<br>-单词匹配<br>不会对查询语句做分词处理,直接去匹配字段的倒排索引,如term,terms,rang等query类型  </p>
+</blockquote>
+</li>
+</ol>
+<h4 id="4-1-Match-Query"><a href="#4-1-Match-Query" class="headerlink" title="4.1 Match Query"></a>4.1 Match Query</h4><ol>
+<li><p>1.对字段做全文检索,最基本和常用的查询类型,API示例如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/71.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/72.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/75.png" alt="">   </p>
+</li>
+<li><p>2.通过operator参数可以控制单词间的匹配关系,可选项为or和and<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/74.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/76.png" alt="">  </p>
+</li>
+</ol>
+<ol>
+<li>3.通过minimum_should_match参数可以控制需要匹配的单词数(至少包含查询语句的几个term)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/77.png" alt=""><br>kibana:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/78.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/79.png" alt=""></li>
+<li>2.kibana示例  </li>
+</ol>
+<h4 id="4-2-Match-Query-流程"><a href="#4-2-Match-Query-流程" class="headerlink" title="4.2 Match Query 流程"></a>4.2 Match Query 流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/73.png" alt="">  </p>
 
       
     </div>
