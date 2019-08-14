@@ -27,7 +27,22 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/9.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/81.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/06/82.png">
-<meta property="og:updated_time" content="2019-07-24T14:39:10.109Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/99.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/95.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/96.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/97.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/100.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/98.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/101.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/102.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/103.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/104.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/105.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/106.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/107.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/108.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/109.png">
+<meta property="og:updated_time" content="2019-08-14T16:24:25.824Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ipcc-1-ipcc整体架构">
 <meta name="twitter:description" content="ipcc总体架构模块 
@@ -254,6 +269,43 @@
 <p>[api]<br>flowno=200<br>agcount=1<br>sessiontimeout=300<br>loggername=dyflowapi01<br>ag1.prx=ag01/ag:tcp -h 127.0.0.1 -p 32011<br>ag2.prx=ag01slave/ag:tcp -h 115.182.84.62 -p 99999</p>
 <p>[rptqueserver]<br>rptquename=acd01/rptque:tcp -h 127.0.0.1 -p 37002<br>rptquecheck=5</p>
 <p>[lic]<br>licprxname=licg01/licg:tcp -h 127.0.0.1 -p 17904<br>```</p>
+<h3 id="2-空号检测模块搭建及录音库文件更新"><a href="#2-空号检测模块搭建及录音库文件更新" class="headerlink" title="2.空号检测模块搭建及录音库文件更新"></a>2.空号检测模块搭建及录音库文件更新</h3><p>注意:金服空号检测服务器由于私有云不能访问到外网,所以将空号检测license所在服务部署到了金服金融云。(金融云是连通公有云和私有云的桥梁)  </p>
+<p>空号检测服务daserver是根据局端返回的录音文件:然后通过asr识别来返回信令结果:dropcause  </p>
+<h4 id="2-1服务搭建"><a href="#2-1服务搭建" class="headerlink" title="2.1服务搭建"></a>2.1服务搭建</h4><ol>
+<li>1.解压da.tar.gz数据库  </li>
+<li>2.安装mysql<br>centos6<br>-yum install mysql-server<br>-service mysqld start<br>-chkconfig mysqld on   </li>
+</ol>
+<p>centos7<br>-yum install mariadb-server<br>-systemctl start mariadb.service<br>-systemctl enable mariadb.service   </p>
+<ol>
+<li><p>3.创建数据库da<br>mysqladmin -uroot -p create da  </p>
+</li>
+<li><p>4.导入数据到da<br>mysql -uroot -p da &lt; da.sql<br>生成的数据库和表如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/99.png" alt=""></p>
+</li>
+<li>5.执行machinecode获取机器码,发给cdevelop@qq.com申请授权码,写入 license.txt .<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/95.png" alt="">    </li>
+<li><p>6.根据安装文档word版本,配置数据库和JSON  </p>
+</li>
+<li><p>7.启动daserver<br>临时启动: ./daserver<br>后台启动: nohup ./daserver &amp;  </p>
+</li>
+</ol>
+<p>注意:启动出现 ./daserver: relocation error: ./libssl.so.10: symbol private_ossl_minimum_dh_bits, version libcrypto.so.10 not defined in file libcrypto.so.10 with link time reference<br>一般是系统已经有了其他版本的ssl,删除 本目录的 libssl.so.10 文件  </p>
+<h4 id="2-2更新录音文件库"><a href="#2-2更新录音文件库" class="headerlink" title="2.2更新录音文件库"></a>2.2更新录音文件库</h4><p>电话在拨打过程中出现了运营商返回的错误信令:dropcause为480<br>通过查询da模块(空号检测模块)录制的录音知道:”您拨打的号码是非本地号码,请在拨打号码前加0” 我们知道空号检测模块的录音库中没有识别到此空号录音，所以我们需要更新录音库(使用da提供的win下的工具samplemgr,连接da所在license的库数据库da)，有时候我们是无法直接连接license所在的da数据，而只能连接测试数据库，所以我们需要在测试环境下操作，然后把对应的数据替换到生产库。  </p>
+<h5 id="2-2-1更新da语音库"><a href="#2-2-1更新da语音库" class="headerlink" title="2.2.1更新da语音库"></a>2.2.1更新da语音库</h5><ol>
+<li>1.打开samplemgr,连接对应的数据库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/96.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/97.png" alt="">      </li>
+<li><p>2.启动服务,输入key(key是da数据库中)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/100.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/98.png" alt=""><br>启动成功日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/101.png" alt="">  </p>
+</li>
+<li><p>3.添加录音库测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/102.png" alt=""><br>文件要求 8000hz 16位 单声道，文件名要是数字，比如 电话号码.wav 这样子。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/103.png" alt=""><br>后续步骤按照samplemgr里面的文档:添加样本例子.docx  </p>
+</li>
+</ol>
+<h5 id="2-2-2-测试环境da数据导入到生产环境"><a href="#2-2-2-测试环境da数据导入到生产环境" class="headerlink" title="2.2.2 测试环境da数据导入到生产环境"></a>2.2.2 测试环境da数据导入到生产环境</h5><p>注意:1.由于da表结构中字段类型是:blob所以我们不能使用SQLyog或者Navicat工具直接将表数据导出，经测试直接导出的数据通过source导入到生产环境时候会由于乱码导入报错。而只能直接在测试环境所在服务是使用mysqldump指令导出数据。  </p>
+<h6 id="1-测试环境da数据导出"><a href="#1-测试环境da数据导出" class="headerlink" title="1.测试环境da数据导出"></a>1.测试环境da数据导出</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/104.png" alt=""></p>
+<ol>
+<li>1.进入测试环境da数据库数据(以导出mfcc数据为例)<br>mysqldump -u <username> -p <dbname> &gt; /path/to/<em>*</em>.sql<br>我们直接输入:mysqldump -u root -p123456 da mfcc&gt;mfcc.sql 报错如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/105.png" alt=""><br>说明我们导出表数据时候不能直接输入密码。我们更换成如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/106.png" alt="">  <h6 id="2-生产环境da数据导入"><a href="#2-生产环境da数据导入" class="headerlink" title="2.生产环境da数据导入"></a>2.生产环境da数据导入</h6></dbname></username></li>
+<li>1.连接生产环境数据库(注：如果连接不上时候加上-h 127.0.01参数)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/107.png" alt=""> </li>
+<li>2.数据导入<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/108.png" alt="">  </li>
+</ol>
+<h6 id="3-启动da的license所在服务"><a href="#3-启动da的license所在服务" class="headerlink" title="3.启动da的license所在服务"></a>3.启动da的license所在服务</h6><ol>
+<li>1.进入daserver所在目录下执行后台启动指令:<br>nohup ./daserver &amp;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/109.png" alt="">  </li>
+</ol>
 
       
     </div>
