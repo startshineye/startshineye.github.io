@@ -152,6 +152,122 @@
       <div class="body-wrap">
         
   
+    <article id="post-ElasticStack-7-Elasticsearch篇之分布式特性介绍" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/16/ElasticStack-7-Elasticsearch篇之分布式特性介绍/">ElasticStack-7-Elasticsearch篇之分布式特性介绍</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-分布式介绍及cerebro"><a href="#1-分布式介绍及cerebro" class="headerlink" title="1.分布式介绍及cerebro"></a>1.分布式介绍及cerebro</h3><h4 id="1-1分布式介绍"><a href="#1-1分布式介绍" class="headerlink" title="1.1分布式介绍"></a>1.1分布式介绍</h4><ol>
+<li><p>1.es支持集群模式,是一个分布式系统,其好处主要有两个:<br>-增大系统容联,如内存、磁盘、使得es集群可以支持PB级的数据。<br>-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  </p>
+</li>
+<li><p>2.es集群由多个es实例组成<br>-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch<br>-每个es实例本质上是一个JVM过程、且有自己的名字，通过node.name进行修改  </p>
+</li>
+</ol>
+<h4 id="1-2-cerebro"><a href="#1-2-cerebro" class="headerlink" title="1.2 cerebro"></a>1.2 cerebro</h4><p>cerebro是elastic search的集群管理工具。  </p>
+<ol>
+<li>1.地址如下:<br><a href="https://github.com/lmenezes/cerebro">https://github.com/lmenezes/cerebro</a>  </li>
+</ol>
+<p>进入上面地址,Download from <a href="https://github.com/lmenezes/cerebro/releases">https://github.com/lmenezes/cerebro/releases</a>,</p>
+<p>下载对应的包安装、只需要装了JVM就可以运行了。  </p>
+<p>Run bin/cerebro(or bin/cerebro.bat if on Windows)</p>
+<ol>
+<li>2.本地运行127.0.0.1：9000进入访问页面设置es节点地址:<a href="http://127.0.0.1:9200" target="_blank" rel="external">http://127.0.0.1:9200</a>  </li>
+</ol>
+<h3 id="2-构建集群"><a href="#2-构建集群" class="headerlink" title="2.构建集群"></a>2.构建集群</h3><h4 id="2-1启动一个节点"><a href="#2-1启动一个节点" class="headerlink" title="2.1启动一个节点"></a>2.1启动一个节点</h4><ol>
+<li><p>1.运行如下命令可以启动一个es节点实例(修改集群名字为：my_cluster 修改节点名称为:node1)<br>-bin/elasticsearch -E cluster.name=my_cluster -E node.name = node1<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/135.png" alt="">  </p>
+</li>
+<li><p>2.cluster state:es集群相关的数据称为:cluster state,主要记录如下信息:<br>-节点信息,比如:节点名称、链接地址等<br>-索引信息,比如:索引名称、配置等<br>-…<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/136.png" alt="">  </p>
+</li>
+<li><p>3.Master Node<br>-可以修改cluster state的节点称为master 节点,一个集群只有一个<br>-cluster state存储在每个节点上,master维护最新版本并同步给其他节点<br>-master节点是通过集群中所有节点选举产生的,可以被选举的节点称为master-eligible节点,相关配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/137.png" alt="">  </p>
+</li>
+</ol>
+<h4 id="2-2-创建一个索引"><a href="#2-2-创建一个索引" class="headerlink" title="2.2 创建一个索引"></a>2.2 创建一个索引</h4><ol>
+<li><p>1.我们通过如下api创建一个索引:put test_index<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/138.png" alt=""><br>cerebro下创建:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/142.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/143.png" alt=""><br>索引创建后，索引的信息会更新到cluster state,cluster state本身有版本这么一说的,之前是cluster state0当我们创建索引后变成了cluster state1</p>
+</li>
+<li><p>2.Coordinating Node:处理请求的节点即为:Coordinating节点,该节点为所有节点的默认角色,不能取消<br>-Coordinating节点作用把路由请求到正确的节点处理,比如创建索引的请求到maser节点。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/139.png" alt="">  </p>
+</li>
+<li><p>3.Data Node:存储数据的几点,默认节点都是data类型,相关配置如下:<br>-node.data:true<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/140.png" alt="">  </p>
+</li>
+</ol>
+<h4 id="2-3-单点问题"><a href="#2-3-单点问题" class="headerlink" title="2.3 单点问题"></a>2.3 单点问题</h4><ol>
+<li>1.在单节点node1的时候,如果node1停止服务,集群停止服务  </li>
+</ol>
+<h4 id="2-4-新增节点"><a href="#2-4-新增节点" class="headerlink" title="2.4 新增节点"></a>2.4 新增节点</h4><ol>
+<li>1.运行如下命令可以启动一个es节点实例<br>-bin/elasticsearch -E cluster.name=my_cluster -E node.name = node2<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/141.png" alt=""><br>-bin/elasticsearch -Ecluster.name=my_cluster -Epath.data=my_cluster_node2 -Enode.name=node2 -Ehttp.port=5300 -d</li>
+</ol>
+<h3 id="3-副本与分片"><a href="#3-副本与分片" class="headerlink" title="3.副本与分片"></a>3.副本与分片</h3><p>分布式系统问题:<br>1.我们如何提高系统的可用性,分为两部分:服务可用性和数据可用性<br>2.如何增大系统的容量</p>
+<h4 id="3-1-系统可用性"><a href="#3-1-系统可用性" class="headerlink" title="3.1 系统可用性"></a>3.1 系统可用性</h4><ol>
+<li><p>1.服务可用性<br>-2个节点的情况下,允许其中1个节点停止服务。  </p>
+</li>
+<li><p>2.数据可用性<br>-数据可用性:就是即便一个节点挂掉之后,整个数据完整<br>-es为了解决数据可用性,引入副本(Replication)解决<br>-每个节点上都有完备的数据  </p>
+</li>
+<li><p>3.具体副本实现如下所示,node2上是test_index的副本<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/144.png" alt="">   </p>
+</li>
+</ol>
+<p>node2上含有node1上索引test_index的副本*test_index  </p>
+<h4 id="3-2-增大系统容联"><a href="#3-2-增大系统容联" class="headerlink" title="3.2 增大系统容联"></a>3.2 增大系统容联</h4><h5 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h5><ol>
+<li>1.如何将数据分布于所有节点上?如何将一个节点的数据分布于100个节点上,充分运用资源。为了解决这个问题:es引入了分片(Shard)解决问题   </li>
+<li>2.分片是es支持PB级数据的基石。<br>-分片存储了部分数据，可以分布于任意节点上<br>-分片数在索引创建时候指定且后续不允许再更改,默认为5个<br>-分片有主分片和副本分片之分,以实现数据的高可用<br>-副本分片的数据由主分片同步,可以有多个,从而提高读取的吞吐量  </li>
+</ol>
+<h5 id="3-2-2-分片"><a href="#3-2-2-分片" class="headerlink" title="3.2.2 分片"></a>3.2.2 分片</h5><ol>
+<li><p>1.下图演示的是3个节点的集群中test_index的分片情况,创建时我们制定了3个分片和1个副本,api如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/145.png" alt=""><br>我们再创建一个节点：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/146.png" alt="">  </p>
+</li>
+<li><p>2.创建一个test_index(3个分片 1个副本)<br>先删除之前的test_index，再创建<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/147.png" alt=""><br>创建后的效果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/148.png" alt=""> </p>
+</li>
+</ol>
+<h3 id="4-两个问题"><a href="#4-两个问题" class="headerlink" title="4.两个问题"></a>4.两个问题</h3><p>目前我们有3个节点、test_index索引有3个分片、现在我们来考虑2个问题</p>
+<ol>
+<li>1.现在我们增加节点node4是否可以提高test_index的数据容量?[添加的加点、相当于添加了内存和磁盘]<br>-答案是不能。因为test_index创建时候,只定义了3个分片和1个副本。3个分片，已经分布在3台节点上，新增的节点无法利用。<br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/149.png" alt=""></li>
+<li>2.此时增加副本数是否能提高test_index的读取吞吐量?<br>-不能。因为新增的副本也是分布在这3个节点上、还是利用了同样的资源。如果要增加吞吐量,还需要新增节点。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/150.png" alt="">  </li>
+</ol>
+<p>所以通过以上的问题,我们发现分片数是很重要的。  </p>
+<ol>
+<li>3.分片数的设定很重要,需要提前规划好<br>-过小会导致后续无法通过增加节点实现水平扩容<br>-过大会导致一个节点上分布过多分片,造成资源浪费、同时会影响查询性能。  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/08/16/ElasticStack-7-Elasticsearch篇之分布式特性介绍/" class="archive-article-date">
+  	<time datetime="2019-08-15T16:36:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-08-16</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-ElasticStack-6-Elasticsearch篇SearchAPI" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -272,6 +388,53 @@
 <li><p>2.kibana演示<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/93.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/94.png" alt=""> </p>
 </li>
 </ol>
+<h3 id="8-Simple-Query-String-Query"><a href="#8-Simple-Query-String-Query" class="headerlink" title="8.Simple Query String Query"></a>8.Simple Query String Query</h3><ol>
+<li>1.类似QueryString,但是会忽略错误的查询语法,并且仅支持部分查询语法  </li>
+<li>2.其常用的逻辑符号如下,不能使用AND、OR、NOT等关键词:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/112.png" alt=""><br>Kibana不加AND:正常查询<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/113.png" alt=""> </li>
+</ol>
+<p>Kibana加上AND会把AND解析为一个单词<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/114.png" alt="">  </p>
+<h3 id="9-term-terms-query"><a href="#9-term-terms-query" class="headerlink" title="9.term-terms-query"></a>9.term-terms-query</h3><p>tem查询区别于match查询,term是不分词的。</p>
+<h4 id="9-1-Term-Query"><a href="#9-1-Term-Query" class="headerlink" title="9.1  Term Query"></a>9.1  Term Query</h4><ol>
+<li>1.将查询语句作为整个单词进行查询,即不对查询语句做分词处理,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/115.png" alt=""></li>
+</ol>
+<p>kibana效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/117.png" alt=""></p>
+<p>kibana效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/118.png" alt=""></p>
+<h4 id="9-2-Terms-Query"><a href="#9-2-Terms-Query" class="headerlink" title="9.2 Terms Query"></a>9.2 Terms Query</h4><ol>
+<li>1.一次传入多个单词进行查询,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/116.png" alt="">  </li>
+</ol>
+<p>kibana效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/119.png" alt=""></p>
+<h3 id="10-range-query"><a href="#10-range-query" class="headerlink" title="10.range-query"></a>10.range-query</h3><ol>
+<li>1.范围查询主要针对数值和日期类型,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/120.png" alt="">   </li>
+<li><p>2.针对日期做查询如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/121.png" alt="">  </p>
+</li>
+<li><p>3.Date Math<br>针对日期提供的一种更友好地计算方式,格式如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/122.png" alt="">  </p>
+</li>
+<li><p>4.单位主要有如下几种:<br>-y-years<br>-M-months<br>-w-weeks<br>-d-days<br>-h-hours<br>-m-minutes<br>-s-seconds  </p>
+</li>
+<li><p>5.假设now为2018-01-02 12:00:00,那么如下计算结果实际为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/123.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="11-复合查询介绍及ConstantScore"><a href="#11-复合查询介绍及ConstantScore" class="headerlink" title="11.复合查询介绍及ConstantScore"></a>11.复合查询介绍及ConstantScore</h3><ol>
+<li>1.符合查询是指包含字段类查询或复合查询的类型,主要包括以下几类:<br>-constant_score query<br>-bool query<br>-dis_max query<br>-function_score query<br>-boosting query  <h4 id="11-1-constant-score-query"><a href="#11-1-constant-score-query" class="headerlink" title="11.1 constant_score query"></a>11.1 constant_score query</h4></li>
+<li>1.该查询将其内部的查询结果文档得分都设定为1或者boost的值<br>-多用于结合bool查询实现自定义得分<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/124.png" alt=""><br>kibana示例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/125.png" alt="">  </li>
+</ol>
+<h3 id="12-bool-query"><a href="#12-bool-query" class="headerlink" title="12.bool-query"></a>12.bool-query</h3><ol>
+<li><p>1.布尔查询由一个或者多个布尔自居组成,主要包含如下4个:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/126.png" alt="">  </p>
+</li>
+<li><p>2.Bool查询API如下所示：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/127.png" alt="">  </p>
+</li>
+<li><p>3.Filter<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/128.png" alt=""><br>Kibana<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/129.png" alt="">  </p>
+</li>
+<li><p>4.Must<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/130.png" alt=""><br>Kibana<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/131.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="13-count-and-source-filtering"><a href="#13-count-and-source-filtering" class="headerlink" title="13.count-and-source-filtering"></a>13.count-and-source-filtering</h3><ol>
+<li><p>1.获取符合条件的文档数,endpoint为:_count(通常用于只返回文档数,不返回具体文档)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/132.png" alt="">  </p>
+</li>
+<li><p>2.source-Filtering<br>在我们之前的查询中,es会把_source的所有信息返回给我们，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/134.png" alt=""><br>但是有时候我们只需要username。  </p>
+</li>
+</ol>
+<p>过滤返回结果中_source中的字段,主要有如下几种方式：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/133.png" alt="">  </p>
 
       
     </div>
@@ -991,77 +1154,6 @@
 
 
   
-    <article id="post-work-8-阿里云oss同步ossutil使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/10/work-8-阿里云oss同步ossutil使用/">work-8-阿里云oss同步ossutil使用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>阿里云ECS服务器上挂载的录音文件磁盘已经快不够了，为了保证呼叫的正常进行、需要将文件同步到oss阿里云文件服务器中。</p>
-<h4 id="1-文件磁盘空间查看"><a href="#1-文件磁盘空间查看" class="headerlink" title="1.文件磁盘空间查看"></a>1.文件磁盘空间查看</h4><ol>
-<li>1.查看文件磁盘空间<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/9.png" alt="">  </li>
-</ol>
-<h4 id="2-linux下阿里云oss搭建"><a href="#2-linux下阿里云oss搭建" class="headerlink" title="2.linux下阿里云oss搭建"></a>2.linux下阿里云oss搭建</h4><p>阿里云oss的操作可参考阿里云官方文档说明:<a href="https://help.aliyun.com/document_detail/50452.html?spm=a2c4g.11186623.3.3.2f012e69aklxKQ" target="_blank" rel="external">https://help.aliyun.com/document_detail/50452.html?spm=a2c4g.11186623.3.3.2f012e69aklxKQ</a>  </p>
-<ol>
-<li><p>1.查看系统位数:uname -r<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/10.png" alt=""></p>
-</li>
-<li><p>2.下载ossutil<br>wget <a href="http://gosspublic.alicdn.com/ossutil/1.6.3/ossutil64" target="_blank" rel="external">http://gosspublic.alicdn.com/ossutil/1.6.3/ossutil64</a>  </p>
-</li>
-<li><p>3.添加到环境变量<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/11.png" alt="">  </p>
-</li>
-<li><p>4.配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/12.png" alt="">  </p>
-</li>
-<li><p>5.查看oss中的Buckets<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/13.png" alt="">  </p>
-</li>
-<li><p>6.同步文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/14.png" alt="">  </p>
-</li>
-<li><p>7.同步文件夹<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/15.png" alt=""> </p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ossutil cp -r /cc/data/ivrrecord2/20190619   oss://fz-oss/picccallcenter/ivrrecord2/20190619</div></pre></td></tr></table></figure>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/10/work-8-阿里云oss同步ossutil使用/" class="archive-article-date">
-  	<time datetime="2019-07-10T10:39:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1127,7 +1219,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.63px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.16px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

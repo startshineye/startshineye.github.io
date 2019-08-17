@@ -152,6 +152,123 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-15-过渡-CSS过渡" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/30/vue-15-过渡-CSS过渡/">vue(15)-过渡-CSS过渡</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>过渡系统是Vue.js 为DOM 动画效果提供的一个特性，它能在元素从DOM 中插入或移除时触发你的CSS 过渡（transition）和动画（animation），也就是说在DOM 元素发生变化时为其添加特定的class 类名，从而产生过渡效果。  </li>
+<li>除了CSS 过渡外，Vue.js 的过渡系统也支持javascript 的过渡，通过暴露过渡系统的钩子函数，我们可以在DOM 变化的特定时机对其进行属性的操作，产生动画效果。  </li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="css过渡"><a href="#css过渡" class="headerlink" title="css过渡"></a>css过渡</h5><h6 id="1-css过渡用法"><a href="#1-css过渡用法" class="headerlink" title="1.css过渡用法"></a>1.css过渡用法</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;div v-if=&quot;show&quot; transition=&quot;my-startup&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        show:false</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>首先在模板中用transition 绑定一个DOM 元素，并且使用v-if 指令使元素先处于未被<br>编译状态。然后在控制台内手动调用vm.show = true, 就可以看到DOM 元素最后输出为：  </p>
+<pre><code>&lt;div class=&quot;my-startup-transition&quot;&gt;&lt;/div&gt;  
+</code></pre><p>我们可以看到在DOM 元素完成编译后，过渡系统自动给元素添加了一个my-startuptransition<br>的class 类名。那么为了让这个效果更明显一点，还可以提前给这个类名添加一点<br>CSS 样式：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"> &lt;style&gt;</div><div class="line">    .my-startup-transition&#123;</div><div class="line">        transition: all 1s ease;</div><div class="line">        width:100px;</div><div class="line">        height: 100px;</div><div class="line">        background: rosybrown;</div><div class="line">        opacity: 1;</div><div class="line">    &#125;</div><div class="line">&lt;/style&gt;</div><div class="line"></div><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;div v-if=&quot;show&quot; transition=&quot;my-startup&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        show:false</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/44.png" alt=""></p>
+<ol>
+<li>此时再重新刷新并手动运行vm.show = true，发现最终样式效果是加载上去了，但并没有出现transition 的效果。  </li>
+<li>这是由于在编译v-if 后，div 直接挂载到body 并添加mystartup-<br>transition 类名这两个过程中浏览器仅进行了一次重绘，这对于div 来说并没有产生属性的更新，所以没有执行css transition 的效果。</li>
+<li>为了解决这个问题，Vue.js 的过渡系统给<br>元素插入及移除时分别添加了2 个类名：<em>-enter 和</em>-leave，* 即为transition 绑定的字符串，本例中即为my-startup  </li>
+</ol>
+<p>所以，在上述例子中，我们还需要添加两个类名样式，即my-startup-<br>enter, my-startup-leave:</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">.my-startup-transition&#123;</div><div class="line">       transition: all 1s ease;</div><div class="line">       width:100px;</div><div class="line">       height: 100px;</div><div class="line">       background: rosybrown;</div><div class="line">       opacity: 1;</div><div class="line"> &#125;</div><div class="line">  .my-startup-enter,.my-startup-leave&#123;</div><div class="line">      height: 0px;</div><div class="line">      opacity: 0;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>整体代码:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">&lt;!--css--&gt;</div><div class="line">.my-startup-transition&#123;</div><div class="line">       transition: all 1s ease;</div><div class="line">       width:100px;</div><div class="line">       height: 100px;</div><div class="line">       background: rosybrown;</div><div class="line">       opacity: 1;</div><div class="line">   &#125;</div><div class="line">   .my-startup-enter,.my-startup-leave&#123;</div><div class="line">       height: 0px;</div><div class="line">       opacity: 0;</div><div class="line">   &#125;</div><div class="line"></div><div class="line"> &lt;!--html--&gt;</div><div class="line">  &lt;div id=&quot;app&quot;&gt;</div><div class="line">    &lt;div v-if=&quot;show&quot; transition=&quot;my-startup&quot;&gt;&lt;/div&gt;</div><div class="line">  &lt;/div&gt;</div><div class="line"></div><div class="line"> &lt;!--js--&gt;</div><div class="line"> var vm = new Vue(&#123;</div><div class="line">   el:&quot;#app&quot;,</div><div class="line">   data:&#123;</div><div class="line">       show:false</div><div class="line">   &#125;</div><div class="line"> &#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/45.gif" alt=""></p>
+<p>此时再重复之前的操作，就可以看到过渡效果了。需要注意的是，这两个类名的优先级需要高于.my-startup-transition，不然被my-startup-transition 覆盖后就失效了。</p>
+<p>同样，我们也可以通过CSS 的animation 属性来实现过渡的效果，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">&lt;!--css--&gt;</div><div class="line">.my-animation-transition&#123;</div><div class="line">      animation: increase 1s ease 0s 1;</div><div class="line">      width:100px;</div><div class="line">      height:100px;</div><div class="line">      background: bisque;</div><div class="line">  &#125;</div><div class="line">   .my-animation-enter,.my-animation-leave&#123;</div><div class="line">       height: 0px;</div><div class="line">   &#125;</div><div class="line">    </div><div class="line">  @keyframes increase &#123;</div><div class="line">        from&#123;height: 0px;&#125;</div><div class="line">        to&#123;height: 100px;&#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">&lt;!--html--&gt;</div><div class="line"> &lt;div id=&quot;app&quot;&gt;</div><div class="line">  &lt;div v-if=&quot;animation&quot; transition=&quot;my-animation&quot;&gt;animation&lt;/div&gt;</div><div class="line"> &lt;/div&gt;</div><div class="line"></div><div class="line">&lt;!--js--&gt;</div><div class="line"> var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        animation:true</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/46.gif" alt="">  </p>
+<p>除了直接在元素上添加transition=”name” 外,Vue.js也支持动态绑定CSS名称，可用于元素需要多个过渡效果的场景。例如：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">&lt;body&gt;</div><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;div v-if=&quot;show&quot; v-bind:transition=&quot;transitionName&quot;&gt;&lt;/div&gt;</div><div class="line">   &lt;div v-if=&quot;show&quot; :transition=&quot;transitionName&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/div&gt;</div><div class="line">&lt;/body&gt;</div><div class="line">&lt;script&gt;</div><div class="line"> var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        show:false,</div><div class="line">        transitionName:&apos;fade&apos;</div><div class="line">     &#125;</div><div class="line">  &#125;);</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
+</code></pre><p>Vue.js 本身并不提供内置的过渡CSS 样式，仅仅是提供了过渡需要使用的样式的加载或移除时机，这样更便于我们灵活地按需去设计过渡样式。  </p>
+<h6 id="2-css过渡钩子函数"><a href="#2-css过渡钩子函数" class="headerlink" title="2.css过渡钩子函数"></a>2.css过渡钩子函数</h6><p>Vue.js提供了在插入或DOM元素时类名变化的钩子函数,可以通过</p>
+<pre><code>Vue.transition(&apos;name&apos;,{}) 
+</code></pre><p>的方式来执行具体的函数操作。例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">&lt;!--html--&gt;</div><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;div v-if=&quot;show&quot; transition=&quot;my-startup&quot;&gt;&lt;/div&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line">&lt;!--js--&gt;</div><div class="line">Vue.transition(&apos;my-startup&apos;,&#123;</div><div class="line">    beforeEnter:function(el)&#123;</div><div class="line">        console.log(&apos;beforeEnter&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    enter:function(el)&#123;</div><div class="line">        console.log(&apos;enter&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    afterEnter:function(el)&#123;</div><div class="line">        console.log(&apos;afterEnter&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    enterCancelled:function(el)&#123;</div><div class="line">       console.log(&apos;enterCancelled&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    beforeLeave:function(el)&#123;</div><div class="line">        console.log(&apos;beforeLeave&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    leave:function(el)&#123;</div><div class="line">        console.log(&apos;leave&apos;,el.className);</div><div class="line">    &#125;,</div><div class="line">    afterLeave: function (el) &#123;</div><div class="line">        console.log(&apos;afterLeave&apos;, el.className);</div><div class="line">    &#125;,</div><div class="line">    leaveCancelled: function (el) &#123;</div><div class="line">        console.log(&apos;leaveCancelled&apos;, el.className);</div><div class="line">    &#125;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        show:false</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/47.png" alt=""><br>这样，我们能很清楚地看到钩子函数执行的顺序以及元素类名的变化。同样的，还可以<br>再次更改vm.show 的值置为false，结果如下：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/48.png" alt="">  </p>
+<p>由于元素在使用CSS 的transition 和animation 时，系统的流程不完全一样。所以先以<br>transition 为例,总结下过渡系统的流程。  </p>
+<p>当vm.show=true时:<br>1.调用beforeEnter函数。<br>2.添加enter类名到元素上。<br>3.将元素插入DOM中。<br>4.调用enter 函数。<br>5.强制reflow一次,然后移除enter类名，触发过渡效果。<br>6.如果此时元素被删除,则触发enterCancelled函数。<br>7.监听transitionend事件,过渡结束后调用afterEnter函数。  </p>
+<p>当vm.show=false时<br>1.调用beforeLeave函数。<br>2.添加v-leave 类名，触发过渡效果。<br>3.调用leave 函数。<br>4.如果此时元素被删除，则触发leaveCancelled函数。<br>5.监听transitionend事件，删除元素及*-leave类名。<br>6.调用afterLeave函数。  </p>
+<p>如果使用animation 作为过渡的话，在DOM 插入时，*-enter 类名不会立即被删除，而<br>是在animationend 事件触发式删除。  </p>
+<p>另外，enter 和leave 函数都有第二个可选的回调参数，用于控制过渡何时结束，而不是<br>监听transitionend 和animationend 事件，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">    my-done-transition &#123;</div><div class="line">     transition: all 2s ease;</div><div class="line">     width: 100px; height: 100px;</div><div class="line">     background: black;</div><div class="line">     opacity: 1;</div><div class="line">    &#125;</div><div class="line">   .my-done-enter, .my-done-leave&#123;</div><div class="line">      height: 0px;</div><div class="line">      opacity: 0;</div><div class="line">   &#125;</div><div class="line"></div><div class="line">Vue.transition(&apos;my-done&apos;, &#123;</div><div class="line">　 enter: function (el, done) &#123;</div><div class="line">　　　this.enterTime = new Date();</div><div class="line">　　　setTimeout(done, 500);</div><div class="line">　 &#125;,</div><div class="line">　 afterEnter: function (el) &#123;</div><div class="line">　　　console.log(&apos;afterEnter&apos;, new Date() - this.enterTime);</div><div class="line">　 &#125;</div><div class="line">&#125;)</div><div class="line">var vm = new Vue(&#123;</div><div class="line">　 el : &apos;#app&apos;,</div><div class="line">　 data: &#123;</div><div class="line">　　　done : false</div><div class="line">　 &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/49.png" alt="">  </p>
+<h5 id="3-显示声明过渡类型"><a href="#3-显示声明过渡类型" class="headerlink" title="3.显示声明过渡类型"></a>3.显示声明过渡类型</h5><p>Vue.js 可以指定过渡元素监听的结束事件的类型， 例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">Vue.transition(&apos;done-type&apos;, &#123;</div><div class="line"> type: &apos;animation&apos;</div><div class="line">&#125;)</div></pre></td></tr></table></figure>
+</code></pre><p>此时Vue.js 就只监听元素的animationend 事件，避免元素上还存在transition 时导致<br>的结束事件触发不一致。  </p>
+<h5 id="4-自定义过渡类名"><a href="#4-自定义过渡类名" class="headerlink" title="4.自定义过渡类名"></a>4.自定义过渡类名</h5><p>除了使用默认的类名<em>-enter, </em>-leave 外，Vue.js 也允许我们自定义过渡类名，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">    Vue.transition(&apos;my-startup&apos;, &#123;</div><div class="line">      enterClass: &apos;fadeIn&apos;,</div><div class="line">      leaveClass: &apos;fadeOut&apos;</div><div class="line">    &#125;)</div><div class="line">    ```  </div><div class="line"></div><div class="line">我们可以通过上述钩子函数的例子，观测元素的类名变化：</div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2017/10/50.png)</div><div class="line"></div><div class="line"></div><div class="line">Vue.js官方推荐了一个CSS动画库,animate.css,配合自定义过渡类名使用,可以达</div><div class="line">到非常不错的效果。只需要引入一个CSS 文件，http://cdn.bootcss.com/animate.css/3.5.2/animate.min.css，就可以使用里面的预设动画。例如：</div></pre></td></tr></table></figure>
+
+&lt;!--引入--&gt;
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;../css/animate.css&quot; media=&quot;all&quot;&gt;
+
+&lt;!--html--&gt;
+&lt;div id=&quot;app&quot;&gt;
+   &lt;div v-if=&quot;animateShow&quot; class = &quot;animated&quot; transition=&quot;bounce&quot;&gt;bounce effect&lt;/div&gt;
+&lt;/div&gt;
+
+&lt;!--js--&gt;
+ Vue.transition(&apos;bounce&apos;,{
+    enterClass:&apos;bounceIn&apos;,
+    leaveClass:&apos;bounceOut&apos;
+});
+var vm = new Vue({
+    el:&quot;#app&quot;,
+    data:{
+        animateShow:false
+    }
+});
+```
+</code></pre><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/51.gif" alt=""></p>
+<p>在使用animate.css 时，需要先给元素附上animated 类名，然后再添加预设的动效类名，<br>例如上例中的bounceIn、bounceOut，这样就能看到动画效果。这个库提供了多种强调展示<br>（例如弹性、抖动）、渐入渐出、翻转、旋转、放大缩小等效果。所有的效果可以访问官方网<br>址<a href="https://daneden.github.io/animate.css/" target="_blank" rel="external">https://daneden.github.io/animate.css/</a> 在线观看。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/30/vue-15-过渡-CSS过渡/" class="archive-article-date">
+  	<time datetime="2017-10-30T14:52:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-14-过滤器" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -761,90 +878,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-5-表单控件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/28/vue-5-表单控件/">vue(5)-表单控件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Vue.js 中提供v-model 的指令对表单元素进行双向数据绑定，在修改表单元素值的<br>同时，实例vm 中对应的属性值也同时更新，反之亦然。</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>篇本主要input元素绑定v-model后的具体用法和处理方式,示例所依赖的js代码如下:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">var vm = new Vue(&#123;</div><div class="line">     el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        message:&apos;&apos;,</div><div class="line">        gender:&apos;&apos;,</div><div class="line">        checked:&apos;&apos;,</div><div class="line">        multiChecked:[],</div><div class="line">        selected:&apos;&apos;,</div><div class="line">        multiSelected:[]</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><h5 id="1-Text-输入框示例"><a href="#1-Text-输入框示例" class="headerlink" title="1.Text(输入框示例)"></a>1.Text(输入框示例)</h5><p>输入框示例，用户输入的内容和vm.message 直接绑定：</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;input type=&quot;text&quot; v-model=&quot;message&quot;&gt;&lt;br&gt;</div><div class="line">&lt;span&gt;Your input is:&#123;&#123;message&#125;&#125;&lt;/span&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/26.png" alt=""></p>
-<h5 id="2-Radio-单选提示框"><a href="#2-Radio-单选提示框" class="headerlink" title="2.Radio(单选提示框)"></a>2.Radio(单选提示框)</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;label&gt;&lt;input type=&quot;radio&quot; value=&quot;male&quot; v-model=&quot;gender&quot;&gt;男&lt;/label&gt;</div><div class="line">&lt;label&gt;&lt;input type=&quot;radio&quot; value=&quot;female&quot; v-model=&quot;gender&quot;&gt;女&lt;/label&gt;</div><div class="line">&lt;p&gt;&#123;&#123;gender&#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/27.png" alt="">  </p>
-<h5 id="3-Checkbox-勾选框"><a href="#3-Checkbox-勾选框" class="headerlink" title="3.Checkbox(勾选框)"></a>3.Checkbox(勾选框)</h5><p>Checkbox 分两种情况：单个勾选框和多个勾选框。<br>单个勾选框，v-model 即为布尔值，此时input 的value 并不影响v-model 的值。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;input type=&quot;checkbox&quot; v-model=&quot;checked&quot;&gt;</div><div class="line">&lt;p&gt;checked:&#123;&#123;checked&#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/28.png" alt="">   </p>
-<p>多个勾选框，v-model 使用相同的属性名称，且属性为数组。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;label&gt;&lt;input type=&quot;checkbox&quot; value=&quot;1&quot; v-model=&quot;multiChecked&quot;&gt;1&lt;/label&gt;</div><div class="line">&lt;label&gt;&lt;input type=&quot;checkbox&quot; value=&quot;2&quot; v-model=&quot;multiChecked&quot;&gt;2&lt;/label&gt;</div><div class="line">&lt;label&gt;&lt;input type=&quot;checkbox&quot; value=&quot;3&quot; v-model=&quot;multiChecked&quot;&gt;3&lt;/label&gt;</div><div class="line">&lt;p&gt;multiChecked:&#123;&#123;multiChecked.join(&apos;|&apos;)&#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/29.png" alt=""></p>
-<h5 id="4-Select-选择框"><a href="#4-Select-选择框" class="headerlink" title="4.Select(选择框)"></a>4.Select(选择框)</h5><p>同Checkbox 元素一样，Select 也分单选和多选两种，多选的时候也需要绑定到一个数组。<br>单选:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;select v-model=&quot;selected&quot;&gt;</div><div class="line">       &lt;option selected&gt;A&lt;/option&gt;</div><div class="line">       &lt;option&gt;B&lt;/option&gt;</div><div class="line">       &lt;option&gt;C&lt;/option&gt;</div><div class="line">&lt;/select&gt;</div><div class="line">&lt;p&gt;selected:&#123;&#123;selected&#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/30.png" alt=""></p>
-<p>多选:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">&lt;select v-model=&quot;multiSelected&quot; multiple&gt;</div><div class="line">       &lt;option selected&gt;A&lt;/option&gt;</div><div class="line">       &lt;option&gt;B&lt;/option&gt;</div><div class="line">       &lt;option&gt;C&lt;/option&gt;</div><div class="line"> &lt;/select&gt;</div><div class="line"> &lt;p&gt;multiSelected:&#123;&#123;multiSelected.join(&apos;|&apos;)&#125;&#125;&lt;/p&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/31.png" alt=""></p>
-<h5 id="5-参数特性"><a href="#5-参数特性" class="headerlink" title="5 参数特性"></a>5 参数特性</h5><p>Vue.js 为表单控件提供了一些参数，方便处理某些常规操作。  </p>
-<p>1.lazy  </p>
-<p>默认情况下，v-model 在input 事件中同步输入框值与数据，加lazy 属性后从会改到在<br>change 事件中同步。</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;input v-model=&quot;query&quot; lazy /&gt;</div><div class="line">&lt;span&gt;query:&#123;&#123;query&#125;&#125;&lt;/span&gt;&lt;br&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/32.png" alt=""></p>
-<p>2.number<br>会自动将用户输入转为Number 类型，如果原值转换结果为NaN 则返回原值。</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;input v-model=&quot;age&quot; number/&gt;</div><div class="line">&lt;span&gt;age:&#123;&#123;age&#125;&#125;&lt;/span&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>3.debounce<br>debounce 为设置的最小延时，单位为ms，即为单位时间内仅执行一次数据更新。该参<br>数往往应用在高耗操作上，例如在更新时发出ajax 请求返回提示信息。 </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">    &lt;input v-model=&quot;query&quot; debounce=&quot;500&quot; /&gt;</div><div class="line">    ``` </div><div class="line"></div><div class="line">不过Vue.js 2.0 中取消了lazy 和number 作为参数，用修饰符（modifier）来代替:</div></pre></td></tr></table></figure>
-
-&lt;input v-model.lazy=&quot;query&quot; /&gt;　&lt;input v-model.numer=&quot;age&quot; /&gt;
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">新增了trim 修饰符，去掉输入值首尾空格:</div></pre></td></tr></table></figure>
-
-&lt;input v-model.trim=&quot;name&quot; /&gt;
-```
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/28/vue-5-表单控件/" class="archive-article-date">
-  	<time datetime="2017-10-28T07:18:21.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-28</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
@@ -910,7 +943,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 12.63px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.16px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
