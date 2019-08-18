@@ -7,7 +7,7 @@
   <title>ElasticStack-7-Elasticsearch篇之分布式特性介绍 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
   <meta name="description" content="1.分布式介绍及cerebro1.1分布式介绍
-1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容联,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
+1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容量,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
 
 2.es集群由多个es实例组成-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch-每个es实例本质上是一">
 <meta property="og:type" content="article">
@@ -15,7 +15,7 @@
 <meta property="og:url" content="https://github.com/startshineye/2019/08/16/ElasticStack-7-Elasticsearch篇之分布式特性介绍/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="1.分布式介绍及cerebro1.1分布式介绍
-1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容联,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
+1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容量,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
 
 2.es集群由多个es实例组成-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch-每个es实例本质上是一">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/135.png">
@@ -34,11 +34,27 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/148.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/149.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/150.png">
-<meta property="og:updated_time" content="2019-08-17T12:58:30.689Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/151.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/152.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/153.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/154.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/155.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/156.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/157.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/158.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/159.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/160.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/161.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/162.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/163.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/164.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/165.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/166.png">
+<meta property="og:updated_time" content="2019-08-18T07:19:09.562Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-7-Elasticsearch篇之分布式特性介绍">
 <meta name="twitter:description" content="1.分布式介绍及cerebro1.1分布式介绍
-1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容联,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
+1.es支持集群模式,是一个分布式系统,其好处主要有两个:-增大系统容量,如内存、磁盘、使得es集群可以支持PB级的数据。-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  
 
 2.es集群由多个es实例组成-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch-每个es实例本质上是一">
 <meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/135.png">
@@ -196,7 +212,7 @@
     <div class="article-entry" itemprop="articleBody">
       
         <h3 id="1-分布式介绍及cerebro"><a href="#1-分布式介绍及cerebro" class="headerlink" title="1.分布式介绍及cerebro"></a>1.分布式介绍及cerebro</h3><h4 id="1-1分布式介绍"><a href="#1-1分布式介绍" class="headerlink" title="1.1分布式介绍"></a>1.1分布式介绍</h4><ol>
-<li><p>1.es支持集群模式,是一个分布式系统,其好处主要有两个:<br>-增大系统容联,如内存、磁盘、使得es集群可以支持PB级的数据。<br>-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  </p>
+<li><p>1.es支持集群模式,是一个分布式系统,其好处主要有两个:<br>-增大系统容量,如内存、磁盘、使得es集群可以支持PB级的数据。<br>-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  </p>
 </li>
 <li><p>2.es集群由多个es实例组成<br>-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch<br>-每个es实例本质上是一个JVM过程、且有自己的名字，通过node.name进行修改  </p>
 </li>
@@ -243,7 +259,7 @@
 </li>
 </ol>
 <p>node2上含有node1上索引test_index的副本*test_index  </p>
-<h4 id="3-2-增大系统容联"><a href="#3-2-增大系统容联" class="headerlink" title="3.2 增大系统容联"></a>3.2 增大系统容联</h4><h5 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h5><ol>
+<h4 id="3-2-增大系统容量"><a href="#3-2-增大系统容量" class="headerlink" title="3.2 增大系统容量"></a>3.2 增大系统容量</h4><h5 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h5><ol>
 <li>1.如何将数据分布于所有节点上?如何将一个节点的数据分布于100个节点上,充分运用资源。为了解决这个问题:es引入了分片(Shard)解决问题   </li>
 <li>2.分片是es支持PB级数据的基石。<br>-分片存储了部分数据，可以分布于任意节点上<br>-分片数在索引创建时候指定且后续不允许再更改,默认为5个<br>-分片有主分片和副本分片之分,以实现数据的高可用<br>-副本分片的数据由主分片同步,可以有多个,从而提高读取的吞吐量  </li>
 </ol>
@@ -261,6 +277,49 @@
 <p>所以通过以上的问题,我们发现分片数是很重要的。  </p>
 <ol>
 <li>3.分片数的设定很重要,需要提前规划好<br>-过小会导致后续无法通过增加节点实现水平扩容<br>-过大会导致一个节点上分布过多分片,造成资源浪费、同时会影响查询性能。  </li>
+</ol>
+<h3 id="5-集群状态-Cluster-Health"><a href="#5-集群状态-Cluster-Health" class="headerlink" title="5.集群状态(Cluster Health)"></a>5.集群状态(Cluster Health)</h3><ol>
+<li>1.通过如下api可以查看集群健康状况,包括以下3种:<br>-green 健康状态,指所有主副分片都正常分配<br>-yellow 指所有主分片都正常分配，但是有副本分片未正常分配<br>-red 有主分片未分配(但是我们还是可以访问此集群的)<br>其对应的api如下：<br>GET _cluster/health<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/151.png" alt="">  </li>
+</ol>
+<h3 id="6-故障转移"><a href="#6-故障转移" class="headerlink" title="6.故障转移"></a>6.故障转移</h3><p>当集群发生问题时候,怎样主动去修复?</p>
+<ol>
+<li><p>1.集群由3个节点组成,如下所示,此时集群状态为:green<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/152.png" alt="">  </p>
+</li>
+<li><p>2.node1所在机器宕机导致服务器终止,此时集群会如何处理?<br>-node2和node3会定时去ping节点node1<br>-node2和node3发现node1无法响应一段时间后会发起master选举,比如这里选择node2为master节点。此时由于主分片P0下线,集群状态变成Red。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/153.png" alt=""><br>-node2发现主分片P0未分配,将R0提升为主分片,此时由于所有主分片都正常分配,集群状态变成yellow。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/154.png" alt=""><br>-node2为P0和P1生成新的副本,集群状态为绿色<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/155.png" alt="">  </p>
+</li>
+<li><p>3.cerebro实践<br>-我们关掉node1,发现节点node2和节点node3的主/副分片如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/156.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="7-文档分布式存储"><a href="#7-文档分布式存储" class="headerlink" title="7.文档分布式存储"></a>7.文档分布式存储</h3><ol>
+<li><p>1.文档最终会存储到分片上,如下图所示:<br>-Document1最终存储在分片P1上,则在其副本R1上也存了一份<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/157.png" alt="">  </p>
+</li>
+<li><p>2.Document1是如何存储到分片P1的?选择P1的依据是什么?<br>-Document1并不是随便选择到P1的,而是有一个文档到分片的映射算法。<br>-映射算法目的:使得文档均匀分布在所有分片上,以充分利用资源。  </p>
+</li>
+<li><p>3.算法<br>-随机选择或者round-robin算法? 不可取:这种方法存储时候,文档存进去之后,我们需要读取的，比如：document1存储到p1了，我要通过这个文档id=1，如果是随机存储或者round-robin存储的获取，你是没法知道此文档1存储到那个分片上，两种选择:a.请求过来之后,在所有分片上都请求一下,有就返回,加入分片数有100个,浪费性能。b.开辟一个存储空间,存储文档到分片的映射关系。成本巨大(es是支持pb级别的数据存储,加入有上亿个文档,存储对应关系成本太高)。<br>-我们采用的是：根据文档值试试计算对应的分片。  </p>
+</li>
+</ol>
+<h4 id="7-1-文档到分片的映射算法"><a href="#7-1-文档到分片的映射算法" class="headerlink" title="7.1 文档到分片的映射算法"></a>7.1 文档到分片的映射算法</h4><ol>
+<li><p>1.es通过如下的公式计算文档对应的分片<br>-shard = hash(routing)%number_of_primary_shards<br>-hash算法保证可以将数据均匀地分散在分片中<br>-routing是一个关键参数,默认是文档id,也可以自行指定。<br>-number_of_primary_shards是主分片数。  </p>
+</li>
+<li><p>2.该算法与主分片相关,这也是分片数一旦确定后便不能更改的原因。  </p>
+</li>
+</ol>
+<h4 id="7-2-文档创建的流程"><a href="#7-2-文档创建的流程" class="headerlink" title="7.2 文档创建的流程"></a>7.2 文档创建的流程</h4><p>1.Client向node3发起创建文档的要求<br>2.node3通过routing计算该文档应该存储在Shard1上,查询cluster state后确认主分片P1在node2上,然后转发创建文档的请求到node2<br>3.P1接收并执行创建文档请求后,将同样的请求发送到副本分片R1上<br>4.R1接收并执行创建文档请求后，通知P1成功的结果。<br>5.P1接收副本分片结果后,通知node3创建成功。<br>6.node3返回结果到Client端<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/158.png" alt="">  </p>
+<h4 id="7-2-文档读取的流程"><a href="#7-2-文档读取的流程" class="headerlink" title="7.2 文档读取的流程"></a>7.2 文档读取的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/159.png" alt=""> </p>
+<h4 id="7-3-文档批量创建的流程"><a href="#7-3-文档批量创建的流程" class="headerlink" title="7.3 文档批量创建的流程"></a>7.3 文档批量创建的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/160.png" alt="">  </p>
+<h4 id="7-4-文档批量读取的流程"><a href="#7-4-文档批量读取的流程" class="headerlink" title="7.4 文档批量读取的流程"></a>7.4 文档批量读取的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/161.png" alt="">  </p>
+<h3 id="8-脑裂问题"><a href="#8-脑裂问题" class="headerlink" title="8.脑裂问题"></a>8.脑裂问题</h3><ol>
+<li>1.脑裂问题,英文为split-brian,是分布式系统中的经典问题,如下图所示:<br>-3个节点组成的集群,突然node1的网络和其他两个节点中断.node2与node3会重新选举master.比如node2成为了新master,此时会更新cluster state[cluster state 3’]<br>-node1发现与其他节点连接不上时候,node1自己组成集群后,也会更新cluster state  </li>
+<li><p>2.同一个集群中有两个master,而且维护不同的cluster state,网络恢复后无法选择正确的master<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/162.png" alt="">  </p>
+</li>
+<li><p>3.解决方案为仅在可选举master-eligible节点数大于等于quorum时才可以进行master选举<br>-quorum = master-eligible节点数/2+1，例如3个master-eligible节点时,quorum为2。<br>-设定discovery.zen.minimum_master_nodes为quorum即可避免脑裂。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/163.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="9-Shard详解"><a href="#9-Shard详解" class="headerlink" title="9.Shard详解"></a>9.Shard详解</h3><h4 id="9-1-倒排索引不可变更"><a href="#9-1-倒排索引不可变更" class="headerlink" title="9.1 倒排索引不可变更"></a>9.1 倒排索引不可变更</h4><ol>
+<li>1.倒排索引一旦生成，不可更改  </li>
+<li>2.其好处:<br>-不用考虑并发写文件的问题，杜绝了锁机制带来的性能问题。<br>-由于文件不可更改,可以充分利用文件系统缓存，只需载入一次，只要内存足够,对该文件的读取都会从内存读取,性能高。<br>-利于生成缓存数据<br>-对于文件进行压缩存储,节省磁盘和内存存储空间。  </li>
+<li>3.坏处为需要写入新文档时，必须重新构建倒排索引文建，然后哦替换老文件后，新文档才能被检索，导致文档实时性差。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/164.png" alt=""> </li>
+<li>4.解决方案是新文档直接生成新的倒排索引文件，查询的时候同事查询所有的排序文件，然后做结果的汇总计算即可。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/165.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/166.png" alt=""> </li>
 </ol>
 
       
