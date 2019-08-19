@@ -213,7 +213,18 @@
 </li>
 <li>3.kibana实例<br>我们按照默认方式创建以上三个文档时候(此时默认为分片数为5)，我们通过DFS Query-then-Fetch查询时候得到：三个文档数是不一样的呢?是正确的(基于es6.x版本)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/178.png" alt="">  </li>
 </ol>
-<h3 id="3-sorting-doc-values-fielddata"><a href="#3-sorting-doc-values-fielddata" class="headerlink" title="3.sorting-doc-values-fielddata"></a>3.sorting-doc-values-fielddata</h3><h3 id="4-分页与遍历-fromsize"><a href="#4-分页与遍历-fromsize" class="headerlink" title="4.分页与遍历-fromsize"></a>4.分页与遍历-fromsize</h3><h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
+<h3 id="3-sorting-doc-values-fielddata"><a href="#3-sorting-doc-values-fielddata" class="headerlink" title="3.sorting-doc-values-fielddata"></a>3.sorting-doc-values-fielddata</h3><h4 id="3-1-排序"><a href="#3-1-排序" class="headerlink" title="3.1 排序"></a>3.1 排序</h4><ol>
+<li>1.es默认会采用相关性算分从高到低排序,用户可以通过设定sorting参数来自行设定排序规则<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/179.png" alt=""><br>也可以指定多个排序条件:先按照日期从大到小排列,如果日期相等的话,就按照相关性得分从大到小排列,以此类推。  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/180.png" alt="">  </p>
+<ol>
+<li>2.kibana实例<br>我们查询username=”alfred”并且按照birth的sort降序排列。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/181.png" alt=""><br>a.我们发现查询出的文档是按照日期从小到大排列<br>b.此时_score分数为null,原因是已经按照birth从大到小排列,此时的计算score得分没有的意义。  </li>
+</ol>
+<p>如果需要按照相关性得分算,此时的sort里面应该传递的是数组包含_score<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/182.png" alt="">  </p>
+<ol>
+<li>3.按照字符串排序比价特殊,因为es有text和keyword之分,针对text类型排序,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/183.png" alt="">  </li>
+</ol>
+<h3 id="4-分页与遍历-fromsize"><a href="#4-分页与遍历-fromsize" class="headerlink" title="4.分页与遍历-fromsize"></a>4.分页与遍历-fromsize</h3><h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
       
     </div>
     <div class="article-info article-info-index">
