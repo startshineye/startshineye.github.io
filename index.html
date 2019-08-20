@@ -1134,17 +1134,28 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="ipcc对接第三方话务平台"><a href="#ipcc对接第三方话务平台" class="headerlink" title="ipcc对接第三方话务平台"></a>ipcc对接第三方话务平台</h4><h5 id="1-抓包找不到对应ip数据包"><a href="#1-抓包找不到对应ip数据包" class="headerlink" title="1.抓包找不到对应ip数据包"></a>1.抓包找不到对应ip数据包</h5><ol>
+        <h4 id="1-ipcc对接第三方话务平台"><a href="#1-ipcc对接第三方话务平台" class="headerlink" title="1.ipcc对接第三方话务平台"></a>1.ipcc对接第三方话务平台</h4><h5 id="1-1抓包找不到对应ip数据包"><a href="#1-1抓包找不到对应ip数据包" class="headerlink" title="1.1抓包找不到对应ip数据包"></a>1.1抓包找不到对应ip数据包</h5><ol>
 <li>1.分析:ipcc对接第三方话务平台的时候、我们抓包时候压根抓不到对应的ip网络交互、说明ipcc没能和第三方话务平台建立链接、说明freeswitch的sip对接地址注册有问题  </li>
 <li>2.解决:a.查看对应的网关对接信息是否有问题,在freeswitch的/usr/local/freeswitch/conf/sip_profiles/external/gw5.xml配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/35.png" alt="">  </li>
 <li>3.解决:b.查看freeswitch启动时候日志信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/36.png" alt=""><br>从上面看是gw5.xml网关对应的配置信息有误  </li>
 <li>4.解决:c.打开fs的客户端fs_cli通过sofia status 查看网关注册状态<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/37.png" alt=""><br>从上面可以知道网关注册失败  </li>
 </ol>
 <p>综上:找相关人员再次获取相关信息。</p>
-<h5 id="2-fs通过mrcp对接asr时候对接不上"><a href="#2-fs通过mrcp对接asr时候对接不上" class="headerlink" title="2.fs通过mrcp对接asr时候对接不上"></a>2.fs通过mrcp对接asr时候对接不上</h5><p>在测试环境下fs通过mrcp对接asr时候对接时候、启动fs和ipcc平台时候、发现和机器人交互时候总是感觉机器人获取不到用户说话的声音并且抓包时候也没有抓到包<br>解决: </p>
+<h5 id="1-2-fs通过mrcp对接asr时候对接不上"><a href="#1-2-fs通过mrcp对接asr时候对接不上" class="headerlink" title="1.2.fs通过mrcp对接asr时候对接不上"></a>1.2.fs通过mrcp对接asr时候对接不上</h5><p>在测试环境下fs通过mrcp对接asr时候对接时候、启动fs和ipcc平台时候、发现和机器人交互时候总是感觉机器人获取不到用户说话的声音并且抓包时候也没有抓到包<br>解决: </p>
 <ol>
 <li>1.查看asr的配置信息并确认没问题<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/38.png" alt="">  </li>
 <li>2.查看fs的启动日志:然后查看端口信息、发现端口被占用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/39.png" alt=""><br>综上:杀掉端口对应进程、然后重启即可。</li>
+</ol>
+<h4 id="2-ipcc通话录音不存在"><a href="#2-ipcc通话录音不存在" class="headerlink" title="2.ipcc通话录音不存在"></a>2.ipcc通话录音不存在</h4><h5 id="2-1-现象"><a href="#2-1-现象" class="headerlink" title="2.1 现象"></a>2.1 现象</h5><p>gs在拨打电话测试时候,测试时候交互都很正常,但是在拨打完听录音时候出现:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/184.png" alt=""><br>HTTP Status 404-<br>/record/ivrrecord2/20190820/10/42/90043811800411.wav</p>
+<h5 id="2-2-排查"><a href="#2-2-排查" class="headerlink" title="2.2 排查"></a>2.2 排查</h5><ol>
+<li><p>1.查询服务器磁盘录音是否存在<br>-进入/cc/data/ivrrecord2/20190820/10目录下确实没有此文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/185.png" alt="">  </p>
+</li>
+<li><p>2.查看fsg日志<br>fsg是freeswitch和ag进行交互的枢纽,所以fsg日志里面会记录相关的日志信息,fsg的日志文件在/cc/bin/log下:log0819060907.log<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/186.png" alt=""><br>从上面我们知道fsg和freeswitch已经断开过连接,然后重新建立了连接。  </p>
+</li>
+</ol>
+<p>我们在查看freeswitch.log知道:丢失了很多交互信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/187.png" alt="">  </p>
+<ol>
+<li>3.查看fsg.cfg的配置<br>从配置中我们知道连接的freeswitch是127.0.0.1,对应的录音文件是:/cc/data<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/188.png" alt=""><br>说明在连接本地freeswitch的时候,也出现了网络抖动问题。  </li>
 </ol>
 
       
