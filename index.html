@@ -222,9 +222,32 @@
 </ol>
 <p>如果需要按照相关性得分算,此时的sort里面应该传递的是数组包含_score<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/182.png" alt="">  </p>
 <ol>
-<li>3.按照字符串排序比价特殊,因为es有text和keyword之分,针对text类型排序,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/183.png" alt="">  </li>
+<li><p>3.按照字符串排序比价特殊,因为es有text和keyword之分,针对text类型排序,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/183.png" alt="">  </p>
+</li>
+<li><p>4.针对keyword类型排序,可以返回预期结果。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/189.png" alt="">  </p>
+</li>
 </ol>
-<h3 id="4-分页与遍历-fromsize"><a href="#4-分页与遍历-fromsize" class="headerlink" title="4.分页与遍历-fromsize"></a>4.分页与遍历-fromsize</h3><h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
+<h4 id="3-2-排序过程"><a href="#3-2-排序过程" class="headerlink" title="3.2 排序过程"></a>3.2 排序过程</h4><ol>
+<li>1.排序的过程实质是对字段原始内容排序的过程,这个过程中倒排索引无法发挥作用,需要用到正排索引,也就是通过文档id和字段可以快读得到字段原始内容。  </li>
+<li>2.es对此提供了2种实现方式:<br>-fielddata默认禁用<br>-doc values默认启用,除了text类型<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/190.png" alt=""></li>
+</ol>
+<h4 id="3-3-Fielddata和DocValues比较"><a href="#3-3-Fielddata和DocValues比较" class="headerlink" title="3.3 Fielddata和DocValues比较"></a>3.3 Fielddata和DocValues比较</h4><ol>
+<li><p>1.比较如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/191.png" alt=""></p>
+</li>
+<li><p>2.Fielddata默认是关闭的,可以通过如下api开启:<br>-此时字符串是按照分词后的term排序,往往结果很难符合预期<br>-一般是在对分词做聚合分析的时候开启<br>-Fielddata是可以随时开启和关闭的,只针对于text类型的排序<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/192.png" alt=""></p>
+</li>
+<li><p>3.DocValues默认是启用的,可以在创建索引的时候关闭:<br>-如果后面要再开启doc values,需要做reindex操作<br>-关闭设置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/193.png" alt="">  </p>
+</li>
+<li><p>4.可以通过该字段获取Fielddata或者DocValues中存储的内容<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/194.png" alt="">    </p>
+</li>
+</ol>
+<h3 id="4-分页与遍历-fromsize"><a href="#4-分页与遍历-fromsize" class="headerlink" title="4.分页与遍历-fromsize"></a>4.分页与遍历-fromsize</h3><ol>
+<li>1.es提供了3种方式来解决分页与遍历的问题<br>-from/size<br>-scroll<br>-search_after  </li>
+</ol>
+<h4 id="4-1分页与遍历-fromsize"><a href="#4-1分页与遍历-fromsize" class="headerlink" title="4.1分页与遍历-fromsize"></a>4.1分页与遍历-fromsize</h4><ol>
+<li>1.最常见的分页方案<br>-from 指明开始位置<br>-size 指明获取总数  </li>
+</ol>
+<h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
       
     </div>
     <div class="article-info article-info-index">
