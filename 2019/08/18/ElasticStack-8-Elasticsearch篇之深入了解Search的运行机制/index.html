@@ -43,7 +43,13 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/192.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/193.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/194.png">
-<meta property="og:updated_time" content="2019-08-21T15:53:50.173Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/195.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/196.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/197.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/198.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/199.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/200.png">
+<meta property="og:updated_time" content="2019-08-21T16:28:17.409Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-8-Elasticsearch篇之深入了解Search的运行机制">
 <meta name="twitter:description" content="本章会深入讲解 Search 的运行机制，比如 Query 和 Fetch 阶段具体哪些工作，分片为相关性算分带来了哪些问题。另外还会讲解排序、分页与遍历的解决方案和相关问题。  
@@ -280,8 +286,17 @@
 <li>1.es提供了3种方式来解决分页与遍历的问题<br>-from/size<br>-scroll<br>-search_after  </li>
 </ol>
 <h4 id="4-1分页与遍历-fromsize"><a href="#4-1分页与遍历-fromsize" class="headerlink" title="4.1分页与遍历-fromsize"></a>4.1分页与遍历-fromsize</h4><ol>
-<li>1.最常见的分页方案<br>-from 指明开始位置<br>-size 指明获取总数  </li>
+<li><p>1.最常见的分页方案<br>-from 指明开始位置<br>-size 指明获取总数<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/195.png" alt="">  </p>
+</li>
+<li><p>2.深度分页是一个经典的问题:在数据分片存储的情况下如何获取前1000个文档?<br>-获取从990~1000的文档时,会在每个分片上都先获取1000个文档,然后再由Coordinating Node聚合所有分片的结果后在排序选取前1000个文档。<br>-页数越深,处理文档越多,占用内存越多,耗时越长。尽量避免深度分页,es通过index_max_result_window限定最多到10000条数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/196.png" alt=""></p>
+</li>
 </ol>
+<p>es是通过分片来存储的,以上分为了5个片来存储：p0、p1、p2、p3、p4。要查询1000个文档,需要查询出每个分片的前1000个文档,然后合并整合后返回1000个文档。因为数据是分片存储在各个节点上, Coordinating Node没有全局的概念。 </p>
+<ol>
+<li>3.kibana实例<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/197.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/198.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/199.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/200.png" alt=""> </p>
 <h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
       
     </div>
