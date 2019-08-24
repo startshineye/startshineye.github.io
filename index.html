@@ -152,6 +152,58 @@
       <div class="body-wrap">
         
   
+    <article id="post-linux运维" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/22/linux运维/">linux运维</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-centos7磁盘分区与挂载解析"><a href="#1-centos7磁盘分区与挂载解析" class="headerlink" title="1.centos7磁盘分区与挂载解析"></a>1.centos7磁盘分区与挂载解析</h3><p>链接如下:<a href="https://www.cnblogs.com/lizhangshu/p/9719018.html" target="_blank" rel="external">https://www.cnblogs.com/lizhangshu/p/9719018.html</a></p>
+<h3 id="2-CentOS7-挂载磁盘出错mount-dev-sdb-is-write-protected-mounting-mount-unknown-filesystem-type-‘-null-’"><a href="#2-CentOS7-挂载磁盘出错mount-dev-sdb-is-write-protected-mounting-mount-unknown-filesystem-type-‘-null-’" class="headerlink" title="2.CentOS7 挂载磁盘出错mount: /dev/sdb is write-protected, mounting mount: unknown filesystem type ‘(null)’"></a>2.CentOS7 挂载磁盘出错mount: /dev/sdb is write-protected, mounting mount: unknown filesystem type ‘(null)’</h3><p><a href="https://blog.csdn.net/llwy1428/article/details/93848439" target="_blank" rel="external">https://blog.csdn.net/llwy1428/article/details/93848439</a></p>
+<h3 id="3-Linux环境下Swap配置方法"><a href="#3-Linux环境下Swap配置方法" class="headerlink" title="3.Linux环境下Swap配置方法"></a>3.Linux环境下Swap配置方法</h3><p><a href="https://blog.csdn.net/joshua_317/article/details/78392286" target="_blank" rel="external">https://blog.csdn.net/joshua_317/article/details/78392286</a>  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/08/22/linux运维/" class="archive-article-date">
+  	<time datetime="2019-08-22T01:46:41.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-08-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/linux/">linux</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-ElasticStack-8-Elasticsearch篇之深入了解Search的运行机制" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -256,7 +308,26 @@
 </ol>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/199.png" alt=""> </p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/200.png" alt=""> </p>
-<h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><h3 id="6-分页与遍历-search-after"><a href="#6-分页与遍历-search-after" class="headerlink" title="6.分页与遍历-search_after"></a>6.分页与遍历-search_after</h3><h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3>
+<h3 id="5-分页与遍历-scroll"><a href="#5-分页与遍历-scroll" class="headerlink" title="5.分页与遍历-scroll"></a>5.分页与遍历-scroll</h3><ol>
+<li>1.scroll提供了遍历文档集的api,以快照的 方式来避免深度分页的问题<br>-不能用来做实时索引,因为数据不是湿湿的<br>-尽量不要使用复杂的sort条件,使用_doc最高效<br>-使用稍微复杂  </li>
+</ol>
+<h4 id="5-1-使用Scroll"><a href="#5-1-使用Scroll" class="headerlink" title="5.1 使用Scroll"></a>5.1 使用Scroll</h4><ol>
+<li>1.第一步需要发起1个scroll search(就是告诉es创建一个符合查询条件的快照),如下所示:<br>-es在收到该请求后会根据查询条件创建文档Id合集的快照<br>-快照里面没有from参数的,只有size。他后面会持续获取之后的内容,不用管从第几个开始,每次都会返回下一次调用的scroll_id,所以只需要指定每次返回多少个文档。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/206.png" alt="">   </li>
+<li>2.第二步调用scroll search的api,获取文档集合,如下所示:<br>-不断迭代调用直到返回hits.hits数组为空时停止。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/207.png" alt="">   </li>
+<li>3.scroll是通过快照的机制:在快照之后删除的数据,通过快照还可以查询出,快照之后新增的文档 在快照里面获取不到。  </li>
+<li>过多的scroll调用会占用大量内存,可以通过clear api删除过多的scroll快照:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/208.png" alt=""></li>
+</ol>
+<h3 id="6-分页与遍历-search-after-供实时的下一页文档获取功能-acroll不能实时"><a href="#6-分页与遍历-search-after-供实时的下一页文档获取功能-acroll不能实时" class="headerlink" title="6.分页与遍历-search_after(供实时的下一页文档获取功能:acroll不能实时)"></a>6.分页与遍历-search_after(供实时的下一页文档获取功能:acroll不能实时)</h3><ol>
+<li>1.search_after避免深度分页的性能问题,提供实时的下一页文档获取功能<br>-缺点是不能使用from参数,即不能指定页数<br>-从search_after名字可以知道,search_after只能下一页,不能上一页<br>-使用简单  </li>
+</ol>
+<h4 id="6-1-使用search-after"><a href="#6-1-使用search-after" class="headerlink" title="6.1 使用search_after"></a>6.1 使用search_after</h4><ol>
+<li>1.第一步为正常的搜索,但要指定sort值,并保证值唯一  </li>
+<li>2.第二步为使用上一步最后一个文档的sort值进行查询<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/209.png" alt=""><br>以上sort中age加上_id肯定是唯一的,所以sort里面填写了如上值  <h4 id="6-2-search-after深度分页问题"><a href="#6-2-search-after深度分页问题" class="headerlink" title="6.2 search_after深度分页问题"></a>6.2 search_after深度分页问题</h4></li>
+<li>1.如何避免深度分页问题？<br>-通过唯一排序值定位将每次要处理的文档数都控制在size内<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/210.png" alt=""></li>
+</ol>
+<h4 id="6-3-应用场景"><a href="#6-3-应用场景" class="headerlink" title="6.3 应用场景"></a>6.3 应用场景</h4><p>各种search的应用场景,search_after到100页码,1000页码都没有问题的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/211.png" alt="">  </p>
+<h3 id="7-文档说明"><a href="#7-文档说明" class="headerlink" title="7.文档说明"></a>7.文档说明</h3><p>查阅官方文档:<a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.1/index.html" target="_blank" rel="external">https://www.elastic.co/guide/en/elasticsearch/reference/7.1/index.html</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/212.png" alt="">  </p>
+
       
     </div>
     <div class="article-info article-info-index">
@@ -1220,43 +1291,6 @@
 
 
   
-    <article id="post-work-10-linux下硬盘分区挂载" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>title: work-10-linux下硬盘分区挂载<br>date: 2019-07-29 13:52:20<br>tags:</p>
-<h2 id="linux"><a href="#linux" class="headerlink" title=" linux"></a> linux</h2><p><a href="https://blog.csdn.net/ren_19891209/article/details/79375495" target="_blank" rel="external">https://blog.csdn.net/ren_19891209/article/details/79375495</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/29/work-10-linux下硬盘分区挂载/" class="archive-article-date">
-  	<time datetime="2019-07-29T05:52:20.594Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-29</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1322,7 +1356,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.5px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.5px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.5px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.5px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.5px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 17px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.5px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.5px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.5px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.5px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.5px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.5px;">c</a> <a href="/tags/crawler/" style="font-size: 18px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.5px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.5px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.5px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.5px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.5px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.5px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.5px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.5px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.5px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.5px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.5px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.5px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.5px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.5px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.5px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.5px;">代理</a> <a href="/tags/前端/" style="font-size: 10.5px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13px;">泛型</a> <a href="/tags/注解/" style="font-size: 11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12px;">转载</a> <a href="/tags/集合/" style="font-size: 12px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.68px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 15.26px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
