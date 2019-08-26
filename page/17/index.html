@@ -152,6 +152,105 @@
       <div class="body-wrap">
         
   
+    <article id="post-java-枚举-enum" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/19/java-枚举-enum/">java-枚举(enum)</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>enum 的全称为 enumeration， 是 JDK 1.5  中引入的新特性，存放在 java.lang 包中,继承java.lang.Enum  </p>
+<ol>
+<li><p>原始的接口定义常量</p>
+</li>
+<li><p>语法（定义）</p>
+</li>
+<li><p>遍历、switch 等常用操作</p>
+</li>
+<li><p>enum 对象的常用方法介绍</p>
+</li>
+<li><p>给 enum 自定义属性和方法</p>
+</li>
+<li><p>EnumSet，EnumMap 的应用</p>
+</li>
+<li><p>enum 的原理分析</p>
+</li>
+<li><p>总结</p>
+</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-原始的接口定义常量"><a href="#1-原始的接口定义常量" class="headerlink" title="1. 原始的接口定义常量"></a>1. 原始的接口定义常量</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">public interface IConstants&#123;</div><div class="line">   String MON=&quot;mon&quot;;</div><div class="line">   String TUE=&quot;tue&quot;;</div><div class="line">   String WED=&quot;wed&quot;;</div><div class="line">   String THU=&quot;thu&quot;;</div><div class="line">   String FRI=&quot;fri&quot;;</div><div class="line">   String SAT=&quot;sat&quot;;</div><div class="line">   String  SUN=&quot;sun&quot;;       </div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-语法（定义）"><a href="#2-语法（定义）" class="headerlink" title="2. 语法（定义）"></a>2. 语法（定义）</h5><ol>
+<li>创建枚举类要 使用enum关键字,隐藏了所有类的创建都是java.lang.Enum的子类型(java.lang.Enum是一个抽象类)</li>
+<li>枚举类型符合通用模式 Class Enum<e extends="" enum<e="">&gt;，而 E 表示枚举类型的名称。</e></li>
+<li>枚举类型的每一个值都将映射到 protected Enum(String name, int ordinal)构造函数中，在这里，每个值的名称都被转换成一个字符串，并且序数设置表示了此设置被创建的顺序。</li>
+</ol>
+<p>例如:  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"> public enum Week&#123;</div><div class="line">    MON,TUE, WED,THU,FRI,SAT,SUN</div><div class="line">&#125;</div><div class="line">注意:实例后面没有分号</div><div class="line"></div><div class="line">这段代码实际上调用了7次Enum(String name,int ordinal);</div><div class="line">new Enum(&quot;MON&quot;,1);</div><div class="line">new Enum(&quot;TUE&quot;,2);</div><div class="line">new Enum(&quot;WED&quot;,3);</div><div class="line">...</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-遍历、switch-等常用操作"><a href="#3-遍历、switch-等常用操作" class="headerlink" title="3. 遍历、switch 等常用操作"></a>3. 遍历、switch 等常用操作</h5><p>对enum进行遍历和switch的操作示例代码：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">  public class EnumTest &#123;</div><div class="line">public static  void main(String[] args)&#123;</div><div class="line"> //for循环遍历</div><div class="line"> for(Week week:Week.values())&#123;</div><div class="line">	 System.out.println(week.name()+&quot; &quot;+week.ordinal());</div><div class="line"> &#125;</div><div class="line"> </div><div class="line"> //switch遍历</div><div class="line"> Week option = Week.TUE;</div><div class="line"> switch(option)&#123;</div><div class="line"> case MON:</div><div class="line">	  System.out.println(&quot;今天周一&quot;);</div><div class="line">	 break;</div><div class="line"> case TUE:</div><div class="line">	 System.out.println(&quot;今天周二&quot;);</div><div class="line">	 break;</div><div class="line"> case WED:</div><div class="line">	 System.out.println(&quot;今天周三&quot;);</div><div class="line">	 break;</div><div class="line"> case THU:</div><div class="line">	 System.out.println(&quot;今天周四&quot;);</div><div class="line">	 break;</div><div class="line"> default:</div><div class="line">           System.out.println(option);</div><div class="line">          break;</div><div class="line"> &#125;</div><div class="line"> </div><div class="line">&#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输出:  </p>
+<p>MON 0<br>TUE 1<br>WED 2<br>THU 3<br>FRI 4<br>SAT 5<br>SUN 6<br>今天周二  </p>
+<h5 id="4-enum-对象的常用方法介绍"><a href="#4-enum-对象的常用方法介绍" class="headerlink" title="4. enum 对象的常用方法介绍"></a>4. enum 对象的常用方法介绍</h5><p>int compareTo(E o) //比较此枚举与指定对象的顺序。</p>
+<p>Class<e> getDeclaringClass()  返回与此枚举常量的枚举类型相对应的 Class 对象。</e></p>
+<p>String name()  返回此枚举常量的名称，在其枚举声明中对其进行声明。</p>
+<p>int ordinal()  返回枚举常量的序数（它在枚举声明中的位置，其中初始常量序数为零）。</p>
+<p>String toString() 返回枚举常量的名称，它包含在声明中。</p>
+<p>static <t extends="" enum<t="">&gt; T valueOf(Class<t> enumType, String name)  返回带指定名称的指定枚举类型的枚举常量。</t></t></p>
+<h5 id="5-给-enum-自定义属性和方法"><a href="#5-给-enum-自定义属性和方法" class="headerlink" title="5. 给 enum 自定义属性和方法"></a>5. 给 enum 自定义属性和方法</h5><p>给 enum 对象加一下 value 的属性和 getValue() 的方法：</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">public enum EnumTest &#123;</div><div class="line">MON(1), TUE(2), WED(3), THU(4), FRI(5), SAT(6) &#123;</div><div class="line">    @Override</div><div class="line">    public boolean isRest() &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">&#125;,</div><div class="line">SUN(0) &#123;</div><div class="line">    @Override</div><div class="line">    public boolean isRest() &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line">&#125;;</div><div class="line"> </div><div class="line">private int value;</div><div class="line"> </div><div class="line">private EnumTest(int value) &#123;</div><div class="line">    this.value = value;</div><div class="line">&#125;</div><div class="line"> </div><div class="line">public int getValue() &#123;</div><div class="line">    return value;</div><div class="line">&#125;</div><div class="line"> </div><div class="line">public boolean isRest() &#123;</div><div class="line">    return false;</div><div class="line">&#125;</div><div class="line">&#125;</div><div class="line">public class Test &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    System.out.println(&quot;EnumTest.FRI 的 value = &quot; + EnumTest.FRI.getValue());</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>输出:<br>EnumTest.FRI 的 value = 5</p>
+<h5 id="6-EnumSet，EnumMap-的应用"><a href="#6-EnumSet，EnumMap-的应用" class="headerlink" title="6. EnumSet，EnumMap 的应用"></a>6. EnumSet，EnumMap 的应用</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">public class Test &#123;</div><div class="line">public static void main(String[] args) &#123;</div><div class="line">    // EnumSet的使用</div><div class="line">    EnumSet&lt;EnumTest&gt; weekSet = EnumSet.allOf(EnumTest.class);</div><div class="line">    for (EnumTest day : weekSet) &#123;</div><div class="line">        System.out.println(day);</div><div class="line">    &#125;</div><div class="line"> </div><div class="line">    // EnumMap的使用</div><div class="line">    EnumMap&lt;EnumTest, String&gt; weekMap = new EnumMap(EnumTest.class);</div><div class="line">    weekMap.put(EnumTest.MON, &quot;星期一&quot;);</div><div class="line">    weekMap.put(EnumTest.TUE, &quot;星期二&quot;);</div><div class="line">    // ... ...</div><div class="line">    for (Iterator&lt;Entry&lt;EnumTest, String&gt;&gt; iter = weekMap.entrySet().iterator(); iter.hasNext();) &#123;</div><div class="line">        Entry&lt;EnumTest, String&gt; entry = iter.next();</div><div class="line">        System.out.println(entry.getKey().name() + &quot;:&quot; + entry.getValue());</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="7-enum-的原理分析"><a href="#7-enum-的原理分析" class="headerlink" title="7. enum 的原理分析"></a>7. enum 的原理分析</h5><p> enum 的语法结构尽管和 class 的语法不一样，但是经过编译器编译之后产生的是一个class文件。该class文件经过反编译可以看到实际上是生成了一个类，该类继承了java.lang.Enum<e>。EnumTest 经过反编译(javap com.hmw.test.EnumTest 命令)之后得到的内容如下：</e></p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">public class com.hmw.test.EnumTest extends java.lang.Enum&#123;</div><div class="line">public static final com.hmw.test.EnumTest MON;</div><div class="line">public static final com.hmw.test.EnumTest TUE;</div><div class="line">public static final com.hmw.test.EnumTest WED;</div><div class="line">public static final com.hmw.test.EnumTest THU;</div><div class="line">public static final com.hmw.test.EnumTest FRI;</div><div class="line">public static final com.hmw.test.EnumTest SAT;</div><div class="line">public static final com.hmw.test.EnumTest SUN;</div><div class="line">static &#123;&#125;;</div><div class="line">public int getValue();</div><div class="line">public boolean isRest();</div><div class="line">public static com.hmw.test.EnumTest[] values();</div><div class="line">public static com.hmw.test.EnumTest valueOf(java.lang.String);</div><div class="line">com.hmw.test.EnumTest(java.lang.String, int, int, com.hmw.test.EnumTest);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>所以，实际上 enum 就是一个 class，只不过 java 编译器帮我们做了语法的解析和编译而已。  </p>
+<h5 id="8-总结"><a href="#8-总结" class="headerlink" title="8. 总结"></a>8. 总结</h5><ol>
+<li>可以把 enum 看成是一个普通的 class，它们都可以定义一些属性和方法，不同之处是：enum 不能使用 extends 关键字继承其他类，因为 enum 已经继承了 java.lang.Enum（java是单一继承）。  </li>
+<li>枚举的本质是类，在没有枚举之前，仍然可以按照java最基本的编程手段来解决需要用到枚举的地方。</li>
+<li>枚举屏蔽了枚举值的类型信息，不像在用public static final定义变量必须指定类型。枚举是用来构建常量数据结构的模板，这个模板可扩展。</li>
+<li>枚举的使用增强了程序的健壮性，比如在引用一个不存在的枚举值的时候，编译器会报错。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/19/java-枚举-enum/" class="archive-article-date">
+  	<time datetime="2017-11-19T05:28:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/javaSE/">javaSE</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-26-vue工程实例-前端开发" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -872,96 +971,6 @@ new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
 
 
   
-    <article id="post-vue-18-组件-注册组件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/31/vue-18-组件-注册组件/">vue(18)-组件-注册组件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>代码复用一直是软件开发中长期存在的一个问题，每个开发者都想再次使用之前写好的<br>代码，又担心引入这段代码后对现有的程序产生影响。</li>
-<li>从jQuery 开始，我们就开始通过插件的形式复用代码，到Requirejs 开始将js 文件模块化，按需加载。</li>
-<li>两种方式都提供了比较方便的复用方式，但往往还需要自己手动加入所需的CSS 文件和HTML模块。</li>
-<li>现在，WebComponents 的出现提供了一种新的思路，可以自定义tag 标签，并拥有自身的模板、样式和交互。</li>
-<li>Angularjs 的指令，Reactjs 的组件化都在往这方面做尝试。同样，Vue.js 也提供了自己的组件系统，支持自定义tag和原生HTML元素的扩展。</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>Vue.js 创建组件构造器的方式非常简单：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">var MyComponent = Vue.extend(&#123; … &#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>这样，我们就获得了一个组件构造器，但现在还无法直接使用这个组件,需要将组件注<br>册到应用中。Vue.js 提供了两种注册方式,分别是全局注册和局部注册。</p>
-<h5 id="1-全局注册"><a href="#1-全局注册" class="headerlink" title="1.全局注册"></a>1.全局注册</h5><p>全局注册需要确保在根实例初始化之前注册，这样才能使组件在任意实例中被使用，注<br>册方式如下：  </p>
-<pre><code>Vue.component(&apos;my-component&apos;, MyComponent);
-</code></pre><p>这条语句需要写在</p>
-<pre><code>var vm = new Vue({…})
-</code></pre><p>之前，注册成功之后，就可以在模块中以自定义元素<my-component> 的形式使用组件。对于组件的命名，W3C 规范是字母小写且包<br>含一个短横杠“-”，Vue.js 暂不强制要求，但官方建议遵循这个规则比较好。<br>整个使用方法代码如下：</my-component></p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"> &lt;div id = &quot;app&quot;&gt;</div><div class="line">       &lt;my-component&gt;&lt;/my-component&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line"> var MyComponent = Vue.extend(&#123;</div><div class="line">    template:&quot;&lt;p&gt;Hello Vue.js&lt;/p&gt;&quot;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">Vue.component(&apos;my-component&apos;,MyComponent);</div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line"></div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>输出结果:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">  &lt;p&gt;Hello Vue.js&lt;/p&gt;</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="2-局部注册"><a href="#2-局部注册" class="headerlink" title="2.局部注册"></a>2.局部注册</h5><p>局部注册则限定了组件只能在被注册的组件中使用，而无法在其他组件中使用，注册方式如下：  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> &lt;div id = &quot;app&quot;&gt;</div><div class="line">       &lt;my-parent&gt;&lt;/my-parent&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line"> var Child = Vue.extend(&#123;</div><div class="line">    template:&quot;&lt;p&gt;Child Hello Vue.js&lt;/p&gt;&quot;</div><div class="line">&#125;);</div><div class="line"></div><div class="line">var Parent = Vue.extend(&#123;</div><div class="line">   template:&apos;&lt;div&gt;&lt;p&gt;parent component&lt;/p&gt;&lt;my-child&gt;&lt;/my-child&gt;&lt;/div&gt;&apos;,</div><div class="line">  components:&#123;</div><div class="line">       &apos;my-child&apos;:Child</div><div class="line">  &#125;</div><div class="line">&#125;);</div><div class="line">Vue.component(&apos;my-parent&apos;,Parent);</div><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><p>输出为:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;div&gt;　　　　</div><div class="line">  &lt;p&gt;This is a parent component&lt;/p&gt;</div><div class="line">  &lt;p&gt;This is a child component&lt;/p&gt;　　　　</div><div class="line">&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>而如果在根实例中调用</p>
-<pre><code>&lt;my-child&gt;&lt;/my-child&gt;
-</code></pre><p>会出现:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/53.png" alt=""></p>
-<h5 id="3-注册组件"><a href="#3-注册组件" class="headerlink" title="3.注册组件"></a>3.注册组件</h5><p>Vue.js 对于上述两种注册方式也提供了简化的方法，我们可以直接在注册的时候定义组件构造器选项  </p>
-<p>1.全局注册  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">    Vue.component(&apos;my-component&apos;, &#123;</div><div class="line">       template : &apos;&lt;p&gt;This is a component&lt;/p&gt;&apos;</div><div class="line">    &#125;)</div><div class="line">    ```  </div><div class="line"></div><div class="line">2.局部注册</div></pre></td></tr></table></figure>
-
-var Parent = Vue.extend({
-     template: &apos;&lt;div&gt;
-     &lt;p&gt;This is a parent component&lt;/p&gt;
-      &lt;my-child&gt;&lt;/my-child&gt;
-     &lt;/div&gt;&apos;,
-   components: {
-     &apos;my-child&apos;: {
-      template : &apos;&lt;p&gt;This is a child component&lt;/p&gt;&apos;
-    }
-   }
- })
-```
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/31/vue-18-组件-注册组件/" class="archive-article-date">
-  	<time datetime="2017-10-31T13:50:35.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/16/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/15/">15</a><a class="page-number" href="/page/16/">16</a><span class="page-number current">17</span><a class="page-number" href="/page/18/">18</a><a class="page-number" href="/page/19/">19</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/18/">Next &raquo;</a>
@@ -1027,7 +1036,7 @@ var Parent = Vue.extend({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.68px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.74px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.21px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 15.26px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 13.89px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
