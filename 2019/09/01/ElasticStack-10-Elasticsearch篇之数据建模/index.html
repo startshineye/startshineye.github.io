@@ -20,7 +20,11 @@
 2.数据建模(Data Model)定义:-对现实世界进行抽象描述的一种工具和方法-通过抽像的实体及实体之间联系的形式去描述业务规则,从而实现对现实世">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/13.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/14.png">
-<meta property="og:updated_time" content="2019-09-03T11:01:38.530Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/15.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/16.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/17.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/18.png">
+<meta property="og:updated_time" content="2019-09-06T15:08:27.531Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-10-Elasticsearch篇之数据建模">
 <meta name="twitter:description" content="本章会介绍使用 Elasticsearch 中要注意的数据建模常见问题以及优化思路和方案，让大家可以根据自己的业务场景设置最合理的模型。  
@@ -195,8 +199,61 @@
 <h3 id="2-ES数据建模配置相关介绍"><a href="#2-ES数据建模配置相关介绍" class="headerlink" title="2.ES数据建模配置相关介绍"></a>2.ES数据建模配置相关介绍</h3><h4 id="2-1-ES的数据建模"><a href="#2-1-ES的数据建模" class="headerlink" title="2.1 ES的数据建模"></a>2.1 ES的数据建模</h4><ol>
 <li>1.ES是基于Lucene以倒排索引为基础实现的存储体系,不遵循关系型数据库中的范式约定<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/14.png" alt="">  </li>
 </ol>
-<p>a.首先需要根据业务/数据需求来创建概念/逻辑模型,最后产出:实体列表、实体属性描述、实体键关系描述。<br>b.根据部署/性能需求产生物理模型,es中物理模型有ES Index Template  </p>
-<h3 id="3-ES数据建模实例"><a href="#3-ES数据建模实例" class="headerlink" title="3.ES数据建模实例"></a>3.ES数据建模实例</h3><h3 id="4-Nested-Object"><a href="#4-Nested-Object" class="headerlink" title="4.Nested_Object"></a>4.Nested_Object</h3><h3 id="5-Parent-Child"><a href="#5-Parent-Child" class="headerlink" title="5.Parent_Child"></a>5.Parent_Child</h3><h3 id="6-nested-vs-parent-child"><a href="#6-nested-vs-parent-child" class="headerlink" title="6.nested_vs_parent_child"></a>6.nested_vs_parent_child</h3><h3 id="7-reindex"><a href="#7-reindex" class="headerlink" title="7.reindex"></a>7.reindex</h3><h3 id="8-其他建议"><a href="#8-其他建议" class="headerlink" title="8.其他建议"></a>8.其他建议</h3>
+<p>a.首先需要根据业务/数据需求来创建概念/逻辑模型,最后产出:实体列表、实体属性描述、实体键关系描述。<br>b.根据部署/性能需求产生物理模型,es中物理模型有ES Index Template、ES Index Mapping配置  </p>
+<h4 id="2-2-Mapping字段的相关设置"><a href="#2-2-Mapping字段的相关设置" class="headerlink" title="2.2 Mapping字段的相关设置"></a>2.2 Mapping字段的相关设置</h4><ol>
+<li><p>1.enabled<br>-true|false<br>-当字段仅存储,不做搜索或聚合分析,把这个值设置为false,默认为true,设置为false,节省磁盘空间，比如我们做外部系统请求分析时候、有一些cookie、session数据一般不做查询分析,此时把设置为false    </p>
+</li>
+<li><p>2.index<br>-true|false<br>-设置是否构建倒排索引  </p>
+</li>
+<li><p>3.index_options<br>-docs|freqs|positions|offsets<br>-如果构建倒排索引的话,需要存储哪些信息。  </p>
+</li>
+<li><p>4.norms<br>-true|false<br>-是否存储归一化相关参数,如果字段仅用于过滤和聚合分析,可关闭  </p>
+</li>
+<li><p>5.doc_values<br>-true| false<br>-是否启用doc_values,用于排序和聚合分析时候的场景  </p>
+</li>
+<li><p>6.field_data<br>-false|true<br>-是否为text类型启用fielddata,实现排序和聚合分析  </p>
+</li>
+<li><p>7.store<br>-false|true<br>-是否存储此字段值,默认为false,因为默认存放在source下  </p>
+</li>
+<li>8.coerce<br>-true|false<br>-是否开启自动数据类型转换功能,比如字符串转为数字,浮点转为整数等。  </li>
+<li>9.multifields多字段<br>-灵活使用多字段特性来解决多样的业务需求  </li>
+</ol>
+<h4 id="2-3-Mapping的其他设置"><a href="#2-3-Mapping的其他设置" class="headerlink" title="2.3 Mapping的其他设置"></a>2.3 Mapping的其他设置</h4><ol>
+<li><p>1.dynamic<br>-true|false|strict<br>-控制mapping自动更新  </p>
+</li>
+<li><p>2.data_detection<br>-true|false<br>-是否自动识别日期类型  </p>
+</li>
+</ol>
+<h4 id="2-4-Mapping字段属性的设定流程"><a href="#2-4-Mapping字段属性的设定流程" class="headerlink" title="2.4 Mapping字段属性的设定流程"></a>2.4 Mapping字段属性的设定流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/15.png" alt=""><br>一个设定的流程如下：<br>1.是何种类型  2.是否需要检索(index设定)   3.是否需要排序和聚合分析   4.是否需要另行存储  </p>
+<h5 id="2-4-1-是何种类型"><a href="#2-4-1-是何种类型" class="headerlink" title="2.4.1 是何种类型?"></a>2.4.1 是何种类型?</h5><ol>
+<li>1.字符串类型<br>-需要分词则设定为text类型,否则设定为keyword类型  </li>
+<li>2.枚举类型<br>-基于性能考虑将其设置为keyword类型,即便该数据为整型。  </li>
+<li>3.数值类型<br>-尽量选择贴近的类型,比如byte即可标识所有数值时,即选用byte,不要用long  </li>
+<li>其他类型<br>-比如布尔类型、日期、地理位置数据等。  </li>
+</ol>
+<h5 id="2-4-2-是否需要检索"><a href="#2-4-2-是否需要检索" class="headerlink" title="2.4.2 是否需要检索?"></a>2.4.2 是否需要检索?</h5><ol>
+<li>1.完全不需要检索、排序、聚合分析的字段<br>-enabled设置为false  </li>
+<li>2.不需要检索的字段<br>-index设置为诶false  </li>
+<li>3.需要检索的字段，可以通过如下配置设定需要的存储粒度<br>-index_options结合需要设定<br>-norms不需要归一化数据时关闭即可  </li>
+</ol>
+<h5 id="2-4-3-是否需要排序和聚合分析"><a href="#2-4-3-是否需要排序和聚合分析" class="headerlink" title="2.4.3 是否需要排序和聚合分析?"></a>2.4.3 是否需要排序和聚合分析?</h5><ol>
+<li>1.不需要排序或者聚合分析 功能<br>-doc_vales设定为false<br>-fielddata设定为false  <h5 id="2-4-4-是否需要另行存储"><a href="#2-4-4-是否需要另行存储" class="headerlink" title="2.4.4 是否需要另行存储?"></a>2.4.4 是否需要另行存储?</h5></li>
+<li>1.是否需要专门存储当前字段的数据?<br>-store设定为true,即可存储该字段的原始内容(与_source中的不相关)<br>-一般结合_source的enabled设定为false时使用  </li>
+</ol>
+<h3 id="3-ES数据建模实例"><a href="#3-ES数据建模实例" class="headerlink" title="3.ES数据建模实例"></a>3.ES数据建模实例</h3><p>我们结合博客文章blog_index为例来解析ES数据建模实例  </p>
+<ol>
+<li><p>1.博客文章blog_index<br>-标题title<br>-发布日期publish_data<br>-作者author<br>-摘要abstract<br>-网络地址url  </p>
+</li>
+<li><p>2.blog_index的mapping设置如下:<br>title:需要做全文检索的,所以为text类型,添加fields为keyword是为了满足title完全匹配,此时我们使用title.keyword时候就能完全匹配<br>publish_data:日期类型<br>author:不需要对author进行分词,所以设置为keyword<br>abstract:摘要进行全文检索的,所以分词<br>url:只做展示,不需要搜索url<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/16.png" alt=""></p>
+</li>
+<li><p>3.如果我们在博客中加入了content内容之后:博客文章blog_index<br>-标题title<br>-发布日期publish_data<br>-作者author<br>-摘要abstract<br>-内容content<br>-网络地址url<br>一个内容很大,几千字或者几万甚至几十万字,当内容很大时候,如果还是把content设置为text类型,当你取原始数据时候,通过_source获取原始内容,会取出很多内容,导致性能很慢，这个时候我们该如何解决这个问题,我们可以看下面的内容:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/17.png" alt=""></p>
+</li>
+</ol>
+<p>a.首先我们把_source的enanbled设置为诶false(不需要把原始内容存放在_source里面了)<br>b.为每一个字段都加了”store”:true属性  </p>
+<ol>
+<li>4.一般我们做搜索引擎时候都有这样一个需求:匹配一个关键系之后,需要加一个高亮,以方便查看<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/18.png" alt=""><br>比如以下,我们搜索匹配content为包含word的文章,并且把content设置为高亮、我们在结果中不需要返回content的字段,这个时候设置返回的字段如下:”stored_fields”,如下直接返回title,publish_data,author,abstract,url  </li>
+</ol>
+<h3 id="4-Nested-Object"><a href="#4-Nested-Object" class="headerlink" title="4.Nested_Object"></a>4.Nested_Object</h3><h3 id="5-Parent-Child"><a href="#5-Parent-Child" class="headerlink" title="5.Parent_Child"></a>5.Parent_Child</h3><h3 id="6-nested-vs-parent-child"><a href="#6-nested-vs-parent-child" class="headerlink" title="6.nested_vs_parent_child"></a>6.nested_vs_parent_child</h3><h3 id="7-reindex"><a href="#7-reindex" class="headerlink" title="7.reindex"></a>7.reindex</h3><h3 id="8-其他建议"><a href="#8-其他建议" class="headerlink" title="8.其他建议"></a>8.其他建议</h3>
       
     </div>
     <div class="article-info article-info-index">
