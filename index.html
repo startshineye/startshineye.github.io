@@ -335,7 +335,21 @@
 <li>ES提供了Task API来查看任务的执行进度和相关数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/43.png" alt=""></li>
 </ol>
 <h3 id="8-其他建议"><a href="#8-其他建议" class="headerlink" title="8.其他建议"></a>8.其他建议</h3><h4 id="8-1-数据模型版本管理"><a href="#8-1-数据模型版本管理" class="headerlink" title="8.1.数据模型版本管理"></a>8.1.数据模型版本管理</h4><ol>
-<li>1.对Mapping进行版本管理<br>-包含在代码或者以专门的文件进行管理,添加好注释,并加入Git等版本管理仓库中,方便回顾<br>-为每个增加一个metadata字段,在其中维护一些文档相关的元数据,方便对数据进行管理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/44.png" alt="">  </li>
+<li>1.对Mapping进行版本管理<br>-包含在代码或者以专门的文件进行管理,添加好注释,并加入Git等版本管理仓库中,方便回顾<br>-为每个文档增加一个metadata字段,在其中维护一些文档相关的元数据,方便对数据进行管理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/44.png" alt="">  </li>
+</ol>
+<h4 id="8-2-防止字段过多"><a href="#8-2-防止字段过多" class="headerlink" title="8.2.防止字段过多"></a>8.2.防止字段过多</h4><p>防止索引字段过多  </p>
+<ol>
+<li>1.字段过多主要有如下坏处:<br>-难以维护,当字段成百上千时,基本很难有人能明确知道每个字段的含义<br>-mapping的信息存储在cluster state里面,过多的字段会导致mapping过大,最终导致更新变慢  </li>
+<li>2.通过设置index.mapping.total_fields.limit可以限定索引中最大字段数、默认是1000  </li>
+<li>3.如果字段确实比较多,可以通过key/value的方式解决字段过多问题,但是并不完美。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/45.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/46.png" alt=""></li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/47.png" alt=""></p>
+<h4 id="8-3-Key-Value方式详解"><a href="#8-3-Key-Value方式详解" class="headerlink" title="8.3.Key/Value方式详解"></a>8.3.Key/Value方式详解</h4><ol>
+<li><p>1.虽然通过这种方式可以极大地减少Field数目,但也有一些明显的坏处<br>-query语句复杂度飙升,且有一些可能无法实现,比如聚合分析相关的<br>-不利于在Kibana中做可视化分析  </p>
+</li>
+<li><p>2.一般字段过段的原因是由于没有高质量的数据建模导致的,比如dynamic设置为true  </p>
+</li>
+<li>3.考虑拆分多个索引来解决问题     </li>
 </ol>
 
       
