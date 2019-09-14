@@ -152,6 +152,113 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-7-服务网管" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/06/15/SpringCloud-7-服务网管/">SpringCloud-7-服务网管</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-服务网关和Zuul"><a href="#1-服务网关和Zuul" class="headerlink" title="1.服务网关和Zuul"></a>1.服务网关和Zuul</h3><h4 id="1-1-为什么需要服务网关"><a href="#1-1-为什么需要服务网关" class="headerlink" title="1.1 为什么需要服务网关"></a>1.1 为什么需要服务网关</h4><p>加入没有网关服务,当前系统起了多个服务,比如：订单、广告、商品、支付、用户。等等…<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/38.png" target="_blank" rel="external"></a> </p>
+<p>那么客户端怎么调用呢?和每个服务一步步打交道、显然不现实。需要一个接收request请求的统一入口。充当这个角色的是服务网关。一旦有了服务网关,所有请求都通过他,所以我们需要了解他发挥什么作用,具备什么要素?<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/39.png" target="_blank" rel="external"></a></p>
+<h4 id="1-2-服务网关的作用"><a href="#1-2-服务网关的作用" class="headerlink" title="1.2 服务网关的作用"></a>1.2 服务网关的作用</h4><h5 id="1-稳定性、高可用"><a href="#1-稳定性、高可用" class="headerlink" title="1.稳定性、高可用"></a>1.稳定性、高可用</h5><p>保证24小时可用,网络瘫痪、系统全挂、不能提供外面的服务。 </p>
+<h5 id="2-性能、并发性"><a href="#2-性能、并发性" class="headerlink" title="2.性能、并发性"></a>2.性能、并发性</h5><p>所有的请求都经过网关、所以网关的压力是巨大的、所以网关的性能也必须高。</p>
+<h5 id="3-安全性"><a href="#3-安全性" class="headerlink" title="3.安全性"></a>3.安全性</h5><p>要确保使用服务的安全、防止外部随意访问、比如金融行业、会进行通讯数据的加密措施。</p>
+<h5 id="4-扩展性"><a href="#4-扩展性" class="headerlink" title="4.扩展性"></a>4.扩展性</h5><p>各种请求都经过网关服务、所以网关上大有文章可做、可进行扩展。<br>理论上、网关是处理各种非业务功能的绝佳场所。诸如:协议转发、防刷、流量管控、日志监控等。</p>
+<h4 id="1-3-常用的网关方案"><a href="#1-3-常用的网关方案" class="headerlink" title="1.3 常用的网关方案"></a>1.3 常用的网关方案</h4><p>网关并非是微服务出来后的新鲜事物。业界成熟的网关服务有:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/40.png" target="_blank" rel="external"></a><br>一代的Zuul在性能上确实没有优势、不能喝nginx比较。当然，二代Zuul有较大的提升。</p>
+<p>原始的点餐项目是如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/41.png" target="_blank" rel="external"></a></p>
+<ol>
+<li>1.nginx在前,tomcat在后、nginx做了负载均衡和反向代理。现在我们可以让nginx发挥他负载均衡和反向代理的优势后面的tomcat可以换成Zuul  </li>
+<li>2.项目改造过程中、合理利用原来的资源、发挥新加入事物的优势、因地制宜解决问题。<h4 id="1-4-Zuul的特点"><a href="#1-4-Zuul的特点" class="headerlink" title="1.4 Zuul的特点"></a>1.4 Zuul的特点</h4>Zuul相对nginx来说有所不足、但是作为SpringCloud完整微服务生态体系的前置网关服务是一个很不错的选择。有一种说法路由加过滤器等于Zuul<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/42.png" target="_blank" rel="external"></a>  </li>
+</ol>
+<p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/43.png" target="_blank" rel="external"></a><br>Zuul的组织架构图如下所示:<br>可以看到,过滤器之间是没有直接通信的,他们是通过Request Context进行数据通信的。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/44.png" target="_blank" rel="external"></a>  </p>
+<p>Zuul的一次Http的生命周期:</p>
+<ol>
+<li>1.Origin Server就是我们的业务服务。  </li>
+<li>2.请求先过来之后会到pre filters这种类型的过滤器,比如我们的参数校验就可以在这里面来做。  </li>
+<li>3.routing filters作用就是将http请求转发到Origin Server中去：如果重写http请求可以在这里面做。</li>
+<li>4.post filters 这个时候你已经拿到了返回的结果,这个时候如果你想对结果进行处理和加工,可以在这里面来做</li>
+<li>5.error Filters如果在前两个filter发生异常时候,就可以在error filter中进行全局异常处理。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/45.png" target="_blank" rel="external"></a> </li>
+</ol>
+<h3 id="2-Zuul的使用"><a href="#2-Zuul的使用" class="headerlink" title="2.Zuul的使用"></a>2.Zuul的使用</h3><ol>
+<li>1.新建项目api-gateway<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/46.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/47.png" target="_blank" rel="external"></a> </li>
+<li>2.选择依赖<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/48.png" target="_blank" rel="external"></a>   </li>
+<li>3.删除不需要的文件<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/49.png" target="_blank" rel="external"></a>   </li>
+<li>4.修改版本一致<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/50.png" target="_blank" rel="external"></a></li>
+<li>5.修改配置文件(从统一配置文件中获取配置信息)<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/51.png" target="_blank" rel="external"></a></li>
+</ol>
+<h4 id="2-1-路由转发"><a href="#2-1-路由转发" class="headerlink" title="2.1 路由转发"></a>2.1 路由转发</h4><p>我们现在实现Zuul的路由转发功能,我们在api-gateway项目的启动类上添加:@EnableZuulProxy。我们现在要实现product服务下请求里面的/product/list</p>
+<ol>
+<li><p>1.启动我们的product服务(8081端口),然后访问:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/52.png" target="_blank" rel="external"></a>  </p>
+</li>
+<li><p>2.通过Zuul服务(8084端口)路由转发请求:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/53.png" target="_blank" rel="external"></a><br>只要注册到Eureka上的服务都可以通过:ip:port/服务名/url  </p>
+</li>
+</ol>
+<ol>
+<li><p>3.自定义Zuul路由转发地址<br>以上我们是通过默认的路由转发、默认的地址是:ip:port/服务名/url。但是有时候我们不想把服务名暴露出来 而是想用自己定义的路由地址。此时就需要配置Zuul了。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/55.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/54.png" target="_blank" rel="external"></a>  </p>
+</li>
+<li><p>4.查询Zuul的所有routes,我们可以通过Zuul对应的服务api-gateway启动地址:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/117.png" target="_blank" rel="external"></a>  </p>
+</li>
+</ol>
+<ol>
+<li>5.我们如果想要拦截某些请求<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/1.png" target="_blank" rel="external"></a> </li>
+</ol>
+<h4 id="2-3-Cookie和动态路由"><a href="#2-3-Cookie和动态路由" class="headerlink" title="2.3 Cookie和动态路由"></a>2.3 Cookie和动态路由</h4><h5 id="2-3-1-Cookie"><a href="#2-3-1-Cookie" class="headerlink" title="2.3.1 Cookie"></a>2.3.1 Cookie</h5><p>我们在开发搭建web项目的时候,经常要使用cookie,需要把cookie返回到后端。在这里使用了Zuul组件、默认情况下Cookie是无法传递过去的。如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/3.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/2.png" target="_blank" rel="external"></a><br>我们从Zuul的配置中可以设置cookie的开启和关闭<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/4.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/5.png" target="_blank" rel="external"></a>  </p>
+<h5 id="2-3-2-动态路由"><a href="#2-3-2-动态路由" class="headerlink" title="2.3.2 动态路由"></a>2.3.2 动态路由</h5><p>我们能不能改了路由配置之后自动生效了,就是动态路由。如果需要达到动态路由效果。我们只需要将api-gateway的配置放到config配置中心中去。我们如何做到config统一配置中配置改变了我们的api-gateway服务也动态改变了代码。我们添加Zuul的配置类。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/6.png" target="_blank" rel="external"></a>  </p>
+<h4 id="2-4-路由和高可用小结"><a href="#2-4-路由和高可用小结" class="headerlink" title="2.4 路由和高可用小结"></a>2.4 路由和高可用小结</h4><p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/7.png" target="_blank" rel="external"></a>  </p>
+<h5 id="2-4-1-典型应用场景"><a href="#2-4-1-典型应用场景" class="headerlink" title="2.4.1 典型应用场景"></a>2.4.1 典型应用场景</h5><ol>
+<li><p>1.Zuul的前置过滤器(Pre)<br>a.限流   b.鉴权    c.参数校验调整   d.请求转发  </p>
+</li>
+<li><p>2.Zuul的后置过滤器(Post)<br>人过留名<br>a.统计  b.日志  </p>
+</li>
+</ol>
+<h5 id="2-4-2-高可用"><a href="#2-4-2-高可用" class="headerlink" title="2.4.2 高可用"></a>2.4.2 高可用</h5><p>所有的请求都需要经过Zuul、所以生产环境中、我们需要部署多台Zuul,以避免单点故障。Zuul的高可用是必须的。  </p>
+<ol>
+<li>1.多个Zuul节点注册到Eureka Server(将多个节点注册到Eureka Server就可以实现高可用)  </li>
+<li>2.Nginx和Zuul “混搭”(使用nginx对外暴露一个url,nginx把请求转发到多个zuul服务上、这样可以做到彼此的取长补短)。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/06/15/SpringCloud-7-服务网管/" class="archive-article-date">
+  	<time datetime="2019-06-15T03:01:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-06-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-6-消息和异步" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -420,7 +527,8 @@ public List&lt;ProductInfo&gt;  decreaseStockProcess(List&lt;DecreaseStockInput&
 <li><p>2.配置坐席呼出<br><a href="https://blog.csdn.net/weixin_34242819/article/details/90492301" target="_blank" rel="external">https://blog.csdn.net/weixin_34242819/article/details/90492301</a><br>对于登录坐席工号进行呼出的情况,我们有如下步骤:1.坐席签入后能上线成功  2.坐席能够正确路由到运营商的sip电话进行呼叫  </p>
 </li>
 </ol>
-<h5 id="2-1-1-坐席签入后能上线成功"><a href="#2-1-1-坐席签入后能上线成功" class="headerlink" title="2.1.1 坐席签入后能上线成功"></a>2.1.1 坐席签入后能上线成功</h5><p>1.在cti_work表中找到分机,如:100003。<br>2.配置100003到cti_work_queue中去<br>3.在cti_telno中配置分机路由:100003分机呼出使用内线字段、长度在1-6(因为:100003是6位数)、<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/215.png" alt=""><br>4.如果出问题,查看Acdgate模块下Tomcat日志,在查看/cc/log/acd_acd01.log下的日志<br>acd_acd01.log里面r:开头的。  </p>
+<h5 id="2-1-1-坐席签入后能上线成功"><a href="#2-1-1-坐席签入后能上线成功" class="headerlink" title="2.1.1 坐席签入后能上线成功"></a>2.1.1 坐席签入后能上线成功</h5><h6 id="坐席上线"><a href="#坐席上线" class="headerlink" title="坐席上线"></a>坐席上线</h6><p>1.在cti_work表中找到分机,如:100003。<br>2.配置100003到cti_work_queue中去<br>3.在cti_outcaller中配置上线的主叫<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/64.png" alt=""><br>3.在cti_telno中配置分机路由:100003分机呼出使用内线字段、长度在1-6(因为:100003是6位数)、<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/215.png" alt=""><br>4.查看/cc/bin/log下面的日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/62.png" alt=""><br>发现话机没有注册,打开一看:是注册的服务错了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/63.png" alt=""><br>5.如果出问题,查看Acdgate模块下Tomcat日志,在查看/cc/log/acd_acd01.log下的日志<br>acd_acd01.log里面r:开头的。   </p>
+<h6 id="机器人锁定坐席转人工"><a href="#机器人锁定坐席转人工" class="headerlink" title="机器人锁定坐席转人工"></a>机器人锁定坐席转人工</h6><p>1.在确保坐席能够上线情况下,先配置转人工的机器人场景:1013502011<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/65.png" alt=""><br>2.在批次场景里面创建人批次场景,然后创建对应批次,进行外呼<br>3.查看acd_acd01_xxxx.log下的日志:锁定坐席成功与否?—&gt;TRptque::getandlockagent<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/66.png" alt=""><br>4.外呼后查看日志:httpg_httpg01_xxxx.log<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/67.png" alt=""><br>查看机器人转人工文档说明书知道:”att_status”:”0”不在线，”att_status”:”1”在线  </p>
 <h5 id="2-1-2-正确路由到运营商的sip电话进行呼叫"><a href="#2-1-2-正确路由到运营商的sip电话进行呼叫" class="headerlink" title="2.1.2 正确路由到运营商的sip电话进行呼叫"></a>2.1.2 正确路由到运营商的sip电话进行呼叫</h5><p>1.acd.cfg配置(配置是不是开启did,did是优先级最高的,如果开启,呼叫客户的主叫号码将会是did号码-DID的中文意思是直接拨入，是运营商提出的概念，通过这个号码，运营商可以呼叫到voip系统内，freeswitch上实现外乎呼叫的方式为配置一个网关，指定运营商的接入号和密码，有呼叫这个号码时，运营商会把这个号码送给freeswitch。)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/216.png" alt=""><br>2.acd.cfg配置(设置使用的主叫号码:usefromcaller,如果想要使用cti_work里面的,需要配置为1)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/217.png" alt=""><br>3.配置坐席呼出的主叫显示:cti_outcaller<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/218.png" alt=""><br>4.使用web页面上的软电话条进行呼叫,然后查看呼叫的结果里面是不是我们配置的主叫<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/219.png" alt=""><br>从上面我们可以知道,坐席呼出时候是两通电话。</p>
 <h4 id="1-fsg模块"><a href="#1-fsg模块" class="headerlink" title="1.fsg模块"></a>1.fsg模块</h4><p>FSG模块作为:AG(CTI)和FS进行交互模块,其作用就是一个接口调用服务。<br>对应的配置文件是:/cc/cfg/fsg.cfg<br>对应的日志文件是:/cc/log/fsg<em>**</em>.log和/cc/bin/log/log*.log<br>其日志记录了ipcc内部和外部中继网络交互的日志详情。  </p>
 <h5 id="1-1-fsg模块修改日志"><a href="#1-1-fsg模块修改日志" class="headerlink" title="1.1.fsg模块修改日志"></a>1.1.fsg模块修改日志</h5><p>有时候,我们为了排查和外部对接的错误信息时候,可以通过两种方式:<br>1.修改fsg的日志级别为6<br>2.通过tcpdump -w xx.cap抓包<br>以下为修改fsg的日志级别为6的设置  </p>
@@ -1188,74 +1296,6 @@ server:
 
 
   
-    <article id="post-mysql优化-1-准备" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/01/23/mysql优化-1-准备/">mysql优化-1-准备</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们以电商项目为例来说明数据库优化方案  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基础"><a href="#1-基础" class="headerlink" title="1.基础"></a>1.基础</h5><p>1.mysql实例<br>推荐使用MySQL5.7版本  </p>
-<p>2.MySQL图形客户端程序<br>推荐使用SQLyog  </p>
-<p>3.操作基础<br>linux命令和Shell脚本的基础知识 </p>
-<h5 id="2-电商项目简介"><a href="#2-电商项目简介" class="headerlink" title="2.电商项目简介"></a>2.电商项目简介</h5><p>电商项目流程如下:用户登录后选购商品,然后把商品加入购物车,加入购物车时候查看商品库存,有商品的话提交订单,支付方式是货到付款则发货,不是的话,订单付款再发货。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/52.png" alt="">  </p>
-<h5 id="3-电商项目模块简介"><a href="#3-电商项目模块简介" class="headerlink" title="3.电商项目模块简介"></a>3.电商项目模块简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/53.png" alt="">  </p>
-<h5 id="4-数据库设计规范"><a href="#4-数据库设计规范" class="headerlink" title="4.数据库设计规范"></a>4.数据库设计规范</h5><h6 id="4-1-现实中数据库设计"><a href="#4-1-现实中数据库设计" class="headerlink" title="4.1 现实中数据库设计"></a>4.1 现实中数据库设计</h6><p>1.在通常情况下数据库设计是按照:先进行逻辑设计再进行物理设计。<br>2.现实工作中:逻辑设计和物理设计结合起来进行设计。<br>3.物理设计时候基本就是对:表名 字段名 字段类型进行设计。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/54.png" alt="">    </p>
-<h6 id="4-2-数据库设计规范"><a href="#4-2-数据库设计规范" class="headerlink" title="4.2 数据库设计规范"></a>4.2 数据库设计规范</h6><p>如果公司中已经有了数据库设计规范,我们最好是按照此数据库设计规范进行设计。我们一般按照以下六个规范来进行数据库设计。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/55.png" alt="">   </p>
-<h6 id="1-数据库命名规范"><a href="#1-数据库命名规范" class="headerlink" title="1.数据库命名规范"></a>1.数据库命名规范</h6><p>1.所有数据库对象名称必须使用小写字母并用下划线分隔。(由于:mysql在默认情况下是对大小写敏感的,在linux系统下,数据库和表就是linux系统下的一个文件,linux系统本身是对英文字母的大小敏感的,则以下数据库:DbName和dbname是两个不同的数据库名。数据库表:TABLE,Table和table是不同的表)<br>2.所有数据库对象名称禁止使用MySQL保留关键字(由于我们数据库关键字在sql执行时候有特定的含义,如果我们使用关键字将会是sql执行有误,比如使用from字段,则查询时候:select from from table),通过以下网址可以查看到mysql的关键字:<a href="http://dev.mysql.com/doc/refman/5.7/en/keywords.html" target="_blank" rel="external">http://dev.mysql.com/doc/refman/5.7/en/keywords.html</a><br>3.数据库对象的命名要见名识义,并且最好不要超过32个字符。<br>4.临时表必须以temp为前缀并以日期为后缀。<br>5.备份库,备份表必须以bak为前缀并以日期为后缀。<br>6.所有存储相同数据的列名和列类型必须一致。(由于:这虽然是一条命名规范,但是对数据库的查询性能是非常重要的,因为这些列通常都作为关联了来使用,如果两个关联列的数据类型不同时,并且有时根据此列进行数据库关联时候,他会进行数据类型的转换导致索引失效,查询效率大幅度降低)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/56.png" alt="">   </p>
-<h6 id="2-数据库基本设计规范"><a href="#2-数据库基本设计规范" class="headerlink" title="2.数据库基本设计规范"></a>2.数据库基本设计规范</h6><p>1.所有表必须使用Innodb存储引擎<br>Mysql5.5使用之前Myisam(默认存储引擎)情况,默认数据库存储引擎必须使用Innodb存储引擎,除非有特殊用途(原因:1.mysql5.6版本之后,Innodb存储引擎成为了mysql的默认引擎,进行了很多优化 2.innodb存储引擎支持事务,行级锁,更好的恢复性,高并发下性能更好。)<br>2.数据库和表的字符集统一使用UTF-8(utf-8兼容性更好,几乎支持常用的所有字符,如果在表列中存储短信符号,那么使用utf-8的扩展字符集才可以,还可以避免字符集转换产生的一些乱码)–注意:Mysql中utf-8字符集汉字为3个自己,ASCII码占用1个字节<br>3.所有表和字段都需要添加注释(便于维护)<br>4.尽量控制单表数据量的大小,建议控制在500万以内(1.数据太大,查询效率有影响 2.修改表结构,备份,回复都会有很大问题 3.500万并不是MySQL数据库的限制 4.Mysql最多可以存储多少万条数据:没有规定 5.可以用历史数据归档,分库分表等手段来控制数据量的大小进而保证单表数据量在500万以内)<br>5.谨慎使用MySQL分区表(1. 误解:因为分区表在物理上表现为多个文件,在逻辑上表现为一个表,利用磁盘的io 提高查询性能,但是io的更好利用是有条件的,最好情况下分区表分区文件存放在不同分区文件上,如果把所有分区文件放到一起,实际上对io优化效果不是那么好,如果硬要选择分区:谨慎选择分区键,跨分区查询效率可能更低 2.建议采用物理分表的方式管理大数据)<br>6.尽量做到冷热数据分离,减少表的宽度/减少字段数(MySQL限制最多存储4096列,每一行数据大小不能超过65535)<br>7.禁止在表中建立预留字段(很多开发人员都容易违反,在表中预留很大的varchar类型的不确定字段,后续使用,实际上:1预留字段的命名很难做到见名识义 2.预留字段无法确认存储的数据类型,所以无法选择合适的类型 3.后期对预留字段类型的修改,也会对表进行锁定,mysql修改一个字段成本大于新增一个字段)<br>8.禁止在数据库中存储数据图片,文件等二进制数据(1.过多影响数据性能,往往这些数据都是很大的数据 2.将文件图片存储到文件服务器,数据库中值存储文件图片信息)<br>9.禁止在线上做数据库的压力测试<br>10.禁止从开发环境,测试环境直连生产环境数据库  </p>
-<h6 id="3-数据库索引设计规范"><a href="#3-数据库索引设计规范" class="headerlink" title="3.数据库索引设计规范"></a>3.数据库索引设计规范</h6><p>索引对数据库的查询性能来说是非常重要的,但是索引也是双刃剑,使用不好反而会降低数据库的性能,不要滥用索引  </p>
-<p>1.限制每张表上的索引数量,建议单张表索引不超过5个(一般来说索引数量和列数量成正比的,列越多索引越多,所以规范中不能使用较多的列数量)。<br>2.</p>
-<h6 id="4-数据库字段设计规范"><a href="#4-数据库字段设计规范" class="headerlink" title="4.数据库字段设计规范"></a>4.数据库字段设计规范</h6><p>字段类型设计</p>
-<h6 id="5-数据库SQL开发规范"><a href="#5-数据库SQL开发规范" class="headerlink" title="5.数据库SQL开发规范"></a>5.数据库SQL开发规范</h6><p>编写sql语句时候,所指定的规范  </p>
-<h6 id="6-数据库操作行为规范"><a href="#6-数据库操作行为规范" class="headerlink" title="6.数据库操作行为规范"></a>6.数据库操作行为规范</h6><p>针对于数据库运维人员,减少数据库故障  </p>
-<h6 id="7-MySql5-6使用validate-password-插件加强密码强度的安装及使用方法"><a href="#7-MySql5-6使用validate-password-插件加强密码强度的安装及使用方法" class="headerlink" title="7.MySql5.6使用validate password 插件加强密码强度的安装及使用方法"></a>7.MySql5.6使用validate password 插件加强密码强度的安装及使用方法</h6><p><a href="https://www.cnblogs.com/kevingrace/p/5752632.html" target="_blank" rel="external">https://www.cnblogs.com/kevingrace/p/5752632.html</a></p>
-<p><a href="https://www.jb51.net/article/87773.htm" target="_blank" rel="external">https://www.jb51.net/article/87773.htm</a></p>
-<p>密码3次被锁定,锁定时间是24小时<br><a href="https://blog.csdn.net/qq_25237663/article/details/47723913" target="_blank" rel="external">https://blog.csdn.net/qq_25237663/article/details/47723913</a></p>
-<h6 id="8-linux运维查询磁盘和大文件"><a href="#8-linux运维查询磁盘和大文件" class="headerlink" title="8.linux运维查询磁盘和大文件"></a>8.linux运维查询磁盘和大文件</h6><p><a href="https://uule.iteye.com/blog/2149323" target="_blank" rel="external">https://uule.iteye.com/blog/2149323</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/01/23/mysql优化-1-准备/" class="archive-article-date">
-  	<time datetime="2019-01-23T15:58:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-01-23</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/mysql/">mysql</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/2/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><span class="page-number current">3</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/4/">Next &raquo;</a>
@@ -1321,7 +1361,7 @@ server:
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 14.74px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 15.26px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 14.74px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 15.26px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
