@@ -35,7 +35,20 @@ logstash分为3个阶段">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/76.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/77.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/78.png">
-<meta property="og:updated_time" content="2019-09-21T16:21:05.072Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/79.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/80.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/81.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/82.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/83.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/84.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/85.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/86.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/87.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/88.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/89.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/90.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/91.png">
+<meta property="og:updated_time" content="2019-09-23T15:38:27.270Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-12-Logstash篇之入门与运行机制">
 <meta name="twitter:description" content="1.入门及架构简介1.1 Logstash介绍
@@ -222,7 +235,46 @@ logstash分为3个阶段">
 <p>以下标准数据流后使用codec-&gt;line(按照每一行切割数据、换行符切割)、filter为空、output中的codec-&gt;json(把每一个logstash Event转化为json对象)  </p>
 <p>我们以以下输入:”foo\bar”为例。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/76.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/77.png" alt="">  </p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/78.png" alt="">  </p>
-<h3 id="2-Event的生命周期"><a href="#2-Event的生命周期" class="headerlink" title="2.Event的生命周期"></a>2.Event的生命周期</h3><p>接下来我们整体了解下:logstash的整个架构。</p>
+<h3 id="2-Event的生命周期"><a href="#2-Event的生命周期" class="headerlink" title="2.Event的生命周期"></a>2.Event的生命周期</h3><h4 id="2-1-整个架构"><a href="#2-1-整个架构" class="headerlink" title="2.1 整个架构"></a>2.1 整个架构</h4><p>接下来我们整体了解下:logstash的整个架构。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/79.png" alt=""><br>1.1.每个input可以有哦多个的,每个input绑定了一个codec.<br>2.2.箭头”-&gt;”表示的是数据流向<br>3.3.通过input进来的数据经过codec后进行queue中,然后queue把数据分发到不同的pipeline中,pipeline由:Batcher、Filter、Output组成。<br>4.4.Batcher作用是批量从Queue中取数据(每次取多少数据是可以配置的)。<br>5.5.上面的架构是logstash经过很多次迭代后形成的架构。  </p>
+<h4 id="2-2-一个logstash的整个生命历程-life"><a href="#2-2-一个logstash的整个生命历程-life" class="headerlink" title="2.2 一个logstash的整个生命历程(life)"></a>2.2 一个logstash的整个生命历程(life)</h4><ol>
+<li>1.首先input会从web.log中收集数据(Line1,line2,..代表的是每一行数据)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/80.png" alt="">  </li>
+<li><p>2.Json Codec读取到line1数据之后会将其转换成Event<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/81.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/82.png" alt="">  </p>
+</li>
+<li><p>3.Event经过Queue后流转到不同的pipeline里面的batcher里面,经过时间推移,batcher里面缓存到越来越多的数据,数据达到阈值或者时间到了之后经过filter后经过output、最后输出到其他中间件,输出之后发送ACK给Queue。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/83.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/84.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="3-Queue简介"><a href="#3-Queue简介" class="headerlink" title="3.Queue简介"></a>3.Queue简介</h3><h4 id="3-1-Queue分类"><a href="#3-1-Queue分类" class="headerlink" title="3.1 Queue分类"></a>3.1 Queue分类</h4><ol>
+<li>1.In Memory<br>-无法处理进程Crash、机器宕机等情况,会导致数据丢失。  </li>
+<li>2.Persistent Queue In Disk<br>-可处理进程Crash等情况,保证数据不丢失。<br>-保证数据至少消费一次。<br>-充当缓冲区,类似于kafaka消息队列，可以替代kafaka等消息队列的作用。  </li>
+</ol>
+<h4 id="3-2-Persistent-Queue容灾特性"><a href="#3-2-Persistent-Queue容灾特性" class="headerlink" title="3.2 Persistent Queue容灾特性"></a>3.2 Persistent Queue容灾特性</h4><ol>
+<li>1.数据从Input后到达PQ(Persistent Queue)、然后数据会在DISK上一个备份、然后DISK通知PQ我已经收到这个数据了。并返回给Input、之后数据就会到Filter/Output、然后Output收到数据并推送出去之后发送消息给PQ(ack)、然后通知DISKs删除数据。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/85.png" alt="">  </li>
+</ol>
+<h4 id="3-3-PQ性能分析"><a href="#3-3-PQ性能分析" class="headerlink" title="3.3 PQ性能分析"></a>3.3 PQ性能分析</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/86.png" alt=""> </p>
+<p>从上面可以知道,PQ比memory性能相差不大  </p>
+<h4 id="3-4-PQ基本配置"><a href="#3-4-PQ基本配置" class="headerlink" title="3.4 PQ基本配置"></a>3.4 PQ基本配置</h4><p>我们可以设置queue的类型和数据存储。  </p>
+<ol>
+<li>1.queue.type:persisted  </li>
+<li>2.queue.max_bytest:4gb<br>-队列存储最大数据量  </li>
+</ol>
+<h3 id="4-线程简介"><a href="#4-线程简介" class="headerlink" title="4.线程简介"></a>4.线程简介</h3><p>在之前的架构中、logstash有哪些线程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/87.png" alt="">  </p>
+<p>我们一般进行logstash调优时候一般主要是对线程数进行调节。</p>
+<h4 id="4-1-线程相关配置"><a href="#4-1-线程相关配置" class="headerlink" title="4.1 线程相关配置"></a>4.1 线程相关配置</h4><ol>
+<li><p>1.pipeline.workers | -w<br>-pipeline线程数,即filter_output的处理线程数,默认是cpu核数。  </p>
+</li>
+<li><p>2.pipeline.batch.size | -b<br>-Batcher一次批量获取的待处理文档数,默认是125,可以根据输出进行调整,越大会占用越多的heap空间,可以通过jvm.options调整  </p>
+</li>
+<li>3.pipeline.batch.delay | -u<br>-Batcher等待的时长,单位为ms,默认是50ms  (在指定时间内还没有达到batcher的容联,也会把数据送给Filter/Output处理)  </li>
+</ol>
+<p>我们通过软件:VisualVM来查看JVM相关信息。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/88.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/89.png" alt=""><br>我们可以查看其线程数目:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/90.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/91.png" alt="">  </p>
+<h3 id="5-配置简介"><a href="#5-配置简介" class="headerlink" title="5.配置简介"></a>5.配置简介</h3><p>logstash配置文件分为两种，1种是logstash设置相关的配置文件、还有1种是pipeline配置文件。  </p>
+<ol>
+<li><p>1.logstash设置相关的配置文件(在conf文件夹中,setting files)<br>-logstash.yml:logstash相关配置,比如node.name、path.data、pipeline.workers、queue.type等、这其中的配置可以被命令行参数中的相关参数覆盖<br>-jvm.options:修改jvm的相关参数,比如修改heap size等。  </p>
+</li>
+<li><p>2.pipeline配置文件<br>-定义数据处理流程的文件,以.conf结尾。  </p>
+</li>
+</ol>
 
       
     </div>
