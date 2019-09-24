@@ -232,7 +232,50 @@
 <li><p>2.pipeline配置文件<br>-定义数据处理流程的文件,以.conf结尾。  </p>
 </li>
 </ol>
-
+<h4 id="5-1-logstash-yml"><a href="#5-1-logstash-yml" class="headerlink" title="5.1 logstash.yml"></a>5.1 logstash.yml</h4><ol>
+<li>1.使用yaml语法、支持如下两种形式:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/92.png" alt="">  </li>
+</ol>
+<h4 id="5-2-logstash-yml-常用配置项"><a href="#5-2-logstash-yml-常用配置项" class="headerlink" title="5.2 logstash.yml 常用配置项"></a>5.2 logstash.yml 常用配置项</h4><ol>
+<li><p>1.node.name<br>-节点名,便于识别，建议定义成有实际意义的    </p>
+</li>
+<li><p>2.path.data<br>-持久化存储数据的文件夹,默认是logstash home目录下的data  </p>
+</li>
+<li><p>3.path.config<br>-设定pipeline配置文件的目录  </p>
+</li>
+<li><p>4.path.log<br>-设定pipeline日志文件的目录  </p>
+</li>
+<li><p>5.pipeline.workers<br>-设定pipeline的线程数(filter+output),优化的常用项。  </p>
+</li>
+<li><p>6.pipeline.batcher.size/delay<br>-设定批量处理数据的数目和延迟  </p>
+</li>
+<li><p>7.queue.type<br>-设定队列类型,默认是memory  </p>
+</li>
+<li><p>8.queue.max_bytes<br>-队列总容量,默认是1g  </p>
+</li>
+</ol>
+<h4 id="5-3-logstash命令行配置项"><a href="#5-3-logstash命令行配置项" class="headerlink" title="5.3 logstash命令行配置项"></a>5.3 logstash命令行配置项</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/93.png" alt="">  </p>
+<p>-t用于校验：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/94.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/95.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/96.png" alt="">  </p>
+<h3 id="6-多实例运行方式"><a href="#6-多实例运行方式" class="headerlink" title="6.多实例运行方式"></a>6.多实例运行方式</h3><p>接下来我们看一下在一台机器上运行多个logstash实例。挂件配置就是path.settings,让logstash加载不同的logstash配置路径。   </p>
+<ol>
+<li>1.bin/logstash –path.settings instance1   </li>
+<li>2.bin/logstash –path.settings instance2  </li>
+<li>3.不同的instance中修改logstash.yml,自定义path.data，确保其不相同即可。(注意:不同的实例一定要配置不同的path.data,因为一个path.data实例只能被一个实例使用，如果logstash发现此目录已经被其他使用将会启用失败)  </li>
+</ol>
+<p>实际操作如下：我们进入logstash的config文件夹，里面有如下配置：里面有5个和settingfiles相关文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/97.png" alt=""> </p>
+<p>比如我们需要启用实例2:instance2  </p>
+<ol>
+<li>1.赋值一份config文件  </li>
+<li><p>2.修改配置文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/98.png" alt="">  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">node.name test2  </div><div class="line">path.data instance2 //没有跟绝对路径,则会在logstash的hone目录创建此目录  </div><div class="line">path.config imooc/codec.conf //设置pipeline的路径</div></pre></td></tr></table></figure>
+</li>
+<li><p>3.查看pipeline的配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/99.png" alt="">  </p>
+</li>
+<li><p>4.启动实例后的结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/100.png" alt=""></p>
+</li>
+</ol>
+<h3 id="7-pipeline配置简介"><a href="#7-pipeline配置简介" class="headerlink" title="7.pipeline配置简介"></a>7.pipeline配置简介</h3>
       
     </div>
     <div class="article-info article-info-index">
