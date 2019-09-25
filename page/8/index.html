@@ -152,6 +152,67 @@
       <div class="body-wrap">
         
   
+    <article id="post-work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/10/17/work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案/">work(1)-部署项目时出现：Error configuring application listener of class org.springframework.web.context.解决方案</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>福州做保险项目时候,运用到监控项目,由于项目是比较老的spring2.0项目,之前项目一直是在jdk1.6环境下正常运行,但是在保险项目需要在jdk1.7下运行,但是一直报错</li>
+<li><p>错误:  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Error configuring application listener of class org.springframework.web.context.org.springframework.web.util.Log4jConfigListener</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><ol>
+<li><p>查了很多资料,网上大部分人说是缺少jar包:spring-web.jar 但是导入了jar包和更新了spring保本  还是报一样的作物,后面找到以下资料解决:<br><a href="https://blog.csdn.net/zouke314/article/details/72465772" target="_blank" rel="external">解决连接</a></p>
+</li>
+<li><p>解决方法如:右键点击项目选择properties，进入后找到deployment assembly，查看右边列表，如果没有maven dependency，那么点击add，然后点击Java build path entries，点击next，添加即可。</p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/10/17/work-1-部署项目时出现：Error-configuring-application-listener-of-class-org-springframework-web-context-解决方案/" class="archive-article-date">
+  	<time datetime="2018-10-17T08:42:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-10-17</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-zyzx-52-SpringBoot项目在idea目录下不正产展示" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1060,257 +1121,6 @@ goodguy = user:delete:zhangsan
 
 
   
-    <article id="post-zyzx-54-全文搜索概述" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/25/zyzx-54-全文搜索概述/">zyzx(54)-全文搜索概述</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>场景:<br>1.一般我们在浏览器中使用搜索引擎搜索问题<br>2.我们查询关系型数据库时候,本身也是搜索过程,根据sql语句,数据库把搜索到的结果返回给查询结果集  </p>
-<p>主要内容:<br>1.全文搜索<br>2.全文搜索产品(ElasticSearch简介)<br>3.ElasticSearch核心概念<br>4.ElasticSearch与SpringBoot集成<br>5.ElasticSearch实战  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-全文搜索"><a href="#1-全文搜索" class="headerlink" title="1.全文搜索"></a>1.全文搜索</h5><h6 id="1-1数据结构"><a href="#1-1数据结构" class="headerlink" title="1.1数据结构"></a>1.1数据结构</h6><ol>
-<li>结构化：指具有固定格式或有限长度的数据,如数据库,元数据等,(见得最多的就是每次我们创建数据库时候需要制定数据的格式和长度)  </li>
-<li>非结构化:指不定长或者无固定格式的数据,如:邮件,word文档等。  </li>
-</ol>
-<p>结构化的数据查询一般来说我们都是比较熟悉的,但是对于非结构化的数据,我们如何查询呢？  </p>
-<h6 id="1-2-非结构化数据的检索"><a href="#1-2-非结构化数据的检索" class="headerlink" title="1.2 非结构化数据的检索"></a>1.2 非结构化数据的检索</h6><p>1.顺序扫描法(Serial Scanning)<br>比如在文档里面查找字符串,就是从头到尾找此字符串,直到找到为止(类似从字典里面查找某一个字的时候,我们从头到尾的找),这种方法对于数据量小的数据量,效率很高,但是数据量很大,就会很慢,那么大文件数据用哪种搜索法比较好呢?</p>
-<p>2.全文搜索(Full-text Search)<br>对于数据量比较大的时候,此方法合适<br>全文搜索:就是把非结构化的部分信息提取出来重新进行组织,使其变得有结构,对有结构的数据进行搜索,从而达到搜索相对较快的目的</p>
-<p>非结构化数据的检索其实就是把非结构化的数据组织成结构化数据,然后创建索引,来实现搜索目的.</p>
-<p>索引:从非结构化数据中部分提取出的结构化数据  </p>
-<p>比如字典:里面有很多汉字,那么如何找到其中的一个汉字,全文搜索就是替每一个汉字都建立起一套规则,汉字的拼音 就是索引</p>
-<h6 id="1-3-全文搜索概念"><a href="#1-3-全文搜索概念" class="headerlink" title="1.3 全文搜索概念"></a>1.3 全文搜索概念</h6><p>全文搜索概念:全文搜索是一种将文件中所有文本与搜索 项匹配的文字资料检索方法</p>
-<h6 id="1-4-全文搜索实现原理"><a href="#1-4-全文搜索实现原理" class="headerlink" title="1.4 全文搜索实现原理"></a>1.4 全文搜索实现原理</h6><p>以从字典中搜索出汉字为例:<br>建立文本库:建立要搜索的数据源<br>建立索引:提取结构化数据<br>执行搜索:进行搜索,结果返回给用户<br>过滤结果:将返回结果给用户时候,有很多种结果,在一个页面里面不可能全部展现出现,应该分页展示<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/49.png" alt=""> </p>
-<h6 id="1-5-全文搜索实现技术"><a href="#1-5-全文搜索实现技术" class="headerlink" title="1.5 全文搜索实现技术"></a>1.5 全文搜索实现技术</h6><p>基于Java的开源实现<br>1.Lucene:基于全文搜索的引擎<br>2.ElasticSearch:基于Lucene之上的全文搜索<br>3.Solr:与ElasticSearch同类型的产品,也是基于Lucene的</p>
-<p>以车为例:Lucene其实就是车的发动机,对于具体什么车,ElasticSearch和Solr就是具体的车:比如奥迪,大众,可能用到了同一个引擎(Lucene)  </p>
-<p>ElasticSearch与Solr区别:<br>1.Solr在分布式管理上:利用了zookeper进行分布式,并且支持很多种数据格式:比如xml，json,csv,在传统业务上要好于Solr，但是在实时性处理要低ElasticSearch<br>2.ElasticSearch自带分布式,格式只支持json来提供restful接口<br>3.在目前市场上:ElasticSearch主流些,用的比较多</p>
-<h5 id="2-全文搜索产品-ElasticSearch简介"><a href="#2-全文搜索产品-ElasticSearch简介" class="headerlink" title="2.全文搜索产品(ElasticSearch简介)"></a>2.全文搜索产品(ElasticSearch简介)</h5><p>ElasticSearch是什么?  </p>
-<ol>
-<li>高度可扩展的开源全文搜索和分析引擎(不单单是搜索,还提供很多分析功能)   </li>
-<li>快速地,近实时地对大数据进行存储,搜索和分析  </li>
-<li>用来支撑有复杂的数据搜索需求的企业级应用  <h6 id="2-1-ElasticSearch特点"><a href="#2-1-ElasticSearch特点" class="headerlink" title="2.1 ElasticSearch特点"></a>2.1 ElasticSearch特点</h6></li>
-<li>分布式:分布式搜索引擎,每个索引实现分片,每个分片,有很多副本数据分不到多个分片上  </li>
-<li>高可用:正因为是分布式造就了高可用,单应用崩溃爱概率比较大  </li>
-<li>多类型:支持多种数据类型  </li>
-<li>多API:支持java原始api,也支持restful结构类型的API  </li>
-<li>面向文档:不需要事先定义一些模式  </li>
-<li>异步写入:性能比同步更高</li>
-<li>近实时:实时性好</li>
-<li>基于lucene</li>
-<li>Apache协议  </li>
-</ol>
-<h5 id="3-ElasticSearch核心概念"><a href="#3-ElasticSearch核心概念" class="headerlink" title="3.ElasticSearch核心概念"></a>3.ElasticSearch核心概念</h5><ol>
-<li>近实时:近实时是接近实时,但是不是实时，从搜索文档,到可搜索有一个轻微延时,大概是1秒,为什么会有这轻微延时呢？Lucene其实是可以做到这真实的实时的,但是如果做到实时,要么是牺牲索引,每次搜索 都得刷新数据,要么是牺牲查询的效率,每次查询都得做一个刷新,所以做了一个折中,每个n秒做一个刷新  </li>
-<li>集群:一个或者多个节点的集合,保存应用全部数据,并提供全部数据的索引和集成的数据,每个集群都要有一个名称,默认是ElasticSearch名称</li>
-<li>节点:集群中的单台服务器,保存数据,参与整个集群的索引和搜索操作  </li>
-<li>索引:加快搜索,文档得集合  </li>
-<li>类型：索引中包含文档得细分  </li>
-<li>文档:进行索引的基本单位,与索引中的类型是对应的，文档对应于结构化数据的实体,文档得实例对应于实体的实例,也就是具体的数据。  </li>
-<li>分片:ES把索引分片,然后用分片来存储部分数据   </li>
-<li>副本:分片可以设置各自副本,设置副本目的：故障不可避免,为了是系统高可用,我们需要副本,放到多节点上   </li>
-</ol>
-<h5 id="4-ElasticSearch与SpringBoot集成"><a href="#4-ElasticSearch与SpringBoot集成" class="headerlink" title="4.ElasticSearch与SpringBoot集成"></a>4.ElasticSearch与SpringBoot集成</h5><h6 id="4-1-配置环境"><a href="#4-1-配置环境" class="headerlink" title="4.1.配置环境"></a>4.1.配置环境</h6><ol>
-<li>ElasticSearch 2.4.4</li>
-<li>Spring Data ElasticSearch 2.1.3RELEASE  </li>
-<li><p>JNA 4.3.0(访问操作系统原生应用)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/50.png" alt=""></p>
-<h6 id="4-2-添加依赖"><a href="#4-2-添加依赖" class="headerlink" title="4.2 添加依赖"></a>4.2 添加依赖</h6><pre><code>&lt;!--elasticsearch--&gt;
- &lt;dependency&gt;
-     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-     &lt;artifactId&gt;spring-boot-starter-data-elasticsearch&lt;/artifactId&gt;
- &lt;/dependency&gt;
-
- &lt;!--jna--&gt;
- &lt;dependency&gt;
-     &lt;groupId&gt;net.java.dev.jna&lt;/groupId&gt;
-     &lt;artifactId&gt;jna&lt;/artifactId&gt;
-     &lt;version&gt;4.3.0&lt;/version&gt;
- &lt;/dependency&gt;
-</code></pre></li>
-</ol>
-<h5 id="5-ElasticSearch实战"><a href="#5-ElasticSearch实战" class="headerlink" title="5.ElasticSearch实战"></a>5.ElasticSearch实战</h5><h6 id="1-修改application-properties"><a href="#1-修改application-properties" class="headerlink" title="1.修改application.properties"></a>1.修改application.properties</h6><pre><code># 内嵌 Elasticsearch 实例。默认存储位置是工作目录的 elastic 目录
-spring.data.elasticsearch.properties.path.home=target/elastic
-spring.data.elasticsearch.properties.transport.tcp.connect_timeout=120s
-</code></pre><h6 id="2-后台编码"><a href="#2-后台编码" class="headerlink" title="2.后台编码"></a>2.后台编码</h6><p>####### 1.文档EsBlog<br> ES中id不是我们普通所指的Long类型的id,而是String类型id  </p>
-<pre><code>@Document(indexName = &quot;blog&quot;,type = &quot;blog&quot;)//标识是一个文档:indexName 索引名称
-public class EsBlog implements Serializable{
-private static final long serialVersionUID = 1L;
-/**
- * Es主键是String类型的
- */
-@Id //标识是主键
-private String id;
-/**
- * 标题
- */
-private String title;
-/**
- * 摘要
- */
-private  String summary;
-/**
- * 内容
- */
-private  String content;
-
-protected EsBlog(){//JPA规范要求,防止直接使用
-
-}
-public EsBlog(String title,String summary,String content){
-  this.title = title;
-  this.summary = summary;
-  this.content = content;
-}
-
-public String getId() {
-    return id;
-}
-
-public void setId(String id) {
-    this.id = id;
-}
-
-public String getTitle() {
-    return title;
-}
-
-public void setTitle(String title) {
-    this.title = title;
-}
-
-public String getSummary() {
-    return summary;
-}
-
-public void setSummary(String summary) {
-    this.summary = summary;
-}
-
-public String getContent() {
-    return content;
-}
-
-public void setContent(String content) {
-    this.content = content;
-}
-
-@Override
-public String toString() {
-    return &quot;EsBlog{&quot; +
-            &quot;id=&apos;&quot; + id + &apos;\&apos;&apos; +
-            &quot;, title=&apos;&quot; + title + &apos;\&apos;&apos; +
-            &quot;, summary=&apos;&quot; + summary + &apos;\&apos;&apos; +
-            &quot;, content=&apos;&quot; + content + &apos;\&apos;&apos; +
-            &apos;}&apos;;
-   }
-}
-</code></pre><p>####### 2.资源库 EsBlogRepository<br>定义一个方法:只从title,summary,content里面取搜索,只需要有一个地方搜索到,就返回此结果  </p>
-<pre><code>public interface EsBlogRepository extends ElasticsearchRepository&lt;EsBlog,String&gt;{
-Page&lt;EsBlog&gt; findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(String title,String summary,String content,Pageable pageable);
-}
-</code></pre><p>####### 3.资源库测试用例 EsBlogRepositoryTest  </p>
-<pre><code>/**
- * 测试
- */
-@RunWith(SpringRunner.class)
-@SpringBootTest
-public class EsBlogRepositoryTest {
-
-@Autowired
-private EsBlogRepository esBlogRepository;
-
-@Before//before表明在Test初始化之前执行的动作
-public void initRepositoryData(){
-    //清除所有数据
-    esBlogRepository.deleteAll();
-
-    //创建初始化数据
-    esBlogRepository.save(new EsBlog(&quot;登鹳雀楼&quot;,&quot;王之涣的登鹳雀楼&quot;,&quot;白日依山尽,黄河入海流,欲穷千里目,更能上一层楼&quot;));
-    esBlogRepository.save(new EsBlog(&quot;相思&quot;,&quot;王维的相思&quot;,&quot;红豆生南国,春来发几枝,援军多采洁,此物最相思&quot;));
-    esBlogRepository.save(new EsBlog(&quot;静夜思&quot;,&quot;李白的静夜思&quot;,&quot;床前明月光,疑是地上霜,举头望明月,低头思故乡&quot;));
-
-}
-
-@Test
-public void testFindDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(){
-    //查询20条数据
-    Pageable pageable = new PageRequest(0, 20);
-    String titile = &quot;思&quot;;
-    String summary = &quot;相思&quot;;
-    String content = &quot;相思&quot;;
-
-    Page&lt;EsBlog&gt; page = esBlogRepository.findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(titile, summary, content, pageable);
-
-    System.out.println(&quot;------------start&quot;);
-    for (EsBlog esBlog:page) {
-        System.out.println(esBlog.toString());
-    }
-    System.out.println(&quot;------------end&quot;);
-  }
-}
-</code></pre><p>测试前先启动Es:<br>切换到bin的目录下,点击elasticsearch.bat  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/06/1.png" alt=""></p>
-<p>####### 4.BlogController(控制器)  </p>
-<pre><code>@RestController
-@RequestMapping(&quot;/blogs&quot;)
-public class EsBlogController {
-@Autowired
-private EsBlogRepository esBlogRepository;
-@GetMapping
-public List&lt;EsBlog&gt; list(@RequestParam(value=&quot;title&quot;,required=false,defaultValue=&quot;&quot;) String title,
-                         @RequestParam(value=&quot;summary&quot;,required=false,defaultValue=&quot;&quot;) String summary,
-                         @RequestParam(value=&quot;content&quot;,required=false,defaultValue=&quot;&quot;) String content,
-                         @RequestParam(value=&quot;pageIndex&quot;,required=false,defaultValue=&quot;0&quot;) int pageIndex,
-                         @RequestParam(value=&quot;pageSize&quot;,required=false,defaultValue=&quot;10&quot;) int pageSize) {
-    // 数据在 Test 里面先初始化了，这里只管取数据
-    Pageable pageable = new PageRequest(pageIndex, pageSize);
-    Page&lt;EsBlog&gt; page = esBlogRepository.findDistinctEsBlogByTitleContainingOrSummaryContainingOrContentContaining(title,summary,content,pageable);
-    return page.getContent();
-   }
-}
-</code></pre><p>测试: </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/06/2.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/25/zyzx-54-全文搜索概述/" class="archive-article-date">
-  	<time datetime="2018-05-24T16:40:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/51/">51</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
@@ -1376,7 +1186,7 @@ public List&lt;EsBlog&gt; list(@RequestParam(value=&quot;title&quot;,required=fa
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 14.74px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.79px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.53px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.79px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.32px;">websocket</a> <a href="/tags/work/" style="font-size: 15.26px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.32px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 10.56px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
