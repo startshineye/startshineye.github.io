@@ -229,6 +229,55 @@
 <li><p>10.计算机内存分布情况如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/19.png" alt=""><br>a.低位内存方便管理又进行了分片:最低位的 代码段(c语言代码-函数编译之后存到磁盘,一旦运行此程序后,代码编译后的二进制数据加载到内存中,此部分内存就是代码段)。<br>b.声明的一些全局变量或者声明的一些常量:const int i;int global;这些存放到数据段。<br>c.一般数据段内存地址编号通常会比代码段内存大小要大,代码段和数据段都是我们操作系统预先规划好的，不管有多少应用程序,代码段和程序段都是在低位的。<br>d.中间绿色区域为:自由可以分配的内存。此区域越大调用的资源就越多。<br>e.除了以上内存外:计算机还有堆内存、栈内存。    </p>
 </li>
 </ol>
+<h4 id="3-3-变量和指针的本质"><a href="#3-3-变量和指针的本质" class="headerlink" title="3.3 变量和指针的本质"></a>3.3 变量和指针的本质</h4><ol>
+<li><p>1.编写以下代码:求长方形/正方形面积  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">   #include&lt;stdio.h&gt;</div><div class="line">int global=0;</div><div class="line">int rect(int a,int b)&#123;</div><div class="line">  static int count=0;</div><div class="line">  count++;</div><div class="line">  global++;</div><div class="line">  int s=a*b;</div><div class="line">  return s;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int quadrate(int a)&#123;</div><div class="line">  static int count=0;</div><div class="line">  count++;</div><div class="line">  global++;</div><div class="line">  int s = rect(a,a);</div><div class="line">  return s;</div><div class="line">&#125;</div><div class="line"></div><div class="line">int main()&#123;</div><div class="line"> int a=3;</div><div class="line"> int b=4;</div><div class="line"> int *pa=&amp;a;</div><div class="line"> int *pb=&amp;b;</div><div class="line"> int *pglobal = &amp;global;</div><div class="line"> int (*pquadrate)(int a)=&amp;quadrate;</div><div class="line"> int s=quadrate(a);</div><div class="line"> printf(&quot;%d\n&quot;,s);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.编译gdb调试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/20.png" alt="">  </p>
+</li>
+</ol>
+<p>a.上面输入l展示出了源代码,说明咱们的源代码已经关联上了。<br>b.start指令开始调试,一开始是进入main.c的main函数,从上面可知起始为: main () at main.c:20<br>c.我们之所以可以被调试,是因为我们源代码编译后成为了机器码,计算机就能够识别这种代码,运行时候,这些机器码已经加载到了我们的内存中。他被保存到我们的代码段。<br>d.代码段在哪里呢?由上一节的图形可以知道,我们的代码段在低地址位的内存中<br>e.以上程序指令:int a=3; int b=4;int *pa=&a;在内存里面。既然在内存里面，那么也有一个地址,不过c语言语法是不允许我们直接操作代码段的。但是其实代码段也是有地址的。我们调试时候每一步执行的动作后程序执行到哪一行都有一个记录。实际上除了代码编译后存在代码段以外。函数的其他信息,函数的执行状态(比如:当前调用哪个函数、当前调用的函数运行到了多少行、并且这个函数中有哪些变量,这些变量的值是什么?)也会有记录,这个记录的地方就是在“栈”。栈在我们的高地址端。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/21.png" alt=""><br>f.a里面的值是3,b里面的值是4,这些信息都是被我们的栈内存记录下来了,他记录在内存的什么地方呢?我们可以通过取地址符打印出来:p &amp;a<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/22.png" alt=""><br>对比我们之前的内存地址表:0x7fffffffe468就是a的实际地址。</p>
+<h5 id="3-3-1-变量的本质"><a href="#3-3-1-变量的本质" class="headerlink" title="3.3.1 变量的本质"></a>3.3.1 变量的本质</h5><p>变量的本质就是内存,变量名它只是一个代号。   </p>
+<ol>
+<li>1.a变量当main函数被调用的时候、通过栈内存空间来保存我们这个a,a只是一个代号,代表了0x7fffffffe468内存空间而已。</li>
+<li>2.我们写程序时候,计算机处理的都是二进制的数据。而我们的二进制数据肯定是存在内存里面cpu才能取出来。cpu从内存中取数据,那么cpu必须知道从哪个内存中取数据。而变量就起到了一个表示作用,用来告诉我们cpu要从什么地方去取数据。或者把数据写到什么地方去。  <h5 id="3-3-2-指针的本质"><a href="#3-3-2-指针的本质" class="headerlink" title="3.3.2 指针的本质"></a>3.3.2 指针的本质</h5></li>
+<li>1.c语言中所有的变量都有类型;int 类型就保存整数,double类型就保存的双精度的浮点数,指针他也是一种类型,他保存的就是内存的地址。</li>
+<li>2.指针本质上就是地址。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/23.png" alt=""> </li>
+</ol>
+<h4 id="3-4-操作系统对内存管理"><a href="#3-4-操作系统对内存管理" class="headerlink" title="3.4 操作系统对内存管理"></a>3.4 操作系统对内存管理</h4><p>我们的操作系统到底是如何来管理我们的内存的,gcc编译器对我们的源代码<br>编译之后所做的优化。</p>
+<ol>
+<li>1.代码段:我们的函数也会加载到内存,加载到内存之后也会占用内存空间,内存空间大小其实是可以计算出来的。下面是我们的代码段内存地址：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/24.png" alt="">  </li>
+<li>2.数据段:数据段存放全局变量常量的内存地址,如下表名,数据段地址比代码段地址大<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/25.png" alt="">  </li>
+<li>3.有下面的地址我们知道:整形a,b,s的地址是连续的,但是是占用4个字节的,这是由于gcc对我们代码进行了优化,把同一类型的数据地址分配到一起,而和我们代码中定义变量的先后是没有关系的,因为我们代码运行时候才会分配内存地址,让cpu查找,而在运行的时候是没法修改内存的地址的。<br>在64位操作系统中指针是占用8个字节<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/26.png" alt="">  <h4 id="3-5-函数栈以及数据段内存"><a href="#3-5-函数栈以及数据段内存" class="headerlink" title="3.5 函数栈以及数据段内存"></a>3.5 函数栈以及数据段内存</h4></li>
+<li>1.代码段,数据段内存分配是从下往上分配,内存地址越来越大,栈恰好相反,我们并不知道我们的函数会被调用多少个栈?所以最先分配的栈地址反而最大。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/27.png" alt=""><br>从栈顶往下分配的。 堆:后进先出。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/28.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/29.png" alt="">  </p>
+<ol>
+<li>2.我们发现在栈0-rect函数和栈1-quadrate函数里面里面静态变量count的地址是不一样的,两个函数里面的count++不会影响到另一个函数。</li>
+<li>3.全局变量时候,rect函数和quadrate函数有自己的栈,但是他们对应的全局变量global有同一个地址。指向同一个地址,那么在任何一个栈中,只要修改了值,那么在另一个函数中也会修改相应的值。  </li>
+<li>4.上面的静态变量的地址比较小,而我们的栈的地址比较大,也说明了我们的静态变量不在我们的栈中，而是在数据段中。(静态变量、常量、全局变量默认都在数据段中)</li>
+</ol>
+<h4 id="3-6-函数栈以及数据段内存函数指针与指针指向的数据访问"><a href="#3-6-函数栈以及数据段内存函数指针与指针指向的数据访问" class="headerlink" title="3.6 函数栈以及数据段内存函数指针与指针指向的数据访问"></a>3.6 函数栈以及数据段内存函数指针与指针指向的数据访问</h4><ol>
+<li><p>1.我们修改代码如下:pquadrate代表指针-其地址是quadrate地址,*代表的是地址里面的内容。    </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">       int main()&#123;</div><div class="line"> int a=3;</div><div class="line"> int b=4;</div><div class="line"> int *pa=&amp;a;</div><div class="line"> int *pb=&amp;b;</div><div class="line"> int *pglobal = &amp;global;</div><div class="line"> int (*pquadrate)(int a)=&amp;quadrate;</div><div class="line"> //int s=quadrate(a);</div><div class="line"> int s = (*pquadrate)(a);</div><div class="line"> printf(&quot;%d\n&quot;,s);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.修改代码后重新编译：gcc -g main.c  </p>
+</li>
+<li><p>3.调试运行:gdb ./a.out<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/30.png" alt=""><br>a.我们发现main中25行也是一个函数指针。27行是函数指针的调用,我们通过s也可以进入调试,说明函数指针也可以调用一个函数。    </p>
+</li>
+<li><p>1.任何一个指针:仅仅写指针变量名称的话指的是:这个变量所在的地址。但是如果希望找到这个地址里面的东西的话，我们就在前面加一个”*”;</p>
+</li>
+</ol>
+<h3 id="4-字符串与数组"><a href="#4-字符串与数组" class="headerlink" title="4.字符串与数组"></a>4.字符串与数组</h3><p>数组在内存中的排列、指针的运算、字符串与数组字符的关系</p>
+<h4 id="4-1-数组申明的内存排列"><a href="#4-1-数组申明的内存排列" class="headerlink" title="4.1 数组申明的内存排列"></a>4.1 数组申明的内存排列</h4><ol>
+<li><p>1.代码如下:  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">         #include&lt;stdio.h&gt;</div><div class="line">      int main()&#123;</div><div class="line">   int a=3;</div><div class="line">   int b=2;</div><div class="line">   int array[3];</div><div class="line">   array[0]=1;</div><div class="line">   array[1]=10;</div><div class="line">   array[2]=100;</div><div class="line">   int *p = &amp;a;</div><div class="line">   int i;</div><div class="line">   for(i=0;i&lt;6;i++)&#123;</div><div class="line">      printf(&quot;*p=%d\n&quot;,*p);</div><div class="line">      p++;</div><div class="line">   &#125;</div><div class="line">   printf(&quot;------------------------------\n&quot;);</div><div class="line">   p=&amp;a;</div><div class="line">   for(i=0;i&lt;6;i++)&#123;</div><div class="line">      printf(&quot;p[%d]=%d\n&quot;,i,p[i]);</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.打印出对应的值p<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/31.png" alt="">  </p>
+</li>
+<li><p>3.有时候我们一个一个用p去查看某一个变量的地址是很慢的,所以我们可以使用:x/3d 0x7fffffffe47c(从内存地址:0x7fffffffe47c读取内容,d表示以十进制输出具体的值,3表示输出3个单位)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/32.png" alt="">  </p>
+</li>
+</ol>
 
       
     </div>
