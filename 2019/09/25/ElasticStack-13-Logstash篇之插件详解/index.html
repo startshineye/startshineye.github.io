@@ -49,7 +49,23 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/51.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/52.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/53.png">
-<meta property="og:updated_time" content="2019-10-09T15:17:19.685Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/54.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/55.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/56.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/57.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/58.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/59.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/60.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/61.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/62.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/63.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/64.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/65.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/66.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/67.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/68.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/10/69.png">
+<meta property="og:updated_time" content="2019-10-13T01:45:52.609Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ElasticStack-13-Logstash篇之插件详解">
 <meta name="twitter:description" content="本章会详细介绍 Input、Filter、Ouput 以及 Codec 插件 的作用和相关配置，让大家了解常见相关插件的使用场景和效果，以及如何合理选择各个插件来实现自己的业务需求。
@@ -286,9 +302,43 @@
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/51.png" alt="">  </p>
 <ol>
 <li>7.dissect可以自动处理空的匹配值<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/52.png" alt="">  </li>
-<li>8.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/53.png" alt="">  </li>
+<li>8.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/53.png" alt=""> </li>
+<li>9.dissect分割后的字段都是字符串,可以使用 convert_datatype属性进行类型转换。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/54.png" alt="">  </li>
 </ol>
-<h3 id="7-filter插件之mutate-讲解"><a href="#7-filter插件之mutate-讲解" class="headerlink" title="7 filter插件之mutate 讲解"></a>7 filter插件之mutate 讲解</h3><h3 id="8-filter插件之-json讲解"><a href="#8-filter插件之-json讲解" class="headerlink" title="8 filter插件之 json讲解"></a>8 filter插件之 json讲解</h3><h3 id="9-filter-插件之geoip和ruby讲解"><a href="#9-filter-插件之geoip和ruby讲解" class="headerlink" title="9 filter 插件之geoip和ruby讲解"></a>9 filter 插件之geoip和ruby讲解</h3><h3 id="10-output插件简介"><a href="#10-output插件简介" class="headerlink" title="10 output插件简介"></a>10 output插件简介</h3><h3 id="11-文档说明"><a href="#11-文档说明" class="headerlink" title="11 文档说明"></a>11 文档说明</h3>
+<h3 id="7-filter插件之mutate-讲解"><a href="#7-filter插件之mutate-讲解" class="headerlink" title="7 filter插件之mutate 讲解"></a>7 filter插件之mutate 讲解</h3><ol>
+<li>1.mutate是使用最频繁的操作,可以对字段进行各种操作,比如:重命名、删除、替换、更新等,主要操作如下:<br>-convert类型转换<br>-gsub字符串替换<br>-split/join/merge字符串切割、数组合并为字符串、数组合并为数组<br>-rename字段重命名<br>-update/replace字段内容更新或替换<br>-remove_field删除字段 </li>
+</ol>
+<h4 id="7-1-convert"><a href="#7-1-convert" class="headerlink" title="7.1  convert"></a>7.1  convert</h4><ol>
+<li><p>1.实现字段类型的转换,类似hash(例如：convert=&gt;{“age”=&gt;”integer”),仅支持转换为integer、float、string和boolean<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/55.png" alt="">  </p>
+</li>
+<li><p>2.实例:<br>a.在filter配置文件中添加：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/56.png" alt=""><br>b.使用Insomnia进行请求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/57.png" alt=""><br>c.结果输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/58.png" alt="">  </p>
+</li>
+</ol>
+<h4 id="7-2-gsub"><a href="#7-2-gsub" class="headerlink" title="7.2  gsub"></a>7.2  gsub</h4><ol>
+<li><p>1.对字段内容进行替换，类似为数组,每3项为一个替换配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/59.png" alt=""><br>上面是将path的”/“替换成”_”;<br>urlparams里面的”[\?#-]”替换成”.”  </p>
+</li>
+<li><p>2.实例<br>a.在filter配置文件中添加:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/60.png" alt=""><br>b.使用Insomnia进行请求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/61.png" alt=""><br>c.结果输出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/62.png" alt=""></p>
+</li>
+</ol>
+<h4 id="7-2-split-join-merge"><a href="#7-2-split-join-merge" class="headerlink" title="7.2  split/join/merge"></a>7.2  split/join/merge</h4><ol>
+<li>1.splite将字符串切割为数组<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/63.png" alt=""><br>以上将字符串jobs以”,”进行切割。 </li>
+<li>2.join将数组拼接为字符串<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/64.png" alt="">  </li>
+<li>3.merge将两个数组合并为1个数组,字符串会被转为1个元素的数组进行操作<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/65.png" alt="">  </li>
+</ol>
+<h4 id="7-3-rename"><a href="#7-3-rename" class="headerlink" title="7.3  rename"></a>7.3  rename</h4><ol>
+<li>1.将字段重命名<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/66.png" alt=""><br>以上将前面字段名字改成后面名字。  <h4 id="7-4-update-replace"><a href="#7-4-update-replace" class="headerlink" title="7.4  update/replace"></a>7.4  update/replace</h4></li>
+<li>1.更新字段内容,区别在于update只在字段存在时生效,而replace在字段不存在时会执行新增字段的操作<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/67.png" alt="">  </li>
+</ol>
+<h4 id="7-5-remove-field"><a href="#7-5-remove-field" class="headerlink" title="7.5 remove_field"></a>7.5 remove_field</h4><ol>
+<li>1.删除字段<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/68.png" alt="">  </li>
+</ol>
+<h3 id="8-filter插件之-json讲解"><a href="#8-filter插件之-json讲解" class="headerlink" title="8 filter插件之 json讲解"></a>8 filter插件之 json讲解</h3><ol>
+<li><p>1.将字段内容为json格式的数据进行解析<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/69.png" alt=""><br>message实际内容为一个json字符串,我们想把json字符串的每一个字段都解析出来就用到json plugin  </p>
+</li>
+<li><p>2.实例<br>a.source为传过来的message</p>
+</li>
+</ol>
+<h3 id="9-filter-插件之geoip和ruby讲解"><a href="#9-filter-插件之geoip和ruby讲解" class="headerlink" title="9 filter 插件之geoip和ruby讲解"></a>9 filter 插件之geoip和ruby讲解</h3><h3 id="10-output插件简介"><a href="#10-output插件简介" class="headerlink" title="10 output插件简介"></a>10 output插件简介</h3><h3 id="11-文档说明"><a href="#11-文档说明" class="headerlink" title="11 文档说明"></a>11 文档说明</h3>
       
     </div>
     <div class="article-info article-info-index">
