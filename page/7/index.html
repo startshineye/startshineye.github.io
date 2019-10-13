@@ -152,6 +152,60 @@
       <div class="body-wrap">
         
   
+    <article id="post-java爬虫-9-打通爬虫项目的下载-解析-存储流程" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/07/java爬虫-9-打通爬虫项目的下载-解析-存储流程/">java爬虫-9-打通爬虫项目的下载,解析,存储流程</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>之前数据下载和解析都做完了 现在我们需要实现数据存储流程,实现数据存储流程,针对于不同的网站,我们有不同的存储策略,有的可能存储在HBase,有的可能存储在mysql,所以我们需要定义存储接口,然后下面有不同的实现。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-定义数据存储接口"><a href="#1-定义数据存储接口" class="headerlink" title="1.定义数据存储接口"></a>1.定义数据存储接口</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">public interface IStoreService &#123;</div><div class="line">public void store(Page page);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-定义一个控制台打印实现"><a href="#2-定义一个控制台打印实现" class="headerlink" title="2.定义一个控制台打印实现"></a>2.定义一个控制台打印实现</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">public class ConsoleStoreService implements IStoreService&#123;</div><div class="line">@Override</div><div class="line">public void store(Page page) &#123;</div><div class="line">   System.out.println(&quot;播放总数:&quot;+page.getAllNumber());</div><div class="line">   System.out.println(&quot;点赞数:&quot;+page.getSupportNumber());</div><div class="line">   System.out.println(&quot;评论数:&quot;+page.getCommitNumber());</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-启动类中实现"><a href="#3-启动类中实现" class="headerlink" title="3.启动类中实现"></a>3.启动类中实现</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div></pre></td><td class="code"><pre><div class="line">     public class StartDSJ &#123;</div><div class="line">    /**</div><div class="line">     * 定义下载成员变量</div><div class="line">     */</div><div class="line">    private IDownLoadService downLoadService;</div><div class="line">    private IProcessService processService;</div><div class="line">    private IStoreService storeService;</div><div class="line"></div><div class="line">    public static void main(String[] args) &#123;</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        //创建对象</div><div class="line">        StartDSJ dsj = new StartDSJ();</div><div class="line"></div><div class="line">        //定义是用哪个接口下载的,这里是httpClient</div><div class="line">        dsj.setDownLoadService(new HttpClientDownLoadSevice());</div><div class="line">        dsj.setProcessService(new YOUKUProcesService());</div><div class="line">        dsj.setStoreService(new ConsoleStoreService());</div><div class="line"></div><div class="line">        String url =&quot;http://list.youku.com/show/id_z9cd2277647d311e5b692.html?spm=a2htv.20005143.m13050845531.5~5~1~3~A&amp;from=y1.3-tv-index-2640-5143.40177.1-1&quot;;</div><div class="line">        //下载页面</div><div class="line">        Page page = dsj.downloadPage(url);</div><div class="line"></div><div class="line">        //解析页面</div><div class="line">        dsj.setProcessService(new YOUKUProcesService());</div><div class="line">        dsj.processPage(page);</div><div class="line"></div><div class="line">        //存储数据</div><div class="line">        dsj.storePage(page);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 下载页面</div><div class="line">     * @param url</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    public Page downloadPage(String url)&#123;</div><div class="line">       return this.downLoadService.download(url);</div><div class="line">    &#125;</div><div class="line">    /**</div><div class="line">     * 解析页面</div><div class="line">     * @param page</div><div class="line">     */</div><div class="line">    public void processPage(Page page)&#123;</div><div class="line">       this.processService.process(page);</div><div class="line">    &#125;</div><div class="line">    /**</div><div class="line">     * 存储数据</div><div class="line">     * @param page</div><div class="line">     */</div><div class="line">    public void storePage(Page page)&#123;</div><div class="line">        this.storeService.store(page);</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public IStoreService getStoreService() &#123;</div><div class="line">        return storeService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setStoreService(IStoreService storeService) &#123;</div><div class="line">        this.storeService = storeService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public IDownLoadService getDownLoadService() &#123;</div><div class="line">        return downLoadService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setDownLoadService(IDownLoadService downLoadService) &#123;</div><div class="line">        this.downLoadService = downLoadService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public IProcessService getProcessService() &#123;</div><div class="line">        return processService;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setProcessService(IProcessService processService) &#123;</div><div class="line">        this.processService = processService;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="4-项目结构"><a href="#4-项目结构" class="headerlink" title="4.项目结构"></a>4.项目结构</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/34.png" alt=""> </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/07/java爬虫-9-打通爬虫项目的下载-解析-存储流程/" class="archive-article-date">
+  	<time datetime="2018-11-07T01:10:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java爬虫-8-抽取网站规则模板-优化解析代码" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -692,91 +746,6 @@
 
 
   
-    <article id="post-c-50-多文件编程" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/03/c-50-多文件编程/">c-50-多文件编程</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>本节主要分为以下几点来讲<br>1.单文件编程改造成多文件编程<br>2.改造后的文件放入qt里面执行<br>3.调用函数时候,需要进行函数声明,但是多个文件都需要用a.c中定义的100个函数,难不成我们需要在各个需要引入的文件中各申明100次<br>4.头文件的作用及可以在头文件中直接定义函数吗？<br>5.同一个文件如何防止头文件重复包含(包含多次,只有一次生效)  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-单文件编程改造成多文件编程"><a href="#1-单文件编程改造成多文件编程" class="headerlink" title="1.单文件编程改造成多文件编程"></a>1.单文件编程改造成多文件编程</h5><p>实现一个计算字符串的方法,并在main方法中调用执行</p>
-<p>1.单文件代码</p>
-<p>   main.c</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">     #include&lt;stdio.h&gt;</div><div class="line">    int mystrLen(char str[]);</div><div class="line">    int main()&#123;</div><div class="line">   //实现功能:定义一个函数,用来实现字符串长度计算</div><div class="line">   printf(&quot;len=%d\n&quot;,mystrLen(&quot;012345678&quot;));</div><div class="line">   return 0;</div><div class="line">    &#125;</div><div class="line">    int mystrLen(char str[])&#123;</div><div class="line"> int i=0;</div><div class="line">//字符串是以&apos;\0&apos;结尾</div><div class="line"> while(str[i]!=&apos;\0&apos;)&#123;</div><div class="line">	i++;</div><div class="line"> &#125;</div><div class="line">   	return i;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>  编译:gcc main.c -o main<br>  运行:main.exe<br>  输出:len = 6  </p>
-<p>2.多文件<br>在同一个文件夹下:<br> main.c</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">#include&lt;stdio.h&gt;</div><div class="line">int mystrLen(char str[]);</div><div class="line">int main(int argc, char *argv[])&#123;</div><div class="line"> printf(&quot;len = %d\n&quot;,mystrLen(&quot;123456&quot;));</div><div class="line"> return 0;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><p>mystrLen.c</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">   int mystrLen(char str[])&#123;</div><div class="line">int i=0;</div><div class="line">while(str[i]!=&apos;\0&apos;)&#123;</div><div class="line">	i++;</div><div class="line">&#125;</div><div class="line"> return i;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>   编译:gcc main.c mystrLen.c -o test<br>   运行:test.exe<br>   输出:len = 6  </p>
-<h5 id="2-改造后的文件放入qt里面执行"><a href="#2-改造后的文件放入qt里面执行" class="headerlink" title="2.改造后的文件放入qt里面执行"></a>2.改造后的文件放入qt里面执行</h5><p>新建qt的c项目：参考:<a href="https://jingyan.baidu.com/article/3aed632ed680d770108091ba.html" target="_blank" rel="external">https://jingyan.baidu.com/article/3aed632ed680d770108091ba.html</a></p>
-<p>将文件拷贝到里面取,点击运行</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/1.png" alt="">  </p>
-<h5 id="3-调用函数时候-需要进行函数声明-但是多个文件都需要用a-c中定义的100个函数-难不成我们需要在各个需要引入的文件中各申明100次"><a href="#3-调用函数时候-需要进行函数声明-但是多个文件都需要用a-c中定义的100个函数-难不成我们需要在各个需要引入的文件中各申明100次" class="headerlink" title="3.调用函数时候,需要进行函数声明,但是多个文件都需要用a.c中定义的100个函数,难不成我们需要在各个需要引入的文件中各申明100次"></a>3.调用函数时候,需要进行函数声明,但是多个文件都需要用a.c中定义的100个函数,难不成我们需要在各个需要引入的文件中各申明100次</h5><ol>
-<li><p>函数只能定义一次,但是可以申明多次,如下:声明4次  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">    #include&lt;stdio.h&gt;</div><div class="line"> int mystrLen(char str[]);</div><div class="line"> int mystrLen(char str[]);</div><div class="line"> int mystrLen(char str[]);</div><div class="line"> int mystrLen(char str[]);</div><div class="line"> </div><div class="line"> int main()&#123;</div><div class="line">   //实现功能:定义一个函数,用来实现字符串长度计算</div><div class="line">   printf(&quot;len=%d\n&quot;,mystrLen(&quot;123456&quot;));</div><div class="line">   return 0;</div><div class="line"> &#125;</div><div class="line"> int mystrLen(char str[])&#123;</div><div class="line"> int i=0;</div><div class="line">//字符串是以&apos;\0&apos;结尾</div><div class="line"> while(str[i]!=&apos;\0&apos;)&#123;</div><div class="line">	i++;</div><div class="line"> &#125;</div><div class="line">	return i;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/2.png" alt=""></p>
-<ol>
-<li>们引入一个和函数所在文件夹名字一样,只是后缀为.h的文件来保存函数的申明<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/4.png" alt="">  </li>
-</ol>
-<h5 id="4-头文件的作用及可以在头文件中直接定义函数吗？"><a href="#4-头文件的作用及可以在头文件中直接定义函数吗？" class="headerlink" title="4.头文件的作用及可以在头文件中直接定义函数吗？"></a>4.头文件的作用及可以在头文件中直接定义函数吗？</h5><ol>
-<li>让我们先看一下预编译后生成的.i文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/5.png" alt=""><br>从上面我们可以看到,声明的头文件被编译成了函数.h文件里面的内容</li>
-</ol>
-<ol>
-<li>将函数定义写在.h文件里面,进行预编译生成.i文件如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/6.png" alt="">    </li>
-</ol>
-<h5 id="5-同一个文件如何防止头文件重复包含-包含多次-只有一次生效"><a href="#5-同一个文件如何防止头文件重复包含-包含多次-只有一次生效" class="headerlink" title="5.同一个文件如何防止头文件重复包含(包含多次,只有一次生效)"></a>5.同一个文件如何防止头文件重复包含(包含多次,只有一次生效)</h5><ol>
-<li>多次引用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/7.png" alt=""> </li>
-</ol>
-<p>1.在.h文件里面加上 #pragma once(最新加的规范)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/8.png" alt=""> </p>
-<p>2.旧规范</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">#ifndef _MYSTRLEN_H</div><div class="line">#define _MYSTRLEN_H</div><div class="line">//函数声明</div><div class="line">#endif</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/9.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/03/c-50-多文件编程/" class="archive-article-date">
-  	<time datetime="2018-11-03T14:14:18.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-03</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/c/">c</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/6/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="page-number current">7</span><a class="page-number" href="/page/8/">8</a><a class="page-number" href="/page/9/">9</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/8/">Next &raquo;</a>
@@ -842,7 +811,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15.56px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     

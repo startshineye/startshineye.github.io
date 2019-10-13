@@ -152,6 +152,220 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-4-应用通信" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/18/SpringCloud-4-应用通信/">SpringCloud-4-应用通信</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
+<li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
+<li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
+<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
+<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
+<li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
+</ol>
+<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
+<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
+<li>1.使用 “订单服务-&gt;商品服务”为例</li>
+<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
+<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
+<li>4.product端新建ServerController</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.order服务中新建ClientController<br>RestTemplate第一种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:18:18</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        //1.RestTemplate第一种方式 </div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""><br>以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</p>
+<ol>
+<li>6.RestTemplate第二种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private LoadBalancerClient loadBalancerClient;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line"></div><div class="line">        //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port</div><div class="line">        /**</div><div class="line">         * SpringCloud提供了LoadBalancerClient,将其注入到Spring中</div><div class="line">         */</div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);</div><div class="line">        String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());</div><div class="line">        String response = restTemplate.getForObject(url, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line"></div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure>
+<p>@Component<br>public class RestTemplateConfig {<br>    @Bean<br>    @LoadBalanced<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}</p>
+<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
+<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
+    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
+    log.info(&quot;response{}&quot;,response);
+    return response;
+}
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line"></div><div class="line">#### 3.负载均衡器Ribbion  </div><div class="line">1. 1.前面我们在说Eureka时候,谈到了服务端发现和客户端发现。Eureka属于客户端发现的方式,他的负载均衡是软负载,也就是客户端会向服务器(例如:EurekaServer)拉取已经注册的可用服务信息，然后根据负载均衡策略直接命中哪台服务器、发送请求。这整个过程都是在客户端完成的，并不需要服务端参数。SpringCloud中客户端负载均衡就是Ribbion  。他是基于NetflexRibbion实现的。通过SpringCloud的封装可以轻松的实现面向服务的restful模板请求自动转化成客户端负载均衡服务调用。</div><div class="line"></div><div class="line">一下组件都使用到了Ribbon:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/9.png) </div><div class="line"></div><div class="line">2. 2.SpringCloud在结合了Ribbon的负载均衡实现中,封装增加了HttpClient和OkHttp两种请求端实现,默认使用了Ribbon对Eureka服务发现的负载均衡client。</div><div class="line"></div><div class="line">3. 3.在上一节小结中,我们介绍了RestTemplate的三种实现方式。其中通过添加@LoadBalanced注解或者 直接写代码时候使用LoadBalancerClient,其实用到的就是Ribbon的组件</div><div class="line">4. 4.添加@LoadBalanced注解后,Ribbon会通过LoadBalancerClient自动的帮助你基于某种规则,比如:随机简单的轮训去连接目标服务,从而很容易使用Ribbon实现自定义的负载均衡算法。  </div><div class="line">5. 5.Ribbon实现负载均衡核心有3点:1.服务发现(也就是发现依赖服务的列表,也就是依据服务的名字,把该服务下的实例全都找出来)   2.服务选择规则(依据规则策略:如何从多个服务中选择一个有效的服务)  3.服务监听(监测失效服务做到高效剔除)  </div><div class="line">6. 6.主要组件是：ServerList、IRule、ServerListFilter。总体流程是:首先通过ServerList获取所有的可用服务列表。然后通过ServerListFilter过滤掉一部分地址，最后剩下的地址中通过IRule选择一个实例作为最终目标结果。</div><div class="line"></div><div class="line"></div><div class="line">#### 4 追踪源码自定义负载均衡策略</div><div class="line">略</div><div class="line">#### 5 Feign的使用</div><div class="line">##### 5.1 Feign的基本使用</div><div class="line">1. 1.本节使用Feign实现应用间通信。  </div><div class="line">2. 2.现在我们使用了Feign就不用使用restTemplate了,我们现在在ClientController中将restTemplate相关删除,并将RestTemplateConfig删除</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/10.png)</div><div class="line">3. 3.添加依赖:</div></pre></td></tr></table></figure>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-feign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/11.png)  </div><div class="line"></div><div class="line"></div><div class="line">4. 4.启动类中添加注解  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/12.png)  </div><div class="line">5. 5.定义好feign要调用的Server端接口  </div><div class="line">建立client包,定义一个ProductClient接口(里面的方法就是调用product服务的方法),此client代表order服务是一个相对于product的客户端服务。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/13.png) </div><div class="line">product中ServerController里面调用的方法:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/14.png) </div><div class="line">6. 6.此接口定义完之后,在Controller里面定义,然后接口请求:http://localhost:8081/getProductMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/15.png)  </div><div class="line"></div><div class="line">##### 5.2 Feign的总结  </div><div class="line">1. 声明式REST客户端(伪RPC)  </div><div class="line">2. 采用了基于接口的注解(定义一个接口,然后在其上加注解)  </div><div class="line">3. 内部使用了Ribbon作为负载均衡  </div><div class="line"></div><div class="line">#### 6 Feign获取商品列表  </div><div class="line">在Oder服务的OrderServiceImpl中的create里面1、2、3是我们还没有做的,这节我们需要通过Feign获取商品列表  </div><div class="line"></div><div class="line">##### 6.1 Product服务中添加获取商品列表  </div><div class="line"></div><div class="line">###### 1.Product--&gt;dao  </div><div class="line">ProductInfoRepository:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductInfoRepository extends JpaRepository<productinfo,string>{<br>     List<productinfo> findByProductStatus(Integer productStatus);</productinfo></productinfo,string></p>
+<pre><code>List&lt;ProductInfo&gt; findByProductIdIn(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">###### 2.Product--&gt;service</div><div class="line">ProductService:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductService {<br>    /**</p>
+<pre><code> * 查询所有在架商品列表
+ */
+List&lt;ProductInfo&gt; findUpAll();
+/**
+ * 查询商品列表
+ */
+List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">ProductServiceImpl:  </div><div class="line"></div><div class="line"></div><div class="line">```  </div><div class="line">@Service</div><div class="line">public class ProductServiceImpl implements ProductService &#123;</div><div class="line">    @Autowired</div><div class="line">    private ProductInfoRepository repository;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findUpAll() &#123;</div><div class="line">        return repository.findByProductStatus(ProductStatusEnum.UP.getCode());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList) &#123;</div><div class="line">        return repository.findByProductIdIn(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-Product–-gt-controller"><a href="#3-Product–-gt-controller" class="headerlink" title="3.Product–&gt;controller"></a>3.Product–&gt;controller</h6><p>ProductController:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductCategoryService productCategoryService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 获取商品列表(给订单服务使用)</div><div class="line">     * @param productIdList</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    public List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList)&#123;</div><div class="line">        return productService.findList(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="6-2-Order服务中调用商品列表"><a href="#6-2-Order服务中调用商品列表" class="headerlink" title="6.2 Order服务中调用商品列表"></a>6.2 Order服务中调用商品列表</h5><p>在client的ProductClient添加调用product的方法  </p>
+<h6 id="1-Order–-gt-ProductClient"><a href="#1-Order–-gt-ProductClient" class="headerlink" title="1.Order–&gt;ProductClient"></a>1.Order–&gt;ProductClient</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="2-Order–-gt-ClientController"><a href="#2-Order–-gt-ClientController" class="headerlink" title="2.Order–&gt;ClientController"></a>2.Order–&gt;ClientController</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductClient productClient;</div><div class="line"></div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        String msg = productClient.productMsg();</div><div class="line">        log.info(&quot;getProductMsg()&quot;,msg);</div><div class="line">        return msg;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductList&quot;)</div><div class="line">    public String getProductList()&#123;</div><div class="line">        List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));</div><div class="line">        return &quot;ok&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="3-Order–-gt-请求测试"><a href="#3-Order–-gt-请求测试" class="headerlink" title="3.Order–&gt;请求测试"></a>3.Order–&gt;请求测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/16.png" alt="">  </p>
+<h4 id="7-扣库存-Feign"><a href="#7-扣库存-Feign" class="headerlink" title="7.扣库存(Feign)"></a>7.扣库存(Feign)</h4><p>我们已经获取了商品列表,现在开始在Product微服务实现扣库存<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/17.png" alt=""><br>从创建订单接口我们知道,前端会传过来商品的信息和购买数量:我们在DTO中构造一个对象:CartDTO用来传送上面的对象  </p>
+<ol>
+<li>1.Product–&gt;CartDTO对象<br>新建DTO包,新建CartDTO类:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class CartDTO &#123;</div><div class="line"> /**</div><div class="line">     * 商品id</div><div class="line">     */</div><div class="line">  private String productId;</div><div class="line">    /**</div><div class="line">     * 商品数量</div><div class="line">     */</div><div class="line">  private Integer productQuantity;</div><div class="line"></div><div class="line">  public CartDTO()&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line">  public CartDTO(String productId,Integer productQuantity)&#123;</div><div class="line">      this.productId = productId;</div><div class="line">      this.productQuantity = productQuantity;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>2.Product–&gt;Exception自定义异常  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class ProductException extends RuntimeException &#123;</div><div class="line">    private Integer code;</div><div class="line"></div><div class="line">    public ProductException(Integer code,String message)&#123;</div><div class="line">      super(message);</div><div class="line">      this.code =code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ProductException(ResultEnum resultEnum)&#123;</div><div class="line">           super(resultEnum.getMessage());</div><div class="line">           this.code = resultEnum.getCode();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.Product–&gt;返回枚举  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public enum ResultEnum &#123;</div><div class="line">    PRODUCT_NOT_EXIST(1,&quot;商品不存在&quot;),</div><div class="line">    PRODUCT_STOCK_ERROE(2,&quot;商品库存错误&quot; );</div><div class="line">    private Integer code;</div><div class="line">    private String message;</div><div class="line"></div><div class="line">    ResultEnum(Integer code, String message) &#123;</div><div class="line">        this.code = code;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public String getMessage() &#123;</div><div class="line">        return message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setMessage(String message) &#123;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Integer getCode() &#123;</div><div class="line">        return code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setCode(Integer code) &#123;</div><div class="line">        this.code = code;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>4.Product–&gt;Service里面新建方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">public void decreaseStock(List&lt;CartDTO&gt; cartDTOList) &#123;</div><div class="line">    /**</div><div class="line">     * 遍历:查看是否存在</div><div class="line">     */</div><div class="line">    for (CartDTO cartDTO:cartDTOList)&#123;</div><div class="line">        Optional&lt;ProductInfo&gt; productInfoOptional = repository.findById(cartDTO.getProductId());</div><div class="line">        //商品不存在</div><div class="line">        if(!productInfoOptional.isPresent())&#123;</div><div class="line">         throw new ProductException(ResultEnum.PRODUCT_NOT_EXIST);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        //商品存在-库存错误</div><div class="line">        ProductInfo productInfo = productInfoOptional.get();</div><div class="line">        int result = productInfo.getProductStock() - cartDTO.getProductQuantity();</div><div class="line">        if(result&lt;0)&#123;</div><div class="line">            throw new ProductException(ResultEnum.PRODUCT_STOCK_ERROE);</div><div class="line">        &#125;</div><div class="line">        //保存</div><div class="line">        productInfo.setProductStock(result);</div><div class="line">        repository.save(productInfo);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.Product–&gt;controller</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @PostMapping(&quot;/decreaseStock&quot;)</div><div class="line">    public void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList)&#123;</div><div class="line">        productService.decreaseStock(cartDTOList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>6.在Order服务中client里面的ProductClient添加:减库存方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">    String productMsg();</div><div class="line"></div><div class="line">    @PostMapping(&quot;/product/decreaseStock&quot;)</div><div class="line">    void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">7. 7.Order服务中:ClientController</div></pre></td></tr></table></figure>
+<p>@RestController<br>@Slf4j<br>public class ClientController {</p>
+<pre><code>@Autowired
+private ProductClient productClient;
+
+
+@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    String msg = productClient.productMsg();
+    log.info(&quot;getProductMsg()&quot;,msg);
+    return msg;
+}
+
+@GetMapping(&quot;/getProductList&quot;)
+public String getProductList(){
+    List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));
+    return productInfos.toString();
+}
+
+@GetMapping(&quot;/productDecreaseStock&quot;)
+public String productDecreaseStock(){
+   productClient.decreaseStock(Arrays.asList(new CartDTO(&quot;157875196366160022&quot;,1)));
+   return &quot;ok&quot;;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">8. 8.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/19.png)  </div><div class="line">库存减少了  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/20.png)  </div><div class="line"></div><div class="line"></div><div class="line">#### 8.整合接口打通下单流程(Feign)</div><div class="line">之前我们已经完善了,商品的查询,扣库存,那么我们这一节就要完成整套业务的打通。我们之前在Order服务中,创建订单时候,里面还有需要实现的如下几步:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/21.png)  </div><div class="line"></div><div class="line">1. 1.现在我们补充完毕：</div></pre></td></tr></table></figure></p>
+<p>@Service<br>public class OrderServiceImpl implements OrderService {<br>    @Autowired<br>    private OrderMasterRepository orderMasterRepository;</p>
+<pre><code>@Autowired
+private OrderDetailRepository orderDetailRepository;
+@Autowired
+private ProductClient productClient;
+@Override
+public OrderDTO create(OrderDTO orderDTO) {
+    String orderId = KeyUtil.genUniqueKey();
+    //1.TODO 查询商品信息(调用商品服务)
+    List&lt;String&gt; productIdList = orderDTO.getOrderDetailList().stream().map(OrderDetail::getProductId).collect(Collectors.toList());
+    List&lt;ProductInfo&gt; productInfoList = productClient.listForOrder(productIdList);
+    //2.TODO 计算订单总价
+    //定义总价
+    BigDecimal orderAmout = new BigDecimal(BigInteger.ZERO);
+    for(OrderDetail orderDetail:orderDTO.getOrderDetailList()){
+        //总价=(单价*数量)+总价
+        Integer productQuantity = orderDetail.getProductQuantity();
+        for(ProductInfo productInfo:productInfoList){
+            if(productInfo.getProductId().equals(orderDetail.getProductId())){
+                orderAmout = productInfo.getProductPrice().multiply(new BigDecimal(productQuantity)).add(orderAmout);
+
+               //订单详情赋值
+                BeanUtils.copyProperties(productInfo,orderDetail);
+                orderDetail.setOrderId(orderId);
+                orderDetail.setDetailId(KeyUtil.genUniqueKey());
+
+                //订单详情入库
+                orderDetailRepository.save(orderDetail);
+            }
+        }
+
+    }
+    //3.TODO 扣除库存(调用商品服务)
+    List&lt;CartDTO&gt; cartDTOList = orderDTO.getOrderDetailList().stream()
+            .map(e -&gt; new CartDTO(e.getProductId(), e.getProductQuantity()))
+            .collect(Collectors.toList());
+    productClient.decreaseStock(cartDTOList);
+
+    //4. 订单入库
+    OrderMaster orderMaster = new OrderMaster();
+    //先设置主键 会copy到orderMaster
+    orderDTO.setOrderId(orderId);
+    BeanUtils.copyProperties(orderDTO,orderMaster);
+    orderMaster.setOrderAmount(orderAmout);
+    orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());
+    orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());
+    orderMasterRepository.save(orderMaster);
+    return orderDTO;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/22.png)</div><div class="line"></div><div class="line">#### 9.项目改造成多模块</div><div class="line">多模块改造参考:https://blog.csdn.net/yangshangwei/article/details/88809468  </div><div class="line">##### 9.1 项目缺陷</div><div class="line">虽然我们之前已经完成了下单并扣除库存，虽然通信是完成了,但是有些地方做的不好。有如下问题:  </div><div class="line">1.在Product微服务中,获取商品列表(给订单服务使用)</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/23.png)</div><div class="line">返回的ProductInfo是数据库实体:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/24.png)</div><div class="line">基本上,我们不会把自己数据库映射的表对象暴露给外部的。  </div><div class="line">2.在订单服务和商品服务之间都有共有的对象:CartDTO,ProductInfo.重复定义。对象属于哪一个服务就在那一个服务中定义。</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/25.png)    </div><div class="line">3.在Order(订单)服务里,定义了ProductClient接口使用Feign主键调用，我们在项目中可能一个服务就是很多人来做,各个服务费透明的,所以我们在Oder服务中不能把Product的服务代码请求路径等写到Order服务中.</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/26.png) </div><div class="line"></div><div class="line">##### 9.2 Product多模块拆分</div><div class="line">###### 9.2.1模块之间职责  </div><div class="line">针对解决以上情况,我们把项目分成3个模块:product-server、prodect-client、product-common  </div><div class="line"></div><div class="line">1. 1.product-server:存放所有业务逻辑:包括,controller、service</div><div class="line">2. 2.prodect-client:对外暴露的接口,商品模块对外暴露的接口:商品列表和扣库存。  </div><div class="line">3. 3.product-common:公用的对象:既会被内部模块调用,也会被外部模块调用。</div><div class="line">###### 9.2.2模块之间依赖关系  </div><div class="line">1. 1.product-common是公用的对象,所以product-server会依赖product-common,返回的商品对象prodect-client也会依赖product-common</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/27.png) </div><div class="line"></div><div class="line">2. 2.product商品多模块划分可以参考:https://blog.csdn.net/qq_29479041/article/details/84230669  </div><div class="line">3. 3.在本地打包</div></pre></td></tr></table></figure></p>
+<p>mvn -Dmaven.test.skip=true -U clean install<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">使用以上命令,会将对应模块打包并安装到本地maven仓库</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/28.png)  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 9.3 Order多模块拆分</div><div class="line">1. 1.一次类推,Order服务也分为3个模块,但是order-client目前是没有代码:其目前不需要给外提供服务  order-common目前也没有代码:目前没有需求  </div><div class="line">2. 2.在订单服务需要注意的是:订单服务调用商品服务,那么需要在订单服务里面的启动类中添加扫描到商品服务的路径:@EnableFeignClients(basePackages = &quot;com.yxm.product.client&quot;)</div><div class="line">3. 3.最外层pom文件引入product-client的jar包  </div><div class="line">4. 4.&lt;dependencyManagement&gt;是管理jar包版本,不会下载对应依赖</div><div class="line"></div><div class="line"></div><div class="line">##### 9.5 测试  </div><div class="line">启动注册中心，通过product-server和order-server中的main函数启动俩微服务</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/29.png)  </div><div class="line"></div><div class="line">下单  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/30.png)   </div><div class="line"></div><div class="line">```  </div><div class="line">select * from order_master a where a.order_id = &apos;1558247336963513928&apos;</div><div class="line">select * from order_detail a  where a.order_id = &apos;1558247336963513928&apos;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/31.png" alt="">   </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/32.png" alt="">  </p>
+<p>源码:github地址:<a href="https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw">https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw</a>  </p>
+<h4 id="10-同步或者异步"><a href="#10-同步或者异步" class="headerlink" title="10.同步或者异步"></a>10.同步或者异步</h4><ol>
+<li>1.当前订单服务和商品服务,两个服务之间的通讯机制是同步的。订单会调用商品服务的扣库存接口。微服务中除了同步,有很多时候会集成到异步的场景下,通过队列和订阅主题,实现消息的 发布和订阅,一个微服务可以是消息的发布者,通过异步的方式发送到队列和订阅主题下,作为消费者的微服务,可以从队列或者主题中获取消息。通过消息中间件。把服务间的直接调用解耦。</li>
+<li>比如以下图中:用户登录的时候,用户服务需要调用短信服务发短信。要给用户加积分,需要调用积分服务。还可能有其他服务，如果都采用同步的机制，服务间耦合过大,用户登录成功，需要向多个服务同步响应后才会成功，就会造成不好的用户体验。这个时候，我们通过消息队列可以实现很好的异步调用。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/33.png" alt="">  </li>
+<li>3.再比如:订单服务在口库存前会调用查询商品服务,之后再调用减库存的接口来扣库存。我们对其改造:商品服务在更改库存的时候、发布库存变化的消息、订单服务来订阅这个消息、可以获取到商品的部分信息，比如:可购买的商品个数、商品id。订单服务在下单的时候不必同步的去查询数据确定商品的库存信息 而是查询自己服务中数据 然后在扣库存时候订单服务发布一个扣库存的消息、商品服务订阅这个消息。拿到消息后，减少本库存消息的库存量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/34.png" alt=""> </li>
+<li>4.消息中间件:目前常见的消息队列为:RabbitMQ、Kafka、ActiveMQ,我们现在使用RabbitMQ</li>
+</ol>
+<h4 id="11-RabbitMQ的安装"><a href="#11-RabbitMQ的安装" class="headerlink" title="11.RabbitMQ的安装"></a>11.RabbitMQ的安装</h4><p>进入下载网址:<a href="https://www.rabbitmq.com/download.html" target="_blank" rel="external">https://www.rabbitmq.com/download.html</a><br>我们使用docker安装RabbitMQ<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/35.png" alt=""><br>我们使用带有管理界面的mq:3.8.0-beta.4-management<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/36.png" alt="">  </p>
+<p><a href="https://blog.csdn.net/antma/article/details/81334932" target="_blank" rel="external">https://blog.csdn.net/antma/article/details/81334932</a><br><a href="https://www.jianshu.com/p/f3e49b495d74" target="_blank" rel="external">https://www.jianshu.com/p/f3e49b495d74</a>  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/18/SpringCloud-4-应用通信/" class="archive-article-date">
+  	<time datetime="2019-04-17T16:57:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-18</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-3-服务拆分" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1054,485 +1268,6 @@ server:
 
 
   
-    <article id="post-netty实践-二十-聊天页面制作" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/12/16/netty实践-二十-聊天页面制作/">netty实践-二十-聊天页面制作</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>构建手机端上的聊天页面模型，建立会话，接受发送消息，netty控制点对点消息发送，控制会话重连，聊天记录的本地保存与左滑删除，消息标记未读，消息牵手等。</p>
-<p>1.聊天页面讲解与展示<br>2.header动态改为好友昵称，动态滚动到最新消息<br>3 发送按钮的颜色状态改变<br>4 弹出软键盘重新设置聊天窗口高度<br>5 发送消息前置条件网络状态判断<br>6 监听网络连接事件<br>7 发送消息html渲染<br>8 接收消息html渲染<br>9 发送消息与接收消息时的铃声播放<br>10 手机端websocket模型定义和发送消息<br>11 websocket接受消息的渲染_x264<br>12 服务器断开后的重连机制<br>13 chatHandler初步重构<br>14 构建聊天业务模型<br>15 chatHandler - 处理客户端连接<br>16 chatHandler - 保存聊天消息到数据库<br>17 chatHandler - 处理消息发送<br>18 chatHandler - 签收单条或多条消息<br>19 客户端onopen联调，初始化用户和channel关系<br>20 客户端发送消息与接收联调<br>21 接收方获得消息后重构渲染<br>22 客户端签收消息<br>23 websocket新增好友类型联调<br>24 保存聊天记录到本地<br>25 从本地获取聊天记录<br>26 初始化聊天记录和渲染<br>27 聊天快照业务简单讲解<br>28 保存聊天快照到本地<br>29 获取聊天快照<br>30 已读未读消息的设置与快照调用<br>31 展示聊天快照<br>32 未读消息小红点标记<br>33 点击快照开始聊天<br>34 未读消息标记已读<br>35 开发获取未读消息列表接口<br>36 前端获取未读消息列表<br>37 批量签收并且展示未读消息<br>38 聊天快照左滑删除效果<br>39 聊天快照右滑删除聊天记录与快照  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-聊天页面讲解与展示"><a href="#1-聊天页面讲解与展示" class="headerlink" title="1 聊天页面讲解与展示"></a>1 聊天页面讲解与展示</h5><ol>
-<li><p>新增chat.css和chatting.html  </p>
-<h6 id="1-1-聊天页面代码"><a href="#1-1-聊天页面代码" class="headerlink" title="1.1 聊天页面代码"></a>1.1 聊天页面代码</h6>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">     &lt;!DOCTYPE html&gt;</div><div class="line">     &lt;html&gt;</div><div class="line">&lt;head&gt;</div><div class="line">	&lt;meta charset=&quot;utf-8&quot;&gt;</div><div class="line">	&lt;meta name=&quot;viewport&quot; content=&quot;width=device-width,initial-scale=1,minimum-scale=1,maximum-scale=1,user-scalable=no&quot; /&gt;</div><div class="line">	&lt;title&gt;&lt;/title&gt;</div><div class="line">	&lt;link href=&quot;css/mui.min.css&quot; rel=&quot;stylesheet&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/header.css&quot; /&gt;</div><div class="line">	&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;css/chat.css&quot; /&gt;</div><div class="line">	&lt;style&gt;</div><div class="line">		html,</div><div class="line">		body &#123;</div><div class="line">			height: 100%;</div><div class="line">			margin: 0px;</div><div class="line">			padding: 0px;</div><div class="line">			overflow: hidden;</div><div class="line">			-webkit-touch-callout: none;</div><div class="line">			-webkit-user-select: none;</div><div class="line">		&#125;</div><div class="line">	&lt;/style&gt;</div><div class="line">&lt;/head&gt;</div><div class="line">&lt;body contextmenu=&quot;return false;&quot;&gt;</div><div class="line">	&lt;header class=&quot;mui-bar mui-bar-nav title&quot; style=&quot;position: fixed;&quot;&gt;</div><div class="line">		&lt;a class=&quot;mui-action-back mui-icon mui-icon-left-nav mui-pull-left title-color&quot;&gt;&lt;/a&gt;</div><div class="line">		&lt;h1 class=&quot;mui-title title-color&quot;&gt;&lt;b id=&quot;chatting-nickname&quot;&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">	&lt;/header&gt;</div><div class="line">	</div><div class="line">	&lt;div id=&quot;msg-outter&quot; class=&quot;mui-content&quot;&gt;</div><div class="line">		</div><div class="line">		&lt;!--消息div--&gt;</div><div class="line">		&lt;div id=&apos;msg&apos;&gt;</div><div class="line">			</div><div class="line">			&lt;!--朋友消息--&gt;</div><div class="line">			&lt;div class=&quot;friend_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper right&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-left-white&quot;&gt;你是谁？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">	</div><div class="line">              &lt;!--我发送的消息--&gt;</div><div class="line">			&lt;div class=&quot;me_lists&quot;&gt;</div><div class="line">				&lt;div class=&quot;header_img&quot;&gt;</div><div class="line">					&lt;img src=&quot;image/face-default-cat.png&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">				&lt;div class=&quot;msg-wrapper left&quot;&gt;</div><div class="line">					&lt;p class=&quot;msg-right-green&quot;&gt;Zero？&lt;/p&gt;</div><div class="line">				&lt;/div&gt;</div><div class="line">			&lt;/div&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">	&lt;/div&gt;</div><div class="line">	&lt;footer&gt;</div><div class="line">		&lt;!--文本输入框--&gt;</div><div class="line">		&lt;div class=&quot;footer-center&quot;&gt;</div><div class="line">			&lt;textarea id=&apos;msg-text&apos; type=&quot;text&quot; class=&apos;input-text&apos;&gt;&lt;/textarea&gt;</div><div class="line">		&lt;/div&gt;</div><div class="line">		&lt;!--发送框--&gt;</div><div class="line">		&lt;label for=&quot;&quot; class=&quot;footer-right&quot;&gt;</div><div class="line">			&lt;button type=&quot;button&quot; class=&quot;mui-btn mui-btn-gray&quot; id=&quot;send&quot;&gt;发送&lt;/button&gt;</div><div class="line">		&lt;/label&gt;</div><div class="line">	&lt;/footer&gt;</div><div class="line">	&lt;script src=&quot;js/mui.min.js&quot;&gt;&lt;/script&gt;</div><div class="line">	&lt;script type=&quot;application/javascript&quot; src=&quot;js/app.js&quot;&gt;&lt;/script&gt;</div><div class="line">  &lt;/body&gt;</div><div class="line">    &lt;/html&gt;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="1-2-聊天页面展示效果"><a href="#1-2-聊天页面展示效果" class="headerlink" title="1.2 聊天页面展示效果"></a>1.2 聊天页面展示效果</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/174.png" alt="">  </p>
-<h6 id="1-3-通讯录点击打开聊天页面"><a href="#1-3-通讯录点击打开聊天页面" class="headerlink" title="1.3 通讯录点击打开聊天页面"></a>1.3 通讯录点击打开聊天页面</h6><ol>
-<li>在通讯录–&gt;点击好友列表时候展示对应的聊天页面–&gt;进行聊天  </li>
-<li>我们在通讯录之前页面做一个动态绑定,之前在展示通讯录时候,我们队展示出来的列表并没有做聊天页面打开绑定,现在我们自定义一个class<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/175.png" alt="">  </li>
-<li><p>我们在通讯录列表加载完毕之后绑定一个打击事件  </p>
-</li>
-<li><p>此时点击通讯录时候会进入到聊天页面,在tap里面传递好友基本信息  </p>
-</li>
-</ol>
-<ol>
-<li>聊天页面对于不同的人不同(具有唯一性):      </li>
-</ol>
-<h5 id="2-header动态改为好友昵称，动态滚动到最新消息"><a href="#2-header动态改为好友昵称，动态滚动到最新消息" class="headerlink" title="2 header动态改为好友昵称，动态滚动到最新消息"></a>2 header动态改为好友昵称，动态滚动到最新消息</h5><h6 id="2-1-header动态改为好友昵称"><a href="#2-1-header动态改为好友昵称" class="headerlink" title="2.1 header动态改为好友昵称"></a>2.1 header动态改为好友昵称</h6><ol>
-<li>打开聊天页面时候,最上面展示的应该是朋友的昵称图标,而不是app名称  </li>
-<li><p>我们在contact.html页面时候,通讯录列表里面绑定了:friendUserId  friendNickname  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">      //为好友通讯录批量绑定点击事件  </div><div class="line">mui(&quot;#contactList&quot;).on(&quot;tap&quot;,&quot;.chat-with-friend&quot;,function(e)&#123;</div><div class="line">	var friendUserId = this.getAttribute(&quot;friendUserId&quot;);</div><div class="line">	var friendNickname = this.getAttribute(&quot;friendNickname&quot;);</div><div class="line">	var friendFaceImage = this.getAttribute(&quot;friendFaceImage&quot;);</div><div class="line">	</div><div class="line">	 //好友点击通讯录时候,会打开聊天页面  </div><div class="line">	 mui.openWindow(&#123;</div><div class="line">	 	url:&quot;chatting.html&quot;,</div><div class="line">	 	id:&quot;chatting.html&quot;,</div><div class="line">	 	extras:&#123;</div><div class="line">	 		friendUserId:friendUserId,</div><div class="line">	 		friendNickname:friendNickname,</div><div class="line">	 		friendFaceImage:friendFaceImage</div><div class="line">	 	&#125;</div><div class="line">	 &#125;);</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</li>
-<li><p>在chatting.html页面上做获取contact.html的数据,并到:chatting.html页面上修改昵称  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    &lt;script&gt;</div><div class="line">	//创建命名空间  </div><div class="line">	(function($,doc)&#123;</div><div class="line">		mui.plusReady(function()&#123;</div><div class="line">			//获取我自己的用户信息</div><div class="line">			var me = app.getGlobalUserInfo();</div><div class="line">			</div><div class="line">			//获取聊天页面webview</div><div class="line">			var chattingWebview = plus.webview.currentWebview();</div><div class="line">			</div><div class="line">			//设置聊天页面的软键盘样式</div><div class="line">			chattingWebview.setStyle(&#123;softinputMode:&quot;adjustResize&quot;&#125;);</div><div class="line">			</div><div class="line">			// 获取上一个页面传入的好友属性值</div><div class="line">			var friendUserId = chattingWebview.friendUserId;</div><div class="line">			var friendNickname = chattingWebview.friendNickname;</div><div class="line">			var friendFaceImage = chattingWebview.friendFaceImage;</div><div class="line">			</div><div class="line">			//标题改为朋友昵称</div><div class="line">			document.getElementById(&quot;chatting-nickname&quot;).innerHTML = friendNickname;</div><div class="line">		&#125;);</div><div class="line">	&#125;(mui,document));</div><div class="line">&lt;/script&gt;</div></pre></td></tr></table></figure>
-</li>
-<li><p>效果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/183.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/184.png" alt="">  </p>
-</li>
-</ol>
-<h6 id="2-2-动态滚动到最新消息"><a href="#2-2-动态滚动到最新消息" class="headerlink" title="2.2 动态滚动到最新消息"></a>2.2 动态滚动到最新消息</h6><ol>
-<li>现在我们如果页面列表消息比较多的时候,打开contact时候的chatting.html页面时候,显示的消息没有滚动到最后一条<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/185.png" alt="">  </li>
-<li><p>我们现在需要设置id=”msg”的页面消息框的聊天信息在最下面  </p>
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">     var areaMsgList = document.getElementById(&quot;msg&quot;);</div><div class="line">			// 设置聊天记录进入页面的时候自动滚动到最后一条</div><div class="line">areaMsgList.scrollTop = areaMsgList.scrollHeight + areaMsgList.offsetHeight;</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h5 id="3-发送按钮的颜色状态改变"><a href="#3-发送按钮的颜色状态改变" class="headerlink" title="3 发送按钮的颜色状态改变"></a>3 发送按钮的颜色状态改变</h5><ol>
-<li>目前我们在发送消息输入框输入文字时候,其颜色也是没有变化的,我们需要在聊天框输入消息时候,其对应的发送框的按钮颜色是变化成有颜色的。    </li>
-<li>我们可以监控发送框的input输入事件,有输入时候,设置发送按钮的样式。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/186.png" alt="">  </li>
-</ol>
-<h5 id="4-弹出软键盘重新设置聊天窗口高度"><a href="#4-弹出软键盘重新设置聊天窗口高度" class="headerlink" title="4 弹出软键盘重新设置聊天窗口高度"></a>4 弹出软键盘重新设置聊天窗口高度</h5><ol>
-<li>软件盘打开时候,其对应的聊天页面里面消息并没有滚动到最底端<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/187.png" alt="">  </li>
-<li>我们在打开软键盘时候,聊天消息应该滚动到最后一条</li>
-<li><p>当我们的软键盘弹出时候,其实我们窗口,相当于由全屏变成了半屏,此时会触发resize事件(window窗口触发resize事件)   </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">    // 对当前的窗口监听resize事件</div><div class="line">window.addEventListener(&quot;resize&quot;,function()&#123;</div><div class="line">	resizeChattingScreen();</div><div class="line">&#125;);</div><div class="line">	</div><div class="line">   </div><div class="line">   function resizeChattingScreen()&#123;</div><div class="line">var areaMsgList = document.getElementById(&quot;msg&quot;);</div><div class="line">// 设置聊天记录进入页面的时候自动滚动到最后一条</div><div class="line">areaMsgList.scrollTop = areaMsgList.scrollHeight + areaMsgList.offsetHeight;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>即使那样设置了,但是我们的最后一条消息还是被我们的footer给挡住了  </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">	      </div><div class="line">	      // 对当前的窗口监听resize事件</div><div class="line">						window.addEventListener(&quot;resize&quot;,function()&#123;</div><div class="line">							resizeChattingScreen();</div><div class="line">							doc.getElementById(&quot;msg-outter&quot;).style.paddingBottom = &quot;50px&quot;;</div><div class="line">						&#125;);</div><div class="line">       </div><div class="line">      ```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 5 发送消息前置条件网络状态判断  </div><div class="line"></div><div class="line">###### 5.1 原理</div><div class="line">1. 我们在文本框中输入消息之后,点击发送时候,在发送之前我们需要做一些判断,主要有两块需要判断:1.判断整个手机的网络状态(网络飞行模式或者没有连接时候,给出提醒),2.我们发的消息内容不能是空字符串  </div><div class="line"></div><div class="line">2. 其实h5+已经给我们做了处理封装:在h5+的device模块里面有networkinfo信息  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/188.png)  </div><div class="line"></div><div class="line">3. 通过以下方法getCurrentType() 可以获取到手机网络状态,其返回值就是上面的常量 是一个int类型  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/189.png)</div><div class="line"></div><div class="line">4. 如果是:CONNECTION_UNKNOW: 网络连接状态未知 CONNECTION_NONE: 未连接网络  我们需要给出提示  </div><div class="line"></div><div class="line">###### 5.2 代码  </div><div class="line">1. 给send发送按钮绑定一个tap点击事件做相关操作</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<pre><code>      //发送消息前置条件网络状态判断
-       send.addEventListener(&quot;tap&quot;,function(){
-           var networkStatus = plus.networkinfo.getCurrentType();
-           if(networkStatus==0 || networkStatus == 1){
-               app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
-               return;
-           }
-
-           // 判断消息内容，如果长度等于0，则return
-           if(msg_text.value.length==0){
-               return;
-           }
-
-       });
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 断开手机网络后效果  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/190.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 6 监听网络连接事件  </div><div class="line">1. 我们在我们的网络首页index.html页面,需要做一个网络连接的判断,我们的所有页面都包含在我们的index.html页面上  </div><div class="line">2.  在index.html中添加  </div><div class="line">  </div><div class="line">js    </div><div class="line">     </div><div class="line">     ```  </div><div class="line">      </div><div class="line">        //对整个网络连接进行事件监听</div><div class="line">			netChangeSwitch();</div><div class="line">	  		</div><div class="line">        </div><div class="line">          //监听网络状态更改   </div><div class="line">	  	function netChangeSwitch()&#123;</div><div class="line">	  		document.addEventListener(&quot;netchange&quot;,function()&#123;</div><div class="line">	  			 //网络状态获取和判断</div><div class="line">	  			 var connectionStatus = plus.networkinfo.getCurrentType();</div><div class="line">	  		     if(connectionStatus !=0 &amp;&amp; connectionStatus != 1)&#123;</div><div class="line">	  		     	//重新打开网络连接</div><div class="line">	  		     	var magic_title = document.getElementById(&quot;magic_title&quot;);</div><div class="line">	  		     	magic_title.innerHTML=&quot;&lt;b&gt;魔晶&lt;/b&gt;&quot;;</div><div class="line">	  		     &#125;else&#123;</div><div class="line">	  		     	//重新打开网络连接</div><div class="line">	  		     	var magic_title = document.getElementById(&quot;magic_title&quot;);</div><div class="line">	  		     	magic_title.innerHTML = &quot;&lt;b&gt;魔晶(未连接)&lt;/b&gt;&quot;;</div><div class="line">	  		     &#125;</div><div class="line">	  		&#125;);</div><div class="line">	  	&#125;</div></pre></td></tr></table></figure>
-</code></pre><p>html</p>
-<pre><code> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">      </div><div class="line">       &lt;!--1.添加标题栏:快捷键mhe--&gt;</div><div class="line">		&lt;header class=&quot;mui-bar mui-bar-nav title&quot;&gt;</div><div class="line">		    &lt;h1 id=&quot;magic_title&quot; class=&quot;mui-title title-color&quot;&gt;&lt;b&gt;魔晶&lt;/b&gt;&lt;/h1&gt;</div><div class="line">		&lt;/header&gt;</div><div class="line">      </div><div class="line">     ```  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/191.png)  </div><div class="line"></div><div class="line">##### 7 发送消息html渲染  </div><div class="line">1. 点击发送按钮时候,我们将消息拼接渲染到我们的html页面  </div><div class="line">2. 发送消息时候要携带发送人头像  </div><div class="line"></div><div class="line">###### 7.1 js</div><div class="line"></div><div class="line">1.定义发送js方法:</div></pre></td></tr></table></figure>
-
-
-   function sendMessage(faceImg,msg){
-          var msgHtml=&apos;&lt;div class=&quot;me_lists&quot;&gt;&apos;+
-             &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
-                &apos;&lt;img src=&quot;&apos; + faceImg + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos;+
-             &apos;&lt;/div&gt;&apos;+
-            &apos;&lt;div class=&quot;msg-wrapper left&quot;&gt;&apos;+
-                &apos;&lt;p class=&quot;msg-right-green&quot;&gt;&apos;+msg+&apos;&lt;/p&gt;&apos;+
-            &apos;&lt;/div&gt;&apos;+
-            &apos;&lt;/div&gt;&apos;;
-            var msg_list = document.getElementById(&quot;msg&quot;);
-            //拼接到msg后面,相当于append
-            msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在send监听中调用</div></pre></td></tr></table></figure>
-
-
-  //发送消息前置条件网络状态判断
-    send.addEventListener(&quot;tap&quot;,function(){
-        var networkStatus = plus.networkinfo.getCurrentType();
-        if(networkStatus==0 || networkStatus == 1){
-            app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
-            return;
-        }
-        // 判断消息内容，如果长度等于0，则return
-        if(msg_text.value.length==0){
-            return;
-        }
-        //发送消息,渲染html消息到msg的div下
-        sendMessage(app.imgServerUrl+me.faceImage,msg_text.value);
-    });
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/192.png)  </div><div class="line">##### 8 接收消息html渲染  </div><div class="line">1. 接收聊天服务是friend发送的,所以其头像已经获取到了  </div><div class="line">2. 拼接对应的接收即可得到条件所示  </div><div class="line"></div><div class="line">###### 8.1 js</div><div class="line"></div><div class="line">1.定义发送js方法:</div></pre></td></tr></table></figure>
-
-
-   function receiveMessage(msg){
-                var msgHtml = &apos;&lt;div class=&quot;friend_lists&quot;&gt;&apos;+
-                &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
-                    &apos;&lt;img src=&quot;&apos; + app.imgServerUrl + friendFaceImage + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos; +
-                &apos;&lt;/div&gt;&apos;+
-                &apos;&lt;div class=&quot;msg-wrapper right&quot;&gt;&apos;+
-                    &apos;&lt;p class=&quot;msg-left-white&quot;&gt;&apos;+msg+&apos;/p&gt;&apos;+
-                &apos;&lt;/div&gt;&apos;+
-               &apos;&lt;/div&gt;&apos;;
-               var msg_list = document.getElementById(&quot;msg&quot;);
-                //拼接到msg后面,相当于append
-                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2.在send监听中调用</div></pre></td></tr></table></figure>
-
-
-  //发送消息前置条件网络状态判断
-    send.addEventListener(&quot;tap&quot;,function(){
-        var networkStatus = plus.networkinfo.getCurrentType();
-        if(networkStatus==0 || networkStatus == 1){
-            app.showToast(&quot;请检查网络连接...&quot;,&quot;error&quot;);
-            return;
-        }
-        // 判断消息内容，如果长度等于0，则return
-        if(msg_text.value.length==0){
-            return;
-        }
-        //模拟接收消息
-        receiveMessage(&quot;模拟接收消息...&quot;);
-    });
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/193.png)  </div><div class="line"></div><div class="line">##### 9 发送消息与接收消息时的铃声播放</div><div class="line">1. 我们在发送完消息之后需要播放一个消息发送铃声  </div><div class="line">2. 我们在接收到消息之后也需要播放一个接收消息的铃声  </div><div class="line">###### 9.1 添加外部引入的mp3文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/194.png)    </div><div class="line">h5+的api</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/195.png)    </div><div class="line">播报语音对象  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/196.png)</div></pre></td></tr></table></figure>
-
-
-  function sendMessage(faceImg,msg){
-              var msgHtml=&apos;&lt;div class=&quot;me_lists&quot;&gt;&apos;+
-                 &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
-                    &apos;&lt;img src=&quot;&apos; + faceImg + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos;+
-                 &apos;&lt;/div&gt;&apos;+
-                &apos;&lt;div class=&quot;msg-wrapper left&quot;&gt;&apos;+
-                    &apos;&lt;p class=&quot;msg-right-green&quot;&gt;&apos;+msg+&apos;&lt;/p&gt;&apos;+
-                &apos;&lt;/div&gt;&apos;+
-                &apos;&lt;/div&gt;&apos;;
-                var msg_list = document.getElementById(&quot;msg&quot;);
-                //拼接到msg后面,相当于append
-                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
-
-                playSendMessageSound();
-            }
-
-            /**
-             * 发送消息播放  
-             */
-            function playSendMessageSound(){
-                var audioPlayer = plus.audio.createPlayer(&quot;/mp3/send.mp3&quot;);
-                audioPlayer.play();
-            }
-
-
-          /**
-             * 接收消息
-             * @param {Object} msg
-             */
-            function receiveMessage(msg){
-                var msgHtml = &apos;&lt;div class=&quot;friend_lists&quot;&gt;&apos;+
-                &apos;&lt;div class=&quot;header_img&quot;&gt;&apos;+
-                    &apos;&lt;img src=&quot;&apos; + app.imgServerUrl + friendFaceImage + &apos;&quot; width=&quot;40px&quot; height=&quot;40px&quot; /&gt;&apos; +
-                &apos;&lt;/div&gt;&apos;+
-                &apos;&lt;div class=&quot;msg-wrapper right&quot;&gt;&apos;+
-                    &apos;&lt;p class=&quot;msg-left-white&quot;&gt;&apos;+msg+&apos;/p&gt;&apos;+
-                &apos;&lt;/div&gt;&apos;+
-               &apos;&lt;/div&gt;&apos;;
-               var msg_list = document.getElementById(&quot;msg&quot;);
-                //拼接到msg后面,相当于append
-                msg_list.insertAdjacentHTML(&quot;beforeend&quot;, msgHtml);
-
-                playReceiveMessage();
-            }
-            /**
-             * 播报接收语音  
-             */
-            function playReceiveMessage(){
-                var audioPlayer = plus.audio.createPlayer(&quot;/mp3/di_didi.mp3&quot;);  
-                audioPlayer.play();
-            }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 10 手机端websocket模型定义和发送消息</div><div class="line">##### 10.1  chatlist.html页面websocket模型定义  </div><div class="line">1.构造webIM对象,在初始化方法中,重写onopen,onmessage,onerror,onclose方法  </div><div class="line">2.在init时候判断此socket是不是已经可用了,可用不创建  </div><div class="line">3.在plusReady中进行调用</div></pre></td></tr></table></figure>
-
-
- //构建聊天业务CHAT
-            window.webIM={
-            socket:null,
-            init:function(){
-                if(window.WebSocket){//判断浏览器是否支撑websocket
-                    //判断socket状态,再确认是否初始化
-                    if(webIM.socket != null 
-                      &amp;&amp; webIM.socket != undefined
-                      &amp;&amp; webIM.socket.readyState == WebSocket.OPEN){
-                        return false;
-                    }
-
-                    webIM.socket = new WebSocket(app.nettyServerUrl);
-                    //websocket的 生命周期方法
-                    webIM.socket.onopen = webIM.wsopen,
-                    webIM.socket.onmessage = webIM.wsmessage,
-                    webIM.onclose = webIM.wsclose,
-                    webIM.onerror = webIM.wsonerror;
-                }else{
-                    //先手机浏览器一般都支持websocket协议  
-                    alert(&quot;手机设备过旧,请升级手机...&quot;);
-                }
-            },
-            sendMessage:function(msg){
-                webIM.socket.send(msg);
-            },
-            wsopen:function(){
-                console.log(&quot;建立连接&quot;);
-            },
-            wsmessage:function(e){
-                console.log(&quot;消息为:&quot;+e.data);
-                //将消息填充到接收消息处
-                var receiveMsg = document.getElementById(&quot;receiveMsg&quot;);
-                var html = receiveMsg.innerHTML;
-                receiveMsg.innerHTML = html+&quot;&lt;br/&gt;&quot;+ e.data;
-            },
-            wsclose:function(){
-                console.log(&quot;断开连接&quot;);
-            },
-            wsonerror:function(){
-                console.log(&quot;断开连接&quot;);
-            }
-        }     
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/197.png)  </div><div class="line"></div><div class="line">##### 10.2 chatting.html页面websocket发送消息  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/198.png)   </div><div class="line">手机端接收:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/199.png)   </div><div class="line">server端接收:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/200.png)   </div><div class="line">##### 11 websocket接受消息的渲染_x264</div><div class="line">1.由于websocket对象是在chatlist.html页面,所以后端返回消息的时候消息是在chatlist.html中的wsmessage里面,但是渲染消息的方法是在chatting.html页面里面,所以我们需要获取chatting.html里面receiveMessage(msg)在chatlist.html调用  </div><div class="line">2.获取webview,然后调用receiveMessage(msg)  </div><div class="line">3.在通讯录里面:contact.html里面通过mui.openWindow()打开chatting-friendUserId,目前先写死;</div></pre></td></tr></table></figure>
-
-
-  wsmessage:function(e){
-                console.log(&quot;消息为:&quot;+e.data);
-                //将消息填充到接收消息处
-                //TODO 我们先把动态的chatting.html 页面webview的id先写死    id:&quot;chatting-&quot;+friendUserId    181210CDNSNRBCZC
-                var chattingWeview = plus.webview.getWebviewById(&quot;chatting-181210CDNSNRBCZC&quot;);
-                    //在Webview窗口中执行JS脚本,将JS脚本发送到Webview窗口中运行，可用于实现Webview窗口间的数据通讯。
-                chattingWeview.evalJS(&quot;receiveMessage(&apos;&quot;+e.data+&apos;)&quot;);
-            }
-
-  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4.此时chatlist.html需要调用chatting.html页面里面的方法,我们需要把命名空间去掉。</div></pre></td></tr></table></figure>
-
-
-  wsmessage:function(e){
-        console.log(&quot;消息为:&quot;+e.data);
-        //将消息填充到接收消息处
-        //TODO 我们先把动态的chatting.html 页面webview的id先写死    id:&quot;chatting-&quot;+friendUserId    181210CDNSNRBCZC
-        var chattingWeview = plus.webview.getWebviewById(&quot;chatting-181210CDNSNRBCZC&quot;);
-
-            //在Webview窗口中执行JS脚本,将JS脚本发送到Webview窗口中运行，可用于实现Webview窗口间的数据通讯。
-
-        chattingWeview.evalJS(&quot;receiveMessage(&apos;&quot; + e.data + &quot;&apos;)&quot;);
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 12 服务器断开后的重连机制</div><div class="line">1.当我们连接时候,我们如果server端断开了连接,然后再发送消息时候,此时手机页面上没有渲染消息,原因就是此时websocket可能已经断开了,所以我们需要在sendMessage时候做一个判断  </div><div class="line">2.需要在接收消息之后:resizeChattingScreen()    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/201.png) </div><div class="line">##### 13 chatHandler初步重构  </div><div class="line">1.ChatHandler中handlerAdded在客户端和服务端建立连接之后就会形成handler并添加到我们定义的ChannelGroup中   </div><div class="line">2.客户端和服务端断开时候需要进行移除chanel  </div><div class="line">3.在客户端和服务端发生异常时候,也需要关闭连接,这也需要重写eceptionCaught方法  </div><div class="line">4.channelRead0中进行channel消息的处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/202.png)  </div><div class="line">5.channelRead0</div></pre></td></tr></table></figure>
-
-
-   @Override
-protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-    //1.获取客户端传过来的消息
-    //2.根据消息类型做不同的处理
-       //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
-       //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
-       //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
-       //2.4 心跳类型消息
-}
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 14 构建聊天业务模型  </div><div class="line">###### 14.1 DataContent-业务传输的数据内容</div></pre></td></tr></table></figure>
-
-
-  public class DataContent implements Serializable{
-     /**
-      * 动作类型
-      */
-     private Integer action;
-     /**
-      * 用户聊天类型
-      */
-     private ChatMsg chatMsg;
-     /**
-       * 扩展字段
-      */
-     private String extand;
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatMsg</div></pre></td></tr></table></figure>
-
-
- public class ChatMsg implements Serializable {
-        /**
-         * 发送者用户id
-         */
-    private String senderId;
-        /**
-         * 接受者用户id
-         */
-    private String receiverId;
-        /**
-         * 消息内容
-         */
-    private String msg;
-        /**
-         * 消息id:用于签收
-         */
-    private String msgId;
-  }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 14.2 ChatHandler</div></pre></td></tr></table></figure>
-
-
-   @Override
-    protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) throws Exception {
-        String content = msg.text();
-        //1.获取客户端传过来的消息
-        DataContent dataContent = JsonUtils.jsonToPojo(content, DataContent.class);
-        int action = dataContent.getAction();
-        //2.根据消息类型做不同的处理
-        if(action == MsgActionEnum.CONNECT.type){
-            //2.1 当websocket第一次open时候,初始化channel,把用的 channel和userid关联起来
-
-        }else if(action == MsgActionEnum.CHAT.type){
-            //2.2 聊天类型的消息,把聊天记录保存到数据库,同时标记消息的签收状态【未签收】
-        }else if(action == MsgActionEnum.SIGNED.type){
-            //2.3 签收消息类型,针对具体消息进行签收,修改数据库对应消息的签收状态【已签收】
-        }else if(action == MsgActionEnum.KEEPALIVE.type){
-            //2.4 心跳类型消息
-        }
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15 chatHandler - 处理客户端连接  </div><div class="line">##### 15.1 定义用户和channel的关联</div></pre></td></tr></table></figure>
-
-
-      /**
-     * 用户和channel关联表
-     * @author yxm
-     */
-    public class UserChannelRe {
-        private static Map&lt;String,Channel&gt; manager = new HashMap&lt;String,Channel&gt;();
-
-        public static void put(String userId,Channel channel){
-            manager.put(userId,channel);
-        }
-
-        public static Channel get(String userId){
-           return manager.get(userId);
-        }
-    }
-
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 15.2 ChatHandler处理  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/12/203.png)   </div><div class="line"></div><div class="line">##### 16 chatHandler - 保存聊天消息到数据库  </div><div class="line">###### 16.1 saveChatMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/1.png) </div><div class="line">###### 16.2 ChatHandler  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/01/2.png) </div><div class="line"></div><div class="line">###### 16.3 SpringUtil</div></pre></td></tr></table></figure>
-
-
-  public class SpringUtil implements ApplicationContextAware {
-
-    private static ApplicationContext applicationContext;
-
-    @Override
-    public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
-        if (SpringUtil.applicationContext == null) {
-            SpringUtil.applicationContext = applicationContext;
-        }
-    }
-
-    // 获取applicationContext
-    public static ApplicationContext getApplicationContext() {
-        return applicationContext;
-    }
-
-    // 通过name获取 Bean.
-    public static Object getBean(String name) {
-        return getApplicationContext().getBean(name);
-    }
-
-    // 通过class获取Bean.
-    public static &lt;T&gt; T getBean(Class&lt;T&gt; clazz) {
-        return getApplicationContext().getBean(clazz);
-    }
-
-    // 通过name,以及Clazz返回指定的Bean
-    public static &lt;T&gt; T getBean(String name, Class&lt;T&gt; clazz) {
-        return getApplicationContext().getBean(name, clazz);
-    }
-    }
-
- ```
-</code></pre><h5 id="17-chatHandler-处理消息发送"><a href="#17-chatHandler-处理消息发送" class="headerlink" title="17 chatHandler - 处理消息发送"></a>17 chatHandler - 处理消息发送</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/2.png" alt=""> </p>
-<h5 id="18-chatHandler-签收单条或多条消息"><a href="#18-chatHandler-签收单条或多条消息" class="headerlink" title="18 chatHandler - 签收单条或多条消息"></a>18 chatHandler - 签收单条或多条消息</h5><p>1.签收:不是用户行为,用户行为只是已读和未读状态,签收是我们把消息 发送到用户手机上,用户接受到了消息<br>2.消息签收时候,需要把客户已经收到的消息的id集合发送到后端,后端批量更新magic_chat_msg表的sign_flag=1<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/3.png" alt="">   </p>
-<p>3.update语句<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/4.png" alt="">  </p>
-<h5 id="19-客户端onopen联调，初始化用户和channel关系"><a href="#19-客户端onopen联调，初始化用户和channel关系" class="headerlink" title="19 客户端onopen联调，初始化用户和channel关系"></a>19 客户端onopen联调，初始化用户和channel关系</h5><h6 id="19-1-app-js中构建模型"><a href="#19-1-app-js中构建模型" class="headerlink" title="19.1.app.js中构建模型"></a>19.1.app.js中构建模型</h6><p>在前端:构建后端对应的模型(ChatMsg,DataContent,MsgActionEnum)对象到前端的app.js中<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/5.png" alt="">  </p>
-<h6 id="19-2-onopen中进行connect消息发送"><a href="#19-2-onopen中进行connect消息发送" class="headerlink" title="19.2.onopen中进行connect消息发送"></a>19.2.onopen中进行connect消息发送</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/6.png" alt="">  </p>
-<h6 id="19-3-channelRead0消息打印"><a href="#19-3-channelRead0消息打印" class="headerlink" title="19.3.channelRead0消息打印"></a>19.3.channelRead0消息打印</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/7.png" alt="">  </p>
-<h5 id="20-客户端发送消息与接收联调"><a href="#20-客户端发送消息与接收联调" class="headerlink" title="20 客户端发送消息与接收联调"></a>20 客户端发送消息与接收联调</h5><p>1.发送消息是执行MsgActionEnum.CHAT<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/8.png" alt="">  </p>
-<h5 id="21-接收方获得消息后重构渲染"><a href="#21-接收方获得消息后重构渲染" class="headerlink" title="21 接收方获得消息后重构渲染"></a>21 接收方获得消息后重构渲染</h5><p>1.接收消息就是在接收方的wsmessage进行渲染<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/9.png" alt="">  </p>
-<h5 id="22-客户端签收消息"><a href="#22-客户端签收消息" class="headerlink" title="22 客户端签收消息"></a>22 客户端签收消息</h5><p>1.消息的签收,分为单签和多签<br>2.单签:聊天过程中,朋友发送一条,自己签收一条,在wsmessage出签收<br>3.多签:朋友刚开始没有聊天,没有打开手机,在朋友首次打开手机时候,会有多条消息推送过来,此时会有一个统一的批量签收,这样子就是多签和批量签收  </p>
-<h6 id="22-1-客户端单签收消息"><a href="#22-1-客户端单签收消息" class="headerlink" title="22.1 客户端单签收消息"></a>22.1 客户端单签收消息</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/10.png" alt=""> </p>
-<h5 id="23-websocket新增好友类型联调"><a href="#23-websocket新增好友类型联调" class="headerlink" title="23 websocket新增好友类型联调"></a>23 websocket新增好友类型联调</h5><p>1.我们进行好友请求时候,好友的关系是双方的,请求方发送消息之后,接受方一旦同意了我们的请求之后,接受方会查询自己的记录,然后在通讯录进行相应渲染，代码如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/11.png" alt=""></p>
-<p>2.对于接受者没有问题了,但是对于发送者,其实也需要获取到朋友通知,然后更新好友列表,此时我们需要使用netty的channel发送一份请求。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/12.png" alt=""></p>
-<p>3.前端app.js补充消息类型<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/13.png" alt="">  </p>
-<p>4.在前端消息处,获取消息是DataContent,做一个判断,拉取好友列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/14.png" alt=""> </p>
-<p>5.在后端发送消息统一用DataContent,而不是ChatMsg<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/15.png" alt=""> </p>
-<p>6.注册SpringUtil在Spring容器里面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/16.png" alt=""><br>可以看到获取的applicationContext为空,原因就是SpringUtil没有在Spring中创建对象管理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/17.png" alt=""> </p>
-<h5 id="24-保存聊天记录到本地"><a href="#24-保存聊天记录到本地" class="headerlink" title="24 保存聊天记录到本地"></a>24 保存聊天记录到本地</h5><p>在两种情况下会触发保存消息<br>1.用户发送聊天消息出去<br>2.websocket中在接收到用户消息时候:wsmessage会把消息保存到本地<br>3.以上两种消息是不同的我们会分开定义:我的消息,朋友的消息<br>4.保存到本地的消息我们需要缓存的key:我的消息:my+msgId  朋友消息:friend+msgId  </p>
-<h6 id="24-1-我们在app-js中做保存"><a href="#24-1-我们在app-js中做保存" class="headerlink" title="24.1 我们在app.js中做保存"></a>24.1 我们在app.js中做保存</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/18.png" alt=""> </p>
-<h5 id="25-从本地获取聊天记录"><a href="#25-从本地获取聊天记录" class="headerlink" title="25 从本地获取聊天记录"></a>25 从本地获取聊天记录</h5><p>用户在打开聊天记录之后,会获取聊天记录进行渲染  </p>
-<h6 id="1-在app-js中获取聊天记录"><a href="#1-在app-js中获取聊天记录" class="headerlink" title="1.在app.js中获取聊天记录"></a>1.在app.js中获取聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/19.png" alt="">   </p>
-<h6 id="2-在接收消息出保存聊天记录"><a href="#2-在接收消息出保存聊天记录" class="headerlink" title="2.在接收消息出保存聊天记录"></a>2.在接收消息出保存聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/20.png" alt=""></p>
-<h6 id="3-在发送消息出保存聊天记录"><a href="#3-在发送消息出保存聊天记录" class="headerlink" title="3.在发送消息出保存聊天记录"></a>3.在发送消息出保存聊天记录</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/21.png" alt=""></p>
-<h5 id="26-初始化聊天记录和渲染"><a href="#26-初始化聊天记录和渲染" class="headerlink" title="26 初始化聊天记录和渲染"></a>26 初始化聊天记录和渲染</h5><p>1.把我们的html代码做一个整合,之前的聊天信息做一个动态的配置。 把chatting.html中的<div id="msg">下的代码做了一个删除,然后动态绑定。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/28.png" alt=""><br>2.定义一个初始化聊天消息的方法,动态拼接上面的聊天信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/29.png" alt=""><br>3.在初始化时候调用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/30.png" alt="">  </div></p>
-<h5 id="27-聊天快照业务简单讲解"><a href="#27-聊天快照业务简单讲解" class="headerlink" title="27 聊天快照业务简单讲解"></a>27 聊天快照业务简单讲解</h5><p>1.在app首页会展示和哪个朋友的聊天信息,针对最新的聊天记录会逐个显示,并且对于只会显示一条最新的最近的记录,我们叫做快照。<br>2.只要我们和谁进行过聊天,就会把最新的聊天消息展示到顶端。  </p>
-<h5 id="28-保存聊天快照到本地"><a href="#28-保存聊天快照到本地" class="headerlink" title="28 保存聊天快照到本地"></a>28 保存聊天快照到本地</h5><p>1.之前我们保存用户聊天记录到本地,现在我们需要保存用户聊天快照到本地<br>2.保存聊天快照时候,需要查看此朋友的聊天快照是否含有,没有的话就添加到首部,有的话删除原来的,再添加到首部<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/31.png" alt=""> </p>
-<h5 id="29-获取聊天快照"><a href="#29-获取聊天快照" class="headerlink" title="29 获取聊天快照"></a>29 获取聊天快照</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/32.png" alt=""> </p>
-<h5 id="30-已读未读消息的设置与快照调用"><a href="#30-已读未读消息的设置与快照调用" class="headerlink" title="30 已读未读消息的设置与快照调用"></a>30 已读未读消息的设置与快照调用</h5><p>1.之前我们保存用户聊天历史消息时候是在两个地方: a.发送用户消息  b.接收用户消息<br>2.保存用户快照信息:a.发送用户消息(消息从我发送出去,此时消息肯定是已读)  b.接收用户消息(两种情况:用户加入停留在当前页面/首页/聊天快照页面,此时聊天消息是未读的,如果当前是聊天页面互动时候,此时聊天页面是已读的)  </p>
-<h6 id="30-1-发送用户消息"><a href="#30-1-发送用户消息" class="headerlink" title="30.1 发送用户消息"></a>30.1 发送用户消息</h6><p>消息从我发送出去,此时消息肯定是已读<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/33.png" alt=""></p>
-<h6 id="30-2-接收用户消息"><a href="#30-2-接收用户消息" class="headerlink" title="30.2 接收用户消息"></a>30.2 接收用户消息</h6><p>两种情况:用户加入停留在当前页面/首页/聊天快照页面,此时聊天消息是未读的,如果当前是聊天页面互动时候,此时聊天页面是已读的<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/34.png" alt="">  </p>
-<h5 id="31-展示聊天快照"><a href="#31-展示聊天快照" class="headerlink" title="31 展示聊天快照"></a>31 展示聊天快照</h5><p>1.聊天信息是在chatlist.html里面进行展示的,所以我们在这里面添加对应的方法loadingChatSnapshot.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/42.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/37.png" alt=""><br>2.在app.js中根据聊天的frendId从本地联系人列表的缓存中拿到相关信息:getFriendFromContactList<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/38.png" alt=""><br>3.我们在接收到消息和发送消息时候需要加载快照:loadingChatSnapshot<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/39.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/40.png" alt=""></p>
-<p>4.效果图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/41.png" alt="">  </p>
-<h5 id="32-未读消息小红点标记"><a href="#32-未读消息小红点标记" class="headerlink" title="32 未读消息小红点标记"></a>32 未读消息小红点标记</h5><p>1.聊天时候,如果我们的消息不是在聊天框所在页面里面时候,我们的消息就是未读消息,我们用一个小红点标记消息是不是已读/未读<br>2.添加red-point样式来标识未读消息    </p>
-<p>3.在聊天朋友页面上加上一个span标签,并且添加上red-point样式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/43.png" alt="">    </p>
-<p>4.在loadingChatSnapshot里面写方法,获取isRead,如果是未读的:添加两块html代码<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/44.png" alt="">    </p>
-<h5 id="33-点击快照开始聊天"><a href="#33-点击快照开始聊天" class="headerlink" title="33 点击快照开始聊天"></a>33 点击快照开始聊天</h5><p>1.在contact.html中我们绑定了一个事件:点击通讯录时候会打开一个新的页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/45.png" alt=""><br>2.我们把上面代码拷贝到chatlist.html页面中,然后点击快照时候绑定一个事件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/46.png" alt=""><br>3.绑定到li标签,所以添加class=’’，由于绑定标签之后需要获取朋友的friendUserId，friendNickname，friendFaceImage所以我们需要在loadingChatSnapshot时候拼接上朋友信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/01/47.png" alt="">  </p>
-<h5 id="34-未读消息标记已读"><a href="#34-未读消息标记已读" class="headerlink" title="34 未读消息标记已读"></a>34 未读消息标记已读</h5><h5 id="35-开发获取未读消息列表接口"><a href="#35-开发获取未读消息列表接口" class="headerlink" title="35 开发获取未读消息列表接口"></a>35 开发获取未读消息列表接口</h5><h5 id="36-前端获取未读消息列表"><a href="#36-前端获取未读消息列表" class="headerlink" title="36 前端获取未读消息列表"></a>36 前端获取未读消息列表</h5><h5 id="37-批量签收并且展示未读消息"><a href="#37-批量签收并且展示未读消息" class="headerlink" title="37 批量签收并且展示未读消息"></a>37 批量签收并且展示未读消息</h5><h5 id="38-聊天快照左滑删除效果"><a href="#38-聊天快照左滑删除效果" class="headerlink" title="38 聊天快照左滑删除效果"></a>38 聊天快照左滑删除效果</h5><h5 id="39-聊天快照右滑删除聊天记录与快照"><a href="#39-聊天快照右滑删除聊天记录与快照" class="headerlink" title="39 聊天快照右滑删除聊天记录与快照"></a>39 聊天快照右滑删除聊天记录与快照</h5>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/12/16/netty实践-二十-聊天页面制作/" class="archive-article-date">
-  	<time datetime="2018-12-16T11:50:37.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-12-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/3/">&laquo; Prev</a><a class="page-number" href="/">1</a><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="page-number current">4</span><a class="page-number" href="/page/5/">5</a><a class="page-number" href="/page/6/">6</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/5/">Next &raquo;</a>
@@ -1598,7 +1333,7 @@ protected void channelRead0(ChannelHandlerContext ctx, TextWebSocketFrame msg) t
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15.56px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
