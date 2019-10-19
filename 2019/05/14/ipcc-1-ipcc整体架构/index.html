@@ -71,7 +71,8 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/110.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/111.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/109.png">
-<meta property="og:updated_time" content="2019-10-08T15:29:53.842Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/08/114.png">
+<meta property="og:updated_time" content="2019-10-19T15:18:03.913Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ipcc-1-ipcc整体架构">
 <meta name="twitter:description" content="1.ipcc总体架构模块 
@@ -350,6 +351,17 @@
 <ol>
 <li>1.进入daserver所在目录下执行后台启动指令:<br>nohup ./daserver &amp;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/109.png" alt="">  </li>
 </ol>
+<h4 id="10-定时备份日志"><a href="#10-定时备份日志" class="headerlink" title="10.定时备份日志"></a>10.定时备份日志</h4><ol>
+<li><p>1.编写clearlog.sh  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /cc/log/bak</div><div class="line">find /cc/bin/log -mtime +1 -type f -name &quot;log*.log&quot; -exec mv &#123;&#125; /cc/log/bak/. \;</div><div class="line">tar zcvf fslog$(date +&quot;%Y%m%d%H%M&quot;)tar.gz log*.log </div><div class="line">rm -f log*.log</div><div class="line">find /cc/log -mtime +1 -type f -name &quot;*.log&quot; -exec mv &#123;&#125; /cc/log/bak/. \;</div><div class="line">tar zcvf log$(date +&quot;%Y%m%d%H%M&quot;).log.tar.gz *.log </div><div class="line">rm -f *.log</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.添加到系统定时任务中去<br>a.在root下执行 crontab -e<br>b.将0 0 <em> </em> *  /cc/bin/cleanlog.sh &gt; /dev/null 2&gt;&amp;1 放进去 保存退出。</p>
+</li>
+<li><p>3.运维查询每天日志的最小、最大拨打时间  </p>
+<pre><code>SELECT MIN(starttime),MAX(starttime),SUBSTRING(starttime,1,10) FROM cti_cdr WHERE entid = 1308 GROUP BY SUBSTRING(starttime,1,10) ORDER BY starttime ASC;
+</code></pre></li>
+</ol>
+<h4 id="11-停止掉空号检测"><a href="#11-停止掉空号检测" class="headerlink" title="11.停止掉空号检测"></a>11.停止掉空号检测</h4><p>1.进入:/cc/freeswitch/conf;不是删除da2.json<br>2.注释掉:load mod_da2<br>进入:/cc/freeswitch/conf/autoload_configs找到文件:modules.conf.xml<br>然后注释掉:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/114.png" alt="">  </p>
 
       
     </div>
