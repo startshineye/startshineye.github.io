@@ -184,7 +184,44 @@
 </ol>
 <p>配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/87.png" alt=""><br>启动如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/88.png" alt="">  </p>
 <p>postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/89.png" alt=""><br>产生的结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/90.png" alt=""> </p>
-<h3 id="2-实战之apacheLogs（上）"><a href="#2-实战之apacheLogs（上）" class="headerlink" title="2 -实战之apacheLogs（上）"></a>2 -实战之apacheLogs（上）</h3><h3 id="3-实战之apacheLogs（下）"><a href="#3-实战之apacheLogs（下）" class="headerlink" title="3 实战之apacheLogs（下）"></a>3 实战之apacheLogs（下）</h3><h3 id="4-实战之csv"><a href="#4-实战之csv" class="headerlink" title="4 实战之csv"></a>4 实战之csv</h3><h3 id="5-监控运维建议"><a href="#5-监控运维建议" class="headerlink" title="5 监控运维建议"></a>5 监控运维建议</h3>
+<h3 id="2-实战之apacheLogs（上）"><a href="#2-实战之apacheLogs（上）" class="headerlink" title="2 -实战之apacheLogs（上）"></a>2 -实战之apacheLogs（上）</h3><p>收集Apache日志:Apache日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/91.png" alt="">  </p>
+<ol>
+<li><p>1.事先准备好apache_logs<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/92.png" alt="">  </p>
+</li>
+<li><p>2.查看apache日志:apache_logs如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/93.png" alt="">   </p>
+</li>
+<li><p>3.编写logstash配置文件  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">      [root@sindvision02 apache_logs]# vim ls.conf</div><div class="line">input&#123;</div><div class="line">   http&#123;</div><div class="line">     port=&gt;7474</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">output&#123;</div><div class="line">   stdout&#123;codec=&gt;rubydebug&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>4.启动</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">bin/logstash -f /workspace/elasticstack/logstash/demo_data/apache_logs/ls.conf -r</div></pre></td></tr></table></figure>
+</li>
+<li><p>5.测试<br>postman中输入:    </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">83.149.9.216 - - [17/May/2015:10:05:03 +0000] &quot;GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1&quot; 200 203023 &quot;http://semicomplete.com/presentations/logstash-monitorama-2013/&quot; &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36&quot;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>结果为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/94.png" alt="">  </p>
+<p>上面我们看到headers字段出现,现在我们想去除掉headers字段,添加filter如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/95.png" alt="">  </p>
+<p>再次请求,结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/96.png" alt="">  </p>
+<p>接着我们需要查分分解message,我们使用grok表达式:<br>1）进入grok的debugger调试官网:<br><a href="http://grokdebug.herokuapp.com/" target="_blank" rel="external">http://grokdebug.herokuapp.com/</a>  </p>
+<p>2）在Discover栏,输入此日志文件,找到对应的配置grok表达式:%{COMBINEDAPACHELOG}<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/97.png" alt="">  </p>
+<p>3）在debugger下测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/98.png" alt="">  </p>
+<p>4）有时候Discover的功能不是很准,需要自己写Patterns<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/99.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/100.png" alt="">  </p>
+<p>我们现在以:%{COMMONAPACHELOG}作为filter的解析  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line"> grok&#123;</div><div class="line">match=&gt;&#123;</div><div class="line"> &quot;message&quot;=&gt;&quot;%&#123;COMMONAPACHELOG&#125;&quot;</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>测试结果如下:我们发现结果是没有问题了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/101.png" alt=""> </p>
+<p>接下来,我们又不想展示message了,我们在filter里面添加:remove_field<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/102.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/103.png" alt="">  </p>
+<p>我们从上面看到时间有两条:@timestamp(写入日志的时间:当前操作时间)和timestamp(appache日志的时间)时间。现在我们把timestamp变换到@timestamp 并且保留@timestamp时间。我们把@timestamp复制一份叫做@read_timestamp。<br>我们添加mutate:注意现在版本是v7.1,在v6.1的版本下是不支持这个copy的可以使用ruby<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mutate&#123;</div><div class="line">   copy=&gt;&#123;&quot;@timestamp&quot;=&gt;&quot;@read_timestamp&quot;&#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>等同于：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ruby&#123;code=&gt;&quot;event.set(&apos;@read_timestamp&apos;,event.get(&apos;@timestamp&apos;))&quot;&#125;</div></pre></td></tr></table></figure></p>
+<p>我们使用date插件实现把timestamp变换到@timestamp。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">date&#123;</div><div class="line">   match=&gt;[&quot;timestamp&quot;,&quot;dd/MMM/yyyy:HH:mm:ss Z&quot;]</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/104.png" alt=""><br>再到mutate中remove掉timestamp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mutate&#123;</div><div class="line">   remove_field=&gt;[&apos;headers&apos;,&apos;message&apos;,&apos;timestamp&apos;]</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/105.png" alt="">  </p>
+<p>同时clientip我们能够使用geoip增加地理位置数据。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">geoip&#123;</div><div class="line">   source=&gt;&quot;clientip&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>请求测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/106.png" alt="">  </p>
+<p>有时候我们不希望geoip展示的信息那么多,所以我们看官方文档可否进行缩减。<br>我们在谷歌搜索即可:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/107.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">geoip&#123;</div><div class="line">   source=&gt;&quot;clientip&quot;</div><div class="line">   fields=&gt;[&quot;location&quot;,&quot;country_name&quot;,&quot;city_name&quot;,&quot;region_name&quot;]</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/108.png" alt="">  </p>
+<h3 id="3-实战之apacheLogs（下）"><a href="#3-实战之apacheLogs（下）" class="headerlink" title="3 实战之apacheLogs（下）"></a>3 实战之apacheLogs（下）</h3><h3 id="4-实战之csv"><a href="#4-实战之csv" class="headerlink" title="4 实战之csv"></a>4 实战之csv</h3><h3 id="5-监控运维建议"><a href="#5-监控运维建议" class="headerlink" title="5 监控运维建议"></a>5 监控运维建议</h3>
       
     </div>
     <div class="article-info article-info-index">
