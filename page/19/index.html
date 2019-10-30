@@ -152,6 +152,111 @@
       <div class="body-wrap">
         
   
+    <article id="post-vue-16-过渡-JavaScript过渡" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/10/31/vue-16-过渡-JavaScript过渡/">vue(16)-过渡-JavaScript过渡</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
+<li>Vue.js可以和一些JavaScript动画库配合使用,只需要调用JavaScript钩子函数,不需要定义CSS样式。  </li>
+<li>transition接受选项css:false,将直接跳过CSS检测,避免CSS规则干扰过渡,而且需要在enter和leave钩子函数中调用done函数,明确过渡结束时间。</li>
+<li>引入Velocity.js来配合使用JavaScript过渡。</li>
+</ol>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Velocity-js"><a href="#1-Velocity-js" class="headerlink" title="1.Velocity.js"></a>1.Velocity.js</h5><p>Velocity.js是一款高效的动画引擎,可以单独使用也可以配合jQuery使用。它拥有和<br>jQuery的animate一样的api接口,但比jQuery在动画处理方面更强大、更流畅，以及模拟了一些现实世界的运动,例如弹性动画等。  </p>
+<p>Velocity.js 可以当做jQuery 的插件使用，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">$element.velocity(&#123; left: &quot;100px&quot;&#125;, 500, &quot;swing&quot;, function()&#123;</div><div class="line">  console.log(&quot;done&quot;)&#125;);</div><div class="line">  $element.velocity(&#123; left: &quot;100px&quot;&#125;, &#123;</div><div class="line">    duration: 500,　</div><div class="line">    easing: &quot;swing&quot;,</div><div class="line">    complete : function()&#123;console.log(&quot;done&quot;);</div><div class="line">   &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
+</code></pre><p>也可以单独使用，例如：  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">var el = document.getElementById(id);</div><div class="line">Velocity(el, &#123; left : &apos;100px&apos; &#125;, 500, &apos;swing&apos;, done);</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-JavaScript过渡使用"><a href="#2-JavaScript过渡使用" class="headerlink" title="2.JavaScript过渡使用"></a>2.JavaScript过渡使用</h5><p>我们可以通过以下方式注册一个自定义的JavaScript过渡：  </p>
+<pre><code>```
+&lt;script src=&quot;../js/vue.js&quot;&gt;&lt;/script&gt;
+&lt;script src=&quot;../js/velocity.js&quot;&gt;&lt;/script&gt;
+&lt;link rel=&quot;stylesheet&quot; type=&quot;text/css&quot; href=&quot;../css/animate.css&quot; media=&quot;all&quot;&gt;
+&lt;style&gt;
+    .my-velocity-transition{
+        position:absolute;
+        top:0px;
+        width:100px;
+        height: 100px;
+        background: chartreuse;
+    }
+&lt;/style&gt;
+
+ &lt;div id=&quot;app&quot;&gt;
+ &lt;div v-if=&quot;velocity&quot; transition=&quot;my-velocity&quot;&gt;&lt;/div&gt;
+ &lt;/div&gt;
+
+Vue.transition(&apos;my-velocity&apos;,{
+    css:false,
+    enter:function(el,done){
+      Velocity(el,{left:&apos;100px&apos;},500,&apos;swing&apos;,done);
+      console.log(&apos;enter&apos;,el.className);
+    },
+    enterCancelled:function(el){
+      Velocity(el,&apos;stop&apos;);
+      console.log(&apos;enterCancelled&apos;,el.className);
+    },
+    leave:function(el,done){
+        Velocity(el,{left:&apos;0px&apos;},500,&apos;swing&apos;,done);
+        console.log(&apos;leave&apos;,el.className);
+    },
+    leaveCancelled:function(el){
+        Velocity(el,&apos;stop&apos;);
+    }
+});
+var vm = new Vue({
+    el:&quot;#app&quot;,
+    data:{
+        velocity:false
+    }
+});
+``` 
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/52.gif" alt="">  </p>
+<p>运行上述代码，在设置vm.velocity = true 后，过渡系统即会调用enter 钩子函数，通<br>过Velocity 对DOM 操作展现动画效果，然后强制调用done 函数，明确结束过渡效果。 </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/10/31/vue-16-过渡-JavaScript过渡/" class="archive-article-date">
+  	<time datetime="2017-10-31T11:30:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-31</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-vue-15-过渡-CSS过渡" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -807,77 +912,6 @@ var vm = new Vue({
 
 
   
-    <article id="post-vue-6-Class与Style绑定" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/10/28/vue-6-Class与Style绑定/">vue(6)-Class与Style绑定</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>在开发过程中，我们经常会遇到动态添加类名或直接修改内联样式（例如tab 切换）。</li>
-<li>class 和style 都是DOM 元素的attribute，我们当然可以直接使用v-bind 对这两个属性进行数据绑定，例如<p v-bind:style="style"></p><p>，然后通过修改vm.style 的值对元素样式进行<br>修改。但这样未免过于繁琐而且容易出错，所以Vue.js 为这两个属性单独做了增强处理，表<br>达式的结果类型除了字符串之外，还可以是对象和数组。</p></li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-Class绑定"><a href="#1-Class绑定" class="headerlink" title="1.Class绑定"></a>1.Class绑定</h5><p>首先说明的是class 属性，我们绑定的数据可以是对象和数组。<br>基本js如下:  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">var vm = new Vue(&#123;</div><div class="line">    el:&quot;#app&quot;,</div><div class="line">    data:&#123;</div><div class="line">        active:true,</div><div class="line">        classA:&apos;class-a&apos;,</div><div class="line">        classB:&apos;class-b&apos;,</div><div class="line">        isB:false,</div><div class="line">        objStyle:&#123;</div><div class="line">            color:&apos;red&apos;,</div><div class="line">            fontSize:&apos;20px&apos;</div><div class="line">        &#125;,</div><div class="line">        styleA:&#123;</div><div class="line">            color:&apos;blue&apos;,</div><div class="line">            fontSize:&apos;12px&apos;</div><div class="line">        &#125;,</div><div class="line">        styleB:&#123;</div><div class="line">           width:&apos;45px&apos;,</div><div class="line">            height:&apos;45px&apos;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><h6 id="1-1-对象语法"><a href="#1-1-对象语法" class="headerlink" title="1.1.对象语法"></a>1.1.对象语法</h6><p>对象语法：v-bind:class 接受参数是一个对象，而且可以与普通的class 属性共存。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;div class=&quot;tab&quot; v-bind:class=&quot;&#123;&apos;active&apos;:active,&apos;unactive&apos;:!active&#125;&quot;&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>渲染结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/33.png" alt=""></p>
-<h6 id="1-2-数组语法"><a href="#1-2-数组语法" class="headerlink" title="1.2.数组语法"></a>1.2.数组语法</h6><p>数组语法：v-bind:class 也接受数组作为参数。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;!--数组语法--&gt;</div><div class="line">   &lt;div v-bind:class=&quot;[classA,classB]&quot;&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p>渲染结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/34.png" alt=""></p>
-<h6 id="1-3-三元运算符"><a href="#1-3-三元运算符" class="headerlink" title="1.3.三元运算符"></a>1.3.三元运算符</h6><p>也可以使用三元表达式切换数组中的class，</p>
-<pre><code>&lt;div v-bind:class=&quot;[classA, isB ? classB :、&apos;&apos;]&quot;&gt;&lt;/div&gt;。
-</code></pre><p>渲染结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/35.png" alt=""></p>
-<h5 id="2-内联样式绑定"><a href="#2-内联样式绑定" class="headerlink" title="2.内联样式绑定"></a>2.内联样式绑定</h5><p>style属性绑定的数据即为内联样式,同样具备有对象和数组两种方式。  </p>
-<h6 id="2-1对象语法"><a href="#2-1对象语法" class="headerlink" title="2.1对象语法"></a>2.1对象语法</h6><p>对象语法：直接绑定符合样式格式的对象。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/36.png" alt=""></p>
-<p>除了直接绑定对象外，也可以绑定单个属性或直接使用字符串。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">&lt;div v-bind:style=&quot;&#123; fontSize : objStyle.fontSize, color : &apos;red&apos;&#125;&quot;&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-2-数组语法"><a href="#2-2-数组语法" class="headerlink" title="2.2 数组语法"></a>2.2 数组语法</h6><p>数组语法：v-bind:style 允许将多个样式对象绑定到统一元素上。</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">&lt;!--style数组绑定--&gt;</div><div class="line">   &lt;div v-bind:style=&quot;[styleA,styleB]&quot;&gt;&lt;/div&gt;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/10/37.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/10/28/vue-6-Class与Style绑定/" class="archive-article-date">
-  	<time datetime="2017-10-28T08:43:05.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-10-28</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/18/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/17/">17</a><a class="page-number" href="/page/18/">18</a><span class="page-number current">19</span><a class="page-number" href="/page/20/">20</a><a class="page-number" href="/page/21/">21</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/20/">Next &raquo;</a>
@@ -943,7 +977,7 @@ var vm = new Vue({
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 15.56px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
