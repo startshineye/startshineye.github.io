@@ -219,7 +219,38 @@ json.add_error_key: true
 <h4 id="2-Filebeat运行-d-“publish”"><a href="#2-Filebeat运行-d-“publish”" class="headerlink" title="2.Filebeat运行-d  “publish”"></a>2.Filebeat运行-d  “publish”</h4><ol>
 <li>1.区别:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/135.png" alt="">  </li>
 </ol>
-<h3 id="15-3-Filebeat-简介及流程介绍"><a href="#15-3-Filebeat-简介及流程介绍" class="headerlink" title="15-3 Filebeat 简介及流程介绍"></a>15-3 Filebeat 简介及流程介绍</h3><h3 id="15-4-Filebeat常见架构及ingest-node介绍"><a href="#15-4-Filebeat常见架构及ingest-node介绍" class="headerlink" title="15-4 Filebeat常见架构及ingest_node介绍"></a>15-4 Filebeat常见架构及ingest_node介绍</h3><h3 id="15-5-Filebeat-Module简介"><a href="#15-5-Filebeat-Module简介" class="headerlink" title="15-5 Filebeat_Module简介"></a>15-5 Filebeat_Module简介</h3>
+<h3 id="15-3-Filebeat-简介及流程介绍"><a href="#15-3-Filebeat-简介及流程介绍" class="headerlink" title="15-3 Filebeat 简介及流程介绍"></a>15-3 Filebeat 简介及流程介绍</h3><ol>
+<li>1.filebeat读取日志文件,但不做数据的解析处理。  </li>
+<li>2.保证数据”At Least Once”至少被读取一次,即数据不会丢。(但是有可能数据会重复消费)  </li>
+<li>3.其他能力<br>-处理多行数据<br>-解析JSON格式数据<br>-简单的过滤功能  </li>
+<li><p>4.fileBeat原理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/136.png" alt=""><br>-filebeat有多个Prospector,Prospector用来监听指定的log文件,每个log文件有一个harvester对文件里面的日志进行实时读取,读取日志后通过Spooler输出日志文件到:es,logstash,kafka,redis各种数据源。  </p>
+</li>
+<li><p>5.filebeat的流程<br>a.安装-开箱即用(下载对应执行文件即可运行)<br>b.配置-filebeat.yml<br>c.配置模板-index template(数据建模:指定设置的数据字段类型,是否需要分词)<br>d.配置Kibana Dashboards(为数据可视化做准备)<br>e.运行  </p>
+</li>
+<li><p>6.Filebeat配置-filebeat.yml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/137.png" alt="">  </p>
+</li>
+<li><p>7.Filebeat配置模板-index template<br>index template作用就是之前我们说es的时候,我们设置的模板。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/138.png" alt="">  </p>
+</li>
+<li><p>8.nginx_fields.yml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/139.png" alt=""><br>我们执行./filebeat export config就可以看到filebeat详细的配置信息。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/140.png" alt=""><br>我们执行./filebeat export template | more<br>就可以看到filebeat详细的配置信息。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/141.png" alt="">  </p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/142.png" alt=""> </p>
+<ol>
+<li>9.Filebeat运行<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/143.png" alt="">  </li>
+</ol>
+<h3 id="15-4-Filebeat常见架构及ingest-node介绍"><a href="#15-4-Filebeat常见架构及ingest-node介绍" class="headerlink" title="15-4 Filebeat常见架构及ingest_node介绍"></a>15-4 Filebeat常见架构及ingest_node介绍</h3><h4 id="Filebeat架构一"><a href="#Filebeat架构一" class="headerlink" title="Filebeat架构一"></a>Filebeat架构一</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/144.png" alt=""><br>filebeat采集日志-&gt;将日志发送到logstash(logstash做一些日志复杂处理:比如:grok解析等)–&gt;然后logstash将查询的日志放在es中存储、查询。–&gt;最后kibana做可视化展示  </p>
+<h4 id="Filebeat架构二"><a href="#Filebeat架构二" class="headerlink" title="Filebeat架构二"></a>Filebeat架构二</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/145.png" alt="">  </p>
+<ol>
+<li>1.Elasticsearch Ingest Node<br>5.x新增的一个节点<br>-在数据写入es前(bulk/index操作)对数据进行处理<br>-可设置独立的ingest node专门进行数据转换处理  node.ingest:true<br>-api endpoint为pipeline </li>
+<li>2.Pipeline由一系列processor组成,类似于logstash的filter plugin,数据处理完之后就会流转到es中  </li>
+<li><p>3.Pipeline的API比较简单,主要有如下4个:<br>-创建PUT<br>-获取GET<br>-删除DELETE<br>-模拟调试SIMULATE(必须重点掌握的api)  </p>
+</li>
+<li><p>4.PUT/GET/DELETE处理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/146.png" alt="">  </p>
+</li>
+<li><p>5.SIMULATE<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/147.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="15-5-Filebeat-Module简介"><a href="#15-5-Filebeat-Module简介" class="headerlink" title="15-5 Filebeat_Module简介"></a>15-5 Filebeat_Module简介</h3>
       
     </div>
     <div class="article-info article-info-index">
