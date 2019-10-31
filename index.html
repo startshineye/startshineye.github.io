@@ -239,7 +239,7 @@ json.add_error_key: true
 <li>9.Filebeat运行<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/143.png" alt="">  </li>
 </ol>
 <h3 id="15-4-Filebeat常见架构及ingest-node介绍"><a href="#15-4-Filebeat常见架构及ingest-node介绍" class="headerlink" title="15-4 Filebeat常见架构及ingest_node介绍"></a>15-4 Filebeat常见架构及ingest_node介绍</h3><h4 id="Filebeat架构一"><a href="#Filebeat架构一" class="headerlink" title="Filebeat架构一"></a>Filebeat架构一</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/144.png" alt=""><br>filebeat采集日志-&gt;将日志发送到logstash(logstash做一些日志复杂处理:比如:grok解析等)–&gt;然后logstash将查询的日志放在es中存储、查询。–&gt;最后kibana做可视化展示  </p>
-<h4 id="Filebeat架构二"><a href="#Filebeat架构二" class="headerlink" title="Filebeat架构二"></a>Filebeat架构二</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/145.png" alt="">  </p>
+<h4 id="Filebeat架构二"><a href="#Filebeat架构二" class="headerlink" title="Filebeat架构二"></a>Filebeat架构二</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/145.png" alt=""><br>fileeat收集日志—-&gt;elasticseach的Ingest Node(具有数据处理能力)—&gt;kibana做数据分析  </p>
 <ol>
 <li>1.Elasticsearch Ingest Node<br>5.x新增的一个节点<br>-在数据写入es前(bulk/index操作)对数据进行处理<br>-可设置独立的ingest node专门进行数据转换处理  node.ingest:true<br>-api endpoint为pipeline </li>
 <li>2.Pipeline由一系列processor组成,类似于logstash的filter plugin,数据处理完之后就会流转到es中  </li>
@@ -247,10 +247,46 @@ json.add_error_key: true
 </li>
 <li><p>4.PUT/GET/DELETE处理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/146.png" alt="">  </p>
 </li>
-<li><p>5.SIMULATE<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/147.png" alt="">  </p>
+<li><p>5.SIMULATE<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/147.png" alt=""><br>a.一种是没有创建pipeline的时候,通过pipeline的参数指定(把具体pipeline的内容放到里面),然后通过docs参数作为模拟测试(把要测试的文档放在source里面)。<br>b.如果pipeline已经创建的话(比如我们已经创建了test的pipeline),我们可以在后面接入:_simulate作为测试,通过docs指定文档作为测试。   </p>
 </li>
 </ol>
-<h3 id="15-5-Filebeat-Module简介"><a href="#15-5-Filebeat-Module简介" class="headerlink" title="15-5 Filebeat_Module简介"></a>15-5 Filebeat_Module简介</h3>
+<h4 id="Ingest-Node-Kibana操作"><a href="#Ingest-Node-Kibana操作" class="headerlink" title="Ingest Node Kibana操作"></a>Ingest Node Kibana操作</h4><ol>
+<li><p>1.创建pipeline<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/148.png" alt="">  </p>
+</li>
+<li><p>2.获取pipeline<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/149.png" alt="">  </p>
+</li>
+<li><p>3.删除pipeline<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/150.png" alt="">  </p>
+</li>
+<li><p>4.模拟调试SIMULATE<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/151.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/152.png" alt="">  </p>
+</li>
+</ol>
+<h4 id="Processor"><a href="#Processor" class="headerlink" title="Processor"></a>Processor</h4><ol>
+<li>1.Processor对应Logstash的Filter Plugin,基本都涵盖了<br>-Convert<br>-Grok<br>-Date<br>-Gsub<br>-Join<br>-Json<br>-Remove<br>-Script  </li>
+</ol>
+<h4 id="注意pipeline的错误处理"><a href="#注意pipeline的错误处理" class="headerlink" title="注意pipeline的错误处理"></a>注意pipeline的错误处理</h4><ol>
+<li>1.注意pipeline处理解析错误的情况的处理<br>-因为在pipeline里面有一个processor,他处理失败了,那么这个pipeline也会挂载到那里,导致后续处理失败,所以大家要注意解析错误的情况,就是on_failure<br>-on_failure就是跟processors平级,我们可以设置其属性及对应的值。他的好处是我们可以把错误信息写到索引里面。<br>-另一种方式我们把on_failure写在processors里面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/153.png" alt="">  </li>
+</ol>
+<h4 id="我们以nginx的日志为例来演示使用pipeline"><a href="#我们以nginx的日志为例来演示使用pipeline" class="headerlink" title="我们以nginx的日志为例来演示使用pipeline"></a>我们以nginx的日志为例来演示使用pipeline</h4><ol>
+<li>1.针对于Ingest中的pipeline,我们有常用的2个插件(ingest-geoip,ingest-user-agent)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/154.png" alt="">  </li>
+<li>2.创建nginx_log的pipeline<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/155.png" alt=""><br>-description-说明此pipeline来解析nginx的log,需要用到geoip,user-agent插件。<br>-Processors里面用到的是grok,里面有一个message,然后是patterns的解析正则。    </li>
+<li>3.然后再simulate<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/156.png" alt=""><br>然后转化为结构化的nginx数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/157.png" alt=""><h4 id="pipeline的使用"><a href="#pipeline的使用" class="headerlink" title="pipeline的使用"></a>pipeline的使用</h4></li>
+<li><p>1.pipeline使用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/158.png" alt="">  </p>
+</li>
+<li><p>2.filebeat可以在output.elasticsearch中指定pipeline,从而数据在流入elasticsearch之后他会先经过pipeline处理,然后才会存到es里面。从而达到对数据预处理的目的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/159.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="15-5-Filebeat-Module简介"><a href="#15-5-Filebeat-Module简介" class="headerlink" title="15-5 Filebeat_Module简介"></a>15-5 Filebeat_Module简介</h3><p>我们接下来看下Filebeat_Module时候,我们再来回顾下:Filebeat流程,流程可以看以下,主要分为以下几个步骤:<br>1.定义数据采集(就是收集数据)—-&gt;filebeat中对应:配置Prospector<br>2.建立数据模型(数据采集之后,我们有哪些字段,以及每个字段的类型,我们需要预先设定好)—–&gt;Index Template<br>3.建立数据处理流程(数据模型有了之后,怎样把采集的数据按照数据模型存储起来,就要建立数据处理流程)—-&gt;Logstash/Ingest Pipeline<br>4.存储并分析数据—-&gt;ES/Kibana Dashboards<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/160.png" alt="">  </p>
+<ol>
+<li><p>2.以上流程比较复杂,能否简化使用流程?能否实现一系列的设定呢?(简化以上4个流程)自动帮我们建立好,答案是可以的就是使用modules    </p>
+</li>
+<li><p>3.filebeat提供了很多开箱即用的Modules,可以通过./filebeat modules list来查看,有以下类型,默认都是Disbled<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/161.png" alt=""><br>如果需要开启使用:./filebeat modules enable nginx  </p>
+</li>
+<li><p>4.以nginx module为例,配置位于module文件夹中,如nginx module(module/nginx)的相关配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/162.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/163.png" alt=""><br>查看module我们发现module很多。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/164.png" alt="">  </p>
+</li>
+<li><p>5.进入nginx的access<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/165.png" alt="">  </p>
+</li>
+</ol>
+
       
     </div>
     <div class="article-info article-info-index">
