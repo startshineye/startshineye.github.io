@@ -152,6 +152,120 @@
       <div class="body-wrap">
         
   
+    <article id="post-Android-19-文件权限" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-19-文件权限/">Android(19)-文件权限</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="文件权限"><a href="#文件权限" class="headerlink" title="文件权限"></a>文件权限</h4><p>文件权限有四种模式<br>写一个小demo,用于文件几个权限介绍  </p>
+<ol>
+<li>1.采用线性垂直布局生成定义四个button，当我们点击button时候会生成相应的权限(画ui)  </li>
+<li>2.对顶button点击后生成对应模式的文件(写逻辑)</li>
+<li>3.测试(测试)<h4 id="代码示例"><a href="#代码示例" class="headerlink" title="代码示例"></a>代码示例</h4><h6 id="1-画UI"><a href="#1-画UI" class="headerlink" title="1.画UI"></a>1.画UI</h6> <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div></pre></td><td class="code"><pre><div class="line">&lt;LinearLayout xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;</div><div class="line">xmlns:tools=&quot;http://schemas.android.com/tools&quot;</div><div class="line">android:layout_width=&quot;match_parent&quot;</div><div class="line">android:layout_height=&quot;match_parent&quot;</div><div class="line">android:orientation=&quot;vertical&quot;</div><div class="line">tools:context=&quot;.MainActivity&quot; &gt;</div><div class="line"></div><div class="line">&lt;Button </div><div class="line">    android:onClick=&quot;click1&quot;</div><div class="line">    android:id=&quot;@+id/bt_private&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:text=&quot;private&quot;</div><div class="line">    /&gt;</div><div class="line"></div><div class="line"> &lt;Button </div><div class="line">    android:onClick=&quot;click2&quot;</div><div class="line">    android:id=&quot;@+id/bt_append&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:text=&quot;append&quot;</div><div class="line">    /&gt;</div><div class="line"> </div><div class="line">  &lt;Button </div><div class="line">    android:onClick=&quot;click3&quot;</div><div class="line">    android:id=&quot;@+id/bt_read&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:text=&quot;read&quot;</div><div class="line">    /&gt;</div><div class="line">  </div><div class="line">   &lt;Button </div><div class="line">    android:onClick=&quot;click4&quot;</div><div class="line">    android:id=&quot;@+id/bt_write&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_width=&quot;match_parent&quot;</div><div class="line">    android:text=&quot;write&quot;</div><div class="line">    /&gt;</div><div class="line">&lt;/LinearLayout&gt;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="2-写逻辑"><a href="#2-写逻辑" class="headerlink" title="2.写逻辑"></a>2.写逻辑</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div></pre></td><td class="code"><pre><div class="line">  public class MainActivity extends Activity &#123;</div><div class="line">  @Override</div><div class="line">  protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">      super.onCreate(savedInstanceState);</div><div class="line">      setContentView(R.layout.activity_main);</div><div class="line">      </div><div class="line">      //编写逻辑</div><div class="line">  &#125;</div><div class="line">  //MODE_PRIVATE 生成private.txt文件</div><div class="line">  public void click1(View v)&#123;</div><div class="line">  	//生成文件</div><div class="line">  	try &#123;</div><div class="line">	FileOutputStream openFileOutput = openFileOutput(&quot;private.txt&quot;,MODE_PRIVATE);</div><div class="line">	openFileOutput.write(&quot;private&quot;.getBytes());</div><div class="line">	openFileOutput.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  &#125;</div><div class="line">  //MODE_APPEND 生成append.txt文件</div><div class="line">  public void click2(View v)&#123;</div><div class="line">  	//生成文件</div><div class="line">  	try &#123;</div><div class="line">	FileOutputStream openFileOutput = openFileOutput(&quot;append.txt&quot;,MODE_APPEND);</div><div class="line">	openFileOutput.write(&quot;append&quot;.getBytes());</div><div class="line">	openFileOutput.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  &#125;</div><div class="line">  //MODE_WORLD_READABLE 生成read.txt文件</div><div class="line">  public void click3(View v)&#123;</div><div class="line">  	//生成文件</div><div class="line">  	try &#123;</div><div class="line">	FileOutputStream openFileOutput = openFileOutput(&quot;read.txt&quot;,MODE_WORLD_READABLE);</div><div class="line">	openFileOutput.write(&quot;read&quot;.getBytes());</div><div class="line">	openFileOutput.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  &#125;</div><div class="line">  //MODE_WORLD_WRITEABLE 生成write.txt文件</div><div class="line">  public void click4(View v)&#123;</div><div class="line">  	//生成文件</div><div class="line">  	try &#123;</div><div class="line">	FileOutputStream openFileOutput = openFileOutput(&quot;write.txt&quot;,MODE_WORLD_WRITEABLE);</div><div class="line">	openFileOutput.write(&quot;write&quot;.getBytes());</div><div class="line">	openFileOutput.close();</div><div class="line">&#125; catch (Exception e) &#123;</div><div class="line">	// TODO Auto-generated catch block</div><div class="line">	e.printStackTrace();</div><div class="line">&#125;</div><div class="line">  &#125;</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h6><p>在自己的包下生成如下文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/72.png" alt=""></p>
+<h4 id="Linux下表示文件权限方式"><a href="#Linux下表示文件权限方式" class="headerlink" title="Linux下表示文件权限方式"></a>Linux下表示文件权限方式</h4><p>在Linux下用10位表示文件权限<br>1.第一位:表示文件类型,d表示目录,-表示普通文件<br>2.第2-4位：表示当前用户<br>3.第5-7位:表示当前用户所在的组<br>4.第8-10位:其他用户  </p>
+<p>r-read:可读<br>w-write:可写<br>x-execute:可执行<br>-代表没有权限<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/73.png" alt="">  </p>
+<h6 id="测试"><a href="#测试" class="headerlink" title="测试"></a>测试</h6><p>测试权限是否正确,创建另一个工程,来读取 上个工程里面的文件read.txt因为其文件对于其他用户是可读权限<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">public class MainActivity extends Activity &#123;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">        super.onCreate(savedInstanceState);</div><div class="line">        setContentView(R.layout.activity_main);</div><div class="line">        </div><div class="line">        //应用一启动,将会执行onCreate方法,读取read.txt文件</div><div class="line">        try &#123;</div><div class="line">			String path = &quot;/data/data/com/yxm/file/files&quot;;</div><div class="line">			File file = new File(path,&quot;read.txt&quot;);</div><div class="line">			FileInputStream in = new FileInputStream(file);</div><div class="line">			BufferedReader br = new BufferedReader(new InputStreamReader(in));</div><div class="line">			in.close();</div><div class="line">			br.close();</div><div class="line">			System.out.println(br.read());</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			// TODO Auto-generated catch block</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>使用过滤器过滤日志信息时候,有时候是不打印日志信息的，这里是eclipse的bug，在ddms下main随意点一下左边项目即可。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-19-文件权限/" class="archive-article-date">
+  	<time datetime="2017-03-12T06:43:57.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-Android-18-获取SD空间" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/03/12/Android-18-获取SD空间/">Android(18)-获取SD空间</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>创建完模拟器之后会有这样一个选项:<br>进入:setting-&gt;storage-&gt;进入sd卡的空间<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/71.png" alt=""><br>我们可以看到我们之前创建的大小空间是40M，但是这里是39.36M  </p>
+<h4 id="创建项目获取SD空间大小-使用Environment"><a href="#创建项目获取SD空间大小-使用Environment" class="headerlink" title="创建项目获取SD空间大小(使用Environment)"></a>创建项目获取SD空间大小(使用Environment)</h4><p>1.获取空间<br>2.获取空间大小<br>3.赋值    </p>
+<h4 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h4><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">@SuppressLint(&quot;NewApi&quot;) @Override</div><div class="line">protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">	super.onCreate(savedInstanceState);</div><div class="line">	setContentView(R.layout.activity_main);</div><div class="line">	//获取控件</div><div class="line">	TextView totalSpace = (TextView) findViewById(R.id.tv_totalSpace);</div><div class="line">	TextView availableSpace = (TextView) findViewById(R.id.tv_availabeSpace);</div><div class="line">	//获取控件大小(Evironment)</div><div class="line">	long totalSpaceSize = Environment.getExternalStorageDirectory().getTotalSpace();</div><div class="line">	long freeSpaceSize = Environment.getExternalStorageDirectory().getFreeSpace();</div><div class="line">	//转换</div><div class="line">	String totalSize = Formatter.formatFileSize(this, totalSpaceSize);</div><div class="line">	String spaceSize = Formatter.formatFileSize(this, freeSpaceSize);</div><div class="line">	//赋值</div><div class="line">	totalSpace.setText(totalSize);</div><div class="line">	availableSpace.setText(spaceSize);</div><div class="line">   	&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/03/12/Android-18-获取SD空间/" class="archive-article-date">
+  	<time datetime="2017-03-12T05:40:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Android-17-把数据保存到SD卡" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -653,127 +767,6 @@
 
 
   
-    <article id="post-Android-10-按钮的四种点击事件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/04/Android-10-按钮的四种点击事件/">Android(10)-按钮的四种点击事件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h6 id="1-定义一个内部类去实现按钮的点击事件"><a href="#1-定义一个内部类去实现按钮的点击事件" class="headerlink" title="1.定义一个内部类去实现按钮的点击事件"></a>1.定义一个内部类去实现按钮的点击事件</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       Button btn_call = (Button)findViewById(R.id.button1);</div><div class="line">       btn_call.setOnClickListener(new MyClickListener());</div><div class="line">   &#125;</div><div class="line">   private class MyClickListener implements OnClickListener&#123;</div><div class="line">   	 //逻辑</div><div class="line">   &#125;    </div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-通过匿名内部类去实现"><a href="#2-通过匿名内部类去实现" class="headerlink" title="2.通过匿名内部类去实现"></a>2.通过匿名内部类去实现</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       Button btn_call = (Button)findViewById(R.id.button1);</div><div class="line">       btn_call.setOnClickListener(new MyClickListener()&#123;</div><div class="line">         OnClickListener&#123;</div><div class="line">   	  //逻辑</div><div class="line">        &#125; </div><div class="line">      &#125;);</div><div class="line">    &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="3-当前类实现View包下的OnClickListener"><a href="#3-当前类实现View包下的OnClickListener" class="headerlink" title="3.当前类实现View包下的OnClickListener"></a>3.当前类实现View包下的OnClickListener</h6>   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity implements OnClickListener&#123;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       Button btn_call = (Button)findViewById(R.id.button1);</div><div class="line">       btn_call.setOnClickListener(this);</div><div class="line">    &#125;</div><div class="line">   &#125;    </div><div class="line">   //点击按钮时候执行</div><div class="line">   @Override</div><div class="line">   public void callPhone()&#123;</div><div class="line">     //逻辑</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-<h6 id="4-在按钮的布局上加一个onClick属性-在Activity里面定义一个一个方法【方法名和属性名相同】"><a href="#4-在按钮的布局上加一个onClick属性-在Activity里面定义一个一个方法【方法名和属性名相同】" class="headerlink" title="4.在按钮的布局上加一个onClick属性 在Activity里面定义一个一个方法【方法名和属性名相同】"></a>4.在按钮的布局上加一个onClick属性 在Activity里面定义一个一个方法【方法名和属性名相同】</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line">在ui上：</div><div class="line">&lt;Button</div><div class="line">    android:id=&quot;@+id/button1&quot;</div><div class="line">    android:onClick=&quot;click&quot;</div><div class="line">    android:layout_width=&quot;wrap_content&quot;</div><div class="line">    android:layout_height=&quot;wrap_content&quot;</div><div class="line">    android:layout_below=&quot;@+id/editText1&quot;</div><div class="line">    android:layout_centerHorizontal=&quot;true&quot;</div><div class="line">    android:layout_marginTop=&quot;24dp&quot;</div><div class="line">    android:text=&quot;拨打&quot; /&gt;</div><div class="line"></div><div class="line">在MainActivity上:</div><div class="line">public void click(View v)&#123;</div><div class="line">  //逻辑</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/04/Android-10-按钮的四种点击事件/" class="archive-article-date">
-  	<time datetime="2017-03-04T15:54:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-Android-九-电话拨号器" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/03/04/Android-九-电话拨号器/">Android(九)-电话拨号器</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>本篇制作一个电话拨号器,效果图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/25.png" alt=""></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>Android应用制作非常简单,只需要分三步就行:<br>1.画UI<br>2.根据ui写业务逻辑<br>3.测试  </p>
-<h6 id="1-新建android工程"><a href="#1-新建android工程" class="headerlink" title="1.新建android工程"></a>1.新建android工程</h6><p>新建”电话拨号器”工程,</p>
-<h6 id="2-在activity-main-xml下画ui"><a href="#2-在activity-main-xml下画ui" class="headerlink" title="2.在activity_main.xml下画ui"></a>2.在activity_main.xml下画ui</h6><ol>
-<li>1.拖动TextView到布局页面,修改一些属性<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/26.png" alt="">  </li>
-<li>2.拖动EditText到布局<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/27.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/28.png" alt="">  </li>
-<li>3.拖一个拨打电话的按钮到布局<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/29.png" alt=""></li>
-<li>4.测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/30.png" alt="">  </li>
-</ol>
-<h6 id="3-根据ui写业务逻辑"><a href="#3-根据ui写业务逻辑" class="headerlink" title="3.根据ui写业务逻辑"></a>3.根据ui写业务逻辑</h6><ol>
-<li><p>代码：  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">   public class MainActivity extends Activity &#123;</div><div class="line">   private EditText et_numer;</div><div class="line">@Override</div><div class="line">   protected void onCreate(Bundle savedInstanceState) &#123;</div><div class="line">       super.onCreate(savedInstanceState);</div><div class="line">       //加载一个布局</div><div class="line">       setContentView(R.layout.activity_main);</div><div class="line">       et_numer = (EditText)findViewById(R.id.editText1);</div><div class="line">       //【2】找到button</div><div class="line">       Button btn_call = (Button)findViewById(R.id.button1);</div><div class="line">       </div><div class="line">       //【3】给button按钮设置点击事件(同时获取editText的值)</div><div class="line">       /**这里面的参数是一个接口:以后遇到这种类型时候有以下方法:</div><div class="line">        * 1.定义一个实现这个接口的内部类</div><div class="line">        */</div><div class="line">       btn_call.setOnClickListener(new MyClickListener());</div><div class="line">   &#125;</div><div class="line">   private class MyClickListener implements OnClickListener&#123;</div><div class="line">   	//当按钮被点击时候调用</div><div class="line">	@Override</div><div class="line">	public void onClick(View v) &#123;</div><div class="line">		//【4】获取editText 文本内容</div><div class="line">	   //拿到外部内中的变量:只能是变成成员变量</div><div class="line">		String number = et_numer.getText().toString().trim();</div><div class="line">	   //当number为空时候,给出友好提示</div><div class="line">		if(&quot;&quot;.equals(number))&#123;</div><div class="line">			/****</div><div class="line">			 * context 上下文 因为 MainActivity是实现Context所以可以用MainActivity.this</div><div class="line">			 * duration 时间 Toast.LENGTH_LONG长时间显示  Toast.LENGTH_LONG 值也为1</div><div class="line">			 * 最后一定要show出来</div><div class="line">			 */</div><div class="line">			Toast.makeText(MainActivity.this,&quot;number不能为空&quot;,Toast.LENGTH_LONG).show();</div><div class="line">			System.out.println(&quot;按钮被点击了&quot;);//这句话只会在控制台打印出不会在android模拟器打印出</div><div class="line">			return;</div><div class="line">		&#125;</div><div class="line">		//【5】进行拨打电话 google工程师已经替我们实现了 用意图Intent调用</div><div class="line">		Intent intent = new Intent();//创建一个意图:意图是告诉你自己你想干嘛  打电话就是一个意图</div><div class="line">		//【5.1】意图设置一个动作</div><div class="line">		intent.setAction(Intent.ACTION_CALL);</div><div class="line">		//【5.1】意图设置一个拨打的数据</div><div class="line">		intent.setData(Uri.parse(&quot;tel:&quot;+number));//tel:是写死的</div><div class="line">		//【开启用途】</div><div class="line">		startActivity(intent);</div><div class="line">	&#125;</div><div class="line">    &#125;    </div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</li>
-<li><p>注意:<br>1.先获取输入的110控件,然后点击打控件<br>在MainActivity.java中实现业务逻辑<br>2.android中提示：Toast<br>3.拨打电话原理:<br>拨号打电话时候,你电话肯定有一个基带,和基站进行关联(socket),然后基站转发给其他手机(底层都是socket实现),但是这个应用google已经替我们实现了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/31.png" alt=""></p>
-<h6 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h6><p>上面已经实现了拨打前的代码准备<br>给110打电话<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/32.png" alt=""><br>查看控制台错误<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/33.png" alt=""><br>安全异常,权限被阻止,需要android.permission.CALL)PHONE权限</p>
-</li>
-<li><p>2.添加权限<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/34.png" alt=""><br>重新部署,再次测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/3/35.png" alt=""></p>
-</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/03/04/Android-九-电话拨号器/" class="archive-article-date">
-  	<time datetime="2017-03-04T13:19:51.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-03-04</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/34/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/33/">33</a><a class="page-number" href="/page/34/">34</a><span class="page-number current">35</span><a class="page-number" href="/page/36/">36</a><a class="page-number" href="/page/37/">37</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/36/">Next &raquo;</a>
@@ -839,7 +832,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.32px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

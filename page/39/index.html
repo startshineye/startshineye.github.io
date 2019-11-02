@@ -152,6 +152,141 @@
       <div class="body-wrap">
         
   
+    <article id="post-Spring框架下SockJs实现跨域-403错误" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/14/Spring框架下SockJs实现跨域-403错误/">Spring框架下SockJs实现跨域-403错误</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p> 由于自己开发的im项目和别的项目对接需要运用到跨域(因为本项目的部分配置是在另一个项目中)，一般来说用websocket可以实现跨域,但是又由于apache2.2代理不支持websocket，所以硬把websocket去除掉，去除以下判断只留下 ws = new SockJS(sockJsTarget);<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/138.png" alt=""><br>但是在另一个TOMCAT服务器下的项目访问不同TOMCAT目录下,会出现以下403问题  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="错误"><a href="#错误" class="headerlink" title="错误"></a>错误</h6><p>出现的403错误如下：<br>请求：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/134.png" alt=""><br>响应:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/135.png" alt=""></p>
+<h6 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h6><p>html页面访问限制的问题的：403 Forbidden<br>错误之前配置:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/136.png" alt=""><br>因为spring有个拦截器,会拦截请求的访问域,所以我们需要设置setAllowedOrigins(“*”)全部域都可以访问</p>
+<ol>
+<li><p>一般配置后台</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">registry.addHandler(systemWebSocketHandler(),&quot;/webSocketServer/sockjs&quot;).setAllowedOrigins(&quot;*&quot;).withSockJS();</div></pre></td></tr></table></figure>
+</li>
+<li><p>配置spring-mvc<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/2/137.png" alt=""></p>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/14/Spring框架下SockJs实现跨域-403错误/" class="archive-article-date">
+  	<time datetime="2017-02-14T15:19:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/im/">im</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/sockJs/">sockJs</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-weblogic支持websocket的版本" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/02/14/weblogic支持websocket的版本/">weblogic支持websocket的版本</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>  平时开发中,我们一般是用Tomcat，但是在实际项目现场特别是银行项目中,都一般用收费的Weblogic,项目用到websocket所以不是所有的weblogic都支持websocket，以下是支持websocket的weblogic概述</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p><a href="http://css.dzone.com/articles/getting-started-html5" target="_blank" rel="external">原文</a><br>The current release of Oracle WebLogic (12.1.2) added support to HTML5 WebSocket ( RFC-6455 ) providing the bi-directional communication over a single TCP connection between clients and servers. Unlike the HTTP communication model, client and server can send and receive data independently from each other.  The use of WebSocket is becoming very popular for highly interactive web applications that depend on time critical data delivery, requirements for true bi-directional data flow and higher throughput. To initiate the WebSocket connection, the client sends a handshake request to the server. The connection is established if the handshake request passes validation, and the server accepts the request. When a WebSocket connection is established, a browser client can send data to a WebLogic Server instance while simultaneously receiving data from that server instance.<br>The WebLogic server implementation has the following components:  </p>
+<ol>
+<li>The WebSocket protocol implementation that handles connection upgrades and establishes and manages connections as well as exchanges with the client. The WebLogic server fully implements the WebSocket protocol using its existing threading and networking infrastructure.  </li>
+<li>The WebLogic WebSocket Java API, through the weblogic.websocket package, allows you to create WebSocket-based server side applications handling client connections, WebSocket messages, providing context information for a particular WebSocket connection and managing the request/response handshake. For additional information about the WebLogic WebSocket Java API interfaces and classes, visit the following resource: <a href="http://docs.oracle.com/middleware/1212/wls/WLPRG/websockets.htm#BABJEFFD" target="_blank" rel="external">http://docs.oracle.com/middleware/1212/wls/WLPRG/websockets.htm#BABJEFFD</a>  </li>
+<li>To declare a WebSocket endpoint you use the @WebSocket annotation that allow you to mark a class as a WebSocket listener that’s ready to be exposed and handle events. The annotated class must implement the WebSocketListener interface or extend from the WebSocketAdapter class.</li>
+</ol>
+<p>When you deploy the WebSocket-based application on WebLogic, you basically follow the same approach using the standard Java EE Web Application archives (WARs), either as standalone or WAR module. Either way, the WebLogic Application Server detects the @WebSocket annotation on the class and automatically establishes it as a WebSocket endpoint.<br>Here is a simple application that creates a WebSocket endpoint at the /echo/ location path, receives messages from the client and sends the same message back to the client.   </p>
+<pre><code>import weblogic.websocket.WebSocketAdapter;
+import weblogic.websocket.WebSocketConnection;
+import weblogic.websocket.annotation.WebSocket;
+
+@WebSocket(pathPatterns={&quot;/echo/*&quot;})
+public class Echo extends WebSocketAdapter{
+
+@Override
+  public void onMessage(WebSocketConnection connection, String msg){
+      try{
+          connection.send(msg);
+      }catch(IOException ioe){
+          //Handle error condition
+      }
+  }
+}
+</code></pre><p>n the client side, you typically use the WebSocket JavaScript API that most of the web browsers already support.<br>There are many samples out there that you can use to test the implementation above. One quick way of doing that is to navigate to <a href="http://www.websocket.org/echo.html" target="_blank" rel="external">http://www.websocket.org/echo.html</a> and then point the location field to your WebLogic server. If you follow the sample available on <a href="https://github.com/mjabali/HelloWorld_WebSocket">https://github.com/mjabali/HelloWorld_WebSocket</a> then you’ll end up with something like ws://localhost:7001/HelloWorld_WebSocket/echo/ for the WebSocket server application.<br>The sample client provided will be available at <a href="http://localhost:7001/HelloWorld_WebSocket/index.html" target="_blank" rel="external">http://localhost:7001/HelloWorld_WebSocket/index.html</a> after the WebLogic deployment. See the README.md file on GitHub for additional instructions.<br>Have fun!<br>Published at DZone with permission ofMarcelo Jabali, author and DZone MVB. ( source )</p>
+<p>(Note: Opinions expressed in this article and its replies are the opinions of their respective authors and not those of DZone, Inc.) </p>
+<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4><p>Getting Started with HTML5 WebSocket on Oracle WebLogic 12c</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/02/14/weblogic支持websocket的版本/" class="archive-article-date">
+  	<time datetime="2017-02-14T14:20:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-02-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/im/">im</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/websocket/">websocket</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Window下配置域" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -644,144 +779,6 @@
 
 
   
-    <article id="post-Android-一-1-4G介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/19/Android-一-1-4G介绍/">Android(一)-1-4G介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-4G介绍"><a href="#1-4G介绍" class="headerlink" title="1-4G介绍"></a>1-4G介绍</h4><h6 id="1G"><a href="#1G" class="headerlink" title="1G"></a>1G</h6><ol>
-<li>第一代模拟测试手机(1G):1G 就是大哥大，手机类似于简单的无线电双工电台,通话是锁定在一定频率,所以使用可调频电台就可以窃听通话,只能进行语音通话<h6 id="2G"><a href="#2G" class="headerlink" title="2G"></a>2G</h6></li>
-<li>2G代表手机：小灵通:运用美国的军方标准gsm,后面被民用化了,可以发短信  <h6 id="3G"><a href="#3G" class="headerlink" title="3G"></a>3G</h6></li>
-<li>3G 沃,以前2G访问百度：wap.baidu.com。3G访问百度:www.baidu.com,能达到每秒7.2M/S<h6 id="4G"><a href="#4G" class="headerlink" title="4G"></a>4G</h6></li>
-<li>4G：显著特点就是LTE:LTE（Long Term Evolution，长期演进)是由3GPP（The 3rd Generation Partnership Project，第三代合作伙伴计划）组织制定的UMTS（Universal Mobile Telecommunications System，通用移动通信系统）技术标准的长期演进，于2004年12月在3GPP多伦多会议上正式立项并启动。最高速度最高100M/S<h6 id="5G"><a href="#5G" class="headerlink" title="5G"></a>5G</h6></li>
-<li>5G,投资6亿美金目前华为在研发,最高速度可以达到10G/S<h4 id="总结"><a href="#总结" class="headerlink" title="总结"></a>总结</h4></li>
-<li>1G：主要提供语音通话,代表性通讯手段是大哥大</li>
-<li>2G：语音+低速数据业务,基本是电话和短信</li>
-<li>3G：具备更快的网速,可以提供网页浏览,音乐等基本数据业务</li>
-<li>4G：具备100Mb以上下载速度,能流畅承载视频,电话会议等业务</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/19/Android-一-1-4G介绍/" class="archive-article-date">
-  	<time datetime="2017-01-19T01:31:43.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Android/">Android</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/Android/">Android</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-MongoDB-一-windows下载安装" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/18/MongoDB-一-windows下载安装/">MongoDB(一)-windows下载安装</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="windows下载安装"><a href="#windows下载安装" class="headerlink" title="windows下载安装"></a>windows下载安装</h4><h6 id="1-MongoDB下载"><a href="#1-MongoDB下载" class="headerlink" title="1.MongoDB下载"></a>1.MongoDB下载</h6><ol>
-<li>MongoDB下载地址:<a href="http://mongodb.org/downloads" target="_blank" rel="external">http://mongodb.org/downloads</a></li>
-<li>mongodb教程<a href="http://www.runoob.com/mongodb/mongodb-tutorial.html" target="_blank" rel="external">MongoDB教程</a><h6 id="2-MongoDB安装注意"><a href="#2-MongoDB安装注意" class="headerlink" title="2.MongoDB安装注意"></a>2.MongoDB安装注意</h6></li>
-<li>安装注意:现在硬盘上建立一个目录用于存放mongoBD的数据<br>在D盘上建立MongoDB文件<h6 id="3-安装"><a href="#3-安装" class="headerlink" title="3.安装"></a>3.安装</h6></li>
-<li>在设置环境变量之前需要把数据库安装起来<br>1.下载好对应的MSI安装文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/87.png" alt=""><br>点击进行安装<br>2.点击下一步<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/88.png" alt=""><br>3.选择”I accept”<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/89.png" alt=""><br>4.第一个选项：Complete（完整版），默认安装所有功能到C盘；第二个选项Custom（自定义），可以选择安装目录与服务。这里我们选择Custom<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/90.png" alt=""><br>5.默认全部功能安装，选择Browse更换安装目录到D:\MongoDB（自己选择、）下，Next，然后选择Install开始安装：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/91.png" alt=""><br>6.安装完成！<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/92.png" alt=""></li>
-<li>打开MongoDB目录下的bin文件夹，你会看到很多exe可执行文件，简单介绍下：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/93.png" alt=""><h6 id="4-部署"><a href="#4-部署" class="headerlink" title="4.部署"></a>4.部署</h6></li>
-<li>首先我们在安装目录（D:\MongoDB）下新建一个db文件夹作为数据库存放路径，然后用服务端文件指定为数据库目录！</li>
-<li>win+R，输入cmd，进入DOS命令窗口，然后用cd命令进入D:\MongoDB:\bin目录下，执行如下命令：<br>D:\MongoDB\bin&gt;mongod.exe –dbpath D:\MongoDB\db<br>将会输出服务端相关信息，包括版本，数据库所在路径，监听端口号，数据库大小等等、看到这个说明你已经成功了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/94.png" alt=""></li>
-<li>或者在浏览器中输入：<a href="http://localhost:27017/，你会看到下面一段话" target="_blank" rel="external">http://localhost:27017/，你会看到下面一段话</a>  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">It looks like you are trying to access MongoDB over HTTP on the native driver port.  </div><div class="line">“正在尝试在本地驱动端口上用HTTP链接MongoDB”，也能说明你配置服务端成功了！</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h6 id="5-设置环境变量"><a href="#5-设置环境变量" class="headerlink" title="5.设置环境变量"></a>5.设置环境变量</h6><ol>
-<li>拷贝安装bin目录下的路径–&gt;计算机–&gt;属性–&gt;高级系统设置–&gt;环境变量–&gt;path–&gt;编辑<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/95.png" alt=""><br>在DOS黑窗口下如下操作说明安装成功:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/96.png" alt=""><h6 id="6-启动数据库服务"><a href="#6-启动数据库服务" class="headerlink" title="6.启动数据库服务"></a>6.启动数据库服务</h6>之前几步数据库已经安装成功,并且已经为数据库指定了硬盘上目录作为我数据库文件的存贮地址,怎么启动呢?自己制作mongoba.bat文件(点击此文件启动)，首先在dos下查看其有哪些配置项?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/97.png" alt=""><br>mongodb不做打的修改,只做学习之用的话,只要使用dbpath就可以让mongo启动<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/98.png" alt=""><br>在文件中写入以下命令:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mongod --dbpath D:\MongoDB\db</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>以后点击mongoba.bat文件就可以启动了。</p>
-<ol>
-<li>在桌面上建立mongo文件夹–&gt;建立mongodb.bat(bat是批处理文件)–&gt;填写文件<h6 id="7-启动数据库服务的配置文件"><a href="#7-启动数据库服务的配置文件" class="headerlink" title="7.启动数据库服务的配置文件"></a>7.启动数据库服务的配置文件</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/99.png" alt=""></li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/18/MongoDB-一-windows下载安装/" class="archive-article-date">
-  	<time datetime="2017-01-18T14:46:44.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/MongoDB/">MongoDB</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/数据库/">数据库</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/38/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/37/">37</a><a class="page-number" href="/page/38/">38</a><span class="page-number current">39</span><a class="page-number" href="/page/40/">40</a><a class="page-number" href="/page/41/">41</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/40/">Next &raquo;</a>
@@ -847,7 +844,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.32px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

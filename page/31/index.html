@@ -152,6 +152,137 @@
       <div class="body-wrap">
         
   
+    <article id="post-JVM-一-初始JVM" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/10/JVM-一-初始JVM/">JVM(一)-初始JVM</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>###前言<br>本节主要介绍JVM以下内容<br>1.JVM概念<br>2.JVM发展历史<br>3.JVM种类<br>4.Java语言规范<br>5.JVM规范  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="JVM概念"><a href="#JVM概念" class="headerlink" title="JVM概念"></a>JVM概念</h4><ol>
+<li>JVM是Java Virtual Machine的简称。意为Java虚拟机  </li>
+<li>虚拟机:指通过软件模拟的具有完整硬件系统功能的、运行在一个完全隔离环境中的完整计算机系统  </li>
+<li>虚拟机分类:VMWare,Visual Box,JVM  </li>
+<li>VMWare或者Visual Box都是使用软件模拟物理CPU的指令集  </li>
+<li>JVM使用软件模拟Java字节码的指令集  <h4 id="JVM发展历史"><a href="#JVM发展历史" class="headerlink" title="JVM发展历史"></a>JVM发展历史</h4><h5 id="Java历史"><a href="#Java历史" class="headerlink" title="Java历史"></a>Java历史</h5></li>
+<li>1996年 SUN JDK 1.0 Classic VM–纯解释运行，使用外挂进行JIT</li>
+<li>1997年 JDK1.1 发布–AWT、内部类、JDBC、RMI、反射</li>
+<li>1998年 JDK1.2 Solaris Exact VM–JIT 解释器混合,Accurate Memory Management 精确内存管理，数据类型敏感,提升的GC性能</li>
+<li>2000年 JDK 1.3 Hotspot 作为默认虚拟机发布 加入JavaSound</li>
+<li>2002年 JDK 1.4 Classic VM退出历史舞台  Assert正则表达式 NIO IPV6 日志API 加密类库  </li>
+<li>2004年发布 JDK1.5 即 JDK5 、J2SE 5 、Java 5：泛型,注解,装箱,枚举,可变长参数,Foreach循环  </li>
+<li>JDK1.6 JDK6：脚本语言支持,JDBC 4.0，Java编译器 API</li>
+<li>2011年 JDK7发布：延误项目推出到JDK8，G1，动态语言增强,64位系统中的压缩指针,NIO 2.0</li>
+<li>2014年 JDK8发布:Lambda表达式，语法增强  Java类型注解</li>
+<li>2016年JDK9:模块化 <h5 id="JVM历史"><a href="#JVM历史" class="headerlink" title="JVM历史"></a>JVM历史</h5></li>
+<li>使用最为广泛的JVM为HotSpot</li>
+<li>HotSpot 为Longview Technologies开发 被SUN收购</li>
+<li>2006年 Java开源 并建立OpenJDK：HotSpot  成为Sun JDK和OpenJDK中所带的虚拟机</li>
+<li>2008 年 Oracle收购BEA：得到JRockit VM</li>
+<li>2010年Oracle 收购 Sun：得到Hotspot</li>
+<li>Oracle宣布在JDK8时整合JRockit和Hotspot，优势互补：在Hotspot基础上，移植JRockit优秀特性<h5 id="各种JVM"><a href="#各种JVM" class="headerlink" title="各种JVM"></a>各种JVM</h5></li>
+<li>KVM:SUN发布，IOS Android前，广泛用于手机系统</li>
+<li>CDC/CLDC HotSpot：手机、电子书、PDA等设备上建立统一的Java编程接口,J2ME的重要组成部分</li>
+<li>JRockit:BEA </li>
+<li>IBM J9 VM:IBM内部</li>
+<li>Apache Harmony:1.兼容于JDK 1.5和JDK 1.6的Java程序运行平台，2.与Oracle关系恶劣 退出JCP ，Java社区的分裂，3.OpenJDK出现后，受到挑战 2011年 退役。4.没有大规模商用经历。5.对Android的发展有积极作用<h4 id="Java语言规范"><a href="#Java语言规范" class="headerlink" title="Java语言规范"></a>Java语言规范</h4>Java语言规范定义了java语言,主要包括:语言,变量,类型,文法<br>Java语言规范可参考J2SE  <h4 id="JVM规范"><a href="#JVM规范" class="headerlink" title="JVM规范"></a>JVM规范</h4>JVM规范定义了JVM，主要包括:Class文件格式,数字的内部表示和存储Byte  -128 to 127 (-27 to 27 - 1)，returnAddress 数据类型定义【指向操作码的指针。不对应Java数据类型，不能在运行时修改。Finally实现需要】，定义PC,堆，栈，方法区<h5 id="1-整数的表示"><a href="#1-整数的表示" class="headerlink" title="1.整数的表示"></a>1.整数的表示</h5></li>
+</ol>
+<h5 id="2-为什么用补码"><a href="#2-为什么用补码" class="headerlink" title="2.为什么用补码"></a>2.为什么用补码</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/12.png" alt=""><br>1.0造成歧义:，虽然原码非常的简单直观，但是当用原码表示0的时候就会出问题。0用原码表示分为+0和-0，当机器字长为8时，[+0]原=00000000，[-0]原=10000000。这就有问题了，同一个数却有两种表示，产生了二义性，从而给机器判断0带来了麻烦.<br>2.运算规则复杂:二是用原码运算时，符号位需要单独处理，而且运算规则很复杂。例如加法运算，若两个数异号，则先要让绝对值大的数减去绝对值小的数，然后把绝对值大的数的符号付给结果。还有就是，借位操作如果用计算机硬件实现起来是很困难的。正是因为原码有这些不足之处，才促使人们研究其他的编码方法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/13.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/06/14.png" alt=""></p>
+<h5 id="3-VM指令集"><a href="#3-VM指令集" class="headerlink" title="3.VM指令集"></a>3.VM指令集</h5><p>1.类型转化：l2i<br>2.出栈入栈操作：aload  astore<br>3.运算：iadd  isub<br>4.流程控制：ifeq ifne<br>5.函数调用：invokevirtual invokeinterface  invokespecial  invokestatic  </p>
+<h5 id="4-JVM需要对Java-Library-提供以下支持："><a href="#4-JVM需要对Java-Library-提供以下支持：" class="headerlink" title="4.JVM需要对Java Library 提供以下支持："></a>4.JVM需要对Java Library 提供以下支持：</h5><p>1.反射 java.lang.reflect<br>2.ClassLoader<br>3.初始化class和interface<br>4.安全相关 java.security<br>5.多线程<br>6.弱引用  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/10/JVM-一-初始JVM/" class="archive-article-date">
+  	<time datetime="2017-06-10T12:19:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/JVM/">JVM</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-java并发编程-四-volatile关键字" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/06/07/java并发编程-四-volatile关键字/">java并发编程(四)-volatile关键字</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="volatile关键字概念"><a href="#volatile关键字概念" class="headerlink" title="volatile关键字概念"></a>volatile关键字概念</h4><h5 id="1-概念"><a href="#1-概念" class="headerlink" title="1.概念"></a>1.概念</h5><p>volatile概念:volatile关键字主要作用是是变量在多个线程间可见<br>volatile主要是修饰变量,类似于:private int age=0;private修饰了age,我们用volatile修饰变量可以如下:private volatile int age=0;</p>
+<h5 id="2-代码"><a href="#2-代码" class="headerlink" title="2.代码"></a>2.代码</h5><h5 id="3-总结"><a href="#3-总结" class="headerlink" title="3.总结"></a>3.总结</h5>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/06/07/java并发编程-四-volatile关键字/" class="archive-article-date">
+  	<time datetime="2017-06-07T13:32:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-06-07</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/java并发编程/">java并发编程</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java并发编程-三-synchronized细节问题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -754,183 +885,6 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
 
 
   
-    <article id="post-netty实践-四-netty之helloword客户端" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/24/netty实践-四-netty之helloword客户端/">netty实践(四)-netty之helloword客户端</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-客户端思路"><a href="#1-客户端思路" class="headerlink" title="1.客户端思路"></a>1.客户端思路</h4><ol>
-<li>创建客户端服务  </li>
-<li>创建线程池  </li>
-<li>创建socket工厂  </li>
-<li>创建pipeiline工厂</li>
-<li>建立连接,返回channel</li>
-<li>通过channel返回数据</li>
-</ol>
-<h4 id="2-代码实例"><a href="#2-代码实例" class="headerlink" title="2.代码实例"></a>2.代码实例</h4><h6 id="1-Client类"><a href="#1-Client类" class="headerlink" title="1.Client类"></a>1.Client类</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div></pre></td><td class="code"><pre><div class="line">   package com.yxm.client;</div><div class="line"></div><div class="line">import java.net.InetSocketAddress;</div><div class="line">import java.util.Scanner;</div><div class="line">import java.util.concurrent.ExecutorService;</div><div class="line">import java.util.concurrent.Executors;</div><div class="line"></div><div class="line">import org.jboss.netty.bootstrap.ClientBootstrap;</div><div class="line">import org.jboss.netty.channel.Channel;</div><div class="line">import org.jboss.netty.channel.ChannelFuture;</div><div class="line">import org.jboss.netty.channel.ChannelPipeline;</div><div class="line">import org.jboss.netty.channel.ChannelPipelineFactory;</div><div class="line">import org.jboss.netty.channel.Channels;</div><div class="line">import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;</div><div class="line">import org.jboss.netty.handler.codec.string.StringDecoder;</div><div class="line">import org.jboss.netty.handler.codec.string.StringEncoder;</div><div class="line"></div><div class="line">/*</div><div class="line"> * netty客户端</div><div class="line"> */</div><div class="line">public class Client &#123;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">//客户端服务器</div><div class="line"> ClientBootstrap clientBootstrap = new ClientBootstrap();</div><div class="line"> </div><div class="line"> //线程池</div><div class="line"> ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line"> ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line"> </div><div class="line"> //socket工厂</div><div class="line"> clientBootstrap.setFactory(new NioClientSocketChannelFactory(boss, worker));</div><div class="line"> </div><div class="line"> //管道工厂</div><div class="line"> clientBootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">		//channelpipeline</div><div class="line">		ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">		//pipeline绑定编码器,解码器,处理器</div><div class="line">		pipeline.addLast(&quot;decoder&quot;,new StringDecoder());</div><div class="line">		pipeline.addLast(&quot;encoder&quot;,new StringEncoder());</div><div class="line">		pipeline.addLast(&quot;clientHander&quot;,new ClientHander());</div><div class="line">		return pipeline;</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line"> </div><div class="line"> //建立连接</div><div class="line"> ChannelFuture connect = clientBootstrap.connect(new InetSocketAddress(&quot;127.0.01&quot;,10010));</div><div class="line"> Channel channel = connect.getChannel();</div><div class="line"> </div><div class="line"> System.out.println(&quot;client start!&quot;);</div><div class="line"> </div><div class="line"> //客户端输入</div><div class="line"> Scanner scanner = new Scanner(System.in);</div><div class="line"> while(true)&#123;</div><div class="line">	 System.out.println(&quot;Client:请输入数据&quot;);</div><div class="line">	 channel.write(scanner.next());</div><div class="line"> &#125;</div><div class="line">   &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h6 id="2-ClientHander类"><a href="#2-ClientHander类" class="headerlink" title="2.ClientHander类"></a>2.ClientHander类</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div></pre></td><td class="code"><pre><div class="line">   package com.yxm.client;</div><div class="line">import org.jboss.netty.channel.ChannelHandlerContext;</div><div class="line">import org.jboss.netty.channel.ChannelStateEvent;</div><div class="line">import org.jboss.netty.channel.ExceptionEvent;</div><div class="line">import org.jboss.netty.channel.MessageEvent;</div><div class="line">import org.jboss.netty.channel.SimpleChannelHandler;</div><div class="line">/*</div><div class="line"> * 消息接受处理类</div><div class="line"> */</div><div class="line">public class ClientHander extends SimpleChannelHandler&#123;</div><div class="line">/**</div><div class="line"> * 接收消息</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line">	String s = (String) e.getMessage();</div><div class="line">	System.out.println(s);</div><div class="line">	super.messageReceived(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 捕获异常</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;exceptionCaught&quot;);</div><div class="line">	super.exceptionCaught(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 新连接</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelConnected&quot;);</div><div class="line">	super.channelConnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 必须是链接已经建立，关闭通道的时候才会触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelDisconnected&quot;);</div><div class="line">	super.channelDisconnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * channel关闭的时候触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelClosed&quot;);</div><div class="line">	super.channelClosed(ctx, e);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><h4 id="3-测试"><a href="#3-测试" class="headerlink" title="3.测试"></a>3.测试</h4><h6 id="1-服务端启动"><a href="#1-服务端启动" class="headerlink" title="1.服务端启动"></a>1.服务端启动</h6><p>start!!!!<br>channelConnected<br>message我是客户端  </p>
-<h6 id="2-客户端启动"><a href="#2-客户端启动" class="headerlink" title="2.客户端启动"></a>2.客户端启动</h6><p>console:<br>client start!<br>channelConnected<br>Client:请输入数据<br>我是客户端<br>Client:请输入数据<br>hello too   </p>
-<h4 id="4-问题"><a href="#4-问题" class="headerlink" title="4.问题"></a>4.问题</h4><ol>
-<li>channelDisconnected与channelClosed的区别？<br>channelDisconnected只有在连接建立后断开才会调用<br>channelClosed无论连接是否成功都会调用关闭资源  </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/24/netty实践-四-netty之helloword客户端/" class="archive-article-date">
-  	<time datetime="2017-05-24T14:56:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-netty实践-三-netty之helloword服务端" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/05/21/netty实践-三-netty之helloword服务端/">netty实践(三)-netty之helloword服务端</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>构建netty服务器分为以下几个步骤:<br>1.构建一对主从线程组<br>netty使用Reactor模型,提供了三种线程模型(单线程,多线程,主从多线程),netty官方推荐建议我们去使用主从线程模型<br>2.定义服务器启动类<br>任何启动类,不管是tomcat,jetty还是netty都会有一个Bootstrap启动类,这样的server类,我们在netty服务器构建的时候也会创建<br>3.为服务器设置Channel<br>之前我们在讲解nio时候,我们说过,当我们的客户端和我们的服务端建立连接之后,就会形成一个双向通道,这个双向通道就是Channel,所以我们在我们的服务器需要定义一个这样的Channel类<br>4.设置处理从线程池的助手类初始化器<br>我们会有一个Channel,这个Channel会有一堆的初始化助手类Handler对他进行处理,比如说:编解码处理,读数据写数据等等这样的操作,理解的话可以把它看做一个拦截器Interceptor,我们可以配置多个拦截器去拦截我们的Channel<br>5.监听启动和关闭服务器<br>针对于Server,我们需要监听它的启动,监听的话,我们需要设置他的端口,服务启动完了之后,我们也需要做做关闭的监听  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-构建简单netty服务器"><a href="#1-构建简单netty服务器" class="headerlink" title="1.构建简单netty服务器"></a>1.构建简单netty服务器</h5><h6 id="1-1-创建maven项目"><a href="#1-1-创建maven项目" class="headerlink" title="1.1 创建maven项目"></a>1.1 创建maven项目</h6><p>在idea中创建maven工程</p>
-<h6 id="1-2-引入netty依赖"><a href="#1-2-引入netty依赖" class="headerlink" title="1.2 引入netty依赖"></a>1.2 引入netty依赖</h6><ol>
-<li>在浏览器输入：<a href="http://mvnrepository.com" target="_blank" rel="external">http://mvnrepository.com</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/10.png" alt=""><br>然后在idea中查看到对应依赖已经导入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/11.png" alt="">  </li>
-</ol>
-<h6 id="1-3-书写简单服务器端代码"><a href="#1-3-书写简单服务器端代码" class="headerlink" title="1.3 书写简单服务器端代码"></a>1.3 书写简单服务器端代码</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div></pre></td><td class="code"><pre><div class="line"> /**</div><div class="line"> * 实现客户端发送一个请求,服务端返回Hello netty</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class HelloServer &#123;</div><div class="line"> public static void main(String[] args)&#123;</div><div class="line">       //定义一组线程组</div><div class="line">       //主线程组,用于接受客户端的连接,但是不做任何处理,跟老板一样,不做事</div><div class="line">       EventLoopGroup bossGroup = new NioEventLoopGroup();</div><div class="line">       //从线程组,老板线程组会把任务丢给他,让手下线程去做任务</div><div class="line">       EventLoopGroup workerGroup = new NioEventLoopGroup();</div><div class="line">   try &#123;</div><div class="line">       //netty服务器的创建,ServerBootstarp 是一个启动类</div><div class="line">       ServerBootstrap serverBootstrap = new ServerBootstrap();</div><div class="line">       serverBootstrap.group(bossGroup, workerGroup)    //设置主从线程组</div><div class="line">               .channel(NioServerSocketChannel.class)  //设置nio的双向通道</div><div class="line">               .childHandler(null);                   //子处理器,用于处理workerGroup</div><div class="line"></div><div class="line">       //启动server,并且设置8088为启动的端口号,同时启动方式为同步</div><div class="line">       ChannelFuture channelFuture = serverBootstrap.bind(8088).sync();//绑定需要等待耗时,设置为同步就是等待netty启动完毕</div><div class="line"></div><div class="line">       //监听关闭的channel,设置为同步方式</div><div class="line">       channelFuture.channel().closeFuture().sync();</div><div class="line">   &#125;catch (Exception e)&#123;</div><div class="line"></div><div class="line">   &#125;finally &#123;</div><div class="line">       //最后关闭我们的主从线程组</div><div class="line">       bossGroup.shutdownGracefully();</div><div class="line">       workerGroup.shutdownGracefully();</div><div class="line">     &#125;</div><div class="line">   &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/12.png" alt="">  </p>
-<h5 id="2-设置channel初始化器"><a href="#2-设置channel初始化器" class="headerlink" title="2.设置channel初始化器"></a>2.设置channel初始化器</h5><ol>
-<li>每一个channel由多个handler共同组成管道(pipeline)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/13.png" alt=""><br>1.每一个client和server连接之后都会形成一个channel<br>2.每一个channel会有一个pipeline,我们简称是一个管道,那么这个管道会有很多个handler共同组成<br>3.上图左侧是一个channel,右侧是一个pipeline,这个pipeline是需要开发者去编写(其实就是一个初始化器),在这个初始化器pipeline中,我们需要为他设置handller，handller就是助手类,助手类就是对channel做一些相应处理,比如先注册HandlerA，然后注册HandlerB<br>4.我们可以吧pipeline当成一个大的拦截器,而其他handler就是小的拦截器,请求过来时候我们会一层一层的逐层进行拦截</li>
-</ol>
-<h6 id="2-1-定义初始化器"><a href="#2-1-定义初始化器" class="headerlink" title="2.1 定义初始化器"></a>2.1 定义初始化器</h6><ol>
-<li>因为我们是初始化一个Channel的初始化类,所以我们需要集成ChannelInitializer<socketchannel>   </socketchannel></li>
-<li>因为我们现在需要根据前端http请求,然后后台返回”hello netty”字符串,所以我们用到了http协议,因此我们就会用到http的编解码器。  </li>
-<li><p>因为我们需要返回一个”hello netty”字符串的,这个是需要我们自己去实现处理的,所以我们需要添加一个自定义的Handller<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/14.png" alt=""> </p>
-</li>
-<li><p>在HelloServer中添加初始化助手类<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/15.png" alt=""> </p>
-</li>
-</ol>
-<h5 id="3-创建自定义的助手类"><a href="#3-创建自定义的助手类" class="headerlink" title="3.创建自定义的助手类"></a>3.创建自定义的助手类</h5><ol>
-<li>我们现在是客户端向服务端发送请求之后,请求数据过来,首先是把数据放在我们的缓存区,然后我们的服务端再从这个缓存区中去读,客户端向服务端请求写数据的话,其实这是一个入栈,或者说是入境  </li>
-<li>针对于以上入栈,入境我们有一个SimpleChannelInbounder助手类</li>
-<li>因为是http请求,所以我们传入的对象是HttpObject  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/16.png" alt="">  </p>
-<p>最后将自定义助手类添加到自定义初始化器中</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/17.png" alt="">  </p>
-<h5 id="4-启动测试项目"><a href="#4-启动测试项目" class="headerlink" title="4.启动测试项目"></a>4.启动测试项目</h5><ol>
-<li>main方法主线程中启动  </li>
-<li>在浏览器:<a href="http://localhost:8088/" target="_blank" rel="external">http://localhost:8088/</a>  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/18.png" alt=""><br>此时我们服务返回了hello netty并且 后端server打印出了4个地址,原因:msg接口时候没有做类型判断:我们在CustomerHandler中做一个判断<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/19.png" alt="">  </p>
-<ol>
-<li>重启以上服务器,再次请求:<a href="http://localhost:8088/" target="_blank" rel="external">http://localhost:8088/</a></li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/20.png" alt=""><br>现在变成了2个打印,为什么会有2个打印呢?打开我们浏览器的F12查看到会有一个多余的ico<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/21.png" alt=""> </p>
-<ol>
-<li>根据我们后端返回设置的规则<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/22.png" alt=""> </li>
-</ol>
-<h5 id="5-Channel的生命周期"><a href="#5-Channel的生命周期" class="headerlink" title="5.Channel的生命周期"></a>5.Channel的生命周期</h5><p>在CustomerHandler里面右键:Generate-&gt;Override Method<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/23.png" alt=""> </p>
-<p>添加Channel的生命周期方法  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line"> /**</div><div class="line"> * 创建自定义助手类</div><div class="line"> * @author yxm</div><div class="line"> */</div><div class="line">public class CustomerHandler extends SimpleChannelInboundHandler&lt;HttpObject&gt;&#123;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelRegistered(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........注册&quot;);</div><div class="line">       super.channelRegistered(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelUnregistered(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........移除&quot;);</div><div class="line">       super.channelUnregistered(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelActive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........激活&quot;);</div><div class="line">       super.channelActive(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelInactive(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........不激活&quot;);</div><div class="line">       super.channelInactive(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelReadComplete(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........读写完毕&quot;);</div><div class="line">       super.channelReadComplete(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void userEventTriggered(ChannelHandlerContext ctx, Object evt) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........用户事件触发&quot;);</div><div class="line">       super.userEventTriggered(ctx, evt);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void channelWritabilityChanged(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........可写更改&quot;);</div><div class="line">       super.channelWritabilityChanged(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........异常捕获&quot;);</div><div class="line">       super.exceptionCaught(ctx, cause);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void handlerAdded(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........助手类添加&quot;);</div><div class="line">       super.handlerAdded(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   public void handlerRemoved(ChannelHandlerContext ctx) throws Exception &#123;</div><div class="line">       System.out.println(&quot;channel........助手类移除&quot;);</div><div class="line">       super.handlerRemoved(ctx);</div><div class="line">   &#125;</div><div class="line"></div><div class="line">   @Override</div><div class="line">   protected void channelRead0(ChannelHandlerContext context, HttpObject httpObject) throws Exception &#123;</div><div class="line">        //1.获取当前channel</div><div class="line">        Channel channel = context.channel();</div><div class="line"></div><div class="line">        if(httpObject instanceof HttpRequest)&#123;</div><div class="line">            //显示客户端地址</div><div class="line">            System.out.println(&quot;客户端地址：&quot;+channel.remoteAddress());</div><div class="line"></div><div class="line">            //2.将要返回的字符串,读取数据到缓存Buffer中</div><div class="line">            ByteBuf content = Unpooled.copiedBuffer(&quot;hello netty&quot;, CharsetUtil.UTF_8);</div><div class="line"></div><div class="line">            //3.定义一个返回对象http response</div><div class="line">            //HttpVersion.HTTP_1_1:设置http版本号  HttpResponseStatus.OK:设置返回成功后的状态码</div><div class="line">            DefaultFullHttpResponse response = new DefaultFullHttpResponse(HttpVersion.HTTP_1_1,</div><div class="line">                    HttpResponseStatus.OK,</div><div class="line">                    content);</div><div class="line"></div><div class="line">            //设置返回数据类型及长度</div><div class="line">            response.headers().set(HttpHeaderNames.CONTENT_TYPE,&quot;text/plain&quot;);</div><div class="line">            response.headers().set(HttpHeaderNames.CONTENT_LENGTH,content.readableBytes());</div><div class="line"></div><div class="line">            //把响应刷到客户端</div><div class="line">            context.writeAndFlush(response);</div><div class="line">        &#125;</div><div class="line">     &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>浏览器:<a href="http://localhost:8088/" target="_blank" rel="external">http://localhost:8088/</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/24.png" alt="">    </p>
-<p>关闭浏览器:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/12/25.png" alt="">   </p>
-<h5 id="6-netty扩展"><a href="#6-netty扩展" class="headerlink" title="6.netty扩展"></a>6.netty扩展</h5><h6 id="6-1-netty版本"><a href="#6-1-netty版本" class="headerlink" title="6.1.netty版本"></a>6.1.netty版本</h6><p>netty版本大致分为:netty3.x 和netty4.x,netty5.x</p>
-<h6 id="6-2-netty运用在那些领域"><a href="#6-2-netty运用在那些领域" class="headerlink" title="6.2.netty运用在那些领域"></a>6.2.netty运用在那些领域</h6><ol>
-<li><p>分布式进程通信<br>例如：hadoop,dubbo,akka等具有分布式功能的框架,底层RPC通信都是基于netty实现的，这些框架使用的基本是netty3.x</p>
-</li>
-<li><p>游戏服务器<br>就java的最新的游戏服务器有部分公司可能已经开始采用netty4.x 或 netty5.x</p>
-</li>
-</ol>
-<h6 id="6-3-helloworld实例"><a href="#6-3-helloworld实例" class="headerlink" title="6.3.helloworld实例"></a>6.3.helloworld实例</h6><p>1.导入jar包  </p>
-<ol>
-<li>netty-3.10.5.Finaljar  </li>
-<li>思路<br>1.创建服务器<br>2.创建线程池boss,worker<br>3.设置socket工厂<br>4.设置普通工厂<br>5.监听端口  </li>
-</ol>
-<p>2.代码  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * netty服务端</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class Server &#123;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">  //服务类</div><div class="line">   ServerBootstrap serverBootstrap = new ServerBootstrap();</div><div class="line">   </div><div class="line"> //boss线程监听端口，worker线程负责数据读写</div><div class="line">   ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line">   ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line">   </div><div class="line"> //设置niosocket工厂</div><div class="line">   serverBootstrap.setFactory(new NioServerSocketChannelFactory(boss, worker));</div><div class="line">   </div><div class="line">   //设置管道的工厂</div><div class="line">   serverBootstrap.setPipelineFactory(new ChannelPipelineFactory() &#123;</div><div class="line">	</div><div class="line">	@Override</div><div class="line">	public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">	 ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">	 pipeline.addLast(&quot;decoder&quot;,new StringDecoder());</div><div class="line">	 pipeline.addLast(&quot;encoder&quot;, new StringEncoder());</div><div class="line">	 pipeline.addLast(&quot;helloHandler&quot;, new HelloHander());</div><div class="line">	 return pipeline;</div><div class="line">	&#125;</div><div class="line">&#125;);</div><div class="line">   serverBootstrap.bind(new InetSocketAddress(10010));</div><div class="line">   System.out.println(&quot;start!!!!&quot;);</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line"></div><div class="line">   //主hander</div><div class="line"> /**</div><div class="line"> * 消息接受处理类</div><div class="line"> * @author yxm</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class HelloHander extends SimpleChannelHandler&#123;</div><div class="line">@Override</div><div class="line">public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e)</div><div class="line">		throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelClosed&quot;);</div><div class="line">	super.channelClosed(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e)</div><div class="line">		throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelConnected&quot;);</div><div class="line">	super.channelConnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void channelDisconnected(ChannelHandlerContext ctx,</div><div class="line">		ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelDisconnected&quot;);</div><div class="line">	super.channelDisconnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e)</div><div class="line">		throws Exception &#123;</div><div class="line">	System.out.println(&quot;exceptionCaught&quot;);</div><div class="line">	super.exceptionCaught(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)</div><div class="line">		throws Exception &#123;</div><div class="line">	String message = (String)e.getMessage();</div><div class="line">	System.out.println(&quot;message&quot;+message);</div><div class="line">	</div><div class="line">	//回写数据</div><div class="line">	ctx.getChannel().write(&quot;hello too&quot;);</div><div class="line">	super.messageReceived(ctx, e);</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
-</code></pre><p>3.测试<br>1.打开一个dos,在dos中输入:cmd-&gt;telnet 127.0.0.1 10010-&gt;ctrl+]-&gt;send  helloword-&gt;回车-&gt;hello too<br>2.打开另一个dos,在dos中输入:cmd-&gt;telnet 127.0.0.1 10010-&gt;ctrl+]-&gt;send  helloword-&gt;回车-&gt;hello too</p>
-<p>4.总结<br>1.SimpleChannelHandler:处理消息的Handler,其中包含连接建立,接发消息,异常处理。  </p>
-<ol>
-<li>pipeline.addLast(“decoder”,new StringDecoder());对输入字符进行编码,后台只需要String message = (String)e.getMessage();接收。    </li>
-<li>pipeline.addLast(“encoder”, new StringEncoder());对从服务器达到客户端数据直接输出:ctx.getChannel().write(“hello too”);  </li>
-<li>StringDecoder()方法继承自ChannelUpstreamHander上行数据输入， new StringEncoder()方法继承自ChannelDownstreamHandler下行数据回显数据。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/05/21/netty实践-三-netty之helloword服务端/" class="archive-article-date">
-  	<time datetime="2017-05-21T07:56:16.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-05-21</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/30/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="page-number current">31</span><a class="page-number" href="/page/32/">32</a><a class="page-number" href="/page/33/">33</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/32/">Next &raquo;</a>
@@ -996,7 +950,7 @@ public void exceptionCaught(ChannelHandlerContext ctx, Throwable cause) throws E
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.32px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

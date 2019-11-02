@@ -152,6 +152,120 @@
       <div class="body-wrap">
         
   
+    <article id="post-java爬虫-22-邮件提醒" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/19/java爬虫-22-邮件提醒/">java爬虫-22-邮件提醒</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/19/java爬虫-22-邮件提醒/" class="archive-article-date">
+  	<time datetime="2018-11-19T03:51:22.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-java爬虫-21-爬虫项目监控" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/19/java爬虫-21-爬虫项目监控/">java爬虫-21-爬虫项目监控</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>爬虫宕机需要进行监控,防止项目挂掉之后未有及时的应急处理.  </p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/67.png" alt=""><br>从以上可以知道,监控分为硬件监控和软件系统监控,硬件监控用Ganglila,软件监控用Zookeper  </p>
+<h5 id="1-Zookeper"><a href="#1-Zookeper" class="headerlink" title="1.Zookeper"></a>1.Zookeper</h5><p>zk采用多节点部署,每一个节点叫做znode,每一个节点的路径结构是唯一确定的<br><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/68.png" alt="">  </p>
+<p>Znode，利用zk的短暂Znode和持久化的Znode也有属性来实现监控功能。<br><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/69.png" alt="">  </p>
+<h5 id="2-监控结构"><a href="#2-监控结构" class="headerlink" title="2 监控结构"></a>2 监控结构</h5><p><img src="ttps://raw.githubusercontent.com/startshineye/img/master/2018/11/70.png" alt="">    </p>
+<ol>
+<li>client1 client2 … 代表我们的爬虫服务</li>
+<li>爬虫生命周期监控:每启动一个爬虫服务client时候 我们向zookeeper节点(GroupMembers)注册一个临时节点,一旦节点挂掉和停止了,临时节点(client1)就会消失,此时我们只需要一个watcher来监控所有节点,只要有节点消失掉我们watcher就会知道   </li>
+<li>正常情况下,临时节点不会消失,只有当在有一个节点挂掉了,临时节点消失,我们可以触发监控程序,知晓哪个节点挂掉了</li>
+<li><p>根据以上结构,我们需要做一个watcher服务,用于监控爬虫服务,再建立一个client到zookeeper注册服务(Register)</p>
+<h6 id="2-1-爬虫服务注册"><a href="#2-1-爬虫服务注册" class="headerlink" title="2.1 爬虫服务注册"></a>2.1 爬虫服务注册</h6><p>在StartDSJ中的构造方法中添加:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">    //构造函数  建立连接</div><div class="line">public StartDSJ() &#123;</div><div class="line">	//重试策略:重试3次，每次间隔时间指数增长(有具体增长公式)	</div><div class="line">	RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);</div><div class="line">	//zk地址</div><div class="line">	String hosts = ZKUtil.ZOOKEEPER_HOSTS;</div><div class="line">	CuratorFramework client = CuratorFrameworkFactory.newClient(hosts, retryPolicy);</div><div class="line">	//建立连接</div><div class="line">	client.start();</div><div class="line">	try &#123;</div><div class="line">		//获取本地ip地址</div><div class="line">		InetAddress localHost = InetAddress.getLocalHost();</div><div class="line">		String ip = localHost.getHostAddress();</div><div class="line">		//每启动一个爬虫应用，创建一个临时节点，子节点名称为当前ip</div><div class="line">		client.create().creatingParentsIfNeeded().withMode(CreateMode.EPHEMERAL)</div><div class="line">			.withACL(Ids.OPEN_ACL_UNSAFE).forPath(ZKUtil.PATH+&quot;/&quot;+ip);</div><div class="line">	&#125; catch (Exception e) &#123;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<h6 id="2-2-watcher服务"><a href="#2-2-watcher服务" class="headerlink" title="2.2 watcher服务"></a>2.2 watcher服务</h6><p>对于watcher服务,我们使用zookeeper的Curator,详细操作如:<a href="https://www.jianshu.com/p/70151fc0ef5d" target="_blank" rel="external">Zookeeper客户端Curator使用详解</a>  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line">      /**</div><div class="line"> * 监视器</div><div class="line"> * @author dajiangtai</div><div class="line"> *</div><div class="line"> */</div><div class="line">public class ConfigWatcher implements Watcher &#123;</div><div class="line">	CuratorFramework client;</div><div class="line">	List&lt;String&gt; oldChildrenList = new ArrayList&lt;String&gt;();</div><div class="line"></div><div class="line">	//构造方法</div><div class="line">	public ConfigWatcher() &#123;</div><div class="line">		//重试策略:重试3次，每次间隔时间指数增长(有具体增长公式)	</div><div class="line">		RetryPolicy retryPolicy = new ExponentialBackoffRetry(1000, 3);</div><div class="line">		//zk地址</div><div class="line">		String hosts = ZKUtil.ZOOKEEPER_HOSTS;</div><div class="line">		client = CuratorFrameworkFactory.newClient(hosts,</div><div class="line">				retryPolicy);</div><div class="line">		//建立连接</div><div class="line">		client.start();</div><div class="line"></div><div class="line">		try &#123;</div><div class="line">			//获取子节点集合</div><div class="line">			oldChildrenList = client.getChildren().usingWatcher(this)</div><div class="line">					.forPath(ZKUtil.PATH);</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">	&#125;</div><div class="line">	</div><div class="line">	//具体业务实现</div><div class="line">	public void displayConfig() throws InterruptedException, KeeperException &#123;</div><div class="line">		try &#123;</div><div class="line">			List&lt;String&gt; currentChildrenList = client.getChildren()</div><div class="line">					.usingWatcher(this).forPath(ZKUtil.PATH);</div><div class="line">			for (String child : currentChildrenList) &#123;</div><div class="line">				if (!oldChildrenList.contains(child)) &#123;</div><div class="line">					System.out.println(&quot;新增加的爬虫节点为：&quot; + child);</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			for (String child : oldChildrenList) &#123;</div><div class="line">				if (!currentChildrenList.contains(child)) &#123;</div><div class="line">					System.out.println(&quot;挂掉的爬虫节点为：&quot; + child);</div><div class="line">				&#125;</div><div class="line">			&#125;</div><div class="line">			//子节点集合更新</div><div class="line">			this.oldChildrenList = currentChildrenList;</div><div class="line">		&#125; catch (Exception e) &#123;</div><div class="line">			e.printStackTrace();</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	//监控节点变化</div><div class="line">	public void process(WatchedEvent event) &#123;</div><div class="line">		if (event.getType() == Event.EventType.NodeChildrenChanged) &#123;</div><div class="line">			try &#123;</div><div class="line">				//调用具体业务代码</div><div class="line">				displayConfig();</div><div class="line">			&#125; catch (InterruptedException e) &#123;</div><div class="line">				// TODO Auto-generated catch block</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125; catch (KeeperException e) &#123;</div><div class="line">				// TODO Auto-generated catch block</div><div class="line">				e.printStackTrace();</div><div class="line">			&#125;</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line"></div><div class="line">	public static void main(String[] args) throws InterruptedException &#123;</div><div class="line">		ConfigWatcher configWatcher = new ConfigWatcher();</div><div class="line">		Thread.sleep(Long.MAX_VALUE);//然后一直监控</div><div class="line">	&#125;</div><div class="line"></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/19/java爬虫-21-爬虫项目监控/" class="archive-article-date">
+  	<time datetime="2018-11-19T01:59:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-19</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java爬虫-20-解决频繁抓取ip被封问题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -735,197 +849,6 @@
 
 
   
-    <article id="post-java爬虫-12-Queue队列实现循环抓取" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/15/java爬虫-12-Queue队列实现循环抓取/">java爬虫-12-Queue队列实现循环抓取</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>之前我们爬取页面后 就是把当前页面内容给爬取了,而没有循环遍历爬取数据,这一节 我们通过Queue队列实现循环抓取</li>
-<li>实现功能:添加url队列,循环解析电视剧列表页和详情页(队列里面先进先出)  </li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-建立队列-存储所有url"><a href="#1-建立队列-存储所有url" class="headerlink" title="1.建立队列 存储所有url"></a>1.建立队列 存储所有url</h5><p>建立一个安全并且并发执行的队列  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">private Queue urlQueue = new ConcurrentLinkedDeque();</div></pre></td></tr></table></figure>
-</code></pre><h5 id="2-主程序中开启爬虫"><a href="#2-主程序中开启爬虫" class="headerlink" title="2.主程序中开启爬虫"></a>2.主程序中开启爬虫</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">  /**</div><div class="line"> * 开启一个爬虫入口</div><div class="line"> */</div><div class="line">public void startSpider()&#123;</div><div class="line">    while(true)&#123;</div><div class="line">       //从队列中提取需要解析的url</div><div class="line">        String url = urlQueue.poll();</div><div class="line"></div><div class="line">        //判断url是否为空</div><div class="line">        if(StringUtils.isNotBlank(url))&#123;</div><div class="line">            //下载</div><div class="line">            Page page = this.downloadPage(url);</div><div class="line">            //解析</div><div class="line">            this.processPage(page);</div><div class="line">            List&lt;String&gt; urlList = page.getUrlList();</div><div class="line"></div><div class="line">            //循环抓取</div><div class="line">            for(String eachUrl:urlList)&#123;</div><div class="line">                this.urlQueue.add(eachUrl);</div><div class="line">            &#125;</div><div class="line">            if(page.getUrl().startsWith(&quot;http://www.youku.com/show_page&quot;))&#123;</div><div class="line">                //存储数据</div><div class="line">                this.processPage(page);</div><div class="line">            &#125;</div><div class="line">        &#125;else&#123;</div><div class="line">            System.out.println(&quot;队列中的电视剧url解析完毕，请等待！&quot;);</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="2-mian中调用"><a href="#2-mian中调用" class="headerlink" title="2.mian中调用"></a>2.mian中调用</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> public static void main(String[] args) &#123;</div><div class="line">    //创建对象</div><div class="line">    StartDSJ dsj = new StartDSJ();</div><div class="line"></div><div class="line">    //定义是用哪个接口下载的,这里是httpClient</div><div class="line">    dsj.setDownLoadService(new HttpClientDownLoadSevice());</div><div class="line">    dsj.setProcessService(new YOUKUProcesService());</div><div class="line">    dsj.setStoreService(new ConsoleStoreService());</div><div class="line">    //dsj.setStoreService(new HBaseStoreService());</div><div class="line"></div><div class="line">    //String url = &quot;http://www.youku.com/show_page/id_z9cd2277647d311e5b692.html?spm=a2htv.20005143.m13050845531.5~5~1~3~A&amp;from=y1.3-tv-index-2640-5143.40177.1-1&quot;;</div><div class="line">    //下载页面</div><div class="line">    String url =&quot;http://tv.youku.com/search/index/_page40177_30_cmodid_40177?spm=a2htv.20005143.m13050845531.5%212~5~1~3%215~A&quot;;</div><div class="line"></div><div class="line">    //设置起始地址</div><div class="line">    dsj.urlQueue.add(url);</div><div class="line">    dsj.startSpider();</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/15/java爬虫-12-Queue队列实现循环抓取/" class="archive-article-date">
-  	<time datetime="2018-11-15T03:54:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-15</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-java爬虫-11-解析所有分页url并优化解析实现类" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/11/07/java爬虫-11-解析所有分页url并优化解析实现类/">java爬虫-11-解析所有分页url并优化解析实现类</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><ol>
-<li>实现功能:解析优酷电视剧列表页并优化解析实现类</li>
-</ol>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><ol>
-<li><p>之前我们是解析优酷电视剧详情页<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/40.png" alt=""> </p>
-</li>
-<li><p>现在我们需要通过代码解析所有的电视剧<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/41.png" alt="">   </p>
-</li>
-</ol>
-<p>我们需要在Page属性中存储列表页的url和详情页的url,所以我们定义如下属性: private List<string> urlList = new ArrayList<string>();<br>我们解析的时候是解析的单个url  </string></string></p>
-<h5 id="1-Page实体修改"><a href="#1-Page实体修改" class="headerlink" title="1.Page实体修改"></a>1.Page实体修改</h5><p>Page:</p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">   /**</div><div class="line">   * 存储电视剧url(包含列表url和详情url)</div><div class="line">   */</div><div class="line"> private List&lt;String&gt; urlList = new ArrayList&lt;String&gt;();</div><div class="line">	</div><div class="line"> public void add(String url)&#123;</div><div class="line">     this.urlList.add(url);</div><div class="line"> &#125;</div><div class="line">	</div><div class="line">public List&lt;String&gt; getUrlList()&#123;</div><div class="line">     return urlList;</div><div class="line"> &#125;</div></pre></td></tr></table></figure>
-</code></pre><h5 id="2-process中优酷解析修改"><a href="#2-process中优酷解析修改" class="headerlink" title="2.process中优酷解析修改"></a>2.process中优酷解析修改</h5><p>页面解析方法:之前是直接解析详情页,现在从列表页解析如何写呢?前面基本获取页面是不变的,我们只需要做一个判断。  </p>
-<h6 id="2-1-详情页解析"><a href="#2-1-详情页解析" class="headerlink" title="2.1 详情页解析"></a>2.1 详情页解析</h6><p>1.做一个判断:是详情页还是列表页<br>详情页地址前缀:<a href="http://www.youku.com/show_page" target="_blank" rel="external">http://www.youku.com/show_page</a></p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">  public void process(Page page) &#123;</div><div class="line">    /**</div><div class="line">     * 我们使用HtmlCleaner解析页面</div><div class="line">     */</div><div class="line">    //获取页面抓取内容</div><div class="line">    String content = page.getContent();</div><div class="line"></div><div class="line">    HtmlCleaner htmlCleaner = new HtmlCleaner();</div><div class="line">    //获取根节点</div><div class="line">    TagNode rootNode = htmlCleaner.clean(content);</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 做一个判断是详情页还是列表页(我们根据url的前缀来判断)</div><div class="line">     * 1.详情页 就按照之前的解析走</div><div class="line">     */</div><div class="line">    String detailPagePre = &quot;http://www.youku.com/show_page&quot;;</div><div class="line">    if(page.getUrl().startsWith(detailPagePre))&#123;</div><div class="line">       //解析电视剧详情页</div><div class="line">       parseDetailPage(page,rootNode);</div><div class="line">    &#125;else&#123;</div><div class="line">        /**</div><div class="line">         * 解析列表页</div><div class="line">         * 解析列表页时候</div><div class="line">         * 1.需要先解析下一页</div><div class="line">         * 2.然后 解析当前列表页</div><div class="line">         */</div><div class="line"></div><div class="line">        //1.解析分页查询的下一页按钮</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-</code></pre><p>2.在解析方法中做一个url前缀判断,然后封装成parseDetailPage(Page page,TagNode rootNode)解析 </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div></pre></td><td class="code"><pre><div class="line">       /**</div><div class="line">     * 解析电视剧详情页</div><div class="line">     * @param page</div><div class="line">     * @param rootNode</div><div class="line">     */</div><div class="line">    public void parseDetailPage(Page page,TagNode rootNode)&#123;</div><div class="line">        //获取总数</div><div class="line">        String allNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseAllNumber&quot;), LoadPropertyUtil.getYOUKU(&quot;allnumberRegex&quot;));</div><div class="line"></div><div class="line">        //点赞数</div><div class="line">        String supportNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseSupportNumber&quot;),  LoadPropertyUtil.getYOUKU(&quot;supportnumberRegex&quot;));</div><div class="line"></div><div class="line">        //评论数</div><div class="line">        String commentNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseCommentNumber&quot;),  LoadPropertyUtil.getYOUKU(&quot;commentnumberRegex&quot;));</div><div class="line"></div><div class="line">        //最后把值存起来</div><div class="line">        page.setAllNumber(allNumber);</div><div class="line">        page.setSupportNumber(supportNumber);</div><div class="line">        page.setCommitNumber(commentNumber);</div><div class="line"></div><div class="line">        page.setDayNumber(&quot;0&quot;);</div><div class="line">        page.setAgainstNumber(&quot;0&quot;);</div><div class="line">        page.setCollectNumber(&quot;0&quot;);</div><div class="line"></div><div class="line">        //获取优酷电视剧id</div><div class="line">        Pattern pattern = Pattern.compile(LoadPropertyUtil.getYOUKU(&quot;idRegex&quot;), Pattern.DOTALL);</div><div class="line">        page.setTvId(&quot;youku_&quot;+ RegexUtil.getPageInfoByRegex(page.getUrl(), pattern, 1));</div><div class="line">    &#125;  </div><div class="line">    ```  </div><div class="line"></div><div class="line"></div><div class="line">  </div><div class="line"></div><div class="line">###### 2.2 列表页解析</div><div class="line">1.怎样判断第一页和第二页,需要根据下一页按钮    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/43.png)</div><div class="line"></div><div class="line">2.取其xpath地址,然后保存到配置文件当中:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/44.png)</div><div class="line"></div><div class="line"></div><div class="line">3.解析列表页（解析下一页,解析当前页个列表）   </div><div class="line">3.1 解析下一页   </div><div class="line">由于下一页的url即:nextUrl是在a标签里面的href属性中,所以我们提供如下方法。 根据下一个地址按钮的xpath找到a便签里面的href属性值,在HtmlUtil中封装getAttributeByName(TagNode tagNode,String xPath,String att);  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/45.png)</div><div class="line"></div><div class="line">在YOUKUProcesService中调用  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/46.png)</div><div class="line"></div><div class="line">3.2 解析当前页中所有详情页  </div><div class="line">找到每个详情页的匹配规则  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/47.png)  </div><div class="line"></div><div class="line">具体解析  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2018/11/48.png)  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 3.运行校验</div><div class="line">1. 问题:我们运行项目之后会出现以下问题:</div><div class="line">![](49.png)</div><div class="line">提示host找不到,一般网站采取了“反爬虫技术” 通过程序抓取数据 网站可以检测到,就不允许访问</div><div class="line"></div><div class="line">2. 也就说明是页面下载出现问题：</div></pre></td></tr></table></figure>
-
-      //创建builder
-    HttpClientBuilder builder = HttpClients.custom();
-
-    //build一个CloseableHttpClient
-    CloseableHttpClient client = builder.build();
-    //创建一个Get请求
-    HttpGet request = new HttpGet(url);
-
-    //执行请求并返回
-    String content = null;
-    try {
-        CloseableHttpResponse response = client.execute(request);
-        HttpEntity entity = response.getEntity();
-
-        //将entity转换成String
-        content = EntityUtils.toString(entity);
-    } catch (IOException e) {
-        e.printStackTrace();
-    }
-    return content;
-     }
-
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">但是我们通过浏览器就是可以访问的,通过浏览器访问网站会认为你是一个正常用户 但是经过程序多次访问就认为你是一个非法用户。</div><div class="line"></div><div class="line">3. 针对于以上情况 我们可以通过模拟浏览器来访问,模拟浏览器就是 通过用户代理  </div><div class="line"></div><div class="line">![](50.png)  </div><div class="line"></div><div class="line"></div><div class="line">4. 修改httpClient下载页面,里面定义一个用户代理</div></pre></td></tr></table></figure>
-
-
-     /**
-      * 页面下载工具类
-      * @author yxm
-      * @date 2018/11/5 23:54:20
-      */
-     public class PageDownLoadUtil {
-    /**
-     * 设置用户代理，模拟浏览器
-     */
-    private final static String USER_AGENT=&quot;Mozilla/5.0 (Windows NT 6.1; WOW64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/45.0.2454.101 Safari/537.36&quot;;
-    /**
-     * 获取页面内容
-     * @param url
-     * @return
-     */
-    public static String getPageContent(String url){
-        //创建builder
-        HttpClientBuilder builder = HttpClients.custom();
-
-        //build一个CloseableHttpClient
-        CloseableHttpClient client = builder.build();
-        //创建一个Get请求
-        HttpGet request = new HttpGet(url);
-
-        //执行请求并返回
-        String content = null;
-        try {
-            //设置用户代理-模拟浏览器
-            request.setHeader(&quot;User-Agent&quot;,USER_AGENT);
-            CloseableHttpResponse response = client.execute(request);
-            HttpEntity entity = response.getEntity();
-
-            //将entity转换成String
-            content = EntityUtils.toString(entity);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return content;
-    }
-}
-
-```
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/11/07/java爬虫-11-解析所有分页url并优化解析实现类/" class="archive-article-date">
-  	<time datetime="2018-11-07T09:39:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/5/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/4/">4</a><a class="page-number" href="/page/5/">5</a><span class="page-number current">6</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/7/">Next &raquo;</a>
@@ -991,7 +914,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.32px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     

@@ -152,6 +152,301 @@
       <div class="body-wrap">
         
   
+    <article id="post-shiro-4-多Realm验证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/23/shiro-4-多Realm验证/">shiro(4)-多Realm验证</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在前面几篇文章中说道:<br>我们在数据库中密码存放的是密码的明文,比如:123456 这样不安全 所以我们弄了一个MD5加密,加密之后，是一个很长的不可逆的字符串,安全了一些,但是我们觉得还是不好,我们又弄了一个MD5盐值加密,这样算可以了吧。<br>但是:实际上在某些特定的场合 我们可能把这些安全数据放在不同的数据库里面,比如说:mysql里面有 oracle里面也有,mysql里面可能是MD5而oracle里面可能是HAS-1,这个时候进行用户认证的话需要同时访问两个数据库。我们就需要多个realm，多个realm还涉及到认证策略的问题。以下我们主要讲多realm和验证策略。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-多realm"><a href="#1-多realm" class="headerlink" title="1.多realm"></a>1.多realm</h5><p>通过shiro的quickstart我们知道shiro在认证时候使用了多realm，<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/15.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/16.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/17.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/18.png" alt=""></p>
+<p>我们把不同的两个realm配置到ModularRealmAuthenticator进而配置到shiro的大管家securityManager中去。securityManager通过authenticator配置了jdbcRealm和secondRealm两个realm  </p>
+<p>Spring中配置如下:</p>
+<pre><code>&lt;!--  
+1. 配置 SecurityManager!
+--&gt;     
+&lt;bean id=&quot;securityManager&quot; class=&quot;org.apache.shiro.web.mgt.DefaultWebSecurityManager&quot;&gt;
+    &lt;property name=&quot;cacheManager&quot; ref=&quot;cacheManager&quot;/&gt;
+    &lt;property name=&quot;authenticator&quot; ref=&quot;authenticator&quot;&gt;&lt;/property&gt;
+
+    &lt;property name=&quot;realms&quot;&gt;
+        &lt;list&gt;
+            &lt;ref bean=&quot;jdbcRealm&quot;/&gt;
+            &lt;ref bean=&quot;secondRealm&quot;/&gt;
+        &lt;/list&gt;
+    &lt;/property&gt;
+
+    &lt;property name=&quot;rememberMeManager.cookie.maxAge&quot; value=&quot;10&quot;&gt;&lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;!-- Let&apos;s use some enterprise caching support for better performance.  You can replace this with any enterprise
+     caching framework implementation that you like (Terracotta+Ehcache, Coherence, GigaSpaces, etc --&gt;
+&lt;bean id=&quot;authenticator&quot; 
+    class=&quot;org.apache.shiro.authc.pam.ModularRealmAuthenticator&quot;&gt;
+    &lt;property name=&quot;authenticationStrategy&quot;&gt;
+        &lt;bean class=&quot;org.apache.shiro.authc.pam.AtLeastOneSuccessfulStrategy&quot;&gt;&lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;!-- Used by the SecurityManager to access security data (users, roles, etc).
+     Many other realm implementations can be used too (PropertiesRealm,
+     LdapRealm, etc. --&gt;
+&lt;!-- 
+    3. 配置 Realm 
+    3.1 直接配置实现了 org.apache.shiro.realm.Realm 接口的 bean
+--&gt;     
+&lt;bean id=&quot;jdbcRealm&quot; class=&quot;com.atguigu.shiro.realms.ShiroRealm&quot;&gt;
+    &lt;property name=&quot;credentialsMatcher&quot;&gt;
+        &lt;bean class=&quot;org.apache.shiro.authc.credential.HashedCredentialsMatcher&quot;&gt;
+            &lt;property name=&quot;hashAlgorithmName&quot; value=&quot;MD5&quot;&gt;&lt;/property&gt;
+            &lt;property name=&quot;hashIterations&quot; value=&quot;1024&quot;&gt;&lt;/property&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+
+&lt;bean id=&quot;secondRealm&quot; class=&quot;com.atguigu.shiro.realms.SecondRealm&quot;&gt;
+    &lt;property name=&quot;credentialsMatcher&quot;&gt;
+        &lt;bean class=&quot;org.apache.shiro.authc.credential.HashedCredentialsMatcher&quot;&gt;
+            &lt;property name=&quot;hashAlgorithmName&quot; value=&quot;SHA1&quot;&gt;&lt;/property&gt;
+            &lt;property name=&quot;hashIterations&quot; value=&quot;1024&quot;&gt;&lt;/property&gt;
+        &lt;/bean&gt;
+    &lt;/property&gt;
+&lt;/bean&gt;
+</code></pre><p>ShiroRealm:  </p>
+<pre><code>public class ShiroRealm extends AuthorizingRealm {
+
+@Override
+protected AuthenticationInfo doGetAuthenticationInfo(
+        AuthenticationToken token) throws AuthenticationException {
+    System.out.println(&quot;[FirstRealm] doGetAuthenticationInfo&quot;);
+
+    //1. 把 AuthenticationToken 转换为 UsernamePasswordToken 
+    UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+
+    //2. 从 UsernamePasswordToken 中来获取 username
+    String username = upToken.getUsername();
+
+    //3. 调用数据库的方法, 从数据库中查询 username 对应的用户记录
+    System.out.println(&quot;从数据库中获取 username: &quot; + username + &quot; 所对应的用户信息.&quot;);
+
+    //4. 若用户不存在, 则可以抛出 UnknownAccountException 异常
+    if(&quot;unknown&quot;.equals(username)){
+        throw new UnknownAccountException(&quot;用户不存在!&quot;);
+    }
+
+    //5. 根据用户信息的情况, 决定是否需要抛出其他的 AuthenticationException 异常. 
+    if(&quot;monster&quot;.equals(username)){
+        throw new LockedAccountException(&quot;用户被锁定&quot;);
+    }
+
+    //6. 根据用户的情况, 来构建 AuthenticationInfo 对象并返回. 通常使用的实现类为: SimpleAuthenticationInfo
+    //以下信息是从数据库中获取的.
+    //1). principal: 认证的实体信息. 可以是 username, 也可以是数据表对应的用户的实体类对象. 
+    Object principal = username;
+    //2). credentials: 密码. 
+    Object credentials = null; //&quot;fc1709d0a95a6be30bc5926fdb7f22f4&quot;;
+    if(&quot;admin&quot;.equals(username)){
+        credentials = &quot;038bdaf98f2037b31f1e75b5b4c9b26e&quot;;
+    }else if(&quot;user&quot;.equals(username)){
+        credentials = &quot;098d2c478e9c11555ce2823231e02ec1&quot;;
+    }
+
+    //3). realmName: 当前 realm 对象的 name. 调用父类的 getName() 方法即可
+    String realmName = getName();
+    //4). 盐值. 
+    ByteSource credentialsSalt = ByteSource.Util.bytes(username);
+
+    SimpleAuthenticationInfo info = null; //new SimpleAuthenticationInfo(principal, credentials, realmName);
+    info = new SimpleAuthenticationInfo(principal, credentials, credentialsSalt, realmName);
+    return info;
+}
+
+public static void main(String[] args) {
+    String hashAlgorithmName = &quot;MD5&quot;;
+    Object credentials = &quot;123456&quot;;
+    Object salt = ByteSource.Util.bytes(&quot;user&quot;);;
+    int hashIterations = 1024;
+
+    Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+    System.out.println(result);
+}
+
+//授权会被 shiro 回调的方法
+@Override
+protected AuthorizationInfo doGetAuthorizationInfo(
+        PrincipalCollection principals) {
+    //1. 从 PrincipalCollection 中来获取登录用户的信息
+    Object principal = principals.getPrimaryPrincipal();
+
+    //2. 利用登录的用户的信息来用户当前用户的角色或权限(可能需要查询数据库)
+    Set&lt;String&gt; roles = new HashSet&lt;&gt;();
+    roles.add(&quot;user&quot;);
+    if(&quot;admin&quot;.equals(principal)){
+        roles.add(&quot;admin&quot;);
+    }
+
+    //3. 创建 SimpleAuthorizationInfo, 并设置其 reles 属性.
+    SimpleAuthorizationInfo info = new SimpleAuthorizationInfo(roles);
+
+    //4. 返回 SimpleAuthorizationInfo 对象. 
+    return info;
+  }
+}
+</code></pre><p>SecondRealm:</p>
+<pre><code>public class SecondRealm extends AuthenticatingRealm {
+@Override
+protected AuthenticationInfo doGetAuthenticationInfo(
+        AuthenticationToken token) throws AuthenticationException {
+    System.out.println(&quot;[SecondReaml] doGetAuthenticationInfo&quot;);
+
+    //1. 把 AuthenticationToken 转换为 UsernamePasswordToken 
+    UsernamePasswordToken upToken = (UsernamePasswordToken) token;
+
+    //2. 从 UsernamePasswordToken 中来获取 username
+    String username = upToken.getUsername();
+
+    //3. 调用数据库的方法, 从数据库中查询 username 对应的用户记录
+    System.out.println(&quot;从数据库中获取 username: &quot; + username + &quot; 所对应的用户信息.&quot;);
+
+    //4. 若用户不存在, 则可以抛出 UnknownAccountException 异常
+    if(&quot;unknown&quot;.equals(username)){
+        throw new UnknownAccountException(&quot;用户不存在!&quot;);
+    }
+
+    //5. 根据用户信息的情况, 决定是否需要抛出其他的 AuthenticationException 异常. 
+    if(&quot;monster&quot;.equals(username)){
+        throw new LockedAccountException(&quot;用户被锁定&quot;);
+    }
+
+    //6. 根据用户的情况, 来构建 AuthenticationInfo 对象并返回. 通常使用的实现类为: SimpleAuthenticationInfo
+    //以下信息是从数据库中获取的.
+    //1). principal: 认证的实体信息. 可以是 username, 也可以是数据表对应的用户的实体类对象. 
+    Object principal = username;
+    //2). credentials: 密码. 
+    Object credentials = null; //&quot;fc1709d0a95a6be30bc5926fdb7f22f4&quot;;
+    if(&quot;admin&quot;.equals(username)){
+        credentials = &quot;ce2f6417c7e1d32c1d81a797ee0b499f87c5de06&quot;;
+    }else if(&quot;user&quot;.equals(username)){
+        credentials = &quot;073d4c3ae812935f23cb3f2a71943f49e082a718&quot;;
+    }
+
+    //3). realmName: 当前 realm 对象的 name. 调用父类的 getName() 方法即可
+    String realmName = getName();
+    //4). 盐值. 
+    ByteSource credentialsSalt = ByteSource.Util.bytes(username);
+
+    SimpleAuthenticationInfo info = null; //new SimpleAuthenticationInfo(principal, credentials, realmName);
+    info = new SimpleAuthenticationInfo(&quot;secondRealmName&quot;, credentials, credentialsSalt, realmName);
+    return info;
+}
+
+public static void main(String[] args) {
+    String hashAlgorithmName = &quot;SHA1&quot;;
+    Object credentials = &quot;123456&quot;;
+    Object salt = ByteSource.Util.bytes(&quot;admin&quot;);;
+    int hashIterations = 1024;
+
+    Object result = new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations);
+    System.out.println(result);
+   }
+ }
+</code></pre><h5 id="2-验证策略"><a href="#2-验证策略" class="headerlink" title="2.验证策略"></a>2.验证策略</h5><p>认证策略:假如有多个realm的话 怎样才能认证成功</p>
+<p>认证策略其实就是一个接口:AuthenticationStrategy 其实只默认关注如下：AtLeastOneSuccessfulStrategy方法就行了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/19.png" alt=""><br>这样的话AtLeastOneSuccessfulStrategy只需要验证一个没问题就通过了,如果想要让两次认证通过才算可以,需要在ModularRealmAuthenticator认证器里面配置属性AllSuccessfulStrategy即可<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/07/20.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/07/23/shiro-4-多Realm验证/" class="archive-article-date">
+  	<time datetime="2018-07-23T14:32:03.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-07-23</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shiro/">shiro</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-shiro-3-shiro认证" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/07/22/shiro-3-shiro认证/">shiro(3)-shiro认证</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="登录步骤"><a href="#登录步骤" class="headerlink" title="登录步骤"></a>登录步骤</h5><p>从之前的quickStart知道,用户的登录需要完成以下步骤:<br>1.获取当前的 Subject. 调用 SecurityUtils.getSubject();<br>2.测试当前的用户是否已经被认证. 即是否已经登录. 调用 Subject 的 isAuthenticated()<br>3.若没有被认证, 则把用户名和密码封装为 UsernamePasswordToken 对象<br>1).创建一个表单页面<br>2).把请求提交到 SpringMVC 的 Handler<br>3).获取用户名和密码(在Handler中).<br>4.执行登录: 调用 Subject 的 login(AuthenticationToken) 方法. 此AuthenticationToken会在org.apache.shiro.realm.AuthenticatingRealm中的doGetAuthenticationInfo(AuthenticationToken)<br>5.自定义Realm 的方法,从数据库中获取对应的记录,返回给Shiro.<br>1).实际上需要继承 org.apache.shiro.realm.AuthenticatingRealm 类<br>2).实现 doGetAuthenticationInfo(AuthenticationToken) 方法.<br>6.由shiro完成对密码的比对.  </p>
+<h5 id="盐值加密"><a href="#盐值加密" class="headerlink" title="盐值加密"></a>盐值加密</h5><p>1.为什么使用 MD5 盐值加密: 为了让相同明文密码的用户所对应的加密后密码也不一样<br>2.如何做到:<br>1). 在 doGetAuthenticationInfo 方法返回值创建 SimpleAuthenticationInfo 对象的时候, 需要使用<br>SimpleAuthenticationInfo(principal, credentials, credentialsSalt, realmName) 构造器<br>2). 使用 ByteSource.Util.bytes() 来计算盐值.<br>3). 盐值需要唯一: 一般使用随机字符串或 user id<br>4). 使用 new SimpleHash(hashAlgorithmName, credentials, salt, hashIterations); 来计算盐值加密后的密码的值.   </p>
+<p>1.如何把一个字符串加密为MD5<br>2.替换当前 Realm 的 credentialsMatcher 属性. 直接使用 HashedCredentialsMatcher 对象, 并设置加密算法即可.   </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/07/22/shiro-3-shiro认证/" class="archive-article-date">
+  	<time datetime="2018-07-22T14:38:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-07-22</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/shiro/">shiro</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-shiro-2-shiro之quickstart" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1181,284 +1476,6 @@ public interface TeacherRepository extends JpaRepository&lt;Teacher,Integer&gt;,
 
 
   
-    <article id="post-zyzx-49-SpringBoot使用EhCache做集中式缓存" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/20/zyzx-49-SpringBoot使用EhCache做集中式缓存/">zyzx(49)-SpringBoot使用EhCache做集中式缓存</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>我们直接使用spring-data-jpa来演示使用EhCache做集中式缓存  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h6 id="1-1加入jpa"><a href="#1-1加入jpa" class="headerlink" title="1.1加入jpa"></a>1.1加入jpa</h6><pre><code>&lt;!--spring-data-jpa--&gt;
- &lt;dependency&gt;
-     &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-     &lt;artifactId&gt;spring-boot-starter-data-jpa&lt;/artifactId&gt;
- &lt;/dependency&gt;
-</code></pre><h6 id="1-2创建repository"><a href="#1-2创建repository" class="headerlink" title="1.2创建repository"></a>1.2创建repository</h6><pre><code>public interface TeacherRepository extends JpaRepository&lt;Teacher,Integer&gt;,JpaSpecificationExecutor&lt;Teacher&gt;{
-        Teacher findByName(String name);
-}
-</code></pre><h6 id="2-3-测试"><a href="#2-3-测试" class="headerlink" title="2.3 测试"></a>2.3 测试</h6><p>不用缓存时候查询两次<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/27.png" alt=""><br>以上sql语句打印了两次,说明查询了两次数据库,那么同样的操作是不是可以查询一次数据库,下一次从缓存中拿呢？</p>
-<h5 id="2-使用缓存"><a href="#2-使用缓存" class="headerlink" title="2.使用缓存"></a>2.使用缓存</h5><h6 id="2-1加入缓存依赖"><a href="#2-1加入缓存依赖" class="headerlink" title="2.1加入缓存依赖"></a>2.1加入缓存依赖</h6><pre><code>&lt;!--加入缓存依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-cache&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h6 id="2-2开启缓存-EnableCaching"><a href="#2-2开启缓存-EnableCaching" class="headerlink" title="2.2开启缓存(EnableCaching)"></a>2.2开启缓存(EnableCaching)</h6><pre><code>@SpringBootApplication
-@EnableCaching
-public class Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}
-</code></pre><h6 id="2-3-配置缓存"><a href="#2-3-配置缓存" class="headerlink" title="2.3 配置缓存"></a>2.3 配置缓存</h6><pre><code>@CacheConfig(cacheNames = &quot;teacherCache&quot;)
-public interface TeacherRepository extends JpaRepository&lt;Teacher,Integer&gt;,JpaSpecificationExecutor&lt;Teacher&gt;{
-        @Cacheable
-        Teacher findByName(String name);
-}
-</code></pre><h6 id="2-4-测试缓存"><a href="#2-4-测试缓存" class="headerlink" title="2.4 测试缓存"></a>2.4 测试缓存</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/28.png" alt=""></p>
-<h5 id="3-使用缓存EhCache"><a href="#3-使用缓存EhCache" class="headerlink" title="3.使用缓存EhCache"></a>3.使用缓存EhCache</h5><h6 id="3-0创建ehcache的xml文件"><a href="#3-0创建ehcache的xml文件" class="headerlink" title="3.0创建ehcache的xml文件"></a>3.0创建ehcache的xml文件</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/29.png" alt=""></p>
-<p>ehcache-config.xml内容:  </p>
-<pre><code>&lt;ehcache xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-     xsi:noNamespaceSchemaLocation=&quot;ehcache.xsd&quot;&gt;
-&lt;cache name=&quot;teacherCache&quot;
-       maxEntriesLocalHeap=&quot;200&quot;
-       timeToLiveSeconds=&quot;600&quot;&gt;
-&lt;/cache&gt;
-&lt;/ehcache&gt;
-</code></pre><p>application.properties文件中配置:</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/30.png" alt=""></p>
-<h6 id="3-1加入缓存依赖"><a href="#3-1加入缓存依赖" class="headerlink" title="3.1加入缓存依赖"></a>3.1加入缓存依赖</h6><pre><code>&lt;ehcache xmlns:xsi=&quot;http://www.w3.org/2001/XMLSchema-instance&quot;
-         xsi:noNamespaceSchemaLocation=&quot;ehcache.xsd&quot;&gt;
-    &lt;cache name=&quot;teacherCache&quot;
-           maxEntriesLocalHeap=&quot;200&quot;
-           timeToLiveSeconds=&quot;600&quot;&gt;
-    &lt;/cache&gt;
-&lt;/ehcache&gt;
-</code></pre><h6 id="3-1加入缓存依赖-1"><a href="#3-1加入缓存依赖-1" class="headerlink" title="3.1加入缓存依赖"></a>3.1加入缓存依赖</h6><pre><code>&lt;!--加入EhCache依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;net.sf.ehcache&lt;/groupId&gt;
-    &lt;artifactId&gt;ehcace&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h6 id="3-2开启缓存-EnableCaching"><a href="#3-2开启缓存-EnableCaching" class="headerlink" title="3.2开启缓存(EnableCaching)"></a>3.2开启缓存(EnableCaching)</h6><pre><code>@SpringBootApplication
-@EnableCaching
-public class Application {
-
-    public static void main(String[] args) {
-        SpringApplication.run(Application.class, args);
-    }
-}
-</code></pre><h6 id="3-3-配置缓存"><a href="#3-3-配置缓存" class="headerlink" title="3.3 配置缓存"></a>3.3 配置缓存</h6><pre><code>/**
- * @CacheConfig:配置该类中会用到的一些缓存配置,我们查询的数据会存放到cacheNames=&quot;teacherCache&quot;这个缓存对象中
- */
-@CacheConfig(cacheNames = &quot;teacherCache&quot;)
-public interface TeacherRepository extends JpaRepository&lt;Teacher,Integer&gt;,JpaSpecificationExecutor&lt;Teacher&gt;{
-        /**
-         * 1.配置这个函数的返回值加入到缓存中,查询的时候先从缓存中获取,如果不存在再去数据库查询。
-         * 2.除了@Cacheable还有@CachePut和CacheEvict。
-         * 3.@CachePut：它每次都会调用函数，所以主要用于数据库新增和修改上。
-         * @CacheEvict 配置函数上，通常用在删除方法上，用来从缓存中移除相应数据。
-         * @param name
-         * @return
-         */
-        @Cacheable
-        Teacher findByName(String name);
-
-        /**
-         *1.在spring boot中通过@EnableCaching注解自动化配置合适的缓存管理器。
-         *2.一般缓存管理器有:Generic、JCache、EhCache。。。reids
-         *3.spring.chache.type强制指定缓存管理器。
-         * 4.可以直接在resources下配置ehcache.xml，spring boot会自己侦测到。但是为了后期的演示，我们将其放到config文件夹中，并且改名为ehcache-config.xml,然后配置
-         * 指定这个xml    spring.cache.ehchache.config=classpath:cofnig/ehcache-config.xml
-         * @param name
-         * @return
-         */
-        Teacher save(String name);
-}
-</code></pre><h6 id="3-4-测试缓存"><a href="#3-4-测试缓存" class="headerlink" title="3.4 测试缓存"></a>3.4 测试缓存</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/28.png" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/20/zyzx-49-SpringBoot使用EhCache做集中式缓存/" class="archive-article-date">
-  	<time datetime="2018-05-20T09:57:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-20</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-zyzx-48-SpringBoot整合spring-security" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/">zyzx(48)-SpringBoot整合spring-security</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><pre><code>&lt;!--spring security依赖--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-security&lt;/artifactId&gt;
-&lt;/dependency&gt;   
-
-&lt;!--以thymeleaf渲染页面--&gt;
-&lt;dependency&gt;
-    &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
-    &lt;artifactId&gt;spring-boot-starter-thymeleaf&lt;/artifactId&gt;
-&lt;/dependency&gt;
-</code></pre><h5 id="2-配置类"><a href="#2-配置类" class="headerlink" title="2.配置类"></a>2.配置类</h5><pre><code>@Configuration
-@EnableWebSecurity // 注解开启Spring Security的功能
-//WebSecurityConfigurerAdapter:重写它的方法来设置一些web的安全西街
-public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
-    @Override
-    protected void configure(HttpSecurity http) throws Exception {
-        http
-                .authorizeRequests()  //定义哪些url需要保护，哪些url不需要保护
-                .antMatchers(&quot;/&quot;, &quot;/message/&quot;).permitAll()    //定义不需要认证就可以访问
-                .anyRequest().authenticated()
-                .and()
-                .formLogin()
-                .loginPage(&quot;/login&quot;)  //定义当需要用户登录时候，转到的登录页面
-                .permitAll()
-                .and()
-                .logout()
-                .permitAll();
-        http.csrf().disable();
-    }
-    @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.inMemoryAuthentication().withUser(&quot;user&quot;).password(&quot;password&quot;).roles(&quot;USER&quot;);
-        //在内存中创建了一个用户，该用户的名称为user，密码为password，用户角色为USER
-    }
-}
-</code></pre><p>以上定义除了”/“, “/message/“ 访问时候不需要跳过login页面,其他登录都会要经过login页面<br>当用户名/密码:user/password时候 认证通过</p>
-<h5 id="3-演示测试"><a href="#3-演示测试" class="headerlink" title="3.演示测试"></a>3.演示测试</h5><p>1.新建LoginController类:</p>
-<pre><code>@Controller
-public class LoginController {
-
-    @RequestMapping(value = &quot;/login&quot;)
-    public String login(){
-     return &quot;login&quot;;
-    }
-}
-</code></pre><p>2.在resources下新建template存放前端页面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/05/26.png" alt=""></p>
-<p>hello.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;/&gt;
-&lt;title&gt;Hello World!&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-    &lt;h1&gt;Hello world!&lt;/h1&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>index.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html&gt;
-&lt;head&gt;
-&lt;meta charset=&quot;UTF-8&quot;/&gt;
-&lt;title&gt;Security&lt;/title&gt;
-&lt;/head&gt;
-&lt;body&gt;
-        &lt;h1&gt;Spring Security!&lt;/h1&gt;
-        &lt;p&gt;点击&lt;a th:href=&quot;@{/hello}&quot;&gt;这里&lt;/a&gt;到碗里来！&lt;/p&gt;
-&lt;/body&gt;
-&lt;/html&gt;
-</code></pre><p>login.html</p>
-<pre><code>&lt;!DOCTYPE html&gt;
-&lt;html xmlns=&quot;http://www.w3.org/1999/xhtml&quot;
-      xmlns:th=&quot;http://www.thymeleaf.org&quot;
-      xmlns:sec=&quot;http://www.thymeleaf.org/thymeleaf-extras-springsecurity3&quot;&gt;
-    &lt;head&gt;
-        &lt;title&gt;Spring Security Example &lt;/title&gt;
-    &lt;/head&gt;
-    &lt;body&gt;
-        &lt;div th:if=&quot;${param.error}&quot;&gt;
-            用户名或密码错
-        &lt;/div&gt;
-        &lt;div th:if=&quot;${param.logout}&quot;&gt;
-            您已注销成功
-        &lt;/div&gt;
-        &lt;form th:action=&quot;@{/login}&quot; method=&quot;post&quot;&gt;
-            &lt;div&gt;&lt;label&gt; 用户名 : &lt;input type=&quot;text&quot; name=&quot;username&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;label&gt; 密  码 : &lt;input type=&quot;password&quot; name=&quot;password&quot;/&gt; &lt;/label&gt;&lt;/div&gt;
-            &lt;div&gt;&lt;input type=&quot;submit&quot; value=&quot;登录&quot;/&gt;&lt;/div&gt;
-        &lt;/form&gt;
-    &lt;/body&gt;
-&lt;/html&gt;
-</code></pre>
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/05/19/zyzx-48-SpringBoot整合spring-security/" class="archive-article-date">
-  	<time datetime="2018-05-19T09:58:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-19</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/8/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/7/">7</a><a class="page-number" href="/page/8/">8</a><span class="page-number current">9</span><a class="page-number" href="/page/10/">10</a><a class="page-number" href="/page/11/">11</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/10/">Next &raquo;</a>
@@ -1524,7 +1541,7 @@ public class LoginController {
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.11px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.44px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.89px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 17.78px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.33px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.32px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.84px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.84px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.84px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.84px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
     			</div>
     	</section>
     
