@@ -181,6 +181,11 @@
 </li>
 <li><p>2.Packetbeat抓包底层依赖主要有两种:<br>-pcap基于libpcap实现,跨平台支持<br>-af_packet仅支持linux系统,基于内存映射的嗅探技术,性能更好:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/18.png" alt=""><br>上面buffer_size_mb就是值内存大小,内存设置的越大,性能就越高。  </p>
 </li>
+<li><p>3.Packetbeat配置协议<br>我们在packetbeat.yml配置文件中配置:<br>配置时候,我们把要解析的协议都写上,Packetbeat在抓取网络包时候,就会按照上面协议来解析了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/19.png" alt="">  </p>
+</li>
+<li><p>4.network flows<br>-抓取记录网络流量数据,不涉及协议解析。有了流量数据,就可以做分析了。比如看节点a,b,c三者间流量的数据情况就可以用flows<br>-flows的配置主要是两个参数:timeout和period(timeout:在超时时间内如果还没有收到数据包,我们认为发送的数据已经结束了，period每隔一段时间统计一次,让其有一个时间段的记录)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/20.png" alt="">  </p>
+</li>
+<li>5.timeout和period的区别<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/20.png" alt=""><br>–由上图可以知道,数据字段中有一个final的字段,数据包结束了的,其对应的final就是为true。所以我们在最终分析时候只要过滤final为true的，才是正确的流量。period对应的final永远为false。<br>–由上面可以知道,fows生成的数据有flow_id指明唯一性。<br>–source指明数据包的来源:里面有ip和port以及mac地址。stats表明source给dest发送了一个数据包,包大小为85字节。  <h2 id="–dest指明数据包的目的地址-同样包含ip、port和mac地址。stats表明dest给source返回了一个数据包-包大小为135字节。"><a href="#–dest指明数据包的目的地址-同样包含ip、port和mac地址。stats表明dest给source返回了一个数据包-包大小为135字节。" class="headerlink" title="–dest指明数据包的目的地址:同样包含ip、port和mac地址。stats表明dest给source返回了一个数据包,包大小为135字节。  "></a>–dest指明数据包的目的地址:同样包含ip、port和mac地址。stats表明dest给source返回了一个数据包,包大小为135字节。  </h2></li>
 </ol>
 <h3 id="16-2-2-实战"><a href="#16-2-2-实战" class="headerlink" title="16-2 2-实战"></a>16-2 2-实战</h3>
       
