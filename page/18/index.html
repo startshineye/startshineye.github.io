@@ -152,6 +152,112 @@
       <div class="body-wrap">
         
   
+    <article id="post-netty实践-十一-pipline分析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/28/netty实践-十一-pipline分析/">netty实践(十一)-pipline分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/28/netty实践-十一-pipline分析/" class="archive-article-date">
+  	<time datetime="2017-11-28T12:12:01.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-28</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-netty实践-十-自定义数据包协议客户端服务端测试" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/11/27/netty实践-十-自定义数据包协议客户端服务端测试/">netty实践(十)-自定义数据包协议客户端服务端测试</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>在前面我们说了netty的自定义协议,这节主要讨论自定义协议客户端,服务端测试</p>
+<h5 id="1-服务端"><a href="#1-服务端" class="headerlink" title="1.服务端"></a>1.服务端</h5><h5 id="2-客户端"><a href="#2-客户端" class="headerlink" title="2.客户端"></a>2.客户端</h5><h5 id="3-Common"><a href="#3-Common" class="headerlink" title="3.Common"></a>3.Common</h5><h5 id="4-测试"><a href="#4-测试" class="headerlink" title="4.测试"></a>4.测试</h5><h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-服务端-1"><a href="#1-服务端-1" class="headerlink" title="1.服务端"></a>1.服务端</h5><h6 id="1-1-Client"><a href="#1-1-Client" class="headerlink" title="1.1 Client"></a>1.1 Client</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div></pre></td><td class="code"><pre><div class="line">   import java.net.InetSocketAddress;</div><div class="line">import java.util.Scanner;</div><div class="line">import java.util.concurrent.ExecutorService;</div><div class="line">import java.util.concurrent.Executors;</div><div class="line"></div><div class="line">import org.jboss.netty.bootstrap.ClientBootstrap;</div><div class="line">import org.jboss.netty.channel.Channel;</div><div class="line">import org.jboss.netty.channel.ChannelFuture;</div><div class="line">import org.jboss.netty.channel.ChannelPipeline;</div><div class="line">import org.jboss.netty.channel.ChannelPipelineFactory;</div><div class="line">import org.jboss.netty.channel.Channels;</div><div class="line">import org.jboss.netty.channel.socket.nio.NioClientSocketChannelFactory;</div><div class="line"></div><div class="line">import com.cn.code.RequestEncoder;</div><div class="line">import com.cn.code.ResponseDecoder;</div><div class="line">import com.cn.model.Request;</div><div class="line">import com.cn.module.fuben.request.FightRequest;</div><div class="line"></div><div class="line">public class Client &#123;</div><div class="line">  public static void main(String[] args) throws InterruptedException &#123;</div><div class="line">  //引导类</div><div class="line">  ClientBootstrap bootstrap = new ClientBootstrap();</div><div class="line">  </div><div class="line">  //线程池</div><div class="line">  ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line">  ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line">  </div><div class="line">  //socket工厂</div><div class="line">  bootstrap.setFactory(new NioClientSocketChannelFactory(boss,worker));</div><div class="line"> </div><div class="line">  //管道工厂</div><div class="line">  bootstrap.setPipelineFactory(new ChannelPipelineFactory()&#123;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">		ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">		//对于客户端来说:是对服务端的响应编码</div><div class="line">		pipeline.addLast(&quot;decoder&quot;, new ResponseDecoder());</div><div class="line">		pipeline.addLast(&quot;encoder&quot;, new RequestEncoder());</div><div class="line">		pipeline.addLast(&quot;hiHandler&quot;, new HiHandler());</div><div class="line">		return pipeline;</div><div class="line">	&#125;</div><div class="line">	  </div><div class="line">  &#125;);</div><div class="line">  </div><div class="line">  //连接服务器</div><div class="line">  ChannelFuture connect = bootstrap.connect(new InetSocketAddress(&quot;127.0.0.1&quot;, 10101));</div><div class="line">  Channel channel = connect.sync().getChannel();</div><div class="line">  </div><div class="line">  //请求输入</div><div class="line">  Scanner scanner = new Scanner(System.in);</div><div class="line">  while(true)&#123;</div><div class="line">	  System.out.println(&quot;请输入:&quot;);</div><div class="line">	  int fubenId = Integer.parseInt(scanner.nextLine());</div><div class="line">	  int count = Integer.parseInt(scanner.nextLine());</div><div class="line">	  </div><div class="line">	  FightRequest fightRequest = new FightRequest();</div><div class="line">	  fightRequest.setFubenId(fubenId);</div><div class="line">	  fightRequest.setCount(count);</div><div class="line">	  </div><div class="line">	  Request request = new Request();</div><div class="line">	  request.setModule((short) 1);</div><div class="line">	  request.setCmd((short) 1);</div><div class="line">	  request.setData(fightRequest.getBytes());</div><div class="line">	  </div><div class="line">	  //发送请求</div><div class="line">	  channel.write(request);</div><div class="line">  &#125;</div><div class="line">    &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="1-2-HiHandler"><a href="#1-2-HiHandler" class="headerlink" title="1.2 HiHandler"></a>1.2 HiHandler</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div></pre></td><td class="code"><pre><div class="line">   public class HiHandler extends SimpleChannelHandler&#123;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 接收消息</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e)throws Exception&#123;</div><div class="line">	Response message = (Response)e.getMessage();</div><div class="line"></div><div class="line">	if(message.getModule() == 1)&#123;</div><div class="line">		</div><div class="line">		if(message.getCmd() == 1)&#123;</div><div class="line">			FightResponse fightResponse = new FightResponse();</div><div class="line">			fightResponse.readFromBytes(message.getData());</div><div class="line">			</div><div class="line">			System.out.println(&quot;gold:&quot; + fightResponse.getGold());</div><div class="line">			</div><div class="line">		&#125;else if(message.getCmd() == 2)&#123;</div><div class="line">			</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;else if (message.getModule() == 1)&#123;</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 捕获异常</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;exceptionCaught&quot;);</div><div class="line">	super.exceptionCaught(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 新连接</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception&#123;</div><div class="line">	System.out.println(&quot;channelConnected&quot;);</div><div class="line">	super.channelConnected(ctx, e);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * 必须是链接已经建立，关闭通道的时候才会触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelDisconnected&quot;);</div><div class="line">	super.channelDisconnected(ctx, e);</div><div class="line">&#125;</div><div class="line">/**</div><div class="line"> * channel关闭的时候触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelClosed&quot;);</div><div class="line">	super.channelClosed(ctx, e);</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-客户端-1"><a href="#2-客户端-1" class="headerlink" title="2.客户端"></a>2.客户端</h5><h6 id="2-1-Server"><a href="#2-1-Server" class="headerlink" title="2.1 Server"></a>2.1 Server</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">   public class Server &#123;</div><div class="line">   public static void main(String[] args) &#123;</div><div class="line">//服务类</div><div class="line"> ServerBootstrap bootstrap = new ServerBootstrap();</div><div class="line"> </div><div class="line"> //boss线程监听端口，worker线程负责数据读写</div><div class="line"> ExecutorService boss = Executors.newCachedThreadPool();</div><div class="line"> ExecutorService worker = Executors.newCachedThreadPool();</div><div class="line"> </div><div class="line">//设置niosocket工厂</div><div class="line"> bootstrap.setFactory(new NioServerSocketChannelFactory(boss,worker));</div><div class="line"> </div><div class="line"> //设置管道的工厂</div><div class="line"> bootstrap.setPipelineFactory(new ChannelPipelineFactory()&#123;</div><div class="line"></div><div class="line">	@Override</div><div class="line">	public ChannelPipeline getPipeline() throws Exception &#123;</div><div class="line">		ChannelPipeline pipeline = Channels.pipeline();</div><div class="line">		pipeline.addLast(&quot;decoder&quot;, new RequestDecoder());</div><div class="line">		pipeline.addLast(&quot;encoder&quot;, new ResponseEncoder());</div><div class="line">		pipeline.addLast(&quot;helloHandler&quot;,  new HelloHandler());</div><div class="line">		return pipeline;</div><div class="line">	&#125;</div><div class="line">	 </div><div class="line"> &#125;);</div><div class="line"> </div><div class="line"> bootstrap.bind(new InetSocketAddress(10101));</div><div class="line"> System.out.println(&quot;start!!!&quot;);</div><div class="line">   &#125; </div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h6 id="2-2-HelloHandler"><a href="#2-2-HelloHandler" class="headerlink" title="2.2 HelloHandler"></a>2.2 HelloHandler</h6><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div></pre></td><td class="code"><pre><div class="line">    /**</div><div class="line">    * 消息接受处理类</div><div class="line">    * @author -琴兽-</div><div class="line">    *</div><div class="line">    */</div><div class="line">   public class HelloHandler extends SimpleChannelHandler &#123;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 接收消息</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void messageReceived(ChannelHandlerContext ctx, MessageEvent e) throws Exception &#123;</div><div class="line"></div><div class="line">	Request message = (Request)e.getMessage();</div><div class="line">	</div><div class="line">	if(message.getModule() == 1)&#123;</div><div class="line">		</div><div class="line">		if(message.getCmd() == 1)&#123;</div><div class="line">			</div><div class="line">			FightRequest fightRequest = new FightRequest();</div><div class="line">			fightRequest.readFromBytes(message.getData());</div><div class="line">			</div><div class="line">			System.out.println(&quot;fubenId:&quot; +fightRequest.getFubenId() + &quot;   &quot; + &quot;count:&quot; + fightRequest.getCount());</div><div class="line">			</div><div class="line">			//回写数据</div><div class="line">			FightResponse fightResponse = new FightResponse();</div><div class="line">			fightResponse.setGold(9999);</div><div class="line">			</div><div class="line">			Response response = new Response();</div><div class="line">			response.setModule((short) 1);</div><div class="line">			response.setCmd((short) 1);</div><div class="line">			response.setStatusCode(StatusCode.SUCCESS);</div><div class="line">			response.setData(fightResponse.getBytes());</div><div class="line">			ctx.getChannel().write(response);</div><div class="line">		&#125;else if(message.getCmd() == 2)&#123;</div><div class="line">			</div><div class="line">		&#125;</div><div class="line">		</div><div class="line">	&#125;else if (message.getModule() == 1)&#123;</div><div class="line">		</div><div class="line">		</div><div class="line">	&#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 捕获异常</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void exceptionCaught(ChannelHandlerContext ctx, ExceptionEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;exceptionCaught&quot;);</div><div class="line">	super.exceptionCaught(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 新连接</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelConnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelConnected&quot;);</div><div class="line">	super.channelConnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * 必须是链接已经建立，关闭通道的时候才会触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelDisconnected(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelDisconnected&quot;);</div><div class="line">	super.channelDisconnected(ctx, e);</div><div class="line">&#125;</div><div class="line"></div><div class="line">/**</div><div class="line"> * channel关闭的时候触发</div><div class="line"> */</div><div class="line">@Override</div><div class="line">public void channelClosed(ChannelHandlerContext ctx, ChannelStateEvent e) throws Exception &#123;</div><div class="line">	System.out.println(&quot;channelClosed&quot;);</div><div class="line">	super.channelClosed(ctx, e);</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-Common-1"><a href="#3-Common-1" class="headerlink" title="3.Common"></a>3.Common</h5><p>1.FightRequest</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div></pre></td><td class="code"><pre><div class="line">   public class FightRequest extends Serializer&#123;</div><div class="line">/**</div><div class="line"> * 副本id</div><div class="line"> */</div><div class="line">private int fubenId;</div><div class="line">/**</div><div class="line"> * 攻打次数</div><div class="line"> */</div><div class="line">private int count;</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void read() &#123;</div><div class="line">	this.fubenId = readInt();</div><div class="line">	this.count = readInt();</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void write() &#123;</div><div class="line">	writeInt(fubenId);</div><div class="line">	writeInt(count);</div><div class="line">&#125;</div><div class="line"></div><div class="line">public int getFubenId() &#123;</div><div class="line">	return fubenId;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setFubenId(int fubenId) &#123;</div><div class="line">	this.fubenId = fubenId;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public int getCount() &#123;</div><div class="line">	return count;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setCount(int count) &#123;</div><div class="line">	this.count = count;</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p>2.FightResponse</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">   public class FightResponse extends Serializer&#123;</div><div class="line"></div><div class="line">   /**</div><div class="line">    * 获取金币</div><div class="line">    */</div><div class="line">   private int gold;</div><div class="line">   </div><div class="line">public int getGold() &#123;</div><div class="line">	return gold;</div><div class="line">&#125;</div><div class="line"></div><div class="line">public void setGold(int gold) &#123;</div><div class="line">	this.gold = gold;</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void read() &#123;</div><div class="line">      this.gold = 	readInt();	</div><div class="line">&#125;</div><div class="line"></div><div class="line">@Override</div><div class="line">protected void write() &#123;</div><div class="line">	writeInt(this.gold);	</div><div class="line">&#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/36.png" alt=""></p>
+<h5 id="4-测试-1"><a href="#4-测试-1" class="headerlink" title="4.测试"></a>4.测试</h5><h6 id="4-1客户端"><a href="#4-1客户端" class="headerlink" title="4.1客户端"></a>4.1客户端</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/34.png" alt=""></p>
+<h6 id="4-2服务端"><a href="#4-2服务端" class="headerlink" title="4.2服务端"></a>4.2服务端</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/11/35.png" alt=""></p>
+<p>github地址:<a href="https://github.com/startshineye/Netty-leaning"></a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/11/27/netty实践-十-自定义数据包协议客户端服务端测试/" class="archive-article-date">
+  	<time datetime="2017-11-27T14:30:39.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-27</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Netty/">Netty</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-netty实践-十一-避免socket攻击" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -789,150 +895,6 @@ new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
 
 
   
-    <article id="post-vue-22-组件-动态组件" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/10/vue-22-组件-动态组件/">vue(22)-组件-动态组件</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>Vue.js 支持动态组件，即多个组件可以使用同一挂载点，根据条件来切换不同的组件。<br>使用保留标签<component>，通过绑定到is 属性的值来判断挂载哪个组件。这种场景往往运<br>用在路由控制或者tab 切换中</component></p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><h5 id="1-基础用法"><a href="#1-基础用法" class="headerlink" title="1.基础用法"></a>1.基础用法</h5><p>页面切换说明动态组件基础用法。  </p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">&lt;!--js--&gt;</div><div class="line">&lt;div id=&quot;app&quot;&gt;</div><div class="line">   &lt;ul&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;home&apos;&quot;&gt;home&lt;/li&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;list&apos;&quot;&gt;list&lt;/li&gt;</div><div class="line">       &lt;li @click=&quot;currentView=&apos;detail&apos;&quot;&gt;detail&lt;/li&gt;</div><div class="line">   &lt;/ul&gt;</div><div class="line">   &lt;component :is=&quot;currentView&quot;&gt;&lt;/component&gt;</div><div class="line">&lt;/div&gt;</div><div class="line"></div><div class="line">&lt;!--js--&gt;</div><div class="line">var vm = new Vue(&#123;</div><div class="line"> el:&quot;#app&quot;,</div><div class="line"> data:&#123;</div><div class="line">     currentView:&apos;home&apos;</div><div class="line"> &#125;,</div><div class="line"> components:&#123;</div><div class="line">     home:&#123;</div><div class="line">         template:&apos;&lt;div&gt;Home&lt;/div&gt;&apos;</div><div class="line">     &#125;,</div><div class="line">     list:&#123;</div><div class="line">         template:&apos;&lt;div&gt;List&lt;/div&gt;&apos;</div><div class="line">     &#125;,</div><div class="line">     detail:&#123;</div><div class="line">         template:&apos;&lt;div&gt;Detail&lt;/div&gt;&apos;</div><div class="line">     &#125;</div><div class="line"> &#125;</div><div class="line">&#125;);</div></pre></td></tr></table></figure>
-</code></pre><ol>
-<li><p>component 标签上is 属性决定了当前采用的子组件，:is 是v-bind:is 的缩写，绑定了父<br>组件中data 的currentView 属性。顶部的ul 则起到导航的作用，点击即可修改currentView<br>值，也就修改component 标签中使用的子组件类型。</p>
-</li>
-<li><p>需要注意的事，currentView 的值需要和父组件实例中的components属性的key相对应。</p>
-</li>
-</ol>
-<h5 id="2-keep-alive"><a href="#2-keep-alive" class="headerlink" title="2.keep-alive"></a>2.keep-alive</h5><p>component 标签接受keep-alive 属性，可以将切换出去的组件保留在内存中，避免重新<br>渲染。我们将上述例子中的component 标签修改为：  </p>
-<pre><code>&lt;component :is=&quot;currentView&quot; keep-alive&gt;&lt;/component&gt;
-
- home:{
-         template:&apos;&lt;div&gt;&lt;p&gt;Home&lt;/p&gt;&lt;ul&gt;&lt;li v-for=&quot;item in items&quot;&gt;{{item}}&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;,
-         data:function(){
-             return{
-                 items:[]
-             }
-         },
-         ready:function(){
-             console.log(&quot;ready&quot;);
-             this.items=[1,2,3,4,5,6,7,8];
-         }
-     }
-</code></pre><p>在keep-alive属性下可以在home和list之间切换currentView，home组件的ready 函数只运行一次，可以看到控制台只输出了一次“fetch data”。而将keep-alive 属性去除后，再次在home 和list 组件间切换，会发现每点击到home，控制台都会输出一次“ready”。我们可以根据该特性适当地进行页面的性能优化，如果每个组件在激活时并不要求每次都实时请求数据，那使用keep-alive 可以避免一些不必要的重复渲染，导致用户看到停留时间过长的空白页面。但如果每次激活组件都需要向后端请求数据的话，就不太适合使用keepalive属性了。</p>
-<p>Vue.js 2.0 中keep-alive 属性被修改为标签，例如：</p>
-<pre><code>&lt;keep-alive&gt;
-　 &lt;component v-bind:is=&quot;view&quot;&gt;&lt;/component&gt;
-&lt;/keep-alive&gt;
-</code></pre><h5 id="3-activate钩子函数"><a href="#3-activate钩子函数" class="headerlink" title="3.activate钩子函数"></a>3.activate钩子函数</h5><p>1.Vue.js 给组件提供了activate 钩子函数，作用于动态组件切换或者静态组件初始化的过<br>程中<br>2.activate 接受一个回调函数做为参数，使用函数后组件才进行之后的渲染过程。<br>3.如下:  </p>
-<pre><code>home:{
-         template:&apos;&lt;div&gt;&lt;p&gt;Home&lt;/p&gt;&lt;ul&gt;&lt;li v-for=&quot;item in items&quot;&gt;{{item}}&lt;/li&gt;&lt;/ul&gt;&lt;/div&gt;&apos;,
-         data:function(){
-             return{
-                 items:[]
-             }
-         },
-        activate:function(done){
-            var that = this;
-            // 此处的setTimeout 用于模拟正式业务中的ajax 异步请求数据
-            setTimeout(function() {
-                that.items = [1, 2, 3, 4, 5];
-                done();
-            }, 1000);
-
-        }
-     }
-</code></pre><p>此时也可以定义两个component 作为对比，并设定其中一个属性为keep-alive ：</p>
-<pre><code>&lt;component :is=&quot;currentView&quot;&gt;&lt;/component&gt;
-&lt;component :is=&quot;currentView&quot; keep-alive&gt;&lt;/component&gt;
-</code></pre><p>可以对比出，再次激活home 后，未使用keep-alive 的component 会延迟1s 的时间才<br>渲染出列表。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/11/10/vue-22-组件-动态组件/" class="archive-article-date">
-  	<time datetime="2017-11-10T08:11:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue-js-前端开发-快速入门与专业应用/">Vue.js+前端开发+快速入门与专业应用</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-vue-21-组件-内容分发" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/11/10/vue-21-组件-内容分发/">vue(21)-组件-内容分发</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/11/10/vue-21-组件-内容分发/" class="archive-article-date">
-  	<time datetime="2017-11-10T08:09:14.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-11-10</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/page/17/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/16/">16</a><a class="page-number" href="/page/17/">17</a><span class="page-number current">18</span><a class="page-number" href="/page/19/">19</a><a class="page-number" href="/page/20/">20</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/19/">Next &raquo;</a>
@@ -998,7 +960,7 @@ new webpack.BannerPlugin(&apos;菜鸟教程 webpack 实例&apos;)
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.05px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.53px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 16.84px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.11px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.26px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.58px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.21px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.32px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.32px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.11px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.58px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.53px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 19.47px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.11px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.05px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 18.95px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.37px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.11px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.53px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.05px;">c</a> <a href="/tags/crawler/" style="font-size: 17.89px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.53px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.53px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.26px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.68px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.53px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.11px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.53px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.05px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.58px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.53px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.32px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.58px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.58px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.63px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.63px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.53px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.05px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.53px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.05px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 15.79px;">websocket</a> <a href="/tags/work/" style="font-size: 14.74px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.42px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.58px;">代理</a> <a href="/tags/前端/" style="font-size: 10.53px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.11px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 15.79px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.16px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.05px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.16px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.32px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.11px;">转载</a> <a href="/tags/集合/" style="font-size: 12.11px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 17.65px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 17.06px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.06px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 20px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.35px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.41px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.65px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.18px;">c</a> <a href="/tags/crawler/" style="font-size: 18.24px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.59px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.94px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 15.29px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.82px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.06px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
     			</div>
     	</section>
     
