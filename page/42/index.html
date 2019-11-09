@@ -152,6 +152,66 @@
       <div class="body-wrap">
         
   
+    <article id="post-类加载器-二-自定义类加载器的原理分析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/01/10/类加载器-二-自定义类加载器的原理分析/">类加载器(二)-自定义类加载器的原理分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="原理"><a href="#原理" class="headerlink" title="原理"></a>原理</h4><ol>
+<li>自定义的类加载器必须继承ClassLoader<br>自己写的类加载器必须继承一个抽象类ClassLoader,</li>
+<li>loadClass方法和findClass方法<br>ClassLoader有一个方法叫做loaderClass,参数为指定一个字符串,指定一个类名，类名给它就会加载那个类，返回一个Class,自己写一个类加载器是不需要从写loaderclass方法，因为他会去内部找它的父类并返回，然后调用findClass。也就是说loaderClass首先找爸爸,找到后调用findClass。如果直接覆盖loaderClass就会直接自己干,不会去找爸爸。或者找爸爸还要自己写代码去找没比较难以实现。<br>父类–&gt;loaderClass/findClass/得到class文件的转换成字节码–&gt;defineClass()</li>
+<li>defineClass方法<br>defineClass方法将二进制变成字节码</li>
+<li>例子<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">class NetworkClassLoader extends ClassLoader &#123;</div><div class="line">        String host;</div><div class="line">        int port;</div><div class="line">        public Class findClass(String name) &#123;</div><div class="line">            byte[] b = loadClassData(name);</div><div class="line">            return defineClass(name, b, 0, b.length);</div><div class="line">        &#125;</div><div class="line">        private byte[] loadClassData(String name) &#123;</div><div class="line">            // load the class data from the connection</div><div class="line">             . . .</div><div class="line">        &#125;</div><div class="line">    &#125;</div></pre></td></tr></table></figure></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/01/10/类加载器-二-自定义类加载器的原理分析/" class="archive-article-date">
+  	<time datetime="2017-01-10T13:26:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-10</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/类加载器/">类加载器</a></li></ul>
+	</div>
+
+      
+	<div class="article-category tagcloud">
+	<i class="icon-price-tags"></i>
+	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
+	</div>
+
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-类加载器-一-类加载器及委托机制" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -759,81 +819,6 @@
 	<div class="article-category tagcloud">
 	<i class="icon-price-tags"></i>
 	<a class="article-category-link" href="/categories/javaSE-泛型/">javaSE,泛型</a>
-	</div>
-
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-注解-三-注解的属性" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/01/02/注解-三-注解的属性/">注解(三)-注解的属性</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="什么是注解的属性"><a href="#什么是注解的属性" class="headerlink" title="什么是注解的属性"></a>什么是注解的属性</h4><ol>
-<li>一个注解相当于一个胸牌,如果你胸前贴了胸牌,可以说明你是哪个工作单位的员工，否则就不是，如果还想区分公司哪个部门的那个员工，这时候就可以为胸牌增加一个属性进行区分。增加了属性的标记效果为：@AAnotaion(color=”red”);</li>
-<li>注解中的属性是以方法实行定义，赋值时候是以java属性形式赋值，调用时候也是用调用方法形式。<h4 id="定义基本类型的属性和应用属性"><a href="#定义基本类型的属性和应用属性" class="headerlink" title="定义基本类型的属性和应用属性:"></a>定义基本类型的属性和应用属性:</h4></li>
-<li>在注解中增加String color();</li>
-<li>@AAnotaion(color=”red”);</li>
-</ol>
-<h4 id="反射获得实例对象，再通过该对象调用属性相应的方法"><a href="#反射获得实例对象，再通过该对象调用属性相应的方法" class="headerlink" title="反射获得实例对象，再通过该对象调用属性相应的方法"></a>反射获得实例对象，再通过该对象调用属性相应的方法</h4><ol>
-<li>定义注解 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">public @interface AAnnotation &#123;</div><div class="line">  String color();//此方法是共有的，抽象的，不用加其他修饰符，类似于接口中方法</div><div class="line">  String value();</div><div class="line">&#125;</div><div class="line">``` </div><div class="line">2. 使用注解的类</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>/**</p>
-<ul>
-<li>应用注解</li>
-<li>@author yxm</li>
-<li>@date 2017-1-2<br>*/<br>@AAnnotation(color=”red”)<br>public class B {</li>
-</ul>
-<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">3. 使用注解类的类</div></pre></td></tr></table></figure></p>
-<p>public class AnnotationTest {<br>public static void main(String[] args) {<br>     //对一个类进行检查运用反射,运用 反射首先要搞到类的字节码<br>    //1.获取当前的注解<br>    boolean annotationPresent = B.class.isAnnotationPresent(AAnnotation.class);<br>    //2.如果存在注解,则打印出注解对象<br>    if(annotationPresent){<br>        //获取注解对象<br>        AAnnotation aa = B.class.getAnnotation(AAnnotation.class);<br>        //获取注解对象中的属性<br>        System.out.println(aa.color());//red<br>    }<br>  }</p>
-<p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">#### 为属性制定缺省值</div><div class="line">1. String color() default &quot;yellow&quot;;</div><div class="line">#### value属性</div><div class="line">1. String value() default &quot;yxm&quot;;</div><div class="line">2. 如果注解中有一个名称为value的属性，且你只想为此属性赋值可以省略属性名  </div><div class="line">#### 注解类的数组类型的属性</div><div class="line">int [] arrayAttr() default &#123;1,2,3&#125;; </div><div class="line">被添加的注解设置属性值：@AAnnotation(arrayAttr=&#123;2,3,4&#125;)。</div><div class="line">如果数组属性中只有一个元素，这时候属性值部分可以省略大括号。</div><div class="line">#### 枚举类型的属性</div><div class="line">EnumTest.TrafficLamp lamp() ;</div><div class="line">被添加的注解设置属性值：@AAnnotation(lamp=EnumTest.TrafficLamp.GREEN)</div><div class="line">#### 注解类型的属性</div><div class="line"> MetaAnnotation annotationAttr() default @MetaAnnotation(&quot;xxxx&quot;); </div><div class="line">被添加的注解设置属性值：@AAnnotation(annotationAttr=@MetaAnnotation(“yyy”) )</div><div class="line">可以认为上面这个@MyAnnotation是MyAnnotaion类的一个实例对象，同样的道理，可以认为上面这个@MetaAnnotation是MetaAnnotation类的一个实例对象，调用代码如下：</div><div class="line">MetaAnnotation ma =  myAnnotation.annotationAttr();</div><div class="line">System.out.println(ma.value());</div><div class="line">#### 代码示例</div></pre></td></tr></table></figure></p>
-<p>@interface MetaAnnotation{<br>      String value();<br>}  </p>
-<p>@Retention(RetentionPolicy.RUNTIME) //此注解运行到内存时才消除<br>@Target({ElementType.METHOD,ElementType.TYPE}) //此注解可修饰方法和类<br>@interface AAnnotation {<br>    String color() default “blue” ;<br>    String value();<br>    int[] arrayAttr() default {1};<br>    EnumDemo4.TrafficLamp lamp() default EnumDemo4.TrafficLamp.RED;<br>    MetaAnnotation annotationAttr() default @MetaAnnotation( “lhm”);<br>    Class clazz() default String.class;<br>}<br>//AnnotationTest2类的注解及属性<br>@AAnnotation(annotationAttr=@MetaAnnotation(“flx”),color=”red”,value=”abc”,arrayAttr={1,2,3})<br>public class AnnotationTest2 {<br>    @AAnnotation(“xyz”)  //main方法的注解的属性value=”xyz”<br>    public static void main(String[] args) {<br>        if(AnnotationTest2.class.isAnnotationPresent(AAnnotation. class)){<br>            AAnnotation aa = AnnotationTest2.class .getAnnotation(AAnnotation.class);<br>            System. out.println(aa.color());<br>            //结果：red<br>            System. out.println(aa.arrayAttr().length);<br>            //结果：3<br>            System. out.println(aa.lamp().nextLamp().name());<br>            //结果：GREEN<br>            System. out.println(aa.annotationAttr().value());<br>            //结果：flx<br>            System. out.println(aa.clazz());<br>            //结果：class java.lang.String<br>        }<br>    }<br>}<br>```</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/01/02/注解-三-注解的属性/" class="archive-article-date">
-  	<time datetime="2017-01-02T11:42:26.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-01-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/注解/">注解</a></li></ul>
-	</div>
-
-      
-	<div class="article-category tagcloud">
-	<i class="icon-price-tags"></i>
-	<a class="article-category-link" href="/categories/javaSE-注解/">javaSE,注解</a>
 	</div>
 
 

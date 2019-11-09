@@ -4,17 +4,27 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives | Startshineye的博客</title>
+  <title>Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
+  <meta name="description" content="title: ElasticStack-20-Kibana篇之数据探索Discoverydate: 2019-11-09 09:42:44tags:
+  ElasticStack介绍 Kibana 的数据探索功能，让大家了解 Discovery 的功能和使用技巧。
+20-1-导入数据
+1.导入数据https://www.elastic.co/guide/en/kibana/7.1/tutoria">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/page/11/index.html">
+<meta property="og:url" content="https://github.com/startshineye/2019/11/09/ElasticStack-20-Kibana篇之数据探索Discovery/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="title: ElasticStack-20-Kibana篇之数据探索Discoverydate: 2019-11-09 09:42:44tags:
+  ElasticStack介绍 Kibana 的数据探索功能，让大家了解 Discovery 的功能和使用技巧。
+20-1-导入数据
+1.导入数据https://www.elastic.co/guide/en/kibana/7.1/tutoria">
+<meta property="og:updated_time" content="2019-11-09T03:41:51.451Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:description" content="title: ElasticStack-20-Kibana篇之数据探索Discoverydate: 2019-11-09 09:42:44tags:
+  ElasticStack介绍 Kibana 的数据探索功能，让大家了解 Discovery 的功能和使用技巧。
+20-1-导入数据
+1.导入数据https://www.elastic.co/guide/en/kibana/7.1/tutoria">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,341 +160,110 @@
 </nav>
 
       <div class="body-wrap">
-        
-  
-  
+        <article id="post-ElasticStack-20-Kibana篇之数据探索Discovery" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
     
     
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: ElasticStack-20-Kibana篇之数据探索Discovery<br>date: 2019-11-09 09:42:44<br>tags:</p>
+<h2 id="ElasticStack"><a href="#ElasticStack" class="headerlink" title="  ElasticStack"></a>  ElasticStack</h2><p>介绍 Kibana 的数据探索功能，让大家了解 Discovery 的功能和使用技巧。</p>
+<h3 id="20-1-导入数据"><a href="#20-1-导入数据" class="headerlink" title="20-1-导入数据"></a>20-1-导入数据</h3><ol>
+<li>1.导入数据<br><a href="https://www.elastic.co/guide/en/kibana/7.1/tutorial-load-dataset.html" target="_blank" rel="external">https://www.elastic.co/guide/en/kibana/7.1/tutorial-load-dataset.html</a><br>首先我们导入测试数据,这些测试数据也是kibana教程中，logstash的webserver里面的访问日志。步骤如下:<br>a.配置index-template  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">PUT /logstash-2015.05.18</div><div class="line">&#123;</div><div class="line">  &quot;mappings&quot;: &#123;</div><div class="line">    &quot;properties&quot;: &#123;</div><div class="line">      &quot;geo&quot;: &#123;</div><div class="line">        &quot;properties&quot;: &#123;</div><div class="line">          &quot;coordinates&quot;: &#123;</div><div class="line">            &quot;type&quot;: &quot;geo_point&quot;</div><div class="line">          &#125;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line">kibana演示:</div><div class="line">创建:PUT /logstash-2015.05.18 PUT /logstash-2015.05.19 PUT /logstash-2015.05.20(我们以PUT /logstash-2015.05.20为例)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/11/41.png)  </div><div class="line"></div><div class="line"></div><div class="line">b.通过curl命令导入</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>curl -H ‘Content-Type: application/x-ndjson’ -XPOST ‘localhost:9200/_bulk?pretty’ –data-binary @logs.jsonl<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">之前之前在kibana目录下的data里面下载以下3个数据集:</div></pre></td></tr></table></figure></p>
+<p>curl -O <a href="https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json" target="_blank" rel="external">https://download.elastic.co/demos/kibana/gettingstarted/7.x/shakespeare.json</a><br>curl -O <a href="https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip" target="_blank" rel="external">https://download.elastic.co/demos/kibana/gettingstarted/7.x/accounts.zip</a><br>curl -O <a href="https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz" target="_blank" rel="external">https://download.elastic.co/demos/kibana/gettingstarted/7.x/logs.jsonl.gz</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">下载需要的插件</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/11/42.png)  </div><div class="line">解压</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/11/43.png)  </div><div class="line">按照上面的指令导入:</div><div class="line"></div><div class="line">c.在kibana上查看:</div><div class="line">```  </div><div class="line">GET logstash*/_search</div></pre></td></tr></table></figure></p>
+<h3 id="20-2-Discover实战"><a href="#20-2-Discover实战" class="headerlink" title="20-2-Discover实战"></a>20-2-Discover实战</h3><p>上面我们把数据导入到es中,并在kibana中展示出来了</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/11/09/ElasticStack-20-Kibana篇之数据探索Discovery/" class="archive-article-date">
+  	<time datetime="2019-11-09T01:42:44.608Z" itemprop="datePublished"><i class="icon-clock"></i>2019-11-09</time>
+</a>
       
       
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2018" class="archive-year">2018</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/16/zyzx-43-SpringBoot使用事务管理/" class="archive-article-date">
-  	<time datetime="2018-05-16T14:34:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-16</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/16/zyzx-43-SpringBoot使用事务管理/">zyzx(43)-SpringBoot使用事务管理</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2019/11/03/SpringBoot-39-Spring-Boot-Admin入门指南/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringBoot-39-Spring Boot Admin入门指南</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/12/zyzx-41-SpringBoot整合redis/" class="archive-article-date">
-  	<time datetime="2018-05-12T11:12:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-12</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/12/zyzx-41-SpringBoot整合redis/">zyzx(41)-SpringBoot整合redis</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/05/zyzx-38-springBoot整合mybatis/" class="archive-article-date">
-  	<time datetime="2018-05-05T03:11:05.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-05</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/05/zyzx-38-springBoot整合mybatis/">zyzx(38)-springBoot整合mybatis</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="ElasticStack-20-Kibana篇之数据探索Discovery" data-title="" data-url="https://github.com/startshineye/2019/11/09/ElasticStack-20-Kibana篇之数据探索Discovery/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/05/zyzx-37-springBoot多数据源配置2-jpa/" class="archive-article-date">
-  	<time datetime="2018-05-04T16:04:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-05</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/05/zyzx-37-springBoot多数据源配置2-jpa/">zyzx(37)-springBoot多数据源配置2-jpa</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/03/zyzx-36-springBoot多数据源配置1/" class="archive-article-date">
-  	<time datetime="2018-05-02T16:28:25.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-03</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/03/zyzx-36-springBoot多数据源配置1/">zyzx(36)-springBoot多数据源配置1</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/01/zyzx-35-springBoot使用Spring-data-jpa访问数据库/" class="archive-article-date">
-  	<time datetime="2018-05-01T06:47:32.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/01/zyzx-35-springBoot使用Spring-data-jpa访问数据库/">zyzx(35)-springBoot使用Spring-data-jpa访问数据库</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/05/01/zyzx-34-springBoot使用jdbcTemplate访问数据库/" class="archive-article-date">
-  	<time datetime="2018-05-01T04:18:27.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-05-01</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/05/01/zyzx-34-springBoot使用jdbcTemplate访问数据库/">zyzx(34)-springBoot使用jdbcTemplate访问数据库</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/30/zyzx-33-springBoot统一异常处理/" class="archive-article-date">
-  	<time datetime="2018-04-30T05:31:17.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-04-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/30/zyzx-33-springBoot统一异常处理/">zyzx(33)-springBoot统一异常处理</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/30/zyzx-32-springBoot实现多环境配置/" class="archive-article-date">
-  	<time datetime="2018-04-30T04:05:58.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-04-30</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/30/zyzx-32-springBoot实现多环境配置/">zyzx(32)-springBoot实现多环境配置</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2018/04/25/zyzx-31-SpringBoot结合Swagger2构建RESTful-API测试体系/" class="archive-article-date">
-  	<time datetime="2018-04-25T14:26:53.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-04-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2018/04/25/zyzx-31-SpringBoot结合Swagger2构建RESTful-API测试体系/">zyzx(31)-SpringBoot结合Swagger2构建RESTful API测试体系</a>
-    </h1>
-  
-
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/zyzx/">zyzx</a></li></ul>
-	</div>
-
-          
-
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
-
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/page/10/">&laquo; Prev</a><a class="page-number" href="/archives/">1</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/9/">9</a><a class="page-number" href="/archives/page/10/">10</a><span class="page-number current">11</span><a class="page-number" href="/archives/page/12/">12</a><a class="page-number" href="/archives/page/13/">13</a><span class="space">&hellip;</span><a class="page-number" href="/archives/page/52/">52</a><a class="extend next" rel="next" href="/archives/page/12/">Next &raquo;</a>
-    </nav>
-  
 
 
       </div>
@@ -507,8 +286,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

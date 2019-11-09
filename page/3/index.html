@@ -152,6 +152,168 @@
       <div class="body-wrap">
         
   
+    <article id="post-ElasticStack-5-Elasticsearch篇之Mapping设置" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/08/05/ElasticStack-5-Elasticsearch篇之Mapping设置/">ElasticStack-5-Elasticsearch篇之Mapping设置</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本章会讲解 Elasticsearch 中数据建模的基础–Mapping，即如何定义数据字段和类型。让大家熟悉 mapping 中常见的配置项，也会讲解 dynamic mapping 和 template 的相关知识。</p>
+<h3 id="1-mapping简介"><a href="#1-mapping简介" class="headerlink" title="1.mapping简介"></a>1.mapping简介</h3><ol>
+<li><p>1.类似于数据库中表结构定义，主要作用如下:<br>-定义Index下的字段名(Field Name)。<br>-定义字段的类型，比如数值型、字符型、布尔型等。<br>-定义倒排索引相关的配置，比如是否索引、记录position等。  </p>
+</li>
+<li><p>2.获取test_index索引下的mapping<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/31.png" alt=""><br>kibana Dev Tools测试如下:  </p>
+</li>
+</ol>
+<h3 id="2-自定义mapping"><a href="#2-自定义mapping" class="headerlink" title="2.自定义mapping"></a>2.自定义mapping</h3><ol>
+<li>1.自定义Mapping的api如下所示:(注意这个版本是6.x下的版本,7.x已经移除,默认include_type_name=false不支持_doc,true时候支持)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/32.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/36.png" alt=""></p>
+<ol>
+<li><p>2.Mapping中的字段类型一旦设定后，禁止直接修改，原因如下:<br>a.Lucene实现的倒排索引生成后不允许修改(为了提高效率)<br>b.原因如果mysql中心定义表结构后，重新定义表结构会更新整个表<br>c.如果硬要改的话需要:重新建立新的索引，然后做reindex操作  </p>
+</li>
+<li><p>3.但是允许新增字段  </p>
+</li>
+<li>4.通过dynamic参数来控制字段的新增<br>-true(默认)允许自动新增字段<br>-false不允许自动新增字段,但是文档可以正常写入，但无法对字段进行查询等操作<br>-strict文档不能写入,报错<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/33.png" alt="">  </li>
+</ol>
+<h3 id="3-自定义mapping"><a href="#3-自定义mapping" class="headerlink" title="3.自定义mapping"></a>3.自定义mapping</h3><p>链接地址:<a href="https://www.elastic.co/guide/en/kibana/6.7/tutorial-load-dataset.html" target="_blank" rel="external">https://www.elastic.co/guide/en/kibana/6.7/tutorial-load-dataset.html</a><br>在kibana中我们自定义mapping  </p>
+<p>1.创建索引:    </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">   PUT /my_index</div><div class="line">&#123;</div><div class="line">  &quot;mappings&quot;: &#123;</div><div class="line">           &quot;doc&quot;: &#123;</div><div class="line">      &quot;dynamic&quot; : false,</div><div class="line">      &quot;properties&quot;: &#123;</div><div class="line">        &quot;title&quot; : &#123;</div><div class="line">          &quot;type&quot;:&quot;text&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;name&quot;: &#123;</div><div class="line">          &quot;type&quot;:&quot;keyword&quot;</div><div class="line">        &#125;,</div><div class="line">        &quot;age&quot;: &#123;</div><div class="line">          &quot;type&quot;: &quot;integer&quot;</div><div class="line">        &#125;</div><div class="line">      &#125;</div><div class="line">          &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>2.查询索引  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">get my_index/_mapping</div></pre></td></tr></table></figure>
+</code></pre><p>3.索引添加字段  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">   </div><div class="line">   put /my_index/doc/1</div><div class="line">&#123;</div><div class="line">  &quot;title&quot;:&quot;hello,world&quot;,</div><div class="line">  &quot;desc&quot;:&quot;nothing  here&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>4.查询某一个字段  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">   get my_index/doc/_search</div><div class="line">&#123;</div><div class="line">  &quot;query&quot;:&#123;</div><div class="line">   &quot;match&quot;: &#123;</div><div class="line">     &quot;title&quot;: &quot;hello&quot;</div><div class="line">   &#125;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h3 id="4-自定义mapping参数说明"><a href="#4-自定义mapping参数说明" class="headerlink" title="4.自定义mapping参数说明"></a>4.自定义mapping参数说明</h3><ol>
+<li><p>1.copy_to<br>-将该字段的值复制到目标字段,实现类似_all的作用<br>-不会出现在_source中,只用来搜索  </p>
+</li>
+<li><p>2.kibana实例<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/34.png" alt="">  </p>
+</li>
+</ol>
+<h3 id="5-index参数说明"><a href="#5-index参数说明" class="headerlink" title="5.index参数说明"></a>5.index参数说明</h3><ol>
+<li><p>1.index<br>-控制当前字段是否索引,默认为true,即记录索引,false不记录索引,即不可搜索。 用于希望有些字段不让人查询、比如一些敏感信息：身份证号等</p>
+</li>
+<li><p>2.设置index为false的好处<br>-a.实现不被检索需求<br>-b.不存倒排索引了、所以节省空间</p>
+</li>
+<li>3.kibana操作实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/35.png" alt="">  </li>
+</ol>
+<h3 id="6-index-options参数说明"><a href="#6-index-options参数说明" class="headerlink" title="6.index_options参数说明"></a>6.index_options参数说明</h3><p>index_options用于指定倒排索引创建时候,记录索引的哪些内容。</p>
+<ol>
+<li><p>1.index_options用于控制倒排索引记录的内容，有如下4种配置<br>-docs 只记录doc id(文档id)<br>-freqs 记录doc id(文档id)和term frequencies(单词出现频率)<br>-freqs 记录doc id和term frequencies和term position(单词位置)<br>-offsets记录doc id,term frequencies,term position,character ofsets  </p>
+</li>
+<li><p>2.text类型默认配置为postions,其他默认为:docs</p>
+</li>
+<li>3.记录内容越多,占用空间越大  </li>
+<li>4.index_options设定如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/37.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/38.png" alt="">  </li>
+</ol>
+<h3 id="7-mapping设置文档见官网如下章节"><a href="#7-mapping设置文档见官网如下章节" class="headerlink" title="7.mapping设置文档见官网如下章节"></a>7.mapping设置文档见官网如下章节</h3><p>官方文档记录了Mapping的参数设置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/39.png" alt="">  </p>
+<h3 id="8-mapping数据类型"><a href="#8-mapping数据类型" class="headerlink" title="8.mapping数据类型"></a>8.mapping数据类型</h3><p>我们进入es浏览章节:Elasticsearch Reference [7.1] » Mapping » Field datatypes就可以查看mapping的数据类型。  </p>
+<h4 id="8-1-核心数据类型-Core-datatypes"><a href="#8-1-核心数据类型-Core-datatypes" class="headerlink" title="8.1 核心数据类型(Core datatypes)"></a>8.1 核心数据类型(Core datatypes)</h4><p>官网如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/40.png" alt="">  </p>
+<ol>
+<li>1.字符型<br>-text(支持分词)和keyword(不支持分词)  </li>
+<li>2.数值型<br>-long, integer, short, byte, double, float, half_float, scaled_float</li>
+<li>3.日期类型<br>-date  </li>
+<li>4.布尔类型<br>-boolean</li>
+<li>5.二进制<br>-binary  </li>
+<li>6.范围类型<br>-integer_range, float_range, long_range, double_range, date_range  <h4 id="8-2-复杂数据类型-Complex-datatypesedit"><a href="#8-2-复杂数据类型-Complex-datatypesedit" class="headerlink" title="8.2 复杂数据类型(Complex datatypesedit)"></a>8.2 复杂数据类型(Complex datatypesedit)</h4></li>
+<li>1.数组类型<br>-array  </li>
+<li>2.对象类型<br>-object</li>
+<li>3.嵌套类型<br>-nested object</li>
+</ol>
+<h4 id="8-3-地理位置数据类型-Geo-datatypesedit"><a href="#8-3-地理位置数据类型-Geo-datatypesedit" class="headerlink" title="8.3 地理位置数据类型(Geo datatypesedit)"></a>8.3 地理位置数据类型(Geo datatypesedit)</h4><ol>
+<li>1.Geo-point<br>-geo_point for lat/lon points 存放地理位置点</li>
+<li>2.Geo-shape<br>-geo_shape for complex shapes like polygons  存放地理位置形状信息  </li>
+</ol>
+<h4 id="8-4-专用类型-Specialised-datatypesedit"><a href="#8-4-专用类型-Specialised-datatypesedit" class="headerlink" title="8.4 专用类型(Specialised datatypesedit)"></a>8.4 专用类型(Specialised datatypesedit)</h4><ol>
+<li>1.记录ip地址<br>-ip  </li>
+<li>2.记录自动补全<br>-completion  </li>
+<li>3.记录分词数<br>-token_count</li>
+<li>4.记录字符串hash值<br>-murmur3</li>
+<li>5.Percolator<br>…</li>
+</ol>
+<h4 id="8-5-多字段特性"><a href="#8-5-多字段特性" class="headerlink" title="8.5 多字段特性"></a>8.5 多字段特性</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/41.png" alt="">  </p>
+<h3 id="9-dynamic-mapping简介"><a href="#9-dynamic-mapping简介" class="headerlink" title="9.dynamic-mapping简介"></a>9.dynamic-mapping简介</h3><ol>
+<li>1.es可以自动识别文档字段类型，从而降低用户 使用成本，如下:<br>我们创建文档时候并没有先创建索引，但是文档能创建成功，说明自动穿构建了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/42.png" alt="">  </li>
+<li>2.es是依靠JSON文档的字段类型来实现自动识别字段类型,支持类型如下：JSON类型到es类型的转换<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/43.png" alt="">  </li>
+<li>4.演示实例<br>创建文档时候会创建对应索引,索引的类型转换按照JSON类型自动转换<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/44.png" alt="">  </li>
+</ol>
+<h3 id="10-dynamic日期与数字识别"><a href="#10-dynamic日期与数字识别" class="headerlink" title="10.dynamic日期与数字识别"></a>10.dynamic日期与数字识别</h3><ol>
+<li>1.日期的自动识别可以自行配置日期格式，以满足各种需求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/45.png" alt=""><br>a.创建文档后获取mappings<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/46.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/47.png" alt=""> </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/48.png" alt="">  </p>
+<h3 id="11-Dynamic-Mapping简介"><a href="#11-Dynamic-Mapping简介" class="headerlink" title="11.Dynamic Mapping简介"></a>11.Dynamic Mapping简介</h3><ol>
+<li><p>1.允许根据es自动识别的数据类型、字段等来动态设定字段类型，可以实现如下效果:<br>-将所有字符串类型都设定为keyword类型，即默认不分词(不设置的话默认es会设置为分词的text,里面有倒排索引、暂用空间)。<br>-所有以message开头的字段都设定为text类型,即分词<br>-所有以long_开头的字段都设定为long类型<br>-所有自定匹配为double类型的都设定为float类型、以节省空间。  </p>
+</li>
+<li><p>2.API如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/49.png" alt="">  </p>
+</li>
+<li><p>3.匹配规则一般有如下几个参数<br>-match_mapping_type匹配es自动识别的字段类型，如:boolean,long,string等<br>-match,unmatch匹配字段名<br>-path_match,path_unmatch匹配路径  </p>
+</li>
+<li><p>4.字符串默认使用keyword类型<br>-es默认会为字符串设置为text类型,并增加一个keyword的子字段<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/50.png" alt="">  </p>
+</li>
+<li><p>5.以message开头的字段都设置为text类型<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/51.png" alt=""> </p>
+</li>
+<li>6.double类型设置为float,节省空间<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/52.png" alt="">  </li>
+</ol>
+<h3 id="12-Dynamic-Mapping简介"><a href="#12-Dynamic-Mapping简介" class="headerlink" title="12.Dynamic Mapping简介"></a>12.Dynamic Mapping简介</h3><p>有时候我们创建mapping时候,字段比较多的时候,我们一个个创建比较麻烦,我们可以通过先创建文档、然后获取mapping,再拷贝出来修改自定义mapping  </p>
+<ol>
+<li>1.自定义mapping操作步骤如下:<br>1.写入一条文档到es的临时索引中,获取es自动生成的mapping<br>2.修改步骤哦1得到的mapping,自定义相关配置<br>3.使用步骤2的mapping创建实际所需索引  </li>
+</ol>
+<h3 id="13-索引模板"><a href="#13-索引模板" class="headerlink" title="13.索引模板"></a>13.索引模板</h3><ol>
+<li><p>1.索引模板(Index Template),主要用于在新建索引时自动应用预先设定配置,简化索引的创建步骤<br>-可以设定索引的配置和mapping<br>-可以有多个模板,根据order设置,order打的覆盖小的设置  </p>
+</li>
+<li><p>2.索引模板API,endpoint为_template,如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/53.png" alt="">  </p>
+</li>
+<li><p>3.实例(创建两个模板)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/54.png" alt=""></p>
+</li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/55.png" alt=""></p>
+<ol>
+<li>4.获取与删除API如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/56.png" alt=""></li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/08/05/ElasticStack-5-Elasticsearch篇之Mapping设置/" class="archive-article-date">
+  	<time datetime="2019-08-05T14:30:06.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-08-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-work-12-SpringBoot自带logback日志记录" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -851,216 +1013,6 @@
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-ElasticStack-2-入门" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/06/24/ElasticStack-2-入门/">ElasticStack-2-入门</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-内容简介"><a href="#1-内容简介" class="headerlink" title="1.内容简介:"></a>1.内容简介:</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/68.png" alt=""> </p>
-<h3 id="2-Elastic-Search和Kibana入门"><a href="#2-Elastic-Search和Kibana入门" class="headerlink" title="2.Elastic Search和Kibana入门"></a>2.Elastic Search和Kibana入门</h3><h4 id="2-1-Elasticsearch安装与运行"><a href="#2-1-Elasticsearch安装与运行" class="headerlink" title="2.1 Elasticsearch安装与运行"></a>2.1 Elasticsearch安装与运行</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/69.png" alt=""> </p>
-<p>浏览器输入:<a href="https://www.elastic.co---&gt;进入products--&gt;进入elasticsearch--&gt;Download" target="_blank" rel="external">https://www.elastic.co---&gt;进入products--&gt;进入elasticsearch--&gt;Download</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/70.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/71.png" alt=""><br>我这里以window下为例,下载后解压运行：bin\elasticsearch.bat</p>
-<p>我们访问:<a href="http://127.0.0.1:9200就可以确认es是否已经启动。" target="_blank" rel="external">http://127.0.0.1:9200就可以确认es是否已经启动。</a>  </p>
-<h4 id="2-2-Elasticsearch配置详解"><a href="#2-2-Elasticsearch配置详解" class="headerlink" title="2.2 Elasticsearch配置详解"></a>2.2 Elasticsearch配置详解</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/72.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/73.png" alt=""></p>
-<ol>
-<li><p>1.elasticsearch.yml配置文件说明:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/74.png" alt=""> </p>
-</li>
-<li><p>2.Development与 Production模式说明<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/75.png" alt="">  </p>
-</li>
-</ol>
-<h4 id="2-3-Elasticsearch本地快速搭建集群"><a href="#2-3-Elasticsearch本地快速搭建集群" class="headerlink" title="2.3 Elasticsearch本地快速搭建集群"></a>2.3 Elasticsearch本地快速搭建集群</h4><p>window下启动错误解决:<br><a href="https://blog.csdn.net/fanrenxiang/article/details/81358332" target="_blank" rel="external">https://blog.csdn.net/fanrenxiang/article/details/81358332</a>  </p>
-<p>集群搭建按照下面图所示:启动3个服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/76.png" alt=""> </p>
-<ol>
-<li><p>1.启动默认的服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/77.png" alt=""> </p>
-</li>
-<li><p>2.启动第二个实例<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/78.png" alt=""><br>查看集群:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/79.png" alt="">  </p>
-</li>
-<li><p>3.启动第3个实例<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/80.png" alt=""> </p>
-</li>
-</ol>
-<h4 id="2-4-Kibana安装与演示"><a href="#2-4-Kibana安装与演示" class="headerlink" title="2.4 Kibana安装与演示"></a>2.4 Kibana安装与演示</h4><p>Kibana是使用node.js开发的产品。<br>同样在<a href="https://www.elastic.co/cn/里面的产品--&gt;Kibana--&gt;下载--&gt;Download" target="_blank" rel="external">https://www.elastic.co/cn/里面的产品--&gt;Kibana--&gt;下载--&gt;Download</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/83.png" alt=""></p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/84.png" alt=""><br>注意:需要进入kibana.yml文件，然后修改里面的Elasticsearch的地址指向:<br>1.Open config/kibana.yml in an editor<br>2.Set elasticsearch.hosts to point at your Elasticsearch instance</p>
-<p>然后访问：<a href="http://localhost:5601" target="_blank" rel="external">http://localhost:5601</a></p>
-<h4 id="2-5-Kibana配置详解"><a href="#2-5-Kibana配置详解" class="headerlink" title="2.5 Kibana配置详解"></a>2.5 Kibana配置详解</h4><p>Kibana的配置详解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/85.png" alt=""><br>Kibana常用功能说明<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/86.png" alt="">  </p>
-<h4 id="2-6-Elasticsearch术语介绍与CRUD实际操作"><a href="#2-6-Elasticsearch术语介绍与CRUD实际操作" class="headerlink" title="2.6 Elasticsearch术语介绍与CRUD实际操作"></a>2.6 Elasticsearch术语介绍与CRUD实际操作</h4><h5 id="2-6-1-Elasticsearch常用术语"><a href="#2-6-1-Elasticsearch常用术语" class="headerlink" title="2.6.1 Elasticsearch常用术语"></a>2.6.1 Elasticsearch常用术语</h5><ol>
-<li>1.Document文档数据、既然是数据、可以理解成数据表里面的一条数据。</li>
-<li>2.Index 索引 可以理解成:数据库。所有document都是存在于Index数据中的。    </li>
-<li>3.Type索引中的数据类型。可以理解成数据库中的一个表</li>
-<li>4.Field字段、文档的属性。类似于mysql中的字段。</li>
-<li>5.Query DSL查询语句。</li>
-</ol>
-<h5 id="2-6-2-Elasticsearch的CRUD"><a href="#2-6-2-Elasticsearch的CRUD" class="headerlink" title="2.6.2 Elasticsearch的CRUD"></a>2.6.2 Elasticsearch的CRUD</h5><p>CRUD其实就是数据的增删改查,这里面的数据就是文档，所以CRUD只是对文档的操作。  </p>
-<ol>
-<li>1.Create 创建文档  </li>
-<li>2.Read 读取文档  </li>
-<li>3.Update 更新文档  </li>
-<li>4.Delete 删除文档  </li>
-</ol>
-<p>我们在Index(accounts)下创建一个type(person)文档id为1  文档内容就是下面的左图json格式。右边是一个创建文档后返回的内容。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/87.png" alt=""> </p>
-<p>我们需要实际操作的话,只需要在Kibanna的Dev Tools下的console中输入一下内容。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/88.png" alt=""><br>上面文档就算插入成功了，文档插入成功之后、我们需要获取这个文档也就是读取文档：read<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/89.png" alt=""> </p>
-<p>更新<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/90.png" alt=""> </p>
-<p>删除<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/91.png" alt="">  </p>
-<h4 id="2-7-Elasticsearch查询简介"><a href="#2-7-Elasticsearch查询简介" class="headerlink" title="2.7 Elasticsearch查询简介"></a>2.7 Elasticsearch查询简介</h4><ol>
-<li><p>1.查询的基本语法<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/92.png" alt="">  </p>
-</li>
-<li><p>2.查询实例<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/93.png" alt="">  </p>
-</li>
-<li><p>3.在官方文档可以查看到详细的语法<br>进入官网–&gt;lean(了解)–&gt;doc(文档) –&gt;Elasticsearch Reference–&gt;Query DSL</p>
-</li>
-</ol>
-<h3 id="3-Beats、Filebea入门"><a href="#3-Beats、Filebea入门" class="headerlink" title="3.Beats、Filebea入门"></a>3.Beats、Filebea入门</h3><h4 id="3-1-Beats简介"><a href="#3-1-Beats简介" class="headerlink" title="3.1 Beats简介"></a>3.1 Beats简介</h4><p>Beats定义:Lightweight Data Shipper(官方定义为:轻量级的数据传送者)。官方目前有下面几个beats。</p>
-<ol>
-<li>1.Filebeat—主要针对日志文件  </li>
-<li>2.Metricbeat—主要收集：像操作系统、CPU、内存、磁盘、还有像常用软件:nginx、Mysql的度量指标。Metricbeat能很快收集这些度量指标、然后很快的放入es中进行可视化分析、展示、告警。</li>
-<li>3.Packetbeat—网络数据(比如服务器传输情况)   </li>
-<li>4.Winlogbeat Window 数据—Window的日志数据。</li>
-<li>5.Heartbeat—健康检查<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/94.png" alt=""><br>如上图我们知道：Beat处于数据的起始端、他们可以将数据直接存储到Elasticsearch中、也可以传输到logstash,然后logstash通过分析或者转换把数据传送到Elasticsearch中、最后通过Kibana对数据进行展示。</li>
-</ol>
-<h4 id="3-2Filebeat简介"><a href="#3-2Filebeat简介" class="headerlink" title="3.2Filebeat简介"></a>3.2Filebeat简介</h4><p>Filebeat主要是对日志文件进行处理的，如下为处理流程:<br>Filebeat输入日志文件、拿到日志文件后进行简单处理(Filter)、然后输出OutPut</p>
-<p>我们用以下图查看Filebeat的构成:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/95.png" alt="">  </p>
-<ol>
-<li>1.左边是Filebeat,右边是Filebeat的输出对象。我们可以看到输出对象有:Elasticsearch、Logstash、Kafka、Redis</li>
-<li>2.从左边可以看到Filebeat包含两个部分：Prospect(观察者)和Harvester(收割者)<br>Prospect针对/var/log/*.log文件可以探测其文件是否有变化、如果有变化  Harvester就需要收集新的日志。将日志从每一个日志文件中取出来、然后发送到output对象。</li>
-<li>3.一个Filebeat可以有多个Prospect(观察者)和Harvester(收割者)、上面的Prospect(观察者)和Harvester(收割者)针对的日志文件是不同”的。</li>
-<li>4.Prospect(观察者)针对于不同的配置文件(system.log和wifi.log)会启动多个Harvester。也就是一个Harvester针对于一个配置文件。</li>
-</ol>
-<h4 id="3-3-Filebeat配置简介"><a href="#3-3-Filebeat配置简介" class="headerlink" title="3.3 Filebeat配置简介"></a>3.3 Filebeat配置简介</h4><h5 id="3-3-1-Filebeat-Input配置简介"><a href="#3-3-1-Filebeat-Input配置简介" class="headerlink" title="3.3.1 Filebeat Input配置简介"></a>3.3.1 Filebeat Input配置简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/96.png" alt=""> </p>
-<ol>
-<li>2.使用yml语法、跟之前elasticsearch一致。  </li>
-<li>2.Filebeat其中一个组成是Prospect、在其配置文件中有一个Prospect配置。  </li>
-<li>3.之前说了Prospect是不止一个的、可以配置多个。所以是个数组。yml的数组格式使用”-“隔离的。上图是配置了两个Prospect</li>
-<li>4每一个Prospect有自己的输入类型、这里是log、说明是配置文件。paths也是一个数组、用于指定日志的路径的。</li>
-<li>5.目前input_type有两个类型:一个是log、另一个是stdin(标准输入)</li>
-</ol>
-<h5 id="3-3-2-Filebeat-Output配置简介"><a href="#3-3-2-Filebeat-Output配置简介" class="headerlink" title="3.3.2 Filebeat Output配置简介"></a>3.3.2 Filebeat Output配置简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/97.png" alt=""></p>
-<ol>
-<li>1.Filebeat Output支持以下类型对象:Console(标准输出)、Elasticsearch、Logstash、Kafka、Redis、File(指把一个日志文件输出到另一个日志文件中)。</li>
-</ol>
-<h5 id="3-3-3-Filebeat-Filter配置简介"><a href="#3-3-3-Filebeat-Filter配置简介" class="headerlink" title="3.3.3 Filebeat Filter配置简介"></a>3.3.3 Filebeat Filter配置简介</h5><p>对读入的内容进行一定的处理、当然他的处理能力相对较弱。例如:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/98.png" alt=""><br>例子:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/99.png" alt=""></p>
-<h4 id="3-4Filebeat高级使用简介"><a href="#3-4Filebeat高级使用简介" class="headerlink" title="3.4Filebeat高级使用简介"></a>3.4Filebeat高级使用简介</h4><ol>
-<li><p>1.从上面我们知道Filebea缺乏数据转换的能力。针对于这个问题，Elasticsearch增加了一个Node类型、Elasticsearch Ingest Node<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/100.png" alt=""></p>
-</li>
-<li><p>2.Filebeat Module简介:Filebeat本身想把数据快速存放到Elasticsearch中大致要做一些处理，首先要写合适的Filebeat配置文件。然后去配置Ingest Node中的pipeline、然后对存储的数据进行kibana的合理的可视化配置。Filebeat看到了这些数据做起来是比较复杂的。所以官方推出了一些模块、把常用的日志格式做了统一化的处理达到开箱急用的配置。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/101.png" alt=""></p>
-</li>
-</ol>
-<h4 id="3-5-Filebeat演示"><a href="#3-5-Filebeat演示" class="headerlink" title="3.5 Filebeat演示"></a>3.5 Filebeat演示</h4><p>实际演示Filebeat收集nginx log<br>1.我们通过stdin收集日志。<br>2.通过console输出结果。  </p>
-<p>实践  </p>
-<ol>
-<li>1.下载Filebeat(Filebeat是基于go开发、需要下载不同的安装包)  </li>
-<li><p>2.查看我们需要收集的nginx日志<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/102.png" alt="">  </p>
-</li>
-<li><p>3.配置我们的filebeat<br>a.input_type: stdin (我们从标准输入流获取数据)<br>b.output.console: pretty: true  </p>
-</li>
-<li><p>4.接下来用filebeat:收集nginx的两条数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/103.png" alt="">  </p>
-</li>
-<li><p>5.最后获取到的信息是:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/104.png" alt="">  </p>
-</li>
-</ol>
-<h4 id="3-6-Packetbeat简介"><a href="#3-6-Packetbeat简介" class="headerlink" title="3.6 Packetbeat简介"></a>3.6 Packetbeat简介</h4><h5 id="3-6-1-简介"><a href="#3-6-1-简介" class="headerlink" title="3.6.1 简介"></a>3.6.1 简介</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/105.png" alt=""><br>拥有了Packetbeat类似于就拥有了轻量级的wireshake<br>1.实时抓取网络包<br>2.自动解析应用层协议  </p>
-<h5 id="3-6-2-demo抓取es的网络数据包"><a href="#3-6-2-demo抓取es的网络数据包" class="headerlink" title="3.6.2 demo抓取es的网络数据包"></a>3.6.2 demo抓取es的网络数据包</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/106.png" alt="">  </p>
-<p>1 1.指定网卡:lo0  </p>
-<ol>
-<li>2.protocols:指定协议  </li>
-<li>3.ports:指定端口  </li>
-<li>4.send_request:true 指定request请求的body,默认为false   </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/107.png" alt="">  </p>
-<h4 id="3-7-Packetbeat演示"><a href="#3-7-Packetbeat演示" class="headerlink" title="3.7 Packetbeat演示"></a>3.7 Packetbeat演示</h4><ol>
-<li>1.下载包  </li>
-<li>2.我们抓取es的包、首先我们把es跑起来  </li>
-<li>3.检查配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/108.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/109.png" alt="">  </li>
-<li><p>4.运行paketbeat：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/110.png" alt="">  </p>
-</li>
-<li><p>5.查看paketbeat输出<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/111.png" alt="">  </p>
-</li>
-</ol>
-<h3 id="4、Logstash入门"><a href="#4、Logstash入门" class="headerlink" title="4、Logstash入门"></a>4、Logstash入门</h3><h4 id="4-1-Logstash简介"><a href="#4-1-Logstash简介" class="headerlink" title="4.1 Logstash简介"></a>4.1 Logstash简介</h4><ol>
-<li>1.Logstash定义为一个:Data Shipper、他比Beats的定义少了一个light-weight<br>也就是说Logstash不是轻量级的、会比Beats占用更多的资源。所以会占用一定的资源、当然功能 也会越强大。</li>
-<li><p>2.Logstash其实就是具备ETL的功能、对数据进行以下操作:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/112.png" alt="">  </p>
-</li>
-<li><p>3.处理流程(其实就是3步:input、Filter、Output)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/113.png" alt="">  </p>
-</li>
-</ol>
-<h4 id="4-2-Logstash配置"><a href="#4-2-Logstash配置" class="headerlink" title="4.2 Logstash配置"></a>4.2 Logstash配置</h4><h5 id="4-2-1-我们看下Input和Output配置。"><a href="#4-2-1-我们看下Input和Output配置。" class="headerlink" title="4.2.1 我们看下Input和Output配置。"></a>4.2.1 我们看下Input和Output配置。</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/114.png" alt=""> </p>
-<ol>
-<li>1.logstash的配置不是yml文件、指定的是一个file文件、path路径是在tmp文件下面的。  </li>
-<li>2.output是指标准输出、指定的编码是:rubydebug  </li>
-</ol>
-<h5 id="4-2-2-Filter配置"><a href="#4-2-2-Filter配置" class="headerlink" title="4.2.2 Filter配置"></a>4.2.2 Filter配置</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/115.png" alt=""><br>实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/116.png" alt="">  </p>
-<h4 id="4-3-Logstash演示"><a href="#4-3-Logstash演示" class="headerlink" title="4.3 Logstash演示"></a>4.3 Logstash演示</h4><p>我们使用Logstash收集nginx log  经过logstash输出日志会是怎样子?<br>我们正常下载Logstash，然后解压，最后我们进入:nginx_logstash.conf,主要是需要配置3个地方。logstash有3大配置:input配置、filter配置、output配置。</p>
-<ol>
-<li>1.input<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/20.png" alt=""><br>标准输入</li>
-<li>2.filter<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/21.png" alt=""></li>
-<li>3.output</li>
-</ol>
-<p>我们启动logstash<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/22.png" alt="">  </p>
-<h3 id="5、案例实战"><a href="#5、案例实战" class="headerlink" title="5、案例实战"></a>5、案例实战</h3><h4 id="5-1-实战目标和方案介绍"><a href="#5-1-实战目标和方案介绍" class="headerlink" title="5.1 实战目标和方案介绍"></a>5.1 实战目标和方案介绍</h4><p>我们此次实践的目标:  </p>
-<ol>
-<li>1.收集Elasticsearch集群的查询语句。  </li>
-<li>2.分析查询语句的常用语句、相应时长等。</li>
-</ol>
-<p>方案:</p>
-<ol>
-<li>1.应用Packetbeat+Logstash完成数据收集工作  </li>
-<li>2.使用Kibaba+Elasticsearch完成数据分析工作  </li>
-</ol>
-<p>架构图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/23.png" alt="">  </p>
-<ol>
-<li>1.Production cluster就是我们业务集群  我们现在监控他的es查询语句情况  </li>
-<li>2.做法:我们用Packetbeat监听Production cluster端口、然后所有的查询语句通过网络抓包的形式都可以获取到、然后Packetbeat将所有数据发送到logstash、然后发送给监控集群、最后通过监控集群发送给Kibana。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/24.png" alt="">   </li>
-</ol>
-<p>方案之logstash:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/30.png" alt="">   </p>
-<ol>
-<li>1.input输入:接收beats的数据 监听的端口是:5044  </li>
-<li>2.filter中:如果request请求中包含search的关键字、我们再做grok处理  </li>
-<li>3.output中也做了判断:请求中有search时候、我们输出到 elasticsearch  </li>
-</ol>
-<p>方案之packetbeat:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/31.png" alt="">  </p>
-<h4 id="5-2-实战之数据收集演示"><a href="#5-2-实战之数据收集演示" class="headerlink" title="5.2 实战之数据收集演示"></a>5.2 实战之数据收集演示</h4><h5 id="5-2-1-启动elasticsearch"><a href="#5-2-1-启动elasticsearch" class="headerlink" title="5.2.1 启动elasticsearch"></a>5.2.1 启动elasticsearch</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/32.png" alt="">  </p>
-<h5 id="5-2-2-启动Kinbana"><a href="#5-2-2-启动Kinbana" class="headerlink" title="5.2.2 启动Kinbana"></a>5.2.2 启动Kinbana</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/33.png" alt="">   </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/06/24/ElasticStack-2-入门/" class="archive-article-date">
-  	<time datetime="2019-06-24T15:47:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-06-24</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
 	</div>
 
       
