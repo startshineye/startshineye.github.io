@@ -152,6 +152,77 @@
       <div class="body-wrap">
         
   
+    <article id="post-java爬虫-8-抽取网站规则模板-优化解析代码" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2018/11/06/java爬虫-8-抽取网站规则模板-优化解析代码/">java爬虫-8-抽取网站规则模板,优化解析代码</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.生成正则工具类<br>2.修改html解析实现代码优化<br>3.解析html的代码大都类似,封装解析html的工具类<br>4.正则和xpath是变量形式,一般是将这些变量设置成配置文件里面或者存放在数据库,现在设置成配置文件,以后修改时候直接改配置文件。</p>
+<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><ol>
+<li><p>对于有些爬虫数据(评论数)是不用使用正则表达式就可以获取到,但是为了代码的统一封装,我们使用正则匹配。</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">private String commentNumberRegex = &quot;[\\d,]+&quot;;</div></pre></td></tr></table></figure>
+</li>
+<li><p>我们封装一个正则工具类对以上的解析进行正则封装  </p>
+</li>
+</ol>
+<h5 id="1-生成正则工具类"><a href="#1-生成正则工具类" class="headerlink" title="1.生成正则工具类"></a>1.生成正则工具类</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"> public class RegexUtil &#123;</div><div class="line"> public static String getPageInfoByRegex(String  content, Pattern pattern,int group)&#123;</div><div class="line">     Matcher matcher = pattern.matcher(content);</div><div class="line">     if(matcher.find())&#123;</div><div class="line">         return matcher.group(group).trim();</div><div class="line">     &#125;</div><div class="line">     return &quot;0&quot;;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="2-修改html解析实现代码优化"><a href="#2-修改html解析实现代码优化" class="headerlink" title="2.修改html解析实现代码优化"></a>2.修改html解析实现代码优化</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line">    public class YOUKUProcesService implements IProcessService&#123;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public void process(Page page) &#123;</div><div class="line">        /**</div><div class="line">         * 我们使用HtmlCleaner解析页面</div><div class="line">         */</div><div class="line">        //获取页面抓取内容</div><div class="line">        String content = page.getContent();</div><div class="line"></div><div class="line">        HtmlCleaner htmlCleaner = new HtmlCleaner();</div><div class="line">        //获取根节点</div><div class="line">        TagNode rootNode = htmlCleaner.clean(content);</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">        //获取总数</div><div class="line">        String allNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseAllNumber&quot;), LoadPropertyUtil.getYOUKU(&quot;allnumberRegex&quot;));</div><div class="line"></div><div class="line">        //点赞数</div><div class="line">        String supportNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseSupportNumber&quot;),  LoadPropertyUtil.getYOUKU(&quot;supportnumberRegex&quot;));</div><div class="line"></div><div class="line">        //评论数</div><div class="line">        String commentNumber = HtmlUtil.getFieldByRegex(rootNode,LoadPropertyUtil.getYOUKU(&quot;parseCommentNumber&quot;),  LoadPropertyUtil.getYOUKU(&quot;commentnumberRegex&quot;));</div><div class="line"></div><div class="line">       //最后把值存起来</div><div class="line">        page.setAllNumber(allNumber);</div><div class="line">        page.setSupportNumber(supportNumber);</div><div class="line">        page.setCommitNumber(commentNumber);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="3-解析html的代码大都类似-封装解析html的工具类"><a href="#3-解析html的代码大都类似-封装解析html的工具类" class="headerlink" title="3.解析html的代码大都类似,封装解析html的工具类"></a>3.解析html的代码大都类似,封装解析html的工具类</h5><pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"> public class HtmlUtil &#123;</div><div class="line">  public static String getFieldByRegex(TagNode rootNode,String xPath,String regex)&#123;</div><div class="line">    String number = &quot;0&quot;;</div><div class="line">    Object[] nodes = null;</div><div class="line">    try &#123;</div><div class="line">        nodes = rootNode.evaluateXPath(xPath);</div><div class="line">        //判断此数组长度大于0才解析,不然里面没有任何内容,不解析</div><div class="line">        if(nodes.length&gt;0)&#123;</div><div class="line">            TagNode node = (TagNode)nodes[0];</div><div class="line">            Pattern allNumberPattern = Pattern.compile(regex, Pattern.DOTALL);</div><div class="line">            number = RegexUtil.getPageInfoByRegex(node.getText().toString(), allNumberPattern, 0);</div><div class="line">        &#125;</div><div class="line">    &#125; catch (XPatherException e) &#123;</div><div class="line">        e.printStackTrace();</div><div class="line">    &#125;</div><div class="line">    return number;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="4-定义配置文件"><a href="#4-定义配置文件" class="headerlink" title="4.定义配置文件"></a>4.定义配置文件</h5><ol>
+<li><p>正则和xpath是变量形式,一般是将这些变量设置成配置文件里面或者存放在数据库,现在设置成配置文件,以后修改时候直接改配置文件。</p>
+</li>
+<li><p>在resourcess下定义:youku.properties文件,输入以下内容:</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">   allnumberRegex=(?&lt;\= \u603B\u64AD\u653E\:)[\\d,]+</div><div class="line">supportnumberRegex=(?&lt;\= \u9876\:)[\\d,]+</div><div class="line">commentnumberRegex=[\\d,]+</div><div class="line">parseAllNumber=//*[@id\=&quot;showInfo&quot;]/div/div[1]/ul[2]/li[1]/span[1]</div><div class="line">parseCommentNumber=//*[@id\=&quot;showInfo&quot;]/div/div[1]/ul[2]/li[1]/span[2]/em</div><div class="line">parseSupportNumber=//*[@id\=&quot;showInfo&quot;]/div/div[1]/ul[2]/li[2]/span[1]</div><div class="line">idRegex=http\://www.youku.com/show_page/id_([\\w]+).html</div></pre></td></tr></table></figure>
+</li>
+<li><p>定义解析工具类:LoadPropertyUtil</p>
+</li>
+</ol>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">   public class LoadPropertyUtil &#123;</div><div class="line"></div><div class="line">//读取优酷配置文件</div><div class="line">public static String getYOUKU(String key)&#123;</div><div class="line">	String value = &quot;&quot;;</div><div class="line">	Locale locale = Locale.getDefault();</div><div class="line">	try &#123;</div><div class="line">		ResourceBundle localResource = ResourceBundle.getBundle(&quot;youku&quot;,</div><div class="line">				locale);</div><div class="line">		value = localResource.getString(key);</div><div class="line">	&#125; catch (MissingResourceException mre) &#123;</div><div class="line">		value = &quot;&quot;;</div><div class="line">	&#125;</div><div class="line">	return value;</div><div class="line"> &#125;</div><div class="line"> public static void main(String[] args) &#123;</div><div class="line">	System.out.println(getYOUKU(&quot;parseAllNumber&quot;));</div><div class="line"> &#125;</div><div class="line">   &#125;</div></pre></td></tr></table></figure>
+</code></pre><h5 id="5-文件目录结构"><a href="#5-文件目录结构" class="headerlink" title="5.文件目录结构"></a>5.文件目录结构</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2018/11/33.png" alt=""> </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2018/11/06/java爬虫-8-抽取网站规则模板-优化解析代码/" class="archive-article-date">
+  	<time datetime="2018-11-06T07:44:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-11-06</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/crawler/">crawler</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-java爬虫-7-2-爬虫代码实现一-下载解析视频网站页面" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -706,60 +777,9 @@
 
 
   
-    <article id="post-work-2-premium-oracle数据库乱码" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2018/10/18/work-2-premium-oracle数据库乱码/">work(2)-premium oracle数据库乱码</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>福建保险项目监控平台用到oracle数据库,然后数据导入到数据库后,我用的是naivcat premium 连接oracle数据库,然后数据导入后出现乱码</p>
-<h4 id="解决"><a href="#解决" class="headerlink" title="解决"></a>解决</h4><p>就是环境变量添加一个path<br>NLS_LANG=SIMPLIFIED CHINESE_CHINA.ZHS16GBK<br>这样就ok了</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2018/10/18/work-2-premium-oracle数据库乱码/" class="archive-article-date">
-  	<time datetime="2018-10-18T04:09:34.000Z" itemprop="datePublished"><i class="icon-clock"></i>2018-10-18</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/7/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/6/">6</a><a class="page-number" href="/page/7/">7</a><span class="page-number current">8</span><a class="page-number" href="/page/9/">9</a><a class="page-number" href="/page/10/">10</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><a class="extend next" rel="next" href="/page/9/">Next &raquo;</a>
     </nav>
   
 

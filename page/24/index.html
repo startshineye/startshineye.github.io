@@ -152,6 +152,145 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/">SpringBoot(23)-SpringBoot环境变量读取和属性对象的绑定</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h5 id="1-条件"><a href="#1-条件" class="headerlink" title="1.条件"></a>1.条件</h5><p>SpringBoot中想要获取环境变量读取和属性对象的绑定：<br>1)只要是Spring管理的类<br>2)实现接口 EnvironmentAware<br>3)重写方法 setEnvironment  </p>
+<p>可以在工程启动时就可以获取</p>
+<h5 id="2-代码示例"><a href="#2-代码示例" class="headerlink" title="2.代码示例"></a>2.代码示例</h5><h6 id="2-1-一般类通过实现EnvironmentAware接口"><a href="#2-1-一般类通过实现EnvironmentAware接口" class="headerlink" title="2.1 一般类通过实现EnvironmentAware接口"></a>2.1 一般类通过实现EnvironmentAware接口</h6><p>条件:<br>1)@Configuration<br>2)实现EnvironmentAware  </p>
+<pre><code>import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.bind.RelaxedPropertyResolver;
+import org.springframework.context.EnvironmentAware;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.core.env.Environment;
+@Configuration
+public class MyEnviromentAware implements EnvironmentAware{
+
+//注入application.properties的属性到指定变量中
+@Value(&quot;${spring.datasource.url}&quot;)
+private String url;
+
+//重写的方法setEnvironment是在系统启动的时间被执行
+public void setEnvironment(Environment environment) {
+
+    //打印注入的属性信息
+    System.out.println(&quot;url[&quot;+url+&quot;]&quot;);
+
+    //系统environment获取到系统属性
+    System.out.println(environment.getProperty(&quot;JAVA_HOME&quot;));
+
+    //通过enviroment获取到application.properties配置的属性.
+    System.out.println(environment.getProperty(&quot;spring.datasource.url&quot;));
+
+    //获取到前缀是&quot;spring.datasource.&quot; 的属性列表值.
+    RelaxedPropertyResolver relaxedPropertyResolver = new RelaxedPropertyResolver(environment, &quot;spring.datasource.&quot;);
+    System.out.println(&quot;spring.datasource.url=&quot;+relaxedPropertyResolver.getProperty(&quot;url&quot;));
+  }
+}
+</code></pre><p>输出:<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/9.png" alt=""></p>
+<h6 id="2-2-Controller或者Service通过实现EnvironmentAware接口"><a href="#2-2-Controller或者Service通过实现EnvironmentAware接口" class="headerlink" title="2.2 Controller或者Service通过实现EnvironmentAware接口"></a>2.2 Controller或者Service通过实现EnvironmentAware接口</h6><p>@Controller @Service 等被Spring管理的类都支持，注意重写的方法 setEnvironment 是在系统启动的时候被执行.  </p>
+<pre><code>import org.springframework.context.EnvironmentAware;
+import org.springframework.core.env.Environment;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+import com.yxm.web.entity.Hello;
+/**
+* 使用@RestController代替@controller和@ResponseBody
+* @author yxm
+*/
+@RestController
+public class HelloController implements EnvironmentAware{
+
+private String JAVA_HOME;
+
+@RequestMapping(&quot;/hello&quot;)
+public Hello hello(){
+
+    Hello hello = new  Hello();
+    hello.setId(110);
+    hello.setName(JAVA_HOME);
+    return hello;
+}
+//在程序一启动就执行
+public void setEnvironment(Environment environment) {
+    JAVA_HOME = environment.getProperty(&quot;JAVA_HOME&quot;);
+     System.out.println(&quot;Controller里获取参数  [&quot;+JAVA_HOME+&quot;]&quot;);
+ }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/10.png" alt=""></p>
+<h6 id="2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性"><a href="#2-3-通过-ConfigurationProperties-读取application属性配置文件中的属性" class="headerlink" title="2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性"></a>2.3 通过@ConfigurationProperties 读取application属性配置文件中的属性</h6><p>1.加入依赖  </p>
+<pre><code>&lt;!--spring-boot-configuration:spring boot 配置处理器; --&gt;
+ &lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-configuration-processor&lt;/artifactId&gt;
+       &lt;optional&gt;true&lt;/optional&gt;
+ &lt;/dependency&gt;
+</code></pre><p>2.@ConfigurationProperties 读取application属性配置文件中的属性。</p>
+<pre><code>@Configuration
+@ConditionalOnClass(Mongo.class)
+@EnableConfigurationProperties(MongoProperties.class)
+public class MongoAutoConfiguration {
+
+@Autowired
+private MongoProperties properties;
+
+}
+</code></pre><ol>
+<li>@ConditionOnClass表明该@Configuration仅仅在一定条件下才会被加载，这里的条件是Mongo.class位于类路径上</li>
+<li>@EnableConfigurationProperties将Spring Boot的配置文件（application.properties）中的spring.data.mongodb.*属性映射为MongoProperties并注入到MongoAutoConfiguration中。</li>
+<li><p>@ConditionalOnMissingBean说明Spring Boot仅仅在当前上下文中不存在Mongo对象时，才会实例化一个Bean。这个逻辑也体现了Spring Boot的另外一个特性——自定义的Bean优先于框架的默认配置，我们如果显式的在业务代码中定义了一个Mongo对象，那么Spring Boot就不再创建。</p>
+<p> @ConfigurationProperties(prefix = “spring.data.mongodb”)<br> public class MongoProperties {</p>
+<p> private String host;<br> privateint port = DBPort.PORT;<br> private String uri = “mongodb://localhost/test”;<br> private String database;</p>
+<p> // … getters/ setters omitted<br> }</p>
+</li>
+</ol>
+<p>它就是以spring.data.mongodb作为前缀的属性，然后通过名字直接映射为对象的属性，同时还包含了一些默认值。如果不配置，那么mongo.uri就是mongodb://localhost/test。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/09/12/SpringBoot-23-SpringBoot环境变量读取和属性对象的绑定/" class="archive-article-date">
+  	<time datetime="2017-09-12T04:59:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-12</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-jeecg-3-openwindow加载数据后操作数据后关闭窗口" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1325,141 +1464,9 @@ vm.$watch(&quot;a&quot;,function(){
 
 
   
-    <article id="post-vue-21-指令-自定义指令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/09/02/vue-21-指令-自定义指令/">vue(21)-指令-自定义指令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>例如:v-text,v-for,v-html这些都是vue自带的指令,但是有时候也许自带指令不够时候我们需要自定义指令</p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>自定义指令运用类的方法:Vue.directive()  </p>
-<pre><code>Vue.directive(指令名称,function(){
-
-});
-</code></pre><p>调用指令名称:在指令名称前面加上’v-‘  比如：red指令 则调用时候为:v-red  </p>
-<h5 id="1-改变背景"><a href="#1-改变背景" class="headerlink" title="1.改变背景"></a>1.改变背景</h5><p>1.指令无参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-   &lt;span v-red&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(){
-    this.el.style.background=&quot;red&quot;;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.png" alt="">  </p>
-<p>2.指令传参  </p>
-<pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;input type=&quot;text&quot; v-model=&quot;a&quot;&gt;&lt;br&gt;
-   &lt;span v-red=&quot;a&quot;&gt;
-       {{msg}}
-   &lt;/span&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;red&quot;,function(val){
-    this.el.style.background=val;
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         a:&quot;blue&quot;,
-         msg:&quot;hello world&quot;
-
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/4.gif" alt=""></p>
-<h5 id="2-拖拽"><a href="#2-拖拽" class="headerlink" title="2.拖拽"></a>2.拖拽</h5><pre><code>&lt;body&gt;
-&lt;div id=&quot;box&quot;&gt;
-    &lt;div v-drag :style=&quot;{width:&apos;100px&apos;,height:&apos;100px&apos;,background:&apos;yellow&apos;,position:&apos;absolute&apos;,right:0,top:0}&quot;&gt;
-
-    &lt;/div&gt;
-&lt;/div&gt;
-&lt;script&gt;
-Vue.directive(&quot;drag&quot;,function(){
-    var oDiv = this.el;
-    oDiv.onmousedown=function(ev){
-        var disX = ev.clientX-oDiv.offsetLeft;
-        var disY = ev.clientY-oDiv.offsetTop;
-
-        document.onmousemove=function(ev){
-            var l = ev.clientX-disX;
-            var t = ev.clientY-disY;
-            oDiv.style.left=l+&apos;px&apos;;
-            oDiv.style.top=t+&apos;px&apos;;
-        };
-        document.onmouseup=function(){
-            document.onmousemove=null;
-            document.onmouseup=null;
-        }
-    }
-});
- new Vue({
-     el:&quot;#box&quot;,
-     data:{
-         msg:&quot;hello&quot;
-     }
- });
-&lt;/script&gt;
-&lt;/body&gt;
-</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/9/3.gif" alt=""></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/09/02/vue-21-指令-自定义指令/" class="archive-article-date">
-  	<time datetime="2017-09-02T08:08:56.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-09-02</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/Vue/">Vue</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/23/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="page-number current">24</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/25/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/23/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/22/">22</a><a class="page-number" href="/page/23/">23</a><span class="page-number current">24</span><a class="page-number" href="/page/25/">25</a><a class="page-number" href="/page/26/">26</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><a class="extend next" rel="next" href="/page/25/">Next &raquo;</a>
     </nav>
   
 

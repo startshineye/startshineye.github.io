@@ -152,6 +152,89 @@
       <div class="body-wrap">
         
   
+    <article id="post-Redis-5-字符串" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2017/07/29/Redis-5-字符串/">Redis(5)-字符串</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="二进制数据操作"><a href="#二进制数据操作" class="headerlink" title="二进制数据操作"></a>二进制数据操作</h4><h5 id="1-设置和获取二进制数据"><a href="#1-设置和获取二进制数据" class="headerlink" title="1.设置和获取二进制数据"></a>1.设置和获取二进制数据</h5><p>SET,GET,SETNX,APPEND等命令同样可以用于设置二进制数据。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/76.png" alt="">  </p>
+<h5 id="2-二进制位的索引"><a href="#2-二进制位的索引" class="headerlink" title="2.二进制位的索引"></a>2.二进制位的索引</h5><p>和储存文字时一样,字符串键在存储二进制位时，索引也是从0开始。  </p>
+<p>但是和储存文字时,索引从左到右依次递增不同,当字符串键储存的是二进制位时,二进制位的索引会从左到右依次递减。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/77.png" alt=""> </p>
+<h5 id="3-设置二进制位的值"><a href="#3-设置二进制位的值" class="headerlink" title="3.设置二进制位的值"></a>3.设置二进制位的值</h5><p>SETBIT key index value  </p>
+<p>将给定索引上的二进制位的值设置为value,命令返回被设置的位原来储存的旧值。  </p>
+<p>复杂度O(1)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/78.png" alt="">  </p>
+<h5 id="4-获取二进制位的值"><a href="#4-获取二进制位的值" class="headerlink" title="4.获取二进制位的值"></a>4.获取二进制位的值</h5><p>GETBIT key index  </p>
+<p>返回给定索引上的二进制位的值。<br>复杂度为O(1)。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/79.png" alt="">  </p>
+<h5 id="5-计算值为1的二进制位的数量"><a href="#5-计算值为1的二进制位的数量" class="headerlink" title="5.计算值为1的二进制位的数量"></a>5.计算值为1的二进制位的数量</h5><p>BITCOUNT key [start][end]  </p>
+<p>计算并返回字符串键储存的值中,被设置为1的二进制位的数量。  </p>
+<p>一般情况下,给定的整个字符串键都会进行计数操作,但通过指定额外的 start或end参数,可以让计数只在特定索引范围的位上进行。  </p>
+<p>start和end参数的设置和GETRANGE命令类似,都可以使用负数值:比如-1表示最后一个位,而-2表示倒数第二个位,以此类推。  </p>
+<p>复杂度O(N),其中N为被计算二进制位的数量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/80.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/81.png" alt="">  </p>
+<h5 id="6-二进制位运算"><a href="#6-二进制位运算" class="headerlink" title="6.二进制位运算"></a>6.二进制位运算</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/82.png" alt=""><br>BITO示例<br>假设现在b1储存了二进制01001101,而b2键储存了二进制10110101。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/83.png" alt=""> </p>
+<h5 id="7-示例"><a href="#7-示例" class="headerlink" title="7.示例"></a>7.示例</h5><h6 id="7-1在线人数统计"><a href="#7-1在线人数统计" class="headerlink" title="7.1在线人数统计"></a>7.1在线人数统计</h6><p>一些网站具备了在线人数统计功能,通过这个功能可以看到一段时间内(比如这个小时,或者这一天),曾经登录过这个网站的会员人数。  </p>
+<p>首页   289 人在线 最高纪录815  </p>
+<p>某网站的在线人数统计结果,显示目前有289个会员在线。  </p>
+<p>通过使用字符串键以及二进制数据处理命令,我们也可以构建一个高效并且节约内存的在线人数统计实现。  </p>
+<h6 id="7-2在用户id和位索引之间进行关联"><a href="#7-2在用户id和位索引之间进行关联" class="headerlink" title="7.2在用户id和位索引之间进行关联"></a>7.2在用户id和位索引之间进行关联</h6><p>之前说过,字符串键储存的每个二进制位都有与之对应的索引,比如对于一个8位长的二进制值来说,它的各个二进制位的索引值为0至7。  </p>
+<p>因为网站通常每一个会员都有一个自己的数字id,比如peter的id可能是3,而jack的id可能是5，所以我们可以在用户id和二进制位的索引之间进行关联:  </p>
+<ol>
+<li>如果id为N的用户在线,我们就将索引为N的二级制位的值设置为1。  </li>
+<li>如果索引为N的二进制的值为0,这表示id为N用户不在线。  </li>
+<li>使用BITCOUNT可以统计有 多少个用户在线。  </li>
+<li>通过为每段时间分别储存一个二进制值,我们就可以为每段时间都记录在线用户的数量。(每小时创建一个键或者每天创建一个键,诸如此类)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/84.png" alt="">  <h6 id="7-3-在线用户统计的API及其实现"><a href="#7-3-在线用户统计的API及其实现" class="headerlink" title="7.3 在线用户统计的API及其实现"></a>7.3 在线用户统计的API及其实现</h6><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/85.png" alt=""></li>
+</ol>
+<h6 id="7-4-关于用户在线统计的更多信息"><a href="#7-4-关于用户在线统计的更多信息" class="headerlink" title="7.4 关于用户在线统计的更多信息"></a>7.4 关于用户在线统计的更多信息</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/86.png" alt="">  </p>
+<h6 id="示例-使用Redis缓存热门图片"><a href="#示例-使用Redis缓存热门图片" class="headerlink" title="示例:使用Redis缓存热门图片"></a>示例:使用Redis缓存热门图片</h6><p>图片网站要存储大量的图片(通常放在硬盘里面),而少部分热门图片将会被经常访问到。  </p>
+<p>为了加快网站获取热门图片的速度,我们可以利用Redis能够储存二进制这一特性,使用之前构建的缓存程序来缓存图片网站中的热门图片。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/87.png" alt=""></p>
+<h5 id="8-储存中文时注意事项"><a href="#8-储存中文时注意事项" class="headerlink" title="8.储存中文时注意事项"></a>8.储存中文时注意事项</h5><h6 id="8-1-注意事项"><a href="#8-1-注意事项" class="headerlink" title="8.1 注意事项"></a>8.1 注意事项</h6><p>一个英文字符只需要使用单个文字来存储,而一个中文字符却需要使用多个字节来存储。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/88.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/89.png" alt="">  </p>
+<h6 id="8-2-SETRANGE和SETRANGE实例"><a href="#8-2-SETRANGE和SETRANGE实例" class="headerlink" title="8.2 SETRANGE和SETRANGE实例"></a>8.2 SETRANGE和SETRANGE实例</h6><p>setrange和getrange情况类似:因为这两个命令所使用的索引是根据字节而不是字符来编排的,所以调用setrange或者getrange来处理中文,得不到我们想要的结果。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/90.png" alt="">  </p>
+<h6 id="8-5-结婚"><a href="#8-5-结婚" class="headerlink" title="8.5 结婚"></a>8.5 结婚</h6><p>不要使用以下三个命令来处理中文:<br>STRLEN,SETRANGE和GETRANGE  </p>
+<p>例外情况:如果你想要知道被储存的中文包含多少个字节,那么可以使用STRLEN。  </p>
+<h5 id="9总结"><a href="#9总结" class="headerlink" title="9总结"></a>9总结</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2017/7/91.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2017/07/29/Redis-5-字符串/" class="archive-article-date">
+  	<time datetime="2017-07-29T08:41:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/redis/">redis</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-Redis-4-字符串" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -873,181 +956,9 @@ public static void main( String[] args )
 
 
   
-    <article id="post-SpringBoot-19-SpringBoot-Servlet" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/">SpringBoot(19)-SpringBoot Servlet</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h4><p>1.Web开发使用 Controller 基本上可以完成大部分需求，但是我们还可能会用到 Servlet、Filter、Listener、Interceptor 等等。<br>2.当使用Spring-Boot时，嵌入式Servlet容器通过扫描注解的方式注册Servlet、Filter和Servlet规范的所有监听器（如HttpSessionListener监听器）。<br>3.Spring boot 的主 Servlet 为 DispatcherServlet，其默认的url-pattern为“/”。也许我们在应用中还需要定义更多的Servlet，该如何使用SpringBoot来完成呢？两种方式:1.代码注册Servlet 2.注解自动注册  </p>
-<h4 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h4><p>首先引入servlet的依赖:</p>
-<pre><code>&lt;dependency&gt;
-        &lt;groupId&gt;javax.servlet&lt;/groupId&gt;
-        &lt;artifactId&gt;javax.servlet-api&lt;/artifactId&gt;
-        &lt;scope&gt;provided&lt;/scope&gt;
-&lt;/dependency&gt;    
-</code></pre><h5 id="1-代码注册Servlet"><a href="#1-代码注册Servlet" class="headerlink" title="1.代码注册Servlet"></a>1.代码注册Servlet</h5><h6 id="1-1说明"><a href="#1-1说明" class="headerlink" title="1.1说明"></a>1.1说明</h6><p>1.代码注册Servlet需要通过注册bean：ServletRegistrationBean、 FilterRegistrationBean 和 ServletListenerRegistrationBean 获得控制。也可以通过实现 ServletContextInitializer 接口直接注册<br>2.步骤:(1).自己实现一个servlet[继承HttpServlet类] (2).通过ServletRegistrationBean注册[在应用启动中App.java] </p>
-<h6 id="1-2代码"><a href="#1-2代码" class="headerlink" title="1.2代码"></a>1.2代码</h6><p>MyServlet.java  </p>
-<pre><code>public class MyServlet extends HttpServlet{
-
-/**
- * 
- */
-private static final long serialVersionUID = 1L;
-
-@Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-    System.out.println(&quot;*********doPost Method***********&quot;);
-     System.out.println(&quot;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;&gt;doPost()&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&lt;&quot;);
-        resp.setContentType(&quot;text/html&quot;); 
-        resp.setCharacterEncoding(&quot;UTF-8&quot;);
-        PrintWriter out = resp.getWriter(); 
-        out.println(&quot;&lt;html&gt;&quot;); 
-        out.println(&quot;&lt;head&gt;&quot;); 
-        out.println(&quot;&lt;title&gt;Hello World&lt;/title&gt;&quot;); 
-        out.println(&quot;&lt;/head&gt;&quot;); 
-        out.println(&quot;&lt;body&gt;&quot;); 
-        out.println(&quot;&lt;h1&gt;自定义Servlet是：MyServlet&lt;/h1&gt;&quot;); 
-        out.println(&quot;&lt;/body&gt;&quot;); 
-        out.println(&quot;&lt;/html&gt;&quot;);
-}
-
-@Override
-protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-    System.out.println(&quot;***********doGet Method*****************&quot;);
-    doPost(req, resp);
-}
-}
-</code></pre><p>App.java </p>
-<pre><code>import org.springframework.boot.SpringApplication;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.context.embedded.ServletRegistrationBean;
-import org.springframework.context.annotation.Bean;
-import com.yxm.other.servlet.MyServlet;
-
-/** 大家也许会看到有些demo使用了3个注解： @Configuration @EnableAutoConfiguration @ComponentScan
- * 其实：@SpringBootApplication申明让spring boot自动给程序进行必要的配置，等价于使用三个注解
- *@SpringBootApplication声明应用启动类
- */
-@SuppressWarnings(&quot;deprecation&quot;)
-@SpringBootApplication
-public class App 
-{
-
-/**
- * 注册Servlet.不需要添加注解：@ServletComponentScan
- * @param args
- */
-public static void main( String[] args )
-{
-    /**
-     * 使用SpringApplication.run启动应用
-     */
-  SpringApplication.run(App.class, args);
-}
-
-@Bean
-public  ServletRegistrationBean MySerlet(){
-    return new ServletRegistrationBean(new MyServlet(),&quot;/myServlet/*&quot;); 
-}
-} 
-</code></pre><p>浏览器中访问:<a href="http://localhost:8081/myServlet" target="_blank" rel="external">http://localhost:8081/myServlet</a>  输出:自定义Servlet是：MyServlet</p>
-<h5 id="2-注解自动注册"><a href="#2-注解自动注册" class="headerlink" title="2.注解自动注册"></a>2.注解自动注册</h5><h6 id="2-1说明"><a href="#2-1说明" class="headerlink" title="2.1说明"></a>2.1说明</h6><p>1.在 SpringBootApplication 上使用@ServletComponentScan注解<br>2.Servlet、Filter、Listener 可以直接通过 @WebServlet、@WebFilter、@WebListener 注解自动注册，无需其他代码。</p>
-<h6 id="2-2-代码"><a href="#2-2-代码" class="headerlink" title="2.2 代码"></a>2.2 代码</h6><p>MyServlet2.java  </p>
-<pre><code>@WebServlet(urlPatterns=&quot;/myServlet2/*&quot;, description=&quot;Servlet的说明&quot;)
-public class MyServlet2 extends HttpServlet{
-
-/**
- * 
- */
-private static final long serialVersionUID = 1L;
-
-
-@Override
-protected void doGet(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-    // TODO Auto-generated method stub
-    super.doPost(req, resp);
-}
-
-@Override
-protected void doPost(HttpServletRequest req, HttpServletResponse resp)
-        throws ServletException, IOException {
-        resp.setContentType(&quot;text/html&quot;); 
-        resp.setCharacterEncoding(&quot;UTF-8&quot;);
-        PrintWriter out = resp.getWriter(); 
-        out.println(&quot;&lt;html&gt;&quot;); 
-        out.println(&quot;&lt;head&gt;&quot;); 
-        out.println(&quot;&lt;title&gt;Hello World&lt;/title&gt;&quot;); 
-        out.println(&quot;&lt;/head&gt;&quot;); 
-        out.println(&quot;&lt;body&gt;&quot;); 
-        out.println(&quot;&lt;h1&gt;自定义Servlet2是：MyServlet2&lt;/h1&gt;&quot;); 
-        out.println(&quot;&lt;/body&gt;&quot;); 
-        out.println(&quot;&lt;/html&gt;&quot;);
-}
-}
-</code></pre><p>App.java  </p>
-<pre><code>@SpringBootApplication
-@ServletComponentScan
-public class App 
-{
-public static void main( String[] args )
-{
-    /**
-     * 使用SpringApplication.run启动应用
-     */
-  SpringApplication.run(App.class, args);
-}
-}
-</code></pre><p>浏览器中访问:<a href="http://localhost:8081/myServlet" target="_blank" rel="external">http://localhost:8081/myServlet</a> 输出:自定义Servlet2是：MyServlet2</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2017/07/25/SpringBoot-19-SpringBoot-Servlet/" class="archive-article-date">
-  	<time datetime="2017-07-25T01:07:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2017-07-25</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringBoot/">SpringBoot</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/page/27/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="page-number current">28</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="space">&hellip;</span><a class="page-number" href="/page/52/">52</a><a class="extend next" rel="next" href="/page/29/">Next &raquo;</a>
+      <a class="extend prev" rel="prev" href="/page/27/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="space">&hellip;</span><a class="page-number" href="/page/26/">26</a><a class="page-number" href="/page/27/">27</a><span class="page-number current">28</span><a class="page-number" href="/page/29/">29</a><a class="page-number" href="/page/30/">30</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><a class="extend next" rel="next" href="/page/29/">Next &raquo;</a>
     </nav>
   
 
