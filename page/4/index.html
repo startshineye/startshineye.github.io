@@ -957,7 +957,7 @@ public List&lt;ProductInfo&gt;  decreaseStockProcess(List&lt;DecreaseStockInput&
 </ol>
 <h5 id="3-3-使用抓包工具抓包"><a href="#3-3-使用抓包工具抓包" class="headerlink" title="3.3 使用抓包工具抓包"></a>3.3 使用抓包工具抓包</h5><p>对接完之后,如果电话不通,那么就需要使用wireshake进行网络抓包,分析包  </p>
 <h4 id="4-ipcc对每个号码并发进行控制"><a href="#4-ipcc对每个号码并发进行控制" class="headerlink" title="4.ipcc对每个号码并发进行控制"></a>4.ipcc对每个号码并发进行控制</h4><p>在/cc/cfg/notify.cfg下的callnotify添加:examentline=1表明开启了号码并发设置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/6.png" alt="">  </p>
-<h4 id="5-ipcc配置空号检测"><a href="#5-ipcc配置空号检测" class="headerlink" title="5.ipcc配置空号检测"></a>5.ipcc配置空号检测</h4><ol>
+<h4 id="5-ipcc配置空号检测"><a href="#5-ipcc配置空号检测" class="headerlink" title="5.ipcc配置空号检测"></a>5.ipcc配置空号检测</h4><h5 id="5-1-安装空号检测"><a href="#5-1-安装空号检测" class="headerlink" title="5.1 安装空号检测"></a>5.1 安装空号检测</h5><ol>
 <li>1.首先正常安装并启用空号检测da2(安装数据库、程序)  </li>
 <li>2.如果空号检测部署在一台服务器上，我们呼叫平台部署在多台服务器上，我们如何配置呢?  </li>
 <li>3.查看/usr/local/freeswitch/conf下面文件:da2.json<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/7.png" alt="">  </li>
@@ -969,6 +969,7 @@ public List&lt;ProductInfo&gt;  decreaseStockProcess(List&lt;DecreaseStockInput&
 <ol>
 <li>6.在fs控制台客户端输入:da2 show<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/9.png" alt=""><br>出现上面问题说明成功,如果一直不成功检查对应数据库表  </li>
 </ol>
+<h5 id="5-2-添加新的授权"><a href="#5-2-添加新的授权" class="headerlink" title="5.2 添加新的授权"></a>5.2 添加新的授权</h5><p>部署新的话务平台节点时候需要添加新的授权,修改两个表:user,bill;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/83.png" alt="">   </p>
 <h4 id="6-ipcc中cdr关于服务"><a href="#6-ipcc中cdr关于服务" class="headerlink" title="6.ipcc中cdr关于服务"></a>6.ipcc中cdr关于服务</h4><ol>
 <li>1.服务水平只对呼入而言的 呼出不用管  calltype=100 and dir=1  </li>
 <li>2.starttime  connecttime和endtime 是整个电话的开始 接起和结束时间</li>
@@ -1028,9 +1029,9 @@ public List&lt;ProductInfo&gt;  decreaseStockProcess(List&lt;DecreaseStockInput&
 <li><p>2.添加到系统定时任务中去<br>a.在root下执行 crontab -e<br>b.将0 0 <em> </em> *  /cc/bin/cleanlog.sh &gt; /dev/null 2&gt;&amp;1 放进去 保存退出。</p>
 </li>
 <li><p>3.运维查询每天日志的最小、最大拨打时间  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">SELECT MIN(starttime),MAX(starttime),SUBSTRING(starttime,1,10) FROM cti_cdr WHERE entid = 1308 GROUP BY SUBSTRING(starttime,1,10) ORDER BY starttime ASC;</div><div class="line">```  </div><div class="line"></div><div class="line">#### 11.停止掉空号检测  </div><div class="line">1.进入:/cc/freeswitch/conf;不是删除da2.json  </div><div class="line">2.注释掉:load mod_da2  </div><div class="line">进入:/cc/freeswitch/conf/autoload_configs找到文件:modules.conf.xml</div><div class="line">然后注释掉:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/114.png)  </div><div class="line">3.fsg.cfg里面:注释掉:识别da2的注释掉</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/116.png)</div><div class="line"></div><div class="line">#### 12.fs中注释掉影响通话质量的元素  </div><div class="line">1.conf/vars.xml里面的以下几行注释掉:</div></pre></td></tr></table></figure>
 </li>
 </ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">SELECT MIN(starttime),MAX(starttime),SUBSTRING(starttime,1,10) FROM cti_cdr WHERE entid = 1308 GROUP BY SUBSTRING(starttime,1,10) ORDER BY starttime ASC;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">#### 11.停止掉空号检测</div><div class="line">  </div><div class="line">1.进入:/cc/freeswitch/conf;不是删除da2.json  </div><div class="line">2.注释掉:load mod_da2  </div><div class="line">进入:/cc/freeswitch/conf/autoload_configs找到文件:modules.conf.xml</div><div class="line">然后注释掉:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/114.png)  </div><div class="line">3.fsg.cfg里面:注释掉:识别da2的注释掉</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/116.png)</div><div class="line"></div><div class="line">#### 12.fs中注释掉影响通话质量的元素  </div><div class="line">1.conf/vars.xml里面的以下几行注释掉:</div></pre></td></tr></table></figure>
 <!--RECORD_SILENCE_THRESHOLD vad调节阀值,声音能量，配置太小旁边人说话会被当成说话800 -->
   <!--X-PRE-PROCESS cmd="set" data="RECORD_SILENCE_THRESHOLD=800"/->
 
