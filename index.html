@@ -211,7 +211,51 @@
 <li>3.Kibana中展示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/79.png" alt=""><br>options中定义Vector map<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/80.png" alt="">  </li>
 </ol>
 <h4 id="5-3-Custom-Map-Server"><a href="#5-3-Custom-Map-Server" class="headerlink" title="5.3 Custom Map Server"></a>5.3 Custom Map Server</h4><p>自定义地图服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/81.png" alt=""><br>楼道人员情况:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/82.png" alt="">    </p>
-<h3 id="21-6-Timelion介绍"><a href="#21-6-Timelion介绍" class="headerlink" title="21-6 -Timelion介绍"></a>21-6 -Timelion介绍</h3><h3 id="21-7-VisualBuilder介绍"><a href="#21-7-VisualBuilder介绍" class="headerlink" title="21-7 -VisualBuilder介绍"></a>21-7 -VisualBuilder介绍</h3><h3 id="21-8-other图表介绍"><a href="#21-8-other图表介绍" class="headerlink" title="21-8 -other图表介绍"></a>21-8 -other图表介绍</h3><h3 id="21-9-Dashboard介绍"><a href="#21-9-Dashboard介绍" class="headerlink" title="21-9 -Dashboard介绍"></a>21-9 -Dashboard介绍</h3>
+<h3 id="21-6-Timelion介绍"><a href="#21-6-Timelion介绍" class="headerlink" title="21-6 -Timelion介绍"></a>21-6 -Timelion介绍</h3><ol>
+<li>1.Time Series是kibana专门为时序数列创建的图标类型,包括:Timelion、Visual Builder；也是相对繁杂的可视化组件。</li>
+<li>Timelion基于自定义查询表达式的方式分析数据。  </li>
+<li>相关函数可以进行链式调用。  </li>
+<li>相关表示如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/84.png" alt="">  <h4 id="6-1-Timelion表达式-定义数据来源"><a href="#6-1-Timelion表达式-定义数据来源" class="headerlink" title="6.1 Timelion表达式-定义数据来源"></a>6.1 Timelion表达式-定义数据来源</h4>分析数据,肯定需要有数据源。Timelion支持以下数据源：  </li>
+<li>1.Elasticsearch<br>-.es(index=metricbeat-*)  </li>
+<li>2.World Bank(世界银行)<br>-.wbi(country=CN,indicator=NY.GDP.MKTP,CD)<br>-注意时间跨度选择大于1年,比如最近50年  </li>
+<li>3.Quandl  </li>
+<li>Graphite  </li>
+</ol>
+<h4 id="6-2-es"><a href="#6-2-es" class="headerlink" title="6.2 .es()"></a>6.2 .es()</h4><p>从.es里面取数据。需要配置如下参数:<br>1.index-指明查询的索引<br>2.q指明查询条件<br>3.metric指明展示指标,默认是个数<br>4.split按照某字段分组数据<br>5.offset设定时间偏移值,比如-1d,将昨天的数据展示到当前值。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/85.png" alt="">  </p>
+<h4 id="6-3演示"><a href="#6-3演示" class="headerlink" title="6.3演示"></a>6.3演示</h4><p>Timelion有专门的一菜单栏来展示数据。</p>
+<pre><code>.es(index=logstash.*,q=geo.src.keyword:CN,metric=sum:bytes,split=machine.os.keyword:3,offset=-1d)
+</code></pre><h4 id="6-4-展示相关函数"><a href="#6-4-展示相关函数" class="headerlink" title="6.4 展示相关函数"></a>6.4 展示相关函数</h4><ol>
+<li>1.title设置该图标的名称  </li>
+<li>2.label设置该组数据的图例名称  </li>
+<li>3.数据展现样式<br>-.lines线<br>-.points点<br>-.bars</li>
+<li>4.颜色设置<br>-.color  </li>
+<li>5.legend设定图例的展示样式和位置  </li>
+<li>6.yaxis设定y轴个数和样式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/86.png" alt="">  </li>
+</ol>
+<h4 id="6-5-计算相关函数"><a href="#6-5-计算相关函数" class="headerlink" title="6.5 计算相关函数"></a>6.5 计算相关函数</h4><ol>
+<li>1.对.es()查询出的数据进行统一的运算处理:这也是timelion强大的地方。<br>-abs绝对值<br>-log对数<br>-cusum累加<br>-derivative求导<br>-mvavg移动平均<br>-trend趋势值  </li>
+</ol>
+<p>如:.es().abs().cusum()  </p>
+<h4 id="6-6-范围控制相关函数"><a href="#6-6-范围控制相关函数" class="headerlink" title="6.6 范围控制相关函数"></a>6.6 范围控制相关函数</h4><ol>
+<li>1.range控制坐标轴范围,方便比较不同计量单位的数据  </li>
+<li>2.yaxis(2)添加新坐标  </li>
+<li>3.scaled_interval修改计算间隔到指定的单位,方便比较<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/87.png" alt="">  </li>
+</ol>
+<h4 id="6-7-系列数据运算相关函数"><a href="#6-7-系列数据运算相关函数" class="headerlink" title="6.7 系列数据运算相关函数"></a>6.7 系列数据运算相关函数</h4><p>我们将2个es查询出来的数据在同一时间维度上的运算。以下是将2个es的数据做的运算。  </p>
+<ol>
+<li>1.add/plus相加  </li>
+<li>2.substract相减  </li>
+<li>3.multiply相乘  </li>
+<li>4.divide相除  </li>
+</ol>
+<p>如:.es(CN).divide(.es()).multiplay(100)。<br>以上是求中国来的流量占比情况。  </p>
+<h4 id="6-8-条件判断相关函数"><a href="#6-8-条件判断相关函数" class="headerlink" title="6.8 条件判断相关函数"></a>6.8 条件判断相关函数</h4><ol>
+<li>1.min/max对数据进行截断处理。  </li>
+<li>2.if条件判断<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/88.png" alt="">  </li>
+</ol>
+<p>总的实例:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/89.png" alt="">  </p>
+<h3 id="21-7-VisualBuilder介绍"><a href="#21-7-VisualBuilder介绍" class="headerlink" title="21-7 -VisualBuilder介绍"></a>21-7 -VisualBuilder介绍</h3><p>另一个</p>
+<h3 id="21-8-other图表介绍"><a href="#21-8-other图表介绍" class="headerlink" title="21-8 -other图表介绍"></a>21-8 -other图表介绍</h3><h3 id="21-9-Dashboard介绍"><a href="#21-9-Dashboard介绍" class="headerlink" title="21-9 -Dashboard介绍"></a>21-9 -Dashboard介绍</h3>
       
     </div>
     <div class="article-info article-info-index">
