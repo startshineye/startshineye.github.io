@@ -152,6 +152,137 @@
       <div class="body-wrap">
         
   
+    <article id="post-ElasticStack-14-Logstash-篇之实例分析" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/10/13/ElasticStack-14-Logstash-篇之实例分析/">ElasticStack-14-Logstash 篇之实例分析</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>本章会以实例的形式为大家演示如何使用 Logstash 收集各种类型的数据，比如日志文件、数据库、tcp/udp 等。</p>
+<h3 id="1-Logstash实战建议"><a href="#1-Logstash实战建议" class="headerlink" title="1 -Logstash实战建议"></a>1 -Logstash实战建议</h3><p>这一节我们讲用logstash收集apache日志,怎样手机csv文件。以及如何去监控logstash运行的状况。在实战前我们需要了解logstash的配置  </p>
+<h4 id="1-1-调试的配置建议"><a href="#1-1-调试的配置建议" class="headerlink" title="1.1 调试的配置建议"></a>1.1 调试的配置建议</h4><ol>
+<li>1.调试阶段建议大家使用如下配置:<br>-http做input,方便输入测试数据,并且可以结合reload特性(stdin无法reload)<br>-stdout做output,codec使用rubydebug, 即时查看解析结果<br>-测试错误输入情况下的输出,以便对错误情况进行处理<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/85.png" alt="">  </li>
+</ol>
+<h4 id="1-2-处理的建议"><a href="#1-2-处理的建议" class="headerlink" title="1.2 处理的建议"></a>1.2 处理的建议</h4><ol>
+<li><p>1.@metadata特殊字段,其内容不会输出在output中<br>-适合用来存储做条件判断、临时存储的字段<br>-相比remove_field有一定的性能提升<br>我们在logstash的根目录下的cust_config中添加demo.conf配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/86.png" alt="">  </p>
+</li>
+<li><p>2.实践<br>我们用demo.conf配置代替原有配置  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line">bin/logstash -f cust_config/demo.conf -r</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/87.png" alt=""><br>启动如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/88.png" alt="">  </p>
+<p>postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/89.png" alt=""><br>产生的结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/90.png" alt=""> </p>
+<h3 id="2-实战之apacheLogs（上）"><a href="#2-实战之apacheLogs（上）" class="headerlink" title="2 -实战之apacheLogs（上）"></a>2 -实战之apacheLogs（上）</h3><p>收集Apache日志:Apache日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/91.png" alt="">  </p>
+<ol>
+<li><p>1.事先准备好apache_logs<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/92.png" alt="">  </p>
+</li>
+<li><p>2.查看apache日志:apache_logs如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/93.png" alt="">   </p>
+</li>
+<li><p>3.编写logstash配置文件  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">      [root@sindvision02 apache_logs]# vim ls.conf</div><div class="line">input&#123;</div><div class="line">   http&#123;</div><div class="line">     port=&gt;7474</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">output&#123;</div><div class="line">   stdout&#123;codec=&gt;rubydebug&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>4.启动</p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">bin/logstash -f /workspace/elasticstack/logstash/demo_data/apache_logs/ls.conf -r</div></pre></td></tr></table></figure>
+</li>
+<li><p>5.测试<br>postman中输入:    </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">    </div><div class="line">83.149.9.216 - - [17/May/2015:10:05:03 +0000] &quot;GET /presentations/logstash-monitorama-2013/images/kibana-search.png HTTP/1.1&quot; 200 203023 &quot;http://semicomplete.com/presentations/logstash-monitorama-2013/&quot; &quot;Mozilla/5.0 (Macintosh; Intel Mac OS X 10_9_1) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/32.0.1700.77 Safari/537.36&quot;</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>结果为:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/94.png" alt="">  </p>
+<p>上面我们看到headers字段出现,现在我们想去除掉headers字段,添加filter如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/95.png" alt="">  </p>
+<p>再次请求,结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/96.png" alt="">  </p>
+<p>接着我们需要查分分解message,我们使用grok表达式:<br>1）进入grok的debugger调试官网:<br><a href="http://grokdebug.herokuapp.com/" target="_blank" rel="external">http://grokdebug.herokuapp.com/</a>  </p>
+<p>2）在Discover栏,输入此日志文件,找到对应的配置grok表达式:%{COMBINEDAPACHELOG}<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/97.png" alt="">  </p>
+<p>3）在debugger下测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/98.png" alt="">  </p>
+<p>4）有时候Discover的功能不是很准,需要自己写Patterns<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/99.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/100.png" alt="">  </p>
+<p>我们现在以:%{COMMONAPACHELOG}作为filter的解析  </p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line"> grok&#123;</div><div class="line">match=&gt;&#123;</div><div class="line"> &quot;message&quot;=&gt;&quot;%&#123;COMMONAPACHELOG&#125;&quot;</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</code></pre><p>测试结果如下:我们发现结果是没有问题了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/101.png" alt=""> </p>
+<p>接下来,我们又不想展示message了,我们在filter里面添加:remove_field<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/102.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/103.png" alt="">  </p>
+<p>我们从上面看到时间有两条:@timestamp(写入日志的时间:当前操作时间)和timestamp(appache日志的时间)时间。现在我们把timestamp变换到@timestamp 并且保留@timestamp时间。我们把@timestamp复制一份叫做@read_timestamp。<br>我们添加mutate:注意现在版本是v7.1,在v6.1的版本下是不支持这个copy的可以使用ruby<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mutate&#123;</div><div class="line">   copy=&gt;&#123;&quot;@timestamp&quot;=&gt;&quot;@read_timestamp&quot;&#125;</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p>等同于：<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">ruby&#123;code=&gt;&quot;event.set(&apos;@read_timestamp&apos;,event.get(&apos;@timestamp&apos;))&quot;&#125;</div></pre></td></tr></table></figure></p>
+<p>我们使用date插件实现把timestamp变换到@timestamp。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">date&#123;</div><div class="line">   match=&gt;[&quot;timestamp&quot;,&quot;dd/MMM/yyyy:HH:mm:ss Z&quot;]</div><div class="line"> &#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/104.png" alt=""><br>再到mutate中remove掉timestamp<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">mutate&#123;</div><div class="line">   remove_field=&gt;[&apos;headers&apos;,&apos;message&apos;,&apos;timestamp&apos;]</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/105.png" alt="">  </p>
+<p>同时clientip我们能够使用geoip增加地理位置数据。<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">geoip&#123;</div><div class="line">   source=&gt;&quot;clientip&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<p>请求测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/106.png" alt="">  </p>
+<p>有时候我们不希望geoip展示的信息那么多,所以我们看官方文档可否进行缩减。<br>我们在谷歌搜索即可:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/107.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">geoip&#123;</div><div class="line">   source=&gt;&quot;clientip&quot;</div><div class="line">   fields=&gt;[&quot;location&quot;,&quot;country_name&quot;,&quot;city_name&quot;,&quot;region_name&quot;]</div><div class="line">  &#125;</div></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/108.png" alt="">  </p>
+<p>我们需要把http请求的agent变成结构化的数据,我们添加:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">useragent&#123;</div><div class="line">    source=&gt;&quot;agent&quot;</div><div class="line">    target=&gt;&quot;useragent&quot;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h3 id="3-实战之apacheLogs（下）"><a href="#3-实战之apacheLogs（下）" class="headerlink" title="3 实战之apacheLogs（下）"></a>3 实战之apacheLogs（下）</h3><h4 id="3-1-实战之http"><a href="#3-1-实战之http" class="headerlink" title="3.1 实战之http"></a>3.1 实战之http</h4><p>上一节中我们把日志自带的timestamp解析后又在最后删除了，现在我们换一种方法我们使用mutate:好处就是把timestamp解析到mutate里面避免删除。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/109.png" alt="">  </p>
+<p>测试显示结果:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/110.png" alt=""></p>
+<p>我们发现bytes是字符串型,我们需要转换成integer  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div></pre></td><td class="code"><pre><div class="line">input&#123;</div><div class="line">    http&#123;</div><div class="line">        port =&gt; 7474</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">filter&#123;</div><div class="line">    mutate&#123;add_field =&gt; &#123;&quot;[@metadata][debug]&quot;=&gt;true&#125;&#125;</div><div class="line">    grok&#123;</div><div class="line">        match =&gt; &#123;</div><div class="line">            &quot;message&quot; =&gt; &apos;%&#123;IPORHOST:clientip&#125; %&#123;USER:ident&#125; %&#123;USER:auth&#125; \[%&#123;HTTPDATE:[@metadata][timestamp]&#125;\] &quot;(?:%&#123;WORD:verb&#125; %&#123;NOTSPACE:request&#125;(?: HTTP/%&#123;NUMBER:httpversion&#125;)?|%&#123;DATA:rawrequest&#125;)&quot; %&#123;NUMBER:response&#125; (?:%&#123;NUMBER:bytes&#125;|-) %&#123;QS:referrer&#125; %&#123;QS:agent&#125;&apos;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    ruby&#123;</div><div class="line">        code =&gt; &quot;event.set(&apos;@read_timestamp&apos;,event.get(&apos;@timestamp&apos;))&quot;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    # 20/May/2015:21:05:56 +0000</div><div class="line">    date&#123;</div><div class="line">        match =&gt; [&quot;[@metadata][timestamp]&quot;,&quot;dd/MMM/yyyy:HH:mm:ss Z&quot;]</div><div class="line">    &#125;</div><div class="line">    geoip&#123;</div><div class="line">        source =&gt; &quot;clientip&quot;</div><div class="line">        fields =&gt; [&quot;location&quot;,&quot;country_name&quot;,&quot;city_name&quot;,&quot;region_name&quot;]</div><div class="line">    &#125;</div><div class="line">    useragent&#123;</div><div class="line">        source =&gt; &quot;agent&quot;</div><div class="line">        target =&gt; &quot;useragent&quot;</div><div class="line">    &#125;</div><div class="line">    mutate&#123;</div><div class="line">     convert=&gt;&#123;&quot;bytes&quot;=&gt;&quot;integer&quot;&#125;</div><div class="line">    &#125;</div><div class="line">    mutate&#123;remove_field=&gt;[&quot;headers&quot;]&#125;</div><div class="line">     &#125;</div><div class="line">     output&#123;</div><div class="line">    if [@metadata][debug]&#123;</div><div class="line">        stdout&#123;codec=&gt;rubydebug&#123;metadata=&gt;true&#125;&#125;</div><div class="line">    &#125;else&#123;</div><div class="line">        stdout&#123;codec=&gt;dots&#125;</div><div class="line">     &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>我们修改下请求时间戳:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/111.png" alt="">  </p>
+<p>测试如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/112.png" alt=""><br>我们发现：<br>a.grok解析错误<br>b._geoip_lookup_failure  </p>
+<p>我们需要做额外的处理:<br>添加一个index字段存放在@metadata中,并将其输出到es对应的索引中。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/115.png" alt="">  </p>
+<h4 id="3-2-实战之file"><a href="#3-2-实战之file" class="headerlink" title="3.2 实战之file"></a>3.2 实战之file</h4><p>CentOS7上ElasticSearch安装填坑记:<a href="https://www.jianshu.com/p/04f4d7b4a1d3" target="_blank" rel="external">https://www.jianshu.com/p/04f4d7b4a1d3</a><br>1.修改input为file<br>2.filter中关掉调试[@metadata][debug]<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/117.png" alt=""> </p>
+<p>3.kibana上查看数据<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/118.png" alt="">  </p>
+<p>查看索引:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/119.png" alt="">  </p>
+<ol>
+<li>4.以上有个问题,我们在产生异常的时候,logstash返回的message字段已经被删除,所以我们需要做一个判断:产生异常的时候message展示出来,没有产生异常的时候message可以删除,条件如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/120.png" alt="">  </li>
+</ol>
+<h3 id="4-实战之csv"><a href="#4-实战之csv" class="headerlink" title="4 实战之csv"></a>4 实战之csv</h3><h4 id="4-1-目标"><a href="#4-1-目标" class="headerlink" title="4.1 目标"></a>4.1 目标</h4><p>利用logstash来导入csv文件。  </p>
+<ol>
+<li>1.手机csv类型的数据<br>-csv filter plugin<br>-常见csv文件格式如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/121.png" alt="">  <h4 id="4-2-操作"><a href="#4-2-操作" class="headerlink" title="4.2 操作"></a>4.2 操作</h4></li>
+<li>1.准备数据我们的csv文件如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/122.png" alt="">  </li>
+<li><p>2.书写配置(csv filter通过官网查询)  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+</li>
+<li><p>3.又由于elastcsearch中经纬度索引要求如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/123.png" alt=""></p>
+</li>
+</ol>
+<p>所以我们需要修改配置将其转换为:es的要求格式<br>1)我们添加location字段,并且将输入的latitude和longtitude作为两个值。<br>2)然后我们移除上面2个元素<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line">input&#123;</div><div class="line">    file&#123;</div><div class="line">        path =&gt; &quot;/workspace/elasticstack/logstash/demo_data/earthquakes/earthquakes.csv&quot;</div><div class="line">        start_position =&gt; &quot;beginning&quot;</div><div class="line">        sincedb_path =&gt; &quot;/dev/null&quot;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line"></div><div class="line">filter&#123;</div><div class="line">    csv&#123;</div><div class="line">        columns =&gt; [&quot;timestamp&quot;,&quot;latitude&quot;,&quot;longitude&quot;,&quot;depth&quot;,&quot;mag&quot;,&quot;magType&quot;,&quot;nst&quot;,&quot;gap&quot;,&quot;dmin&quot;,&quot;rms&quot;,&quot;source&quot;,&quot;event_id&quot;]</div><div class="line">        convert =&gt; &#123;&quot;latitude&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;longitude&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;depth&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;mag&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;gap&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;dmin&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">        convert =&gt; &#123;&quot;rms&quot; =&gt; &quot;float&quot;&#125;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    mutate&#123;</div><div class="line">        add_field =&gt; &#123;&quot;location&quot;=&gt;&quot;%&#123;latitude&#125;,%&#123;longitude&#125;&quot;&#125;</div><div class="line">        remove_field =&gt; [ &quot;latitude&quot;,&quot;longitude&quot;]</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    #2016/01/01 00:30:04.91</div><div class="line">    date&#123;</div><div class="line">        match =&gt; [&quot;timestamp&quot;,&quot;yyyy/MM/dd HH:mm:ss.SS&quot;]</div><div class="line">        remove_field =&gt; [&quot;timestamp&quot;]</div><div class="line">    &#125;</div><div class="line"></div><div class="line">&#125;</div><div class="line"></div><div class="line">output&#123;</div><div class="line">    elasticsearch&#123;</div><div class="line">        index =&gt; &quot;earthquake&quot;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    stdout&#123;&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ol>
+<li><p>4.结果<br>我们测试得到结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/124.png" alt="">  </p>
+</li>
+<li><p>5.去kibana查看<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/125.png" alt=""></p>
+</li>
+</ol>
+<h3 id="5-监控运维建议"><a href="#5-监控运维建议" class="headerlink" title="5 监控运维建议"></a>5 监控运维建议</h3>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/10/13/ElasticStack-14-Logstash-篇之实例分析/" class="archive-article-date">
+  	<time datetime="2019-10-13T05:08:47.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-10-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-c语言-指针和内存" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1478,165 +1609,6 @@
 
 
   
-    <article id="post-ElasticStack-7-Elasticsearch篇之分布式特性介绍" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/08/16/ElasticStack-7-Elasticsearch篇之分布式特性介绍/">ElasticStack-7-Elasticsearch篇之分布式特性介绍</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-分布式介绍及cerebro"><a href="#1-分布式介绍及cerebro" class="headerlink" title="1.分布式介绍及cerebro"></a>1.分布式介绍及cerebro</h3><h4 id="1-1分布式介绍"><a href="#1-1分布式介绍" class="headerlink" title="1.1分布式介绍"></a>1.1分布式介绍</h4><ol>
-<li><p>1.es支持集群模式,是一个分布式系统,其好处主要有两个:<br>-增大系统容量,如内存、磁盘、使得es集群可以支持PB级的数据。<br>-提高系统可用性,即使部分节点停止服务,整个集群依然可以正常服务。  </p>
-</li>
-<li><p>2.es集群由多个es实例组成<br>-不同集群通过集群名字来区分,可通过cluser.name进行修改,默认为:elasticsearch<br>-每个es实例本质上是一个JVM过程、且有自己的名字，通过node.name进行修改  </p>
-</li>
-</ol>
-<h4 id="1-2-cerebro"><a href="#1-2-cerebro" class="headerlink" title="1.2 cerebro"></a>1.2 cerebro</h4><p>cerebro是elastic search的集群管理工具。  </p>
-<ol>
-<li>1.地址如下:<br><a href="https://github.com/lmenezes/cerebro">https://github.com/lmenezes/cerebro</a>  </li>
-</ol>
-<p>进入上面地址,Download from <a href="https://github.com/lmenezes/cerebro/releases">https://github.com/lmenezes/cerebro/releases</a>,</p>
-<p>下载对应的包安装、只需要装了JVM就可以运行了。  </p>
-<p>Run bin/cerebro(or bin/cerebro.bat if on Windows)</p>
-<ol>
-<li>2.本地运行127.0.0.1：9000进入访问页面设置es节点地址:<a href="http://127.0.0.1:9200" target="_blank" rel="external">http://127.0.0.1:9200</a>  </li>
-</ol>
-<h3 id="2-构建集群"><a href="#2-构建集群" class="headerlink" title="2.构建集群"></a>2.构建集群</h3><h4 id="2-1启动一个节点"><a href="#2-1启动一个节点" class="headerlink" title="2.1启动一个节点"></a>2.1启动一个节点</h4><ol>
-<li><p>1.运行如下命令可以启动一个es节点实例(修改集群名字为：my_cluster 修改节点名称为:node1)<br>-bin/elasticsearch -E cluster.name=my_cluster -E node.name = node1<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/135.png" alt="">  </p>
-</li>
-<li><p>2.cluster state:es集群相关的数据称为:cluster state,主要记录如下信息:<br>-节点信息,比如:节点名称、链接地址等<br>-索引信息,比如:索引名称、配置等<br>-…<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/136.png" alt="">  </p>
-</li>
-<li><p>3.Master Node<br>-可以修改cluster state的节点称为master 节点,一个集群只有一个<br>-cluster state存储在每个节点上,master维护最新版本并同步给其他节点<br>-master节点是通过集群中所有节点选举产生的,可以被选举的节点称为master-eligible节点,相关配置如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/137.png" alt="">  </p>
-</li>
-</ol>
-<h4 id="2-2-创建一个索引"><a href="#2-2-创建一个索引" class="headerlink" title="2.2 创建一个索引"></a>2.2 创建一个索引</h4><ol>
-<li><p>1.我们通过如下api创建一个索引:put test_index<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/138.png" alt=""><br>cerebro下创建:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/142.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/143.png" alt=""><br>索引创建后，索引的信息会更新到cluster state,cluster state本身有版本这么一说的,之前是cluster state0当我们创建索引后变成了cluster state1</p>
-</li>
-<li><p>2.Coordinating Node:处理请求的节点即为:Coordinating节点,该节点为所有节点的默认角色,不能取消<br>-Coordinating节点作用把路由请求到正确的节点处理,比如创建索引的请求到maser节点。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/139.png" alt="">  </p>
-</li>
-<li><p>3.Data Node:存储数据的几点,默认节点都是data类型,相关配置如下:<br>-node.data:true<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/140.png" alt="">  </p>
-</li>
-</ol>
-<h4 id="2-3-单点问题"><a href="#2-3-单点问题" class="headerlink" title="2.3 单点问题"></a>2.3 单点问题</h4><ol>
-<li>1.在单节点node1的时候,如果node1停止服务,集群停止服务  </li>
-</ol>
-<h4 id="2-4-新增节点"><a href="#2-4-新增节点" class="headerlink" title="2.4 新增节点"></a>2.4 新增节点</h4><ol>
-<li>1.运行如下命令可以启动一个es节点实例<br>-bin/elasticsearch -E cluster.name=my_cluster -E node.name = node2<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/141.png" alt=""><br>-bin/elasticsearch -Ecluster.name=my_cluster -Epath.data=my_cluster_node2 -Enode.name=node2 -Ehttp.port=5300 -d</li>
-</ol>
-<h3 id="3-副本与分片"><a href="#3-副本与分片" class="headerlink" title="3.副本与分片"></a>3.副本与分片</h3><p>分布式系统问题:<br>1.我们如何提高系统的可用性,分为两部分:服务可用性和数据可用性<br>2.如何增大系统的容量</p>
-<h4 id="3-1-系统可用性"><a href="#3-1-系统可用性" class="headerlink" title="3.1 系统可用性"></a>3.1 系统可用性</h4><ol>
-<li><p>1.服务可用性<br>-2个节点的情况下,允许其中1个节点停止服务。  </p>
-</li>
-<li><p>2.数据可用性<br>-数据可用性:就是即便一个节点挂掉之后,整个数据完整<br>-es为了解决数据可用性,引入副本(Replication)解决<br>-每个节点上都有完备的数据  </p>
-</li>
-<li><p>3.具体副本实现如下所示,node2上是test_index的副本<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/144.png" alt="">   </p>
-</li>
-</ol>
-<p>node2上含有node1上索引test_index的副本*test_index  </p>
-<h4 id="3-2-增大系统容量"><a href="#3-2-增大系统容量" class="headerlink" title="3.2 增大系统容量"></a>3.2 增大系统容量</h4><h5 id="3-2-1-简介"><a href="#3-2-1-简介" class="headerlink" title="3.2.1 简介"></a>3.2.1 简介</h5><ol>
-<li>1.如何将数据分布于所有节点上?如何将一个节点的数据分布于100个节点上,充分运用资源。为了解决这个问题:es引入了分片(Shard)解决问题   </li>
-<li>2.分片是es支持PB级数据的基石。<br>-分片存储了部分数据，可以分布于任意节点上<br>-分片数在索引创建时候指定且后续不允许再更改,默认为5个<br>-分片有主分片和副本分片之分,以实现数据的高可用<br>-副本分片的数据由主分片同步,可以有多个,从而提高读取的吞吐量  </li>
-</ol>
-<h5 id="3-2-2-分片"><a href="#3-2-2-分片" class="headerlink" title="3.2.2 分片"></a>3.2.2 分片</h5><ol>
-<li><p>1.下图演示的是3个节点的集群中test_index的分片情况,创建时我们制定了3个分片和1个副本,api如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/145.png" alt=""><br>我们再创建一个节点：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/146.png" alt="">  </p>
-</li>
-<li><p>2.创建一个test_index(3个分片 1个副本)<br>先删除之前的test_index，再创建<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/147.png" alt=""><br>创建后的效果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/148.png" alt=""> </p>
-</li>
-</ol>
-<h3 id="4-两个问题"><a href="#4-两个问题" class="headerlink" title="4.两个问题"></a>4.两个问题</h3><p>目前我们有3个节点、test_index索引有3个分片、现在我们来考虑2个问题</p>
-<ol>
-<li>1.现在我们增加节点node4是否可以提高test_index的数据容量?[添加的加点、相当于添加了内存和磁盘]<br>-答案是不能。因为test_index创建时候,只定义了3个分片和1个副本。3个分片，已经分布在3台节点上，新增的节点无法利用。<br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/149.png" alt=""></li>
-<li>2.此时增加副本数是否能提高test_index的读取吞吐量?<br>-不能。因为新增的副本也是分布在这3个节点上、还是利用了同样的资源。如果要增加吞吐量,还需要新增节点。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/150.png" alt="">  </li>
-</ol>
-<p>所以通过以上的问题,我们发现分片数是很重要的。  </p>
-<ol>
-<li>3.分片数的设定很重要,需要提前规划好<br>-过小会导致后续无法通过增加节点实现水平扩容<br>-过大会导致一个节点上分布过多分片,造成资源浪费、同时会影响查询性能。  </li>
-</ol>
-<h3 id="5-集群状态-Cluster-Health"><a href="#5-集群状态-Cluster-Health" class="headerlink" title="5.集群状态(Cluster Health)"></a>5.集群状态(Cluster Health)</h3><ol>
-<li>1.通过如下api可以查看集群健康状况,包括以下3种:<br>-green 健康状态,指所有主副分片都正常分配<br>-yellow 指所有主分片都正常分配，但是有副本分片未正常分配<br>-red 有主分片未分配(但是我们还是可以访问此集群的)<br>其对应的api如下：<br>GET _cluster/health<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/151.png" alt="">  </li>
-</ol>
-<h3 id="6-故障转移"><a href="#6-故障转移" class="headerlink" title="6.故障转移"></a>6.故障转移</h3><p>当集群发生问题时候,怎样主动去修复?</p>
-<ol>
-<li><p>1.集群由3个节点组成,如下所示,此时集群状态为:green<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/152.png" alt="">  </p>
-</li>
-<li><p>2.node1所在机器宕机导致服务器终止,此时集群会如何处理?<br>-node2和node3会定时去ping节点node1<br>-node2和node3发现node1无法响应一段时间后会发起master选举,比如这里选择node2为master节点。此时由于主分片P0下线,集群状态变成Red。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/153.png" alt=""><br>-node2发现主分片P0未分配,将R0提升为主分片,此时由于所有主分片都正常分配,集群状态变成yellow。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/154.png" alt=""><br>-node2为P0和P1生成新的副本,集群状态为绿色<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/155.png" alt="">  </p>
-</li>
-<li><p>3.cerebro实践<br>-我们关掉node1,发现节点node2和节点node3的主/副分片如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/156.png" alt="">  </p>
-</li>
-</ol>
-<h3 id="7-文档分布式存储"><a href="#7-文档分布式存储" class="headerlink" title="7.文档分布式存储"></a>7.文档分布式存储</h3><ol>
-<li><p>1.文档最终会存储到分片上,如下图所示:<br>-Document1最终存储在分片P1上,则在其副本R1上也存了一份<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/157.png" alt="">  </p>
-</li>
-<li><p>2.Document1是如何存储到分片P1的?选择P1的依据是什么?<br>-Document1并不是随便选择到P1的,而是有一个文档到分片的映射算法。<br>-映射算法目的:使得文档均匀分布在所有分片上,以充分利用资源。  </p>
-</li>
-<li><p>3.算法<br>-随机选择或者round-robin算法? 不可取:这种方法存储时候,文档存进去之后,我们需要读取的，比如：document1存储到p1了，我要通过这个文档id=1，如果是随机存储或者round-robin存储的获取，你是没法知道此文档1存储到那个分片上，两种选择:a.请求过来之后,在所有分片上都请求一下,有就返回,加入分片数有100个,浪费性能。b.开辟一个存储空间,存储文档到分片的映射关系。成本巨大(es是支持pb级别的数据存储,加入有上亿个文档,存储对应关系成本太高)。<br>-我们采用的是：根据文档值试试计算对应的分片。  </p>
-</li>
-</ol>
-<h4 id="7-1-文档到分片的映射算法"><a href="#7-1-文档到分片的映射算法" class="headerlink" title="7.1 文档到分片的映射算法"></a>7.1 文档到分片的映射算法</h4><ol>
-<li><p>1.es通过如下的公式计算文档对应的分片<br>-shard = hash(routing)%number_of_primary_shards<br>-hash算法保证可以将数据均匀地分散在分片中<br>-routing是一个关键参数,默认是文档id,也可以自行指定。<br>-number_of_primary_shards是主分片数。  </p>
-</li>
-<li><p>2.该算法与主分片相关,这也是分片数一旦确定后便不能更改的原因。  </p>
-</li>
-</ol>
-<h4 id="7-2-文档创建的流程"><a href="#7-2-文档创建的流程" class="headerlink" title="7.2 文档创建的流程"></a>7.2 文档创建的流程</h4><p>1.Client向node3发起创建文档的要求<br>2.node3通过routing计算该文档应该存储在Shard1上,查询cluster state后确认主分片P1在node2上,然后转发创建文档的请求到node2<br>3.P1接收并执行创建文档请求后,将同样的请求发送到副本分片R1上<br>4.R1接收并执行创建文档请求后，通知P1成功的结果。<br>5.P1接收副本分片结果后,通知node3创建成功。<br>6.node3返回结果到Client端<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/158.png" alt="">  </p>
-<h4 id="7-2-文档读取的流程"><a href="#7-2-文档读取的流程" class="headerlink" title="7.2 文档读取的流程"></a>7.2 文档读取的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/159.png" alt=""> </p>
-<h4 id="7-3-文档批量创建的流程"><a href="#7-3-文档批量创建的流程" class="headerlink" title="7.3 文档批量创建的流程"></a>7.3 文档批量创建的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/160.png" alt="">  </p>
-<h4 id="7-4-文档批量读取的流程"><a href="#7-4-文档批量读取的流程" class="headerlink" title="7.4 文档批量读取的流程"></a>7.4 文档批量读取的流程</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/161.png" alt="">  </p>
-<h3 id="8-脑裂问题"><a href="#8-脑裂问题" class="headerlink" title="8.脑裂问题"></a>8.脑裂问题</h3><ol>
-<li>1.脑裂问题,英文为split-brian,是分布式系统中的经典问题,如下图所示:<br>-3个节点组成的集群,突然node1的网络和其他两个节点中断.node2与node3会重新选举master.比如node2成为了新master,此时会更新cluster state[cluster state 3’]<br>-node1发现与其他节点连接不上时候,node1自己组成集群后,也会更新cluster state  </li>
-<li><p>2.同一个集群中有两个master,而且维护不同的cluster state,网络恢复后无法选择正确的master<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/162.png" alt="">  </p>
-</li>
-<li><p>3.解决方案为仅在可选举master-eligible节点数大于等于quorum时才可以进行master选举<br>-quorum = master-eligible节点数/2+1，例如3个master-eligible节点时,quorum为2。<br>-设定discovery.zen.minimum_master_nodes为quorum即可避免脑裂。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/163.png" alt="">  </p>
-</li>
-</ol>
-<h3 id="9-Shard详解"><a href="#9-Shard详解" class="headerlink" title="9.Shard详解"></a>9.Shard详解</h3><h4 id="9-1-倒排索引不可变更"><a href="#9-1-倒排索引不可变更" class="headerlink" title="9.1 倒排索引不可变更"></a>9.1 倒排索引不可变更</h4><ol>
-<li>1.倒排索引一旦生成，不可更改  </li>
-<li>2.其好处:<br>-不用考虑并发写文件的问题，杜绝了锁机制带来的性能问题。<br>-由于文件不可更改,可以充分利用文件系统缓存，只需载入一次，只要内存足够,对该文件的读取都会从内存读取,性能高。<br>-利于生成缓存数据<br>-对于文件进行压缩存储,节省磁盘和内存存储空间。  </li>
-<li>3.坏处为需要写入新文档时，必须重新构建倒排索引文建，然后哦替换老文件后，新文档才能被检索，导致文档实时性差。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/164.png" alt=""> </li>
-<li>4.解决方案是新文档直接生成新的倒排索引文件，查询的时候同事查询所有的排序文件，然后做结果的汇总计算即可。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/165.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/166.png" alt=""> </li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/08/16/ElasticStack-7-Elasticsearch篇之分布式特性介绍/" class="archive-article-date">
-  	<time datetime="2019-08-15T16:36:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-08-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ElasticStack/">ElasticStack</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><span class="space">&hellip;</span><a class="page-number" href="/page/53/">53</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -1702,7 +1674,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.18px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.59px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 17.65px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.35px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.88px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.76px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.71px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 17.06px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 17.06px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.35px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.76px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.59px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 20px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.35px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.18px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.41px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.65px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.35px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.59px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.18px;">c</a> <a href="/tags/crawler/" style="font-size: 18.24px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.59px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.59px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.88px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 14.12px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.59px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.35px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.59px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.18px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.76px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.59px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 17.06px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.76px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.76px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.94px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.94px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.59px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.18px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.59px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.18px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.47px;">websocket</a> <a href="/tags/work/" style="font-size: 15.29px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.82px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.76px;">代理</a> <a href="/tags/前端/" style="font-size: 10.59px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.35px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.47px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.53px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.18px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.53px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 17.06px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.35px;">转载</a> <a href="/tags/集合/" style="font-size: 12.35px;">集合</a>
+    				<a href="/tags/Android/" style="font-size: 20px;">Android</a> <a href="/tags/CTI/" style="font-size: 11.11px;">CTI</a> <a href="/tags/Cookie/" style="font-size: 10.56px;">Cookie</a> <a href="/tags/DevelopmentSkills/" style="font-size: 10px;">DevelopmentSkills</a> <a href="/tags/Easyui/" style="font-size: 10px;">Easyui</a> <a href="/tags/ElasticStack/" style="font-size: 17.78px;">ElasticStack</a> <a href="/tags/Git/" style="font-size: 10px;">Git</a> <a href="/tags/Github/" style="font-size: 10px;">Github</a> <a href="/tags/Http/" style="font-size: 10px;">Http</a> <a href="/tags/IE问题/" style="font-size: 10px;">IE问题</a> <a href="/tags/JDK/" style="font-size: 10px;">JDK</a> <a href="/tags/JSP/" style="font-size: 10px;">JSP</a> <a href="/tags/JVM/" style="font-size: 12.22px;">JVM</a> <a href="/tags/JavaSE/" style="font-size: 15.56px;">JavaSE</a> <a href="/tags/Jeecg/" style="font-size: 11.67px;">Jeecg</a> <a href="/tags/Maven/" style="font-size: 10px;">Maven</a> <a href="/tags/MongoDB/" style="font-size: 10px;">MongoDB</a> <a href="/tags/Myeclipse/" style="font-size: 14.44px;">Myeclipse</a> <a href="/tags/Netty/" style="font-size: 16.67px;">Netty</a> <a href="/tags/Node-js/" style="font-size: 10px;">Node.js</a> <a href="/tags/Oracle/" style="font-size: 16.67px;">Oracle</a> <a href="/tags/Redis/" style="font-size: 12.22px;">Redis</a> <a href="/tags/Servlet/" style="font-size: 11.67px;">Servlet</a> <a href="/tags/Spring/" style="font-size: 10.56px;">Spring</a> <a href="/tags/Spring-Boot/" style="font-size: 10px;">Spring Boot</a> <a href="/tags/SpringBoot/" style="font-size: 20px;">SpringBoot</a> <a href="/tags/SpringCloud/" style="font-size: 12.22px;">SpringCloud</a> <a href="/tags/SpringMVC/" style="font-size: 11.11px;">SpringMVC</a> <a href="/tags/Tomcat/" style="font-size: 10px;">Tomcat</a> <a href="/tags/Vue/" style="font-size: 19.44px;">Vue</a> <a href="/tags/Vue-js-前端开发-快速入门与专业应用/" style="font-size: 17.22px;">Vue.js+前端开发+快速入门与专业应用</a> <a href="/tags/Weblogic/" style="font-size: 12.22px;">Weblogic</a> <a href="/tags/Websocket/" style="font-size: 10.56px;">Websocket</a> <a href="/tags/Work-Problem/" style="font-size: 10px;">Work-Problem</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/bg/" style="font-size: 10px;">bg</a> <a href="/tags/c/" style="font-size: 11.11px;">c</a> <a href="/tags/crawler/" style="font-size: 18.33px;">crawler</a> <a href="/tags/dubbo/" style="font-size: 10px;">dubbo</a> <a href="/tags/easyui/" style="font-size: 10px;">easyui</a> <a href="/tags/freeswitch/" style="font-size: 10px;">freeswitch</a> <a href="/tags/hibernate/" style="font-size: 10.56px;">hibernate</a> <a href="/tags/html-css/" style="font-size: 10.56px;">html+css</a> <a href="/tags/html-css/" style="font-size: 15.56px;">html-css</a> <a href="/tags/html-ss/" style="font-size: 10px;">html-ss</a> <a href="/tags/im/" style="font-size: 13.89px;">im</a> <a href="/tags/ipcc/" style="font-size: 10.56px;">ipcc</a> <a href="/tags/jQuery/" style="font-size: 12.22px;">jQuery</a> <a href="/tags/java/" style="font-size: 10px;">java</a> <a href="/tags/java-String/" style="font-size: 10px;">java String</a> <a href="/tags/javaSE/" style="font-size: 10.56px;">javaSE</a> <a href="/tags/javaWeb/" style="font-size: 10px;">javaWeb</a> <a href="/tags/javascript/" style="font-size: 11.11px;">javascript</a> <a href="/tags/java并发编程/" style="font-size: 11.67px;">java并发编程</a> <a href="/tags/java集合/" style="font-size: 10.56px;">java集合</a> <a href="/tags/junit测试/" style="font-size: 10px;">junit测试</a> <a href="/tags/life/" style="font-size: 10px;">life</a> <a href="/tags/linux/" style="font-size: 16.67px;">linux</a> <a href="/tags/log4j/" style="font-size: 11.67px;">log4j</a> <a href="/tags/maven/" style="font-size: 10px;">maven</a> <a href="/tags/mysql/" style="font-size: 10px;">mysql</a> <a href="/tags/netty/" style="font-size: 11.67px;">netty</a> <a href="/tags/nginx/" style="font-size: 10px;">nginx</a> <a href="/tags/nodeJs/" style="font-size: 10px;">nodeJs</a> <a href="/tags/redis/" style="font-size: 12.78px;">redis</a> <a href="/tags/servlet/" style="font-size: 10px;">servlet</a> <a href="/tags/shiro/" style="font-size: 12.78px;">shiro</a> <a href="/tags/sockJs/" style="font-size: 10px;">sockJs</a> <a href="/tags/socket网络编程/" style="font-size: 10.56px;">socket网络编程</a> <a href="/tags/struts1/" style="font-size: 11.11px;">struts1</a> <a href="/tags/vue/" style="font-size: 10.56px;">vue</a> <a href="/tags/web/" style="font-size: 10px;">web</a> <a href="/tags/weblogic/" style="font-size: 11.11px;">weblogic</a> <a href="/tags/websocket/" style="font-size: 16.11px;">websocket</a> <a href="/tags/work/" style="font-size: 15px;">work</a> <a href="/tags/zyzx/" style="font-size: 18.89px;">zyzx</a> <a href="/tags/代理/" style="font-size: 11.67px;">代理</a> <a href="/tags/前端/" style="font-size: 10.56px;">前端</a> <a href="/tags/动手写一个MVC/" style="font-size: 12.22px;">动手写一个MVC</a> <a href="/tags/反射/" style="font-size: 16.11px;">反射</a> <a href="/tags/异常/" style="font-size: 10px;">异常</a> <a href="/tags/微博/" style="font-size: 10px;">微博</a> <a href="/tags/文件读取/" style="font-size: 10px;">文件读取</a> <a href="/tags/泛型/" style="font-size: 13.33px;">泛型</a> <a href="/tags/注解/" style="font-size: 11.11px;">注解</a> <a href="/tags/类加载器/" style="font-size: 13.33px;">类加载器</a> <a href="/tags/线程/" style="font-size: 10px;">线程</a> <a href="/tags/自己写一个apache服务器/" style="font-size: 16.67px;">自己写一个apache服务器</a> <a href="/tags/转载/" style="font-size: 12.22px;">转载</a> <a href="/tags/集合/" style="font-size: 12.22px;">集合</a>
     			</div>
     	</section>
     
