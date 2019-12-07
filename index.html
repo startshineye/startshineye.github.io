@@ -152,6 +152,113 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-6-消息和异步" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: SpringCloud-6-消息和异步<br>date: 2019-04-16 18:44:01<br>tags:</p>
+<h2 id="SpringCloud"><a href="#SpringCloud" class="headerlink" title=" SpringCloud"></a> SpringCloud</h2><h3 id="1-异步和消息"><a href="#1-异步和消息" class="headerlink" title="1.异步和消息"></a>1.异步和消息</h3><h4 id="1-简介"><a href="#1-简介" class="headerlink" title="1.简介"></a>1.简介</h4><ol>
+<li>1.之前我们使用的方式是同步方式。</li>
+<li>2.异步优点:a.客户端请求不会阻塞进程、服务端的相应可以是非及时的。  </li>
+<li>3.http常见是支持同步、但是http也是支持异步的。</li>
+</ol>
+<h4 id="2-异步的常见形态"><a href="#2-异步的常见形态" class="headerlink" title="2.异步的常见形态"></a>2.异步的常见形态</h4><ol>
+<li>1.通知</li>
+<li>2.请求/异步响应:客户端发送请求到服务端,服务端异步响应,客户端不会阻塞,服务端默认不会立马响应。    </li>
+<li><p>3.消息</p>
+<h4 id="3-MQ应用场景"><a href="#3-MQ应用场景" class="headerlink" title="3.MQ应用场景"></a>3.MQ应用场景</h4><p>MQ是分布式应用系统最常用的组件。典型应用场景有如下:</p>
+</li>
+<li><p>1.异步处理:用户注册之后,通过短信服务、积分服务去做他们相应的操作,这样就能提高用户体验。  </p>
+</li>
+<li>2.流量消峰:一般用于秒杀场景,秒杀过程中一般由于流量较大,会导致应用会挂掉、要解决这个问题。把请求放在消息队列中,如果超过消息队列的长度将抛弃此请求,返回错误信息。 </li>
+<li>3.日志处理：这个典型的组件就是kafka，kafka最初的设计就是用于日志处理,大数据里面用的特别多。通过日志采集、定时写入kafka队列，然后kafka队列定时接收 储存 和转发。</li>
+<li>应用解耦：比如用户下单后,订单服务需要通知商品服务、之前是订单服务通过调用商品服务的接口,这样订单服务和商品服务是耦合的。使用mq,用户下单后，订单服务完成持续化处理、将消息写入消息队列、返回用户订单下单成功、商品服务来订阅这个消息采用拉或者推形式获取下单信息、商品服务获取到下单信息后进行商品的扣库存等操作。这样达到应解耦。  </li>
+</ol>
+<h3 id="2-RabbitMQ的基本使用"><a href="#2-RabbitMQ的基本使用" class="headerlink" title="2.RabbitMQ的基本使用"></a>2.RabbitMQ的基本使用</h3><p>我们Order服务使用RabbitMQ实现订单和商品服务解耦。  </p>
+<ol>
+<li>1.添加热rabbitmq依赖<br>在order服务中server子模块添加以下依赖:</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">&lt;!--引入RabbitMQ依赖--&gt;</div><div class="line">&lt;dependency&gt;</div><div class="line">	&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">	&lt;artifactId&gt;spring-boot-starter-amqp&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;  </div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">2. 2.添加配置到github远程仓库  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/94.png)  </div><div class="line"></div><div class="line">3. 3.创建MQ消息接收方  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/95.png)  </div><div class="line"></div><div class="line">4. 4.创建mq发送方进行测试</div><div class="line">我们在测试test文件目录下创建测试类: </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/97.png)   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/96.png) </div><div class="line"></div><div class="line">测试出现了上面问题,原因是因为没有myQueue队列  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/98.png) </div><div class="line">此时正常启动。  </div><div class="line"></div><div class="line">这个时候一切正常。  </div><div class="line"></div><div class="line">5. 5.以上是我们自己在RabbitMQ中创建的队列。我们是否可以自动创建队列,然后再调用队列接口。</div></pre></td></tr></table></figure>
+<p> @RabbitListener(queuesToDeclare = @Queue(“myQueue1”)) //自动创建队列myQueue1<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.自动创建并且和队列绑定</div></pre></td></tr></table></figure></p>
+<p>  @RabbitListener(bindings =@QueueBinding(value =@Queue(“myQueue”),exchange =@Exchange(“myExchange”)))<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 2.2 什么情况下需要用到exchange  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/1.png)</div><div class="line">我们现在是一个小小点餐系统,但是如果后面,我们什么都卖,又卖水果,又卖数码,同时对这两种商品下单,商品变多了,人也多了，订单服务是单独的人来维护,数码供应商、水果供应商都是由单独的人来维护。订单服务要根据不同的商品类型发出不同的MQ消息。相对应的、数码供应商只关注数码订单、水果及其他订单不关注。此时就牵涉到消息的分组。 演示如下:  </div><div class="line">1.我们接收方模拟两个接收服务(a.数码服务 b.水果服务)  </div><div class="line">exchange因为都是订单,我们我们叫做myOrder  </div><div class="line">想要分组归类,我们用key  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/2.png)</div><div class="line">2.我们发送方 (类似订单服务)如下: </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/3.png)  </div><div class="line"></div><div class="line"></div><div class="line">### 3.SpringCloudStream的使用 </div><div class="line">可以参数博客:https://www.cnblogs.com/zhixiang-org-cn/p/10093367.html </div><div class="line">#### 3.1.基本介绍  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/4.png)  </div><div class="line">1. 1.应用模型:应用程序通过 inputs 或者 outputs 来与 Spring Cloud Stream 中Binder 交互，通过我们配置来绑定，而 Spring Cloud Stream 的 Binder 负责与中间件交互。所以，我们只需要搞清楚如何与 Spring Cloud Stream 交互就可以方便使用消息驱动的方式。  </div><div class="line">2. 2.抽象绑定器(The Binder Abstraction):Spring Cloud Stream实现Kafkat和RabbitMQ的Binder实现，也包括了一个TestSupportBinder，用于测试。你也可以写根据API去写自己的Binder.Spring Cloud Stream 同样使用了Spring boot的自动配置，并且抽象的Binder使Spring Cloud Stream的应用获得更好的灵活性，比如：我们可以在application.yml或application.properties中指定参数进行配置使用Kafka或者RabbitMQ，而无需修改我们的代码。  </div><div class="line"></div><div class="line">3. 3.Binder(SpringCloudStream)是应用程序(Application)和消息中间件(Middleware)之间的粘合剂，使用 SpringCloudStream最大的好处莫过于对消息中间件的进一步封装。可以做到代码层面对消息中间件的无感知,设置于动态的切换中间件,但是也有局限:目前SpringCloudStream仅支持2种Binder：一种是RabbitMQ、另一种是Kafka  </div><div class="line"></div><div class="line">#### 3.2.使用SpringCloudStream  </div><div class="line">为了详细了解SpringCloudStream的话,可以详细了解下:https://www.cnblogs.com/leeSmall/p/8900518.html这篇博文。  </div><div class="line">##### 1.引入依赖  </div><div class="line">在order-server.xml中添加如下依赖:</div></pre></td></tr></table></figure></p>
+<p><dependency><br>   <groupid>org.springframework.cloud</groupid><br>   <artifactid>spring-cloud-starter-stream-rabbit</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">##### 2.添加mq的配置  </div><div class="line">之前我们已经配置过了,这里可以省略  </div><div class="line"></div><div class="line"></div><div class="line">##### 3.使用stream发送和接收消息  </div><div class="line">1. 1.定义接口:提供输入输出接口</div></pre></td></tr></table></figure></p>
+<p>public interface StreamClient {</p>
+<pre><code>@Input(&quot;myMessage&quot;)
+SubscribableChannel input();
+
+@Input(&quot;myMessage&quot;)
+MessageChannel output();
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.添加stream接收端</div></pre></td></tr></table></figure></p>
+<p>@Component<br>@EnableBinding(StreamClient.class)<br>@Slf4j<br>public class StreamReceiver {<br>   @StreamListener(“myMessage”)<br>    public void process(Object message){<br>      log.info(“StreamReceiver:{}”,message);<br>   }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.添加stream发送端</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class SendMessageController {<br>    @Autowired<br>    private StreamClient streamClient;</p>
+<pre><code>@GetMapping(&quot;/sendMessage&quot;)
+public void process(){
+    String message = &quot;now &quot; + new Date();
+    streamClient.output().send(MessageBuilder.withPayload(message).build());
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">4. 4.测试  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/5.png)   </div><div class="line">有时候我们后端启用2个order服务,然后重启后 客户端发送消息,发现2个都接收到了,那么我们如何多集群情况下,只有一个实例接收消息呢?</div><div class="line">stream里面有个分组,我们配置一下就可以了 那就是使用分组。   </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/10.png)</div><div class="line"></div><div class="line"></div><div class="line">##### 3.使用stream传递对象  </div><div class="line">之前我们在用例中stream传递的是String、实际工作中stream更重要的是传递对象。</div><div class="line">生产者:发送OrderDetail对象  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/11.png)  </div><div class="line"></div><div class="line">消息接受者:  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/12.png)  </div><div class="line"></div><div class="line">下面我们看一下:mq里面接收的是什么格式数据呢?  </div><div class="line">我们在上面看不到消息了,原因是消息已经被消费完了,所以我们需要把接收端,消费消息的停掉。让mq端有消息的累计。</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/13.png)   </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/14.png)   </div><div class="line"></div><div class="line">上面我们可以看到消息是:OrderDTO对象,如果我们需要在MQ中获取的消息是json格式:则在stream的配置中添加：content-type: application/json  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/16.png)    </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/15.png)    </div><div class="line"></div><div class="line">有时候我们的消费者：StreamReceiver消费完消息之后,我们需要给发送者一个通知,传统的做法是在业务逻辑里面后面做处理。  </div><div class="line">现在我们加上注解即可:  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/17.png)  </div><div class="line"></div><div class="line">总结:使用Stream可以降低对消息中间件的复杂度,让开发者更多的关注业务开发。  </div><div class="line"></div><div class="line"></div><div class="line">### 4.商品和订单服务中使用MQ  </div><div class="line">#### 4.1 引言  </div><div class="line">我们结合点餐业务来使用mq</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/18.png)  </div><div class="line">1. 1.之前我们按照上面图提示到:一旦有库存的变化(商品)、都会发布一个消息、订单拿到这个消息之后,会把库存的消息记录到自己的服务里面(这里我们把他记录到redis里面)</div><div class="line">2. 2.导致库存的变化有很多种:a.第一次商品上线的时候,会填写库存,这个时候库存就变化了。b.还有就是货物快卖完的时候需要补货。相当于加库存。我们以扣库存为例,使用消息队列进行通信。</div><div class="line"></div><div class="line">#### 4.2 product服务接入到配置中心  </div><div class="line">1. 1.添加配置中心的依赖  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/19.png)  </div><div class="line">2. 2.修改appliaction.yml文件为:bootstrap.yml文件,并修改其中的配置  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/21.png) </div><div class="line"></div><div class="line">3. 3.在github上建立对应的product-dev.yml文件,并将共有的信息拷贝到里面去  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/20.png) </div><div class="line">4. 4.在config服务中看是否可以访问到此配置文件。  </div><div class="line">5. 5.启动时候正常启动:说明我们已经把product服务接入到配置中心了。  </div><div class="line"></div><div class="line">#### 4.3 product服务在扣库存时候发送队列消息    </div><div class="line">1. 1.添加springBoot里面的amqp依赖  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/22.png) </div><div class="line"></div><div class="line">2. 2.在统一配置中心中添加mq的连接信息  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/23.png)  </div><div class="line"> </div><div class="line">#### 4.4 product服务在扣库存地方操作消息队列  </div><div class="line">我们在扣库存的service中添加扣库存(decreaseStock)后消息通知:  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/24.png)  </div><div class="line"></div><div class="line">然后我们使用postman测试:  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/25.png)  </div><div class="line">数据库里面的库存从33变成32,数据库扣除成功了</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/26.png)  </div><div class="line">但是我们登录mq的管理后端却发现没有对应的amqpTemplate的productInfo队列，</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/27.png)</div><div class="line">为什么没有这个队列呢?原因是因为我们压根就没有创建队列，只有在接收方添加注解:@RabbitListener注解才会自动创建，我们 上面只有发送方,所以我们先手动创建下:然后点几次发送,后面发现我们在消息队列中有了相应的消息:</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/28.png)</div><div class="line"></div><div class="line"></div><div class="line">以上就完成了消息的发送,现在消息已经从商品服务发送到消息队列里面了,接下来我们要在订单服务接收消息。</div><div class="line">在Order服务的message包下面添加接收消息:</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/29.png)  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/30.png)  </div><div class="line"></div><div class="line">我们先删除之前的productInfo队列,然后重启服务会发现会自动创建队列  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/31.png) </div><div class="line"></div><div class="line">#### 4.5 Order服务获取到扣库存信息存储到redis  </div><div class="line">我们order服务获取到了product服务发送的信息,现在需要把这些信息存储到redis中  </div><div class="line">redis可以使用docker安装、也可以使用自己免安装的版本  </div><div class="line"></div><div class="line">1. 1.项目中引入依赖(order-server中pom.xml)</div></pre></td></tr></table></figure></p>
+<p><dependency><br>            <groupid>org.springframework.cloud</groupid><br>            <artifactid>spring-boot-starter-data-redis</artifactid><br>        </dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.配置redis里面的参数,在统一配置中心添加</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  redis:<br>    host: localhost<br>    port: 6379<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.书写存储到redis(使用StringRedisTemplate)  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/32.png) </div><div class="line"></div><div class="line">4. 4.postman测试</div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/33.png) </div><div class="line"></div><div class="line">#### 4.6 残留的问题  </div><div class="line">[](https://raw.githubusercontent.com/startshineye/img/master/2019/06/34.png)  </div><div class="line">1. 1.从上面我们知道:扣库存是遍历了商品,然后操作数据库,再然后就是发送mq消息,假如decreaseStockInputList长度大于1,我们第一件商品扣库存之后、发送消息到mq,但是第二件商品报了异常,由于有事务,数据库会回滚,但是mq里面的消息不会回滚,所有有脏数据。</div><div class="line">2. 2.我们修改下,我们在数据库扣完库存之后再发mq消息  </div><div class="line">Product服务修改:</div></pre></td></tr></table></figure></p>
+<p>@Override<br>    public void decreaseStock(List<decreasestockinput> decreaseStockInputList) {<br>        //1.获取到扣库存列表<br>        List<productinfo> productInfoList = decreaseStockProcess(decreaseStockInputList);<br>        //2.转换成ProductInfoOutput列表<br>        List<productinfooutput> productInfoOutputList = productInfoList.stream().map(e -&gt; {<br>            ProductInfoOutput output = new ProductInfoOutput();<br>            BeanUtils.copyProperties(e, output);<br>            return output;<br>        }).collect(Collectors.toList());<br>        //3.发送mq消息<br>        amqpTemplate.convertAndSend(“productInfo”, JsonUtil.toJson(productInfoOutputList));<br>    }</productinfooutput></productinfo></decreasestockinput></p>
+<pre><code>@Transactional(rollbackFor = Exception.class)
+public List&lt;ProductInfo&gt;  decreaseStockProcess(List&lt;DecreaseStockInput&gt; decreaseStockInputList) {
+    /**
+     * 遍历:查看是否存在
+     */
+    List&lt;ProductInfo&gt; productInfoList = new ArrayList&lt;&gt;();
+    for (DecreaseStockInput cartDTO:decreaseStockInputList){
+        Optional&lt;ProductInfo&gt; productInfoOptional = repository.findById(cartDTO.getProductId());
+        //商品不存在
+        if(!productInfoOptional.isPresent()){
+            throw new ProductException(ResultEnum.PRODUCT_NOT_EXIST);
+        }
+        //商品存在-库存错误
+        ProductInfo productInfo = productInfoOptional.get();
+        int result = productInfo.getProductStock() - cartDTO.getProductQuantity();
+        if(result&lt;0){
+            throw new ProductException(ResultEnum.PRODUCT_STOCK_ERROE);
+        }
+        //保存
+        productInfo.setProductStock(result);
+        repository.save(productInfo);
+        productInfoList.add(productInfo);
+    }
+    return productInfoList;
+}
+</code></pre><p>```</p>
+<p>Order服务修改:<br>JsonUtil添加如下方法:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/35.png" target="_blank" rel="external"></a>  </p>
+<h3 id="5-异步和库存分析"><a href="#5-异步和库存分析" class="headerlink" title="5.异步和库存分析"></a>5.异步和库存分析</h3><p>项目改造成异步后,数据一致性等问题是经常遇到的,很多时候在单体服务中,依靠本地事务,我们很容易保证数据的一致性。但是一旦切换到分布式异步情况下就很可能出现数据不一致的情况。比如这里的发消息,数据库回滚数据是自动的。消息多发了要怎么办？这个就需要重新仔细考虑,稍不留神机会出错。下面我们以下面通路进一步看下更多考虑的点。<br>参考一下链接:<a href="https://cloud.tencent.com/developer/article/1344252" target="_blank" rel="external">https://cloud.tencent.com/developer/article/1344252</a></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/12/07/SpringCloud-6-消息和异步/" class="archive-article-date">
+  	<time datetime="2019-12-07T09:32:18.056Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-07</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-常见问题" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -324,7 +431,7 @@
 
 
   
-    <article id="post-SpringCloud-1-微服务介绍" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-SpringCloud-8-Zuul综合使用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -334,7 +441,7 @@
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/13/SpringCloud-1-微服务介绍/">SpringClond-1-微服务介绍</a>
+      <a class="article-title" href="/2019/04/18/SpringCloud-8-Zuul综合使用/">SpringCloud-8-Zuul综合使用</a>
     </h1>
   
 
@@ -342,33 +449,72 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h4 id="1-前言"><a href="#1-前言" class="headerlink" title="1.前言"></a>1.前言</h4><ol>
-<li>如今微服务已经是一个趋势,越来越多的人倾向于使用SpringCloud搭建微服务,SpringCloud已经成为了主流趋势。  </li>
-<li>要学习微服务的话,需要掌握如下学习曲线:学习微服务,首先需要学习SpringCloud,学习SpringCloud需要学习SpringBoot。微服务–&gt;SpringCloud–&gt;SpringBoot   </li>
+        <p>项目整体架构图如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/8.png" target="_blank" rel="external"></a>   </p>
+<h4 id="8-1-Zuul-Pre和Post过滤器"><a href="#8-1-Zuul-Pre和Post过滤器" class="headerlink" title="8.1 Zuul:Pre和Post过滤器"></a>8.1 Zuul:Pre和Post过滤器</h4><ol>
+<li>1.所有的请求都会到Zuul,然后到ServicreA、然后到ServiceB、再到ServiceC、现在我们对整体服务做一个权限校验。假如没有zuul服务、那么ServicreA、ServicreB、ServicreC都得校验一次做的太多受不了。所以权限校验我们放在Zuul里面统一处理。</li>
+<li>2.我们以:<a href="http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。" target="_blank" rel="external">http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。</a>  <h5 id="8-1-1-Zuul统一校验"><a href="#8-1-1-Zuul统一校验" class="headerlink" title="8.1.1 Zuul统一校验"></a>8.1.1 Zuul统一校验</h5></li>
+<li><p>1.新建TokenFilter做PRE过滤  </p>
+ <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">@Component</div><div class="line">public class TokenFilter extends ZuulFilter&#123;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public String filterType() &#123;</div><div class="line">       return PRE_TYPE;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public int filterOrder() &#123;</div><div class="line">       /**</div><div class="line">        * filter的顺序:对应的值越低优先级越高</div><div class="line">        * 我们把此Filter放在PRE_DECORATION_FILTER_ORDER前面</div><div class="line">        */</div><div class="line">       return PRE_DECORATION_FILTER_ORDER-1;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public boolean shouldFilter() &#123;</div><div class="line">       /**</div><div class="line">        * 开启过滤</div><div class="line">        */</div><div class="line">       return true;</div><div class="line">   &#125;</div><div class="line">	</div><div class="line">   @Override</div><div class="line">   public Object run() throws ZuulException &#123;</div><div class="line">       RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">       HttpServletRequest request = requestContext.getRequest();</div><div class="line">	</div><div class="line">       //这里从url参数里面获取,也可以从cookie,header里获取</div><div class="line">       String token = request.getParameter(&quot;token&quot;);</div><div class="line">       if(StringUtils.isEmpty(token))&#123;</div><div class="line">           requestContext.setSendZuulResponse(false);</div><div class="line">           requestContext.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());</div><div class="line">       &#125;</div><div class="line">       return null;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.新建Post过滤器    </p>
+</li>
 </ol>
-<h4 id="2-SpringCloud微服务架构实践"><a href="#2-SpringCloud微服务架构实践" class="headerlink" title="2.SpringCloud微服务架构实践"></a>2.SpringCloud微服务架构实践</h4><h5 id="2-1-微服务相关技术简介"><a href="#2-1-微服务相关技术简介" class="headerlink" title="2.1 微服务相关技术简介"></a>2.1 微服务相关技术简介</h5><p>究竟微服务、SpringCloud、SpringBoot之间有什么联系？并且:SpringFramework、SpringBoot、SpringCloud之间又有什么关系呢?我们看如下分析:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/1.png" alt="">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class AddResponseHeaderFilter extends ZuulFilter&#123;</div><div class="line">    @Override</div><div class="line">    public String filterType() &#123;</div><div class="line">        return POST_TYPE;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public int filterOrder() &#123;</div><div class="line">        return SEND_RESPONSE_FILTER_ORDER - 1;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public boolean shouldFilter() &#123;</div><div class="line">        return true;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public Object run() &#123;</div><div class="line">        RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">        HttpServletResponse response = requestContext.getResponse();</div><div class="line">        response.setHeader(&quot;X-Foo&quot;, UUID.randomUUID().toString());</div><div class="line">        return null;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h4 id="8-2-Zuul-限流"><a href="#8-2-Zuul-限流" class="headerlink" title="8.2 Zuul:限流"></a>8.2 Zuul:限流</h4><h5 id="8-2-1-限流基本理论"><a href="#8-2-1-限流基本理论" class="headerlink" title="8.2.1 限流基本理论"></a>8.2.1 限流基本理论</h5><ol>
+<li>1.Zuul充当的是api网关的角色、每个请求都会经过它、在他上面做api限流保护、防止攻击。比如我们的api是发短信的、我们需要限制客户端请求速度、从而在一定程序上抵制短信大攻击、降低损失。</li>
+<li>2.Zuul的限流是放在前置过滤去去做的、更具体来说、时机是在请求被转发之前调用。如果前置过滤器有多个操作、限流放到最靠前那个。比如:Zuul前置过滤器里面有限流、鉴权。那么限流应该早于鉴权。</li>
+<li>3.限流方案很多，这里以一种来说:令牌桶流。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/16.png" target="_blank" rel="external"></a><br>a.中间桶(token bucket)：是存放令牌的、所以叫做令牌桶。<br>b.最上面会以固定的速率往令牌桶中添加令牌、如果已经放满了就丢掉。<br>c.外部请求过来、会从令牌桶中获取令牌、拿到令牌之后才可以继续往前走。如果拿不到令牌直接被拒绝。其实是和买房一样。 </li>
+</ol>
+<h5 id="8-2-2-限流代码实现"><a href="#8-2-2-限流代码实现" class="headerlink" title="8.2.2 限流代码实现"></a>8.2.2 限流代码实现</h5><h6 id="1-新建RateFilter类"><a href="#1-新建RateFilter类" class="headerlink" title="1.新建RateFilter类"></a>1.新建RateFilter类</h6><p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/17.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a>   </p>
+<h4 id="8-3-Zuul-鉴权和添加用户服务"><a href="#8-3-Zuul-鉴权和添加用户服务" class="headerlink" title="8.3 Zuul:鉴权和添加用户服务"></a>8.3 Zuul:鉴权和添加用户服务</h4><h5 id="8-3-1-Zuul权限校验"><a href="#8-3-1-Zuul权限校验" class="headerlink" title="8.3.1 Zuul权限校验"></a>8.3.1 Zuul权限校验</h5><p>我们使用Zuul的权限校验实现下面3个功能。</p>
 <ol>
-<li>1.Spring框架作为j2ee的基石，一直在快速发展、是搭建j2ee的框架主要组成部分。  </li>
-<li>2.SpringBoot在Spring的上层、基于Spring框架构建的一种延伸的简化框架。能够快速构建Spring应用。</li>
-<li>3.SpringCloud又是在SpringBoot的上层，利用SpringBoot构建分布式应用。</li>
+<li>1./order/create 只能买家访问(创建订单)  </li>
+<li>2./order/finish 只能卖家访问(完结订单) </li>
+<li><p>3./product/list 都可以访问(商品列表)  </p>
+</li>
+<li><p>1.新建鉴权Filter(AuthFilter)<br>新建鉴权Filter、用来区分买家和卖家</p>
+</li>
 </ol>
-<h5 id="2-2-技术储备"><a href="#2-2-技术储备" class="headerlink" title="2.2 技术储备"></a>2.2 技术储备</h5><ol>
-<li>1.对SpringBoot的基础知识熟练掌握。  </li>
-<li>2.对Linux和Docker的基本用法熟练掌握  </li>
+<ol>
+<li>2.实现逻辑<br>怎样区分买家和卖家呢?有些人想到cookie、既然想到了cookie那么必须买家和卖家登录了之后才能获取到信息。那么登录功能写到哪里了，就需要有一个用户服务。</li>
 </ol>
-<h5 id="2-3-重点"><a href="#2-3-重点" class="headerlink" title="2.3 重点"></a>2.3 重点</h5><ol>
-<li>1.SpringCloud构建微服务(我们以点餐项目为例构建基本的SpringCloud微服务)  </li>
-<li>2.微服务改造探讨(大多数微服务并不是一开始就设计好的,而是业务发展到一定规模时候产生的,我们会介绍将传统服务改造成微服务)  </li>
-<li>3.本文课程使用SpringBoot2.x，课程讲解内容如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/2.png" alt=""><br>主要讲解上面部分外,我们还会讲解:容器编排和服务追踪。<br>1.容器编排方面使用:docker+rancher组合。<br>2.服务追踪方面使用:SpringCloudSleuth+ZIPKIN组合。   </li>
+<h5 id="8-3-2-添加用户服务"><a href="#8-3-2-添加用户服务" class="headerlink" title="8.3.2 添加用户服务"></a>8.3.2 添加用户服务</h5><ol>
+<li><p>1.API接口登录区分<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" target="_blank" rel="external"></a> </p>
+</li>
+<li><p>2.数据库  </p>
+</li>
 </ol>
-<h5 id="2-4-环境参数"><a href="#2-4-环境参数" class="headerlink" title="2.4 环境参数"></a>2.4 环境参数</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/3.png" alt="">  </p>
+<pre><code>CREATE TABLE `user_info` (
+  `id` varchar(32) NOT NULL,
+  `username` varchar(32) DEFAULT &apos;&apos;,
+  `password` varchar(32) DEFAULT &apos;&apos;,
+  `openid` varchar(64) DEFAULT &apos;&apos; COMMENT &apos;微信openid&apos;,
+  `role` tinyint(1) NOT NULL COMMENT &apos;1买家2卖家&apos;,
+  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &apos;创建时间&apos;,
+  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &apos;修改时间&apos;,
+  PRIMARY KEY (`id`)
+);
+</code></pre><ol>
+<li><p>3.创建应用<br>选择的依赖组件:<br>1.配置:Cloud Config–&gt;Config Cient<br>2.注册中心:Cloud Discovery–&gt;Eureka Discovery<br>3.数据库:SQL–&gt;Mysql/JPA<br>4.缓存:NoSQL–&gt;redis  </p>
+</li>
+<li><p>4.修改版本依赖</p>
+</li>
+<li><p>5.统一配置中心远端服务器创建user-dev.yml文件<br>我们只添加数据库连接信息和redis连接信息，其他信息在bootstrap.yml文件里面  </p>
+</li>
+</ol>
+<ol>
+<li><p>6.在config服务中访问:<a href="http://localhost:8083/user-dev.yml可以查看到对应文件" target="_blank" rel="external">http://localhost:8083/user-dev.yml可以查看到对应文件</a></p>
+</li>
+<li><p>7.因为user服务后面肯定会对外提供接口的、所以我们将其改造成多模块</p>
+</li>
+</ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2019/04/13/SpringCloud-1-微服务介绍/" class="archive-article-date">
-  	<time datetime="2019-04-13T02:45:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-13</time>
+      <a href="/2019/04/18/SpringCloud-8-Zuul综合使用/" class="archive-article-date">
+  	<time datetime="2019-04-18T04:13:24.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-18</time>
 </a>
       
 	<div class="article-tag tagcloud">
@@ -393,6 +539,760 @@
 
 
   
+    <article id="post-SpringCloud-7-服务网管" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/17/SpringCloud-7-服务网管/">SpringCloud-7-服务网管</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-服务网关和Zuul"><a href="#1-服务网关和Zuul" class="headerlink" title="1.服务网关和Zuul"></a>1.服务网关和Zuul</h3><h4 id="1-1-为什么需要服务网关"><a href="#1-1-为什么需要服务网关" class="headerlink" title="1.1 为什么需要服务网关"></a>1.1 为什么需要服务网关</h4><p>加入没有网关服务,当前系统起了多个服务,比如：订单、广告、商品、支付、用户。等等…<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/38.png" target="_blank" rel="external"></a> </p>
+<p>那么客户端怎么调用呢?和每个服务一步步打交道、显然不现实。需要一个接收request请求的统一入口。充当这个角色的是服务网关。一旦有了服务网关,所有请求都通过他,所以我们需要了解他发挥什么作用,具备什么要素?<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/39.png" target="_blank" rel="external"></a></p>
+<h4 id="1-2-服务网关的作用"><a href="#1-2-服务网关的作用" class="headerlink" title="1.2 服务网关的作用"></a>1.2 服务网关的作用</h4><h5 id="1-稳定性、高可用"><a href="#1-稳定性、高可用" class="headerlink" title="1.稳定性、高可用"></a>1.稳定性、高可用</h5><p>保证24小时可用,网络瘫痪、系统全挂、不能提供外面的服务。 </p>
+<h5 id="2-性能、并发性"><a href="#2-性能、并发性" class="headerlink" title="2.性能、并发性"></a>2.性能、并发性</h5><p>所有的请求都经过网关、所以网关的压力是巨大的、所以网关的性能也必须高。</p>
+<h5 id="3-安全性"><a href="#3-安全性" class="headerlink" title="3.安全性"></a>3.安全性</h5><p>要确保使用服务的安全、防止外部随意访问、比如金融行业、会进行通讯数据的加密措施。</p>
+<h5 id="4-扩展性"><a href="#4-扩展性" class="headerlink" title="4.扩展性"></a>4.扩展性</h5><p>各种请求都经过网关服务、所以网关上大有文章可做、可进行扩展。<br>理论上、网关是处理各种非业务功能的绝佳场所。诸如:协议转发、防刷、流量管控、日志监控等。</p>
+<h4 id="1-3-常用的网关方案"><a href="#1-3-常用的网关方案" class="headerlink" title="1.3 常用的网关方案"></a>1.3 常用的网关方案</h4><p>网关并非是微服务出来后的新鲜事物。业界成熟的网关服务有:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/40.png" target="_blank" rel="external"></a><br>一代的Zuul在性能上确实没有优势、不能喝nginx比较。当然，二代Zuul有较大的提升。</p>
+<p>原始的点餐项目是如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/41.png" target="_blank" rel="external"></a></p>
+<ol>
+<li>1.nginx在前,tomcat在后、nginx做了负载均衡和反向代理。现在我们可以让nginx发挥他负载均衡和反向代理的优势后面的tomcat可以换成Zuul  </li>
+<li>2.项目改造过程中、合理利用原来的资源、发挥新加入事物的优势、因地制宜解决问题。<h4 id="1-4-Zuul的特点"><a href="#1-4-Zuul的特点" class="headerlink" title="1.4 Zuul的特点"></a>1.4 Zuul的特点</h4>Zuul相对nginx来说有所不足、但是作为SpringCloud完整微服务生态体系的前置网关服务是一个很不错的选择。有一种说法路由加过滤器等于Zuul<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/42.png" target="_blank" rel="external"></a>  </li>
+</ol>
+<p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/43.png" target="_blank" rel="external"></a><br>Zuul的组织架构图如下所示:<br>可以看到,过滤器之间是没有直接通信的,他们是通过Request Context进行数据通信的。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/44.png" target="_blank" rel="external"></a>  </p>
+<p>Zuul的一次Http的生命周期:</p>
+<ol>
+<li>1.Origin Server就是我们的业务服务。  </li>
+<li>2.请求先过来之后会到pre filters这种类型的过滤器,比如我们的参数校验就可以在这里面来做。  </li>
+<li>3.routing filters作用就是将http请求转发到Origin Server中去：如果重写http请求可以在这里面做。</li>
+<li>4.post filters 这个时候你已经拿到了返回的结果,这个时候如果你想对结果进行处理和加工,可以在这里面来做</li>
+<li>5.error Filters如果在前两个filter发生异常时候,就可以在error filter中进行全局异常处理。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/45.png" target="_blank" rel="external"></a> </li>
+</ol>
+<h3 id="2-Zuul的使用"><a href="#2-Zuul的使用" class="headerlink" title="2.Zuul的使用"></a>2.Zuul的使用</h3><ol>
+<li>1.新建项目api-gateway<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/46.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/47.png" target="_blank" rel="external"></a> </li>
+<li>2.选择依赖<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/48.png" target="_blank" rel="external"></a>   </li>
+<li>3.删除不需要的文件<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/49.png" target="_blank" rel="external"></a>   </li>
+<li>4.修改版本一致<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/50.png" target="_blank" rel="external"></a></li>
+<li>5.修改配置文件(从统一配置文件中获取配置信息)<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/51.png" target="_blank" rel="external"></a></li>
+</ol>
+<h4 id="2-1-路由转发"><a href="#2-1-路由转发" class="headerlink" title="2.1 路由转发"></a>2.1 路由转发</h4><p>我们现在实现Zuul的路由转发功能,我们在api-gateway项目的启动类上添加:@EnableZuulProxy。我们现在要实现product服务下请求里面的/product/list</p>
+<ol>
+<li><p>1.启动我们的product服务(8081端口),然后访问:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/52.png" target="_blank" rel="external"></a>  </p>
+</li>
+<li><p>2.通过Zuul服务(8084端口)路由转发请求:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/53.png" target="_blank" rel="external"></a><br>只要注册到Eureka上的服务都可以通过:ip:port/服务名/url  </p>
+</li>
+</ol>
+<ol>
+<li><p>3.自定义Zuul路由转发地址<br>以上我们是通过默认的路由转发、默认的地址是:ip:port/服务名/url。但是有时候我们不想把服务名暴露出来 而是想用自己定义的路由地址。此时就需要配置Zuul了。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/55.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/54.png" target="_blank" rel="external"></a>  </p>
+</li>
+<li><p>4.查询Zuul的所有routes,我们可以通过Zuul对应的服务api-gateway启动地址:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/06/117.png" target="_blank" rel="external"></a>  </p>
+</li>
+</ol>
+<ol>
+<li>5.我们如果想要拦截某些请求<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/1.png" target="_blank" rel="external"></a> </li>
+</ol>
+<h4 id="2-3-Cookie和动态路由"><a href="#2-3-Cookie和动态路由" class="headerlink" title="2.3 Cookie和动态路由"></a>2.3 Cookie和动态路由</h4><h5 id="2-3-1-Cookie"><a href="#2-3-1-Cookie" class="headerlink" title="2.3.1 Cookie"></a>2.3.1 Cookie</h5><p>我们在开发搭建web项目的时候,经常要使用cookie,需要把cookie返回到后端。在这里使用了Zuul组件、默认情况下Cookie是无法传递过去的。如下:<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/3.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/2.png" target="_blank" rel="external"></a><br>我们从Zuul的配置中可以设置cookie的开启和关闭<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/4.png" target="_blank" rel="external"></a><br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/5.png" target="_blank" rel="external"></a>  </p>
+<h5 id="2-3-2-动态路由"><a href="#2-3-2-动态路由" class="headerlink" title="2.3.2 动态路由"></a>2.3.2 动态路由</h5><p>我们能不能改了路由配置之后自动生效了,就是动态路由。如果需要达到动态路由效果。我们只需要将api-gateway的配置放到config配置中心中去。我们如何做到config统一配置中配置改变了我们的api-gateway服务也动态改变了代码。我们添加Zuul的配置类。<br><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/6.png" target="_blank" rel="external"></a>  </p>
+<h4 id="2-4-路由和高可用小结"><a href="#2-4-路由和高可用小结" class="headerlink" title="2.4 路由和高可用小结"></a>2.4 路由和高可用小结</h4><p><a href="https://raw.githubusercontent.com/startshineye/img/master/2019/07/7.png" target="_blank" rel="external"></a>  </p>
+<h5 id="2-4-1-典型应用场景"><a href="#2-4-1-典型应用场景" class="headerlink" title="2.4.1 典型应用场景"></a>2.4.1 典型应用场景</h5><ol>
+<li><p>1.Zuul的前置过滤器(Pre)<br>a.限流   b.鉴权    c.参数校验调整   d.请求转发  </p>
+</li>
+<li><p>2.Zuul的后置过滤器(Post)<br>人过留名<br>a.统计  b.日志  </p>
+</li>
+</ol>
+<h5 id="2-4-2-高可用"><a href="#2-4-2-高可用" class="headerlink" title="2.4.2 高可用"></a>2.4.2 高可用</h5><p>所有的请求都需要经过Zuul、所以生产环境中、我们需要部署多台Zuul,以避免单点故障。Zuul的高可用是必须的。  </p>
+<ol>
+<li>1.多个Zuul节点注册到Eureka Server(将多个节点注册到Eureka Server就可以实现高可用)  </li>
+<li>2.Nginx和Zuul “混搭”(使用nginx对外暴露一个url,nginx把请求转发到多个zuul服务上、这样可以做到彼此的取长补短)。</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/17/SpringCloud-7-服务网管/" class="archive-article-date">
+  	<time datetime="2019-04-17T03:01:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-17</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloud-5-统一配置中心" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/15/SpringCloud-5-统一配置中心/">SpringCloud-5-统一配置中心</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-统一配置中心概述"><a href="#1-统一配置中心概述" class="headerlink" title="1.统一配置中心概述"></a>1.统一配置中心概述</h3><h4 id="1-1-为什么需要统一配置中心"><a href="#1-1-为什么需要统一配置中心" class="headerlink" title="1.1 为什么需要统一配置中心"></a>1.1 为什么需要统一配置中心</h4><p>之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  </p>
+<ol>
+<li>1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功能,此时配置文件已经改的面目全非了。)</li>
+<li>2.配置内容安全与权限:一个公司线上的配置不会对开发者进行开发公开的,特别熟数据库账号密码,按理说只有运维才知道。我们需要把数据库信息隔离,不放到数据库密码里面去。  </li>
+<li>3.更新配置项目需重启:每次更新项目都要重启,线上有可能修改一些配置,比如更改项目发送短信接口次数，我们怎样做到不重启。</li>
+</ol>
+<h4 id="1-2-统一配置中心"><a href="#1-2-统一配置中心" class="headerlink" title="1.2 统一配置中心"></a>1.2 统一配置中心</h4><p>我们到时候会专门做一个项目:config-server单独的微服务,他也有server端和client端。server端,这些配置我们为了方便管理都把他放到git上,这样子版本控制起来比较方便,他会从远端git把配置给拉取下来,以下图的箭头表示配置信息流的流动方向,最开始我们把他放到远端git,远端git的话,有gitlab,github，config-server把配置拉取下来之后,会把其配置放置到本地git上,注意config&lt;-&gt;本地git之前是双向流动的,他既会把远端git放到本地git去,也可以假如远端git不能使用了,被墙了,那么他会把本地的git拿出来，后面给product和order服务使用(两个服务都会集成config-server的客户端)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/38.png" alt="">  </p>
+<h3 id="2-统一配置中心server端-config-server"><a href="#2-统一配置中心server端-config-server" class="headerlink" title="2.统一配置中心server端(config-server)"></a>2.统一配置中心server端(config-server)</h3><p>新建一个项目:</p>
+<ol>
+<li>1.Spring Initializr<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/39.png" alt=""></li>
+<li>2.填写Project Metadata<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/40.png" alt="">  </li>
+<li>3.添加依赖(本身是个微服务,需要注册到Eureka上去,所以添加Cloud Discovery中的Eureka Discovery和本身是一个配置类:作为config的server端 添加Cloud Config依赖)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/41.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/42.png" alt=""> </li>
+<li>4.创建完毕之后,删除不必要的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/44.png" alt=""> </li>
+<li>5.更改pom使各个微服务版本号统一<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/45.png" alt="">  </li>
+<li>6.在启动类中添加注解:将其注册到Eureka中去<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/46.png" alt=""> </li>
+<li>7.修改其配置文件application.yml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/47.png" alt="">  </li>
+<li>8.启用Eureka服务,再启用config服务,一下出现config服务,说明启用成功。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/48.png" alt="">  </li>
+<li>9.要成功config-server端,需要添加对应注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/49.png" alt=""><br>此时启动报错</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Caused by: java.lang.IllegalStateException: You need to configure a uri for the git repository</div></pre></td></tr></table></figure>
+<p>我们在远程github仓库创建配置文件:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/50.png" alt=""><br>在远程仓库的config-repo下添加order服务的配置信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/51.png" alt=""></p>
+<p>输入一下信息回车:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/52.png" alt=""><br>配置信息的username和password没有配置因为config-repo是公开仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/53.png" alt=""></p>
+<p>然后重启项目完之后,校验我们的配置文件是否被config-server从github仓库中拉取下来了。然后我们在浏览器输入：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/54.png" alt=""><br>为什么需要多写一个a呢?:<a href="http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。" target="_blank" rel="external">http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。</a><br>我们查看config-server启动时候的日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/55.png" alt=""><br>上面是支持properties,yml,json格式见转换的，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/56.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/57.png" alt=""><br>具体的访问配置文件格式说明:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/58.png" alt="">  </p>
+<p>查看config-server把远程的文件:order.yml拉取到了本地的哪个文件:如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png" alt=""><br>当然我们自己也可以自定义这个配置文件路径:浏览器访问:<a href="http://localhost:8083/order-a.yml然后再配置的文件下" target="_blank" rel="external">http://localhost:8083/order-a.yml然后再配置的文件下</a>:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png" alt="">  </p>
+<h3 id="2-统一配置中心client端"><a href="#2-统一配置中心client端" class="headerlink" title="2.统一配置中心client端"></a>2.统一配置中心client端</h3><p>我们以order服务为例集成config-client,按理来说我们把order的全部配置已经放到git上了,不应该放在order的appliaction.yml文件中了,那我们要如何使用了?老套路来了。<br>1.引入依赖  2.启动类上不需要加注解  3.添加配置 </p>
+<h4 id="2-1-引入依赖"><a href="#2-1-引入依赖" class="headerlink" title="2.1 引入依赖"></a>2.1 引入依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;spring-cloud-config-client&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">#### 2.2 启动类上不需要加注解</div><div class="line">不加注解  </div><div class="line"></div><div class="line"></div><div class="line">#### 2.3 添加配置</div><div class="line">我们需要找到github上的通过config-server拉取到本地的一个配置，那么就需要服务名(配置文件中应用名)加开启环境(dev)找到此配置。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/65.png)  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/66.png)  </div><div class="line"></div><div class="line">启动应用:报错:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/67.png)  </div><div class="line"></div><div class="line">思路:我们的期望启动流程是:1.通过配置文件的service-id:CONFIG找到，config-server,然后config-server把这些配置拉取到本地 2.order服务拿到配置之后才能进行数据库的初始化</div><div class="line"></div><div class="line">现在我们把所有信息都写在applaction.yml文件里面,SpringBoot项目不知道哪个在前,哪个在后面,他直接找数据库相关的,那么就启动失败了。  </div><div class="line"></div><div class="line">我们希望config-client的配置先加载,先启动。SpringBoot提供了bootstrap.yml(启动引导的文件)，我们把application..yml改成bootstrap.yml</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/68.png)  </div><div class="line"></div><div class="line">测试是否加载了order-dev.yml里面的配置信息:  </div><div class="line">我们看能不能拿去到env: dev信息  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/69.png)</div><div class="line">浏览器访问:http://localhost:8082/env/dev</div><div class="line">结果如下:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/70.png)  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">#### 2.4 统一配置中心的高可用  </div><div class="line">关于统一配置中心的高可用,我们可以以后在服务器上部署多个,多个服务注册在EurekaServer时候,我们通过Order服务连接CONFIG自动可以实现负载均衡，下面我们以开启多个启动端口为例  </div><div class="line"></div><div class="line">1. 1.config-server配置多个启动类  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/71.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/72.png)  </div><div class="line">然后启用ConfigApplication、ConfigApplication(1)、ConfigApplication(2)三个应用。在EurekaServer端可以看到3个服务已经启动:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/73.png)  </div><div class="line"></div><div class="line">2. 2.我们多次启动Order服务,可以看到其连接的地址多次变动。  </div><div class="line">第一次启动出现:</div></pre></td></tr></table></figure>
+<p>2019-05-25 16:38:58.471  INFO 11424 — [           main] c.c.c.ConfigServicePropertySourceLocator : Fetching config from server at : <a href="http://JSKJ-PC:9002/" target="_blank" rel="external">http://JSKJ-PC:9002/</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">第二次启动出现：</div></pre></td></tr></table></figure></p>
+<p>2019-05-25 16:40:01.977  INFO 10640 — [           main] c.c.c.ConfigServicePropertySourceLocator : Fetching config from server at : <a href="http://JSKJ-PC:8083/" target="_blank" rel="external">http://JSKJ-PC:8083/</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">可以看出他是获取的不同配置。  </div><div class="line"></div><div class="line">#### 2.5 统一配置中心和EurekaServer的注意点  </div><div class="line">Eureka注册中心默认的端口是8761,如果我们将8761改成8762，我们再来看一下情况。  </div><div class="line">1. 1.修改eureka注册中心的端口为:8762,重启   </div><div class="line">2. 2.修改config服务注册中心地址端口为:8762,重启  </div><div class="line">3. 3.修改config服务对应的远程配置文件的信息:打开http://localhost:8083/order-dev.yml发现配置中心的远程配置已经修改并加载到本地  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/74.png)  </div><div class="line"></div><div class="line">4. 4.启动Order服务,加载Order服务的配置  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/75.png)   </div><div class="line">我们发现我们的Oder服务已经连接不上config服务  </div><div class="line">这是什么原因呢?我们理一下流程:Order服务首先要做的其实首先是访问eureka,只有通过访问eureka,才能找到eureka下注册的config服务  </div><div class="line">现在是根本获取不到，获取不到的时候默认就会访问:http://localhost:8888,这是由于eureka地址没有配置对。但是我们不是在order-dev.yml中已经配置了这个地址吗?还是一个顺序的原因,之前8761之所以可以,是因为:8761是默认的一个地址。访问不到微服务就会默认访问8761注册中心,所以是没有问题的。所以当eureka不是默认端口:8761的是时候,我们把eureka的配置信息放到github远程配置上是不合理的。所以我们需要把这个配置拿出来放到Order服务里面的配置文件里面来,Order服务首先加载本地的bootstrap.yml,然后找到注册中心,从注册中心中找到config服务。</div><div class="line">做法:远程去掉eureka注册配置,将其保存到order服务的bootstrap.yml中。</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/76.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/77.png)  </div><div class="line"></div><div class="line">5. 5.在启动Order服务前,我们看一下config下访问的远程配置文件order-dev.yml文件是否已经已经加载到本地  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/74.png) </div><div class="line">发现配置信息并没有加载正确到本地,这个是为什么呢?我们先清空config的控制台,然后再浏览器端访问那个配置：http://localhost:8083/order-dev.yml。发现</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/78.png)  </div><div class="line">说明:会拿到两份配置,并会合并,我们之前的order.yml文件里面配置了eureka注册信息。这个时候是不是应该把order.yml删除了,其实不是的,既然,不管加载哪个配置都需要加载order.yml配置文件,那麽我们就应该把通用的配置信息加载到order.yml文件。这里我们先把order.yml文件里面信息先注释掉。</div><div class="line">然后重新访问就可以了。</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/79.png) </div><div class="line"></div><div class="line"></div><div class="line">#### 2.6 统一配置中心延伸</div><div class="line">我们想用统一配置中心的原因是:更新配置项目需重启,但是我们现在也没有达到。我们修改github上面的配置时候,我们还是没有变化。那么如何做到统一配置的的动态刷新呢?下节我们再学习。</div><div class="line"></div><div class="line"></div><div class="line">### 3.SpringCloud Bus自动刷新配置  </div><div class="line"></div><div class="line">#### 3.1 引言</div><div class="line">Bus就是想上就上的公共汽车。他还有信息通路,总线,这里就是总线的意思。  </div><div class="line">以下是之前统一配置的架构图:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/80.png)  </div><div class="line">我们修改远程git配置,order服务、product服务不会更新修改的配置,原因是我们修改远端git配置后没有及时通知order、product微服务。消息的传递需要载体-消息队列。消息的通知SpringCloud中推荐使用消息队列。要操作消息和操作数据库一样,肯定要使用组件、引入依赖。SpringCloud Bus就是用来操作消息队列的。config-server和order通过消息队列传递信息。config-server使用SpringCloud Bus之后会对外提供一个http接口叫做/bus-refresh,访问这个接口，config-server就会把远程git的配置信息发送到mq里面,那谁来访问这个接口呢?自然是远端git访问这个接口最合适。git服务器基本会提供WebHooks功能,你只要把web服务器配置上就好了。      </div><div class="line"></div><div class="line">#### 3.2 实战  </div><div class="line"></div><div class="line">##### 1.config服务配置  </div><div class="line">1. 1.修改config中pom.xml中SpringBoot版本  </div><div class="line">由于其他版本有bug,我们引入:2.0.0.BUILD-SNAPSHOT</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/81.png)  </div><div class="line">2. 2.引入SpringCloud Bus组件</div></pre></td></tr></table></figure></p>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-bus-amqp</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">3. 3.启动config服务</div><div class="line">提前安装好RabbitMQ。</div><div class="line">安装请参考:  </div><div class="line">可以参考:http://www.chinacion.cn/article/1700.html  </div><div class="line">https://www.cnblogs.com/cvol/p/8818823.html  </div><div class="line">启动服务后我们登录RabbitMQ发现了以下队列。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/82.png) </div><div class="line"></div><div class="line">##### 2.order服务配置 </div><div class="line">1. 1.引入Bus依赖</div></pre></td></tr></table></figure></p>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-bus-amqp</artifactid><br></dependency><br>```  </p>
+<ol>
+<li>2.启动服务<br>启动服务我们发现了其他一个mq执行了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/83.png" alt="">  </li>
+</ol>
+<h5 id="3-测试修改github上配置看config服务是否不重启可以获取到"><a href="#3-测试修改github上配置看config服务是否不重启可以获取到" class="headerlink" title="3.测试修改github上配置看config服务是否不重启可以获取到"></a>3.测试修改github上配置看config服务是否不重启可以获取到</h5><p>我们修改github上的order-dev.yml文件的env值为：dev11 然后刷新<a href="http://localhost:8083/order-dev.yml获取到的env为:dev111" target="_blank" rel="external">http://localhost:8083/order-dev.yml获取到的env为:dev111</a> 但是order服务获取到的值:<a href="http://localhost:8082/env/dev中的值还是dev。说明order服务动态获取不到远程修改的配置。" target="_blank" rel="external">http://localhost:8082/env/dev中的值还是dev。说明order服务动态获取不到远程修改的配置。</a></p>
+<p>现在config服务和order服务都已经跟消息队列RabbitMQ打通了,还差的是访问config的http接口:/bus-refresh  </p>
+<p>我们访问:发现报404错误,我们重启config发现重启日志中确实没有/bus-refresh的接口。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/84.png" alt=""> </p>
+<p>解决,我们需要配置一下,让 /bus-refresh接口暴露出来。在config服务的application.yml文件中添加:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/85.png" alt=""><br>重启后我们发现有相关日志打出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/86.png" alt=""> </p>
+<p>我们使用postman请求一下:看对应的队列是否已经收到消息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/87.png" alt=""> </p>
+<p>然后再消息队列中查看下消息是否有:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/88.png" alt="">  </p>
+<p>然后再刷新：<a href="http://localhost:8082/env/dev" target="_blank" rel="external">http://localhost:8082/env/dev</a><br>还是dev 为什么没有变成:dev111呢?<br>其实通过查看本地日志 发现order服务已经加载了此配置。  </p>
+<p>这个时候我们通过注解@RequestScope实现<br>再次请求：<a href="http://localhost:8082/env/dev" target="_blank" rel="external">http://localhost:8082/env/dev</a>  发现已经变化了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/89.png" alt="">  </p>
+<h3 id="4-集成WebHooks实现动态更新"><a href="#4-集成WebHooks实现动态更新" class="headerlink" title="4.集成WebHooks实现动态更新"></a>4.集成WebHooks实现动态更新</h3><p>我们每次修改了github上的配置信息后,都需要在Order服务中通过http调用此接口才能让Order服务获取到对应的信息。我们现在需要把它做成自动实现。我们可以通过webhooks实现，</p>
+<h4 id="4-1-github上绑定webhooks"><a href="#4-1-github上绑定webhooks" class="headerlink" title="4.1 github上绑定webhooks"></a>4.1 github上绑定webhooks</h4><p>在github上绑定对应的请求:<br>注意:github上配置url地址不是:<a href="http://yyv7tg.natappfree.cc/actuator/bus-refresh" target="_blank" rel="external">http://yyv7tg.natappfree.cc/actuator/bus-refresh</a><br>config组件专门提供了一个用于webhooks的路由,叫做monitor<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/90.png" alt=""></p>
+<p>我们需要把config-server对应的本地服务映射到公网<br>我们使用ngrok  也可以使用natapp.cn:使用说明:<a href="https://blog.csdn.net/weixin_38959210/article/details/80401208" target="_blank" rel="external">https://blog.csdn.net/weixin_38959210/article/details/80401208</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/91.png" alt=""><br>我们在github上的webhooks更新地址:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/93.png" alt=""></p>
+<p>修改远程的配置：env: dev11111<br>访问项目后:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/92.png" alt=""><br>说明成功。</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/15/SpringCloud-5-统一配置中心/" class="archive-article-date">
+  	<time datetime="2019-04-15T14:42:12.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-15</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloud-4-应用通信" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/14/SpringCloud-4-应用通信/">SpringCloud-4-应用通信</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
+<li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
+<li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
+<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
+<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
+<li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
+</ol>
+<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
+<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
+<li>1.使用 “订单服务-&gt;商品服务”为例</li>
+<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
+<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
+<li>4.product端新建ServerController</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.order服务中新建ClientController<br>RestTemplate第一种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:18:18</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        //1.RestTemplate第一种方式 </div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""><br>以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</p>
+<ol>
+<li>6.RestTemplate第二种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private LoadBalancerClient loadBalancerClient;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line"></div><div class="line">        //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port</div><div class="line">        /**</div><div class="line">         * SpringCloud提供了LoadBalancerClient,将其注入到Spring中</div><div class="line">         */</div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);</div><div class="line">        String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());</div><div class="line">        String response = restTemplate.getForObject(url, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line"></div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure>
+<p>@Component<br>public class RestTemplateConfig {<br>    @Bean<br>    @LoadBalanced<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}</p>
+<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
+<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
+    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
+    log.info(&quot;response{}&quot;,response);
+    return response;
+}
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line"></div><div class="line">#### 3.负载均衡器Ribbion  </div><div class="line">1. 1.前面我们在说Eureka时候,谈到了服务端发现和客户端发现。Eureka属于客户端发现的方式,他的负载均衡是软负载,也就是客户端会向服务器(例如:EurekaServer)拉取已经注册的可用服务信息，然后根据负载均衡策略直接命中哪台服务器、发送请求。这整个过程都是在客户端完成的，并不需要服务端参数。SpringCloud中客户端负载均衡就是Ribbion  。他是基于NetflexRibbion实现的。通过SpringCloud的封装可以轻松的实现面向服务的restful模板请求自动转化成客户端负载均衡服务调用。</div><div class="line"></div><div class="line">一下组件都使用到了Ribbon:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/9.png) </div><div class="line"></div><div class="line">2. 2.SpringCloud在结合了Ribbon的负载均衡实现中,封装增加了HttpClient和OkHttp两种请求端实现,默认使用了Ribbon对Eureka服务发现的负载均衡client。</div><div class="line"></div><div class="line">3. 3.在上一节小结中,我们介绍了RestTemplate的三种实现方式。其中通过添加@LoadBalanced注解或者 直接写代码时候使用LoadBalancerClient,其实用到的就是Ribbon的组件</div><div class="line">4. 4.添加@LoadBalanced注解后,Ribbon会通过LoadBalancerClient自动的帮助你基于某种规则,比如:随机简单的轮训去连接目标服务,从而很容易使用Ribbon实现自定义的负载均衡算法。  </div><div class="line">5. 5.Ribbon实现负载均衡核心有3点:1.服务发现(也就是发现依赖服务的列表,也就是依据服务的名字,把该服务下的实例全都找出来)   2.服务选择规则(依据规则策略:如何从多个服务中选择一个有效的服务)  3.服务监听(监测失效服务做到高效剔除)  </div><div class="line">6. 6.主要组件是：ServerList、IRule、ServerListFilter。总体流程是:首先通过ServerList获取所有的可用服务列表。然后通过ServerListFilter过滤掉一部分地址，最后剩下的地址中通过IRule选择一个实例作为最终目标结果。</div><div class="line"></div><div class="line"></div><div class="line">#### 4 追踪源码自定义负载均衡策略</div><div class="line">略</div><div class="line">#### 5 Feign的使用</div><div class="line">##### 5.1 Feign的基本使用</div><div class="line">1. 1.本节使用Feign实现应用间通信。  </div><div class="line">2. 2.现在我们使用了Feign就不用使用restTemplate了,我们现在在ClientController中将restTemplate相关删除,并将RestTemplateConfig删除</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/10.png)</div><div class="line">3. 3.添加依赖:</div></pre></td></tr></table></figure>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-feign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/11.png)  </div><div class="line"></div><div class="line"></div><div class="line">4. 4.启动类中添加注解  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/12.png)  </div><div class="line">5. 5.定义好feign要调用的Server端接口  </div><div class="line">建立client包,定义一个ProductClient接口(里面的方法就是调用product服务的方法),此client代表order服务是一个相对于product的客户端服务。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/13.png) </div><div class="line">product中ServerController里面调用的方法:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/14.png) </div><div class="line">6. 6.此接口定义完之后,在Controller里面定义,然后接口请求:http://localhost:8081/getProductMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/15.png)  </div><div class="line"></div><div class="line">##### 5.2 Feign的总结  </div><div class="line">1. 声明式REST客户端(伪RPC)  </div><div class="line">2. 采用了基于接口的注解(定义一个接口,然后在其上加注解)  </div><div class="line">3. 内部使用了Ribbon作为负载均衡  </div><div class="line"></div><div class="line">#### 6 Feign获取商品列表  </div><div class="line">在Oder服务的OrderServiceImpl中的create里面1、2、3是我们还没有做的,这节我们需要通过Feign获取商品列表  </div><div class="line"></div><div class="line">##### 6.1 Product服务中添加获取商品列表  </div><div class="line"></div><div class="line">###### 1.Product--&gt;dao  </div><div class="line">ProductInfoRepository:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductInfoRepository extends JpaRepository<productinfo,string>{<br>     List<productinfo> findByProductStatus(Integer productStatus);</productinfo></productinfo,string></p>
+<pre><code>List&lt;ProductInfo&gt; findByProductIdIn(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">###### 2.Product--&gt;service</div><div class="line">ProductService:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductService {<br>    /**</p>
+<pre><code> * 查询所有在架商品列表
+ */
+List&lt;ProductInfo&gt; findUpAll();
+/**
+ * 查询商品列表
+ */
+List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">ProductServiceImpl:  </div><div class="line"></div><div class="line"></div><div class="line">```  </div><div class="line">@Service</div><div class="line">public class ProductServiceImpl implements ProductService &#123;</div><div class="line">    @Autowired</div><div class="line">    private ProductInfoRepository repository;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findUpAll() &#123;</div><div class="line">        return repository.findByProductStatus(ProductStatusEnum.UP.getCode());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList) &#123;</div><div class="line">        return repository.findByProductIdIn(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-Product–-gt-controller"><a href="#3-Product–-gt-controller" class="headerlink" title="3.Product–&gt;controller"></a>3.Product–&gt;controller</h6><p>ProductController:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductCategoryService productCategoryService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 获取商品列表(给订单服务使用)</div><div class="line">     * @param productIdList</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    public List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList)&#123;</div><div class="line">        return productService.findList(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="6-2-Order服务中调用商品列表"><a href="#6-2-Order服务中调用商品列表" class="headerlink" title="6.2 Order服务中调用商品列表"></a>6.2 Order服务中调用商品列表</h5><p>在client的ProductClient添加调用product的方法  </p>
+<h6 id="1-Order–-gt-ProductClient"><a href="#1-Order–-gt-ProductClient" class="headerlink" title="1.Order–&gt;ProductClient"></a>1.Order–&gt;ProductClient</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="2-Order–-gt-ClientController"><a href="#2-Order–-gt-ClientController" class="headerlink" title="2.Order–&gt;ClientController"></a>2.Order–&gt;ClientController</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductClient productClient;</div><div class="line"></div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        String msg = productClient.productMsg();</div><div class="line">        log.info(&quot;getProductMsg()&quot;,msg);</div><div class="line">        return msg;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductList&quot;)</div><div class="line">    public String getProductList()&#123;</div><div class="line">        List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));</div><div class="line">        return &quot;ok&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="3-Order–-gt-请求测试"><a href="#3-Order–-gt-请求测试" class="headerlink" title="3.Order–&gt;请求测试"></a>3.Order–&gt;请求测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/16.png" alt="">  </p>
+<h4 id="7-扣库存-Feign"><a href="#7-扣库存-Feign" class="headerlink" title="7.扣库存(Feign)"></a>7.扣库存(Feign)</h4><p>我们已经获取了商品列表,现在开始在Product微服务实现扣库存<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/17.png" alt=""><br>从创建订单接口我们知道,前端会传过来商品的信息和购买数量:我们在DTO中构造一个对象:CartDTO用来传送上面的对象  </p>
+<ol>
+<li>1.Product–&gt;CartDTO对象<br>新建DTO包,新建CartDTO类:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class CartDTO &#123;</div><div class="line"> /**</div><div class="line">     * 商品id</div><div class="line">     */</div><div class="line">  private String productId;</div><div class="line">    /**</div><div class="line">     * 商品数量</div><div class="line">     */</div><div class="line">  private Integer productQuantity;</div><div class="line"></div><div class="line">  public CartDTO()&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line">  public CartDTO(String productId,Integer productQuantity)&#123;</div><div class="line">      this.productId = productId;</div><div class="line">      this.productQuantity = productQuantity;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>2.Product–&gt;Exception自定义异常  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class ProductException extends RuntimeException &#123;</div><div class="line">    private Integer code;</div><div class="line"></div><div class="line">    public ProductException(Integer code,String message)&#123;</div><div class="line">      super(message);</div><div class="line">      this.code =code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ProductException(ResultEnum resultEnum)&#123;</div><div class="line">           super(resultEnum.getMessage());</div><div class="line">           this.code = resultEnum.getCode();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.Product–&gt;返回枚举  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public enum ResultEnum &#123;</div><div class="line">    PRODUCT_NOT_EXIST(1,&quot;商品不存在&quot;),</div><div class="line">    PRODUCT_STOCK_ERROE(2,&quot;商品库存错误&quot; );</div><div class="line">    private Integer code;</div><div class="line">    private String message;</div><div class="line"></div><div class="line">    ResultEnum(Integer code, String message) &#123;</div><div class="line">        this.code = code;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public String getMessage() &#123;</div><div class="line">        return message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setMessage(String message) &#123;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Integer getCode() &#123;</div><div class="line">        return code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setCode(Integer code) &#123;</div><div class="line">        this.code = code;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>4.Product–&gt;Service里面新建方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">public void decreaseStock(List&lt;CartDTO&gt; cartDTOList) &#123;</div><div class="line">    /**</div><div class="line">     * 遍历:查看是否存在</div><div class="line">     */</div><div class="line">    for (CartDTO cartDTO:cartDTOList)&#123;</div><div class="line">        Optional&lt;ProductInfo&gt; productInfoOptional = repository.findById(cartDTO.getProductId());</div><div class="line">        //商品不存在</div><div class="line">        if(!productInfoOptional.isPresent())&#123;</div><div class="line">         throw new ProductException(ResultEnum.PRODUCT_NOT_EXIST);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        //商品存在-库存错误</div><div class="line">        ProductInfo productInfo = productInfoOptional.get();</div><div class="line">        int result = productInfo.getProductStock() - cartDTO.getProductQuantity();</div><div class="line">        if(result&lt;0)&#123;</div><div class="line">            throw new ProductException(ResultEnum.PRODUCT_STOCK_ERROE);</div><div class="line">        &#125;</div><div class="line">        //保存</div><div class="line">        productInfo.setProductStock(result);</div><div class="line">        repository.save(productInfo);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.Product–&gt;controller</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @PostMapping(&quot;/decreaseStock&quot;)</div><div class="line">    public void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList)&#123;</div><div class="line">        productService.decreaseStock(cartDTOList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>6.在Order服务中client里面的ProductClient添加:减库存方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">    String productMsg();</div><div class="line"></div><div class="line">    @PostMapping(&quot;/product/decreaseStock&quot;)</div><div class="line">    void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">7. 7.Order服务中:ClientController</div></pre></td></tr></table></figure>
+<p>@RestController<br>@Slf4j<br>public class ClientController {</p>
+<pre><code>@Autowired
+private ProductClient productClient;
+
+
+@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    String msg = productClient.productMsg();
+    log.info(&quot;getProductMsg()&quot;,msg);
+    return msg;
+}
+
+@GetMapping(&quot;/getProductList&quot;)
+public String getProductList(){
+    List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));
+    return productInfos.toString();
+}
+
+@GetMapping(&quot;/productDecreaseStock&quot;)
+public String productDecreaseStock(){
+   productClient.decreaseStock(Arrays.asList(new CartDTO(&quot;157875196366160022&quot;,1)));
+   return &quot;ok&quot;;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">8. 8.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/19.png)  </div><div class="line">库存减少了  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/20.png)  </div><div class="line"></div><div class="line"></div><div class="line">#### 8.整合接口打通下单流程(Feign)</div><div class="line">之前我们已经完善了,商品的查询,扣库存,那么我们这一节就要完成整套业务的打通。我们之前在Order服务中,创建订单时候,里面还有需要实现的如下几步:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/21.png)  </div><div class="line"></div><div class="line">1. 1.现在我们补充完毕：</div></pre></td></tr></table></figure></p>
+<p>@Service<br>public class OrderServiceImpl implements OrderService {<br>    @Autowired<br>    private OrderMasterRepository orderMasterRepository;</p>
+<pre><code>@Autowired
+private OrderDetailRepository orderDetailRepository;
+@Autowired
+private ProductClient productClient;
+@Override
+public OrderDTO create(OrderDTO orderDTO) {
+    String orderId = KeyUtil.genUniqueKey();
+    //1.TODO 查询商品信息(调用商品服务)
+    List&lt;String&gt; productIdList = orderDTO.getOrderDetailList().stream().map(OrderDetail::getProductId).collect(Collectors.toList());
+    List&lt;ProductInfo&gt; productInfoList = productClient.listForOrder(productIdList);
+    //2.TODO 计算订单总价
+    //定义总价
+    BigDecimal orderAmout = new BigDecimal(BigInteger.ZERO);
+    for(OrderDetail orderDetail:orderDTO.getOrderDetailList()){
+        //总价=(单价*数量)+总价
+        Integer productQuantity = orderDetail.getProductQuantity();
+        for(ProductInfo productInfo:productInfoList){
+            if(productInfo.getProductId().equals(orderDetail.getProductId())){
+                orderAmout = productInfo.getProductPrice().multiply(new BigDecimal(productQuantity)).add(orderAmout);
+
+               //订单详情赋值
+                BeanUtils.copyProperties(productInfo,orderDetail);
+                orderDetail.setOrderId(orderId);
+                orderDetail.setDetailId(KeyUtil.genUniqueKey());
+
+                //订单详情入库
+                orderDetailRepository.save(orderDetail);
+            }
+        }
+
+    }
+    //3.TODO 扣除库存(调用商品服务)
+    List&lt;CartDTO&gt; cartDTOList = orderDTO.getOrderDetailList().stream()
+            .map(e -&gt; new CartDTO(e.getProductId(), e.getProductQuantity()))
+            .collect(Collectors.toList());
+    productClient.decreaseStock(cartDTOList);
+
+    //4. 订单入库
+    OrderMaster orderMaster = new OrderMaster();
+    //先设置主键 会copy到orderMaster
+    orderDTO.setOrderId(orderId);
+    BeanUtils.copyProperties(orderDTO,orderMaster);
+    orderMaster.setOrderAmount(orderAmout);
+    orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());
+    orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());
+    orderMasterRepository.save(orderMaster);
+    return orderDTO;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/22.png)</div><div class="line"></div><div class="line">#### 9.项目改造成多模块</div><div class="line">多模块改造参考:https://blog.csdn.net/yangshangwei/article/details/88809468  </div><div class="line">##### 9.1 项目缺陷</div><div class="line">虽然我们之前已经完成了下单并扣除库存，虽然通信是完成了,但是有些地方做的不好。有如下问题:  </div><div class="line">1.在Product微服务中,获取商品列表(给订单服务使用)</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/23.png)</div><div class="line">返回的ProductInfo是数据库实体:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/24.png)</div><div class="line">基本上,我们不会把自己数据库映射的表对象暴露给外部的。  </div><div class="line">2.在订单服务和商品服务之间都有共有的对象:CartDTO,ProductInfo.重复定义。对象属于哪一个服务就在那一个服务中定义。</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/25.png)    </div><div class="line">3.在Order(订单)服务里,定义了ProductClient接口使用Feign主键调用，我们在项目中可能一个服务就是很多人来做,各个服务费透明的,所以我们在Oder服务中不能把Product的服务代码请求路径等写到Order服务中.</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/26.png) </div><div class="line"></div><div class="line">##### 9.2 Product多模块拆分</div><div class="line">###### 9.2.1模块之间职责  </div><div class="line">针对解决以上情况,我们把项目分成3个模块:product-server、prodect-client、product-common  </div><div class="line"></div><div class="line">1. 1.product-server:存放所有业务逻辑:包括,controller、service</div><div class="line">2. 2.prodect-client:对外暴露的接口,商品模块对外暴露的接口:商品列表和扣库存。  </div><div class="line">3. 3.product-common:公用的对象:既会被内部模块调用,也会被外部模块调用。</div><div class="line">###### 9.2.2模块之间依赖关系  </div><div class="line">1. 1.product-common是公用的对象,所以product-server会依赖product-common,返回的商品对象prodect-client也会依赖product-common</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/27.png) </div><div class="line"></div><div class="line">2. 2.product商品多模块划分可以参考:https://blog.csdn.net/qq_29479041/article/details/84230669  </div><div class="line">3. 3.在本地打包</div></pre></td></tr></table></figure></p>
+<p>mvn -Dmaven.test.skip=true -U clean install<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">使用以上命令,会将对应模块打包并安装到本地maven仓库</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/28.png)  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 9.3 Order多模块拆分</div><div class="line">1. 1.一次类推,Order服务也分为3个模块,但是order-client目前是没有代码:其目前不需要给外提供服务  order-common目前也没有代码:目前没有需求  </div><div class="line">2. 2.在订单服务需要注意的是:订单服务调用商品服务,那么需要在订单服务里面的启动类中添加扫描到商品服务的路径:@EnableFeignClients(basePackages = &quot;com.yxm.product.client&quot;)</div><div class="line">3. 3.最外层pom文件引入product-client的jar包  </div><div class="line">4. 4.&lt;dependencyManagement&gt;是管理jar包版本,不会下载对应依赖</div><div class="line"></div><div class="line"></div><div class="line">##### 9.5 测试  </div><div class="line">启动注册中心，通过product-server和order-server中的main函数启动俩微服务</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/29.png)  </div><div class="line"></div><div class="line">下单  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/30.png)   </div><div class="line"></div><div class="line">```  </div><div class="line">select * from order_master a where a.order_id = &apos;1558247336963513928&apos;</div><div class="line">select * from order_detail a  where a.order_id = &apos;1558247336963513928&apos;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/31.png" alt="">   </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/32.png" alt="">  </p>
+<p>源码:github地址:<a href="https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw">https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw</a>  </p>
+<h4 id="10-同步或者异步"><a href="#10-同步或者异步" class="headerlink" title="10.同步或者异步"></a>10.同步或者异步</h4><ol>
+<li>1.当前订单服务和商品服务,两个服务之间的通讯机制是同步的。订单会调用商品服务的扣库存接口。微服务中除了同步,有很多时候会集成到异步的场景下,通过队列和订阅主题,实现消息的 发布和订阅,一个微服务可以是消息的发布者,通过异步的方式发送到队列和订阅主题下,作为消费者的微服务,可以从队列或者主题中获取消息。通过消息中间件。把服务间的直接调用解耦。</li>
+<li>比如以下图中:用户登录的时候,用户服务需要调用短信服务发短信。要给用户加积分,需要调用积分服务。还可能有其他服务，如果都采用同步的机制，服务间耦合过大,用户登录成功，需要向多个服务同步响应后才会成功，就会造成不好的用户体验。这个时候，我们通过消息队列可以实现很好的异步调用。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/33.png" alt="">  </li>
+<li>3.再比如:订单服务在口库存前会调用查询商品服务,之后再调用减库存的接口来扣库存。我们对其改造:商品服务在更改库存的时候、发布库存变化的消息、订单服务来订阅这个消息、可以获取到商品的部分信息，比如:可购买的商品个数、商品id。订单服务在下单的时候不必同步的去查询数据确定商品的库存信息 而是查询自己服务中数据 然后在扣库存时候订单服务发布一个扣库存的消息、商品服务订阅这个消息。拿到消息后，减少本库存消息的库存量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/34.png" alt=""> </li>
+<li>4.消息中间件:目前常见的消息队列为:RabbitMQ、Kafka、ActiveMQ,我们现在使用RabbitMQ</li>
+</ol>
+<h4 id="11-RabbitMQ的安装"><a href="#11-RabbitMQ的安装" class="headerlink" title="11.RabbitMQ的安装"></a>11.RabbitMQ的安装</h4><p>进入下载网址:<a href="https://www.rabbitmq.com/download.html" target="_blank" rel="external">https://www.rabbitmq.com/download.html</a><br>我们使用docker安装RabbitMQ<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/35.png" alt=""><br>我们使用带有管理界面的mq:3.8.0-beta.4-management<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/36.png" alt="">  </p>
+<p><a href="https://blog.csdn.net/antma/article/details/81334932" target="_blank" rel="external">https://blog.csdn.net/antma/article/details/81334932</a><br><a href="https://www.jianshu.com/p/f3e49b495d74" target="_blank" rel="external">https://www.jianshu.com/p/f3e49b495d74</a>  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/14/SpringCloud-4-应用通信/" class="archive-article-date">
+  	<time datetime="2019-04-13T16:57:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloud-3-服务拆分" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/13/SpringCloud-3-服务拆分/">SpringCloud-3-服务拆分</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-微服务拆分的起点"><a href="#1-微服务拆分的起点" class="headerlink" title="1.微服务拆分的起点"></a>1.微服务拆分的起点</h4><h5 id="1-1如何拆分微服务"><a href="#1-1如何拆分微服务" class="headerlink" title="1.1如何拆分微服务?"></a>1.1如何拆分微服务?</h5><p>现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  </p>
+<ol>
+<li>1.先明白起点和终点<br>起点:既有架构的形态。<br>终点:好的架构不是设计出来的,而是进化而来的。  </li>
+<li>典型架构<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/65.png" alt=""></li>
+</ol>
+<h5 id="1-2-适合上微服务么"><a href="#1-2-适合上微服务么" class="headerlink" title="1.2 适合上微服务么?"></a>1.2 适合上微服务么?</h5><p>业务形态不适合的<br>1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)<br>2.业务相对稳定、迭代周期长<br>3.访问压力不大、可用性要求不高(中小型企业的OA)  </p>
+<h4 id="2-康威定律和微服务"><a href="#2-康威定律和微服务" class="headerlink" title="2.康威定律和微服务"></a>2.康威定律和微服务</h4><h5 id="2-1-康威定律"><a href="#2-1-康威定律" class="headerlink" title="2.1 康威定律"></a>2.1 康威定律</h5><p>除了业务形态不适合的,其实还有其他条件,很可能导致不适合迁移到微服务中去,首先我们看一下微服务理论基础:康威定律<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/66.png" alt=""></p>
+<p>一句话概括就是:沟通的问题会影响系统设计<br>所以微服务都是强调小团队开发,大的系统拆分成微服务时候,大的团队随机也会拆分成小的团队。 </p>
+<h5 id="2-2-微服务和团队结构"><a href="#2-2-微服务和团队结构" class="headerlink" title="2.2 微服务和团队结构"></a>2.2 微服务和团队结构</h5><ol>
+<li>微服务特点<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/67.png" alt=""></li>
+<li>传统vs微服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/68.png" alt=""></li>
+</ol>
+<h4 id="3-点餐业务服务拆分分析"><a href="#3-点餐业务服务拆分分析" class="headerlink" title="3.点餐业务服务拆分分析"></a>3.点餐业务服务拆分分析</h4><p>点餐系统分为:买家端 和 卖家端  </p>
+<h5 id="3-1-服务拆分"><a href="#3-1-服务拆分" class="headerlink" title="3.1 服务拆分"></a>3.1 服务拆分</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/69.png" alt=""><br>上面:服务两种方式拆分:<br>第一种(按照终端):买家端(手机端)的ui单独为一个服务放到nginx里面,卖家端(PC端)的ui单独为一个服务,两个服务同时向后端的通用服务请求数据<br>第二种(按照业务):将订单ui,商品ui,支付ui都放到一个边缘服务。</p>
+<p>以上两种都不对,如果只是自己运营的的点餐应用:团队只有一个,并且业务变化也不大,没有微服务化的必要。如果是一个快速发展的IT公司点餐部门,业务快速发展，需求不断提出，所以需要拆分成微服务。</p>
+<p>所以说:起点和团队结构,沟通方式都会决定微服务的设计。  </p>
+<h5 id="3-2-服务拆分方法论"><a href="#3-2-服务拆分方法论" class="headerlink" title="3.2 服务拆分方法论"></a>3.2 服务拆分方法论</h5><p>下图出自&lt;&lt;可扩展的艺术&gt;&gt;书籍<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/70.png" alt=""></p>
+<ol>
+<li>X轴 水平复制:通过应用程序扩展,通过负载均衡运行多个父本一样的应用程序</li>
+<li>Z轴 数据分区:将服务按数据分区、每个服务器负责一个数据子集、每个服务器运行的代码是一样的  </li>
+<li>Y轴 功能解耦:不同职责模块分成不同服务</li>
+</ol>
+<p>通过以上模型,知道服务拆分的两个关键职责:功能和数据 </p>
+<h6 id="3-2-1-如何拆”功能”"><a href="#3-2-1-如何拆”功能”" class="headerlink" title="3.2.1 如何拆”功能”"></a>3.2.1 如何拆”功能”</h6><ol>
+<li>1.单一职责(每个服务负责业务功能的单独一部分)、松耦合(服务之间耦合度低,修改一个服务不用导致另一个服务修改)、高内聚(服务内部相关行为都聚集在一个服务内,而不是分散在不同服务中心)。</li>
+<li>2.关注点分离:-按职责  -按通用性 -按粒度级别(微服务并不是越小越好,要合适)  </li>
+</ol>
+<h6 id="3-2-2-如何拆”数据”"><a href="#3-2-2-如何拆”数据”" class="headerlink" title="3.2.2 如何拆”数据”"></a>3.2.2 如何拆”数据”</h6><p>拆分功能和拆分数据是有先后顺序  </p>
+<ol>
+<li>1.先考虑业务功能、再考虑业务功能对应的数据  </li>
+<li>2.无状态服务（状态:如果一个数据要被多个服务共享才能完成一个请求,那么这个数据就称为状态,进而依赖这个状态数据的服务称为有状态服务）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png" alt=""><br>如上所示把业务数据存放到有状态服务的数据库,缓存中实现前端微服务和后端微服务质检无状态服务,数据间没有太大耦合性。  </li>
+</ol>
+<p>如何拆数据:<br>1.每个微服务都有单独数据存储(微服务共有数据库,有可能其中一个数据库出现问题会影响其他微服务,一个服务要获取另一个服务的数据,不能直接连接库去请求,而是调用另一个服务接口去获取数据,服务之间有隔离)<br>2.依据服务特点选择不同结构的数据库类型(如果:数据基于搜索的,那么es合适,如果是非机构化数据,那么nosql的mongodb合适)<br>3.难点在确定边界  </p>
+<h6 id="3-2-3-点餐业务服务拆分分析"><a href="#3-2-3-点餐业务服务拆分分析" class="headerlink" title="3.2.3 点餐业务服务拆分分析"></a>3.2.3 点餐业务服务拆分分析</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png" alt=""><br>1.不要期望服务拆分一次就正确,微服务是不断演进的  </p>
+<h4 id="4-商品服务"><a href="#4-商品服务" class="headerlink" title="4.商品服务"></a>4.商品服务</h4><h5 id="4-1-商品服务api和sql介绍"><a href="#4-1-商品服务api和sql介绍" class="headerlink" title="4.1 商品服务api和sql介绍"></a>4.1 商品服务api和sql介绍</h5><h3 id="商品列表"><a href="#商品列表" class="headerlink" title="商品列表"></a>商品列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET /product/list</div></pre></td></tr></table></figure>
+<p>参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">无</div></pre></td></tr></table></figure>
+<p>返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;code&quot;: 0,</div><div class="line">    &quot;msg&quot;: &quot;成功&quot;,</div><div class="line">    &quot;data&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;热榜&quot;,</div><div class="line">            &quot;type&quot;: 1,</div><div class="line">            &quot;foods&quot;: [</div><div class="line">                &#123;</div><div class="line">                    &quot;id&quot;: &quot;123456&quot;,</div><div class="line">                    &quot;name&quot;: &quot;皮蛋粥&quot;,</div><div class="line">                    &quot;price&quot;: 1.2,</div><div class="line">                    &quot;description&quot;: &quot;好吃的皮蛋粥&quot;,</div><div class="line">                    &quot;icon&quot;: &quot;http://xxx.com&quot;,</div><div class="line">                &#125;</div><div class="line">            ]</div><div class="line">        &#125;,</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;好吃的&quot;,</div><div class="line">            &quot;type&quot;: 2,</div><div class="line">            &quot;foods&quot;: [</div><div class="line">                &#123;</div><div class="line">                    &quot;id&quot;: &quot;123457&quot;,</div><div class="line">                    &quot;name&quot;: &quot;慕斯蛋糕&quot;,</div><div class="line">                    &quot;price&quot;: 10.9,</div><div class="line">                    &quot;description&quot;: &quot;美味爽口&quot;,</div><div class="line">                    &quot;icon&quot;: &quot;http://xxx.com&quot;,</div><div class="line">                &#125;</div><div class="line">            ]</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">sql</div></pre></td></tr></table></figure>
+<p>– 类目<br>CREATE TABLE <code>product_category</code> (<br>    <code>category_id</code> INT NOT NULL AUTO_INCREMENT,<br>    <code>category_name</code> VARCHAR(64) NOT NULL COMMENT ‘类目名字’,<br>    <code>category_type</code> INT NOT NULL COMMENT ‘类目编号’,<br>    <code>create_time</code> TIMESTAMP NOT NULL COMMENT ‘创建时间’,<br>    <code>update_time</code> TIMESTAMP NOT NULL COMMENT ‘修改时间’,<br>    PRIMARY KEY (<code>category_id</code>),<br>    UNIQUE KEY <code>uqe_category_type</code> (<code>category_type</code>)<br>);<br>– 商品<br>CREATE TABLE <code>product_info</code> (<br>    <code>product_id</code> VARCHAR(32) NOT NULL,<br>    <code>product_name</code> VARCHAR(64) NOT NULL COMMENT ‘商品名称’,<br>    <code>product_price</code> DECIMAL(8,2) NOT NULL COMMENT ‘单价’,<br>    <code>product_stock</code> INT NOT NULL COMMENT ‘库存’,<br>    <code>product_description</code> VARCHAR(64) COMMENT ‘描述’,<br>    <code>product_icon</code> VARCHAR(512) COMMENT ‘小图’,<br>    <code>product_status</code> TINYINT(3) DEFAULT ‘0’ COMMENT ‘商品状态,0正常1下架’,<br>    <code>category_type</code> INT NOT NULL COMMENT ‘类目编号’,<br>    <code>create_time</code> TIMESTAMP NOT NULL COMMENT ‘创建时间’,<br>    <code>update_time</code> TIMESTAMP NOT NULL COMMENT ‘修改时间’,<br>    PRIMARY KEY (<code>product_id</code>)<br>);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 4.2 商品服务编码  </div><div class="line">###### 4.2.1 创建工程</div><div class="line">1. 创建一个Eureka客户端服务,并修改pom.xml文件 保持版本一致性。    </div><div class="line">2. 修改项目名称并注册到Eureka注册中心  </div><div class="line">3. 添加注解:@EnableDiscoveryClient</div><div class="line"></div><div class="line">###### 4.2.2 启动项目,查看Eureka Server是否有注册的服务  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/73.png)  </div><div class="line"> </div><div class="line">###### 4.2.3 书写业务</div><div class="line">1. 1.添加mysql驱动和jpa依赖</div><div class="line">2. application.yml中配置数据源  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/74.png)</div><div class="line"></div><div class="line"></div><div class="line">#### 5.订单服务 </div><div class="line">##### 5.1 业务逻辑分析    </div><div class="line">### 创建订单</div></pre></td></tr></table></figure></p>
+<p>POST /order/create<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">参数</div></pre></td></tr></table></figure></p>
+<p>name: “张三”<br>phone: “18868822111”<br>address: “总部”<br>openid: “ew3euwhd7sjw9diwkq” //用户的微信openid<br>items: [{<br>    productId: “1423113435324”,<br>    productQuantity: 2 //购买数量<br>}]</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">返回</div></pre></td></tr></table></figure>
+<p>{<br>  “code”: 0,<br>  “msg”: “成功”,<br>  “data”: {<br>      “orderId”: “147283992738221”<br>  }<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库   </div><div class="line"></div><div class="line">##### 5.2 编码实践    </div><div class="line">###### 5.2.1 创建应用 注册到注册中心</div><div class="line">略(按照:client客户端创建)  </div><div class="line"></div><div class="line">###### 5.2.2 dao</div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库  </div><div class="line"></div><div class="line">###### 5.2.3 service  </div><div class="line">1. 由于传递的参数包含:买家信息和订单信息,所以创建订单的service需要做一个数据转换 然后insert到对应买家和订单表里面,创建dto(Data Transfer Object)包,创建OrderDTO(买家和订单详情是一对多的关系,所以里面OrderDTO里是一个买家信息加许多商品信息)    </div><div class="line">2. OrderService里面创建订单的参数和返回为:OrderDTO  </div><div class="line">3. OrderServiceImpl里面实现创建订单:分为以下四步:1.查询商品 2.计算总价 3.扣除库存 4.订单入库。由于前3步都需要调用其他商品服务,所以我们写为:TODO  </div><div class="line">4. 创建OrderMaster时候,我们需要设置买家状态:orderStatus,payStatus我们用枚举实现如下:</div></pre></td></tr></table></figure>
+<p>public enum OrderStatusEnum {<br>    NEW(0, “新订单”),<br>    FINISHED(1, “完结”),<br>    CANCEL(2, “取消”),<br>    ;<br>    private Integer code;<br>    private String message;<br>    OrderStatusEnum(Integer code, String message) {<br>        this.code = code;<br>        this.message = message;<br>    }<br>    public Integer getCode() {<br>        return code;<br>    }<br>    public String getMessage() {<br>        return message;<br>    }<br>}  </p>
+<p>public enum PayStatusEnum {<br>    WAIT(0, “等待支付”),<br>    SUCCESS(1, “支付成功”),<br>    ;<br>    private Integer code;</p>
+<pre><code>private String message;
+
+PayStatusEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+
+public Integer getCode() {
+    return code;
+}
+
+public String getMessage() {
+    return message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. OrderId是主键,我们用简单的KeyUtil生成工具生成</div></pre></td></tr></table></figure></p>
+<p>public class KeyUtil {<br>    /**</p>
+<pre><code> * 生成唯一的主键
+ * 格式: 时间+随机数
+ */
+public static synchronized  String  genUniqueKey(){
+    Random random = new Random();
+    Integer number = random.nextInt(900000)+100000;
+    return System.currentTimeMillis()+String.valueOf(number);
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. service逻辑如下:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/82.png)</div><div class="line"></div><div class="line"></div><div class="line">###### 5.2.4 controller</div><div class="line">1. controller里面需要实现的业务逻辑大部分都是在service中,此处只是多了个参数校验，所以分为以下几步:1.参数校验 2.查询商品信息(调用商品服务) 3.计算总价 4.扣库存(调用商品服务) 5.订单入库  </div><div class="line">2.  涉及很多参数时候,我们封装前端参数,此处叫:OrderForm,并在里面添加了参数校验,不用在controller方法里面(使用@NotEmpty)校验。OrderForm此处省略getter,setter也可以用lombok加上@Data注解。</div></pre></td></tr></table></figure></p>
+<p>public class OrderForm {<br>    /**</p>
+<pre><code> * 买家姓名
+ */
+@NotEmpty(message = &quot;姓名必填&quot;)
+private String name;
+
+/**
+ * 买家手机号
+ */
+@NotEmpty(message = &quot;手机号必填&quot;)
+private String phone;
+
+/**
+ * 买家地址
+ */
+@NotEmpty(message = &quot;地址必填&quot;)
+private String address;
+
+/**
+ * 买家微信openid
+ */
+@NotEmpty(message = &quot;openid必填&quot;)
+private String openid;
+
+/**
+ * 购物车
+ */
+@NotEmpty(message = &quot;购物车不能为空&quot;)
+private String items;
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 在create方法中添加@Valid注解  </div><div class="line"></div><div class="line"></div><div class="line">4. 如果参数校验有错误时候抛出异常(自定义异常)OrderException(Integer code, String message)，其中code,message不使用硬编码,定义一个枚举:ResultEnum</div></pre></td></tr></table></figure>
+<p>public class OrderException extends RuntimeException {<br>    private Integer code;<br>    public OrderException(Integer code, String message){<br>      super(message);<br>      this.code = code;<br>    }<br>    public OrderException(ResultEnum resultEnum) {<br>        super(resultEnum.getMessage());<br>        this.code = resultEnum.getCode();<br>    }<br>}</p>
+<p>@Getter<br>public enum ResultEnum {<br>    PARAM_ERROR(1, “参数错误”),<br>    CART_EMPTY(2, “购物车为空”)<br>    ;</p>
+<pre><code>private Integer code;
+
+private String message;
+
+ResultEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">5. 在controller里面将校验过的参数：OrderForm转换成OrderDTO,此处转换封装成工具类处理(其中json转换成数据使用Gson)，转换失败时候抛出异常,打印日志      </div><div class="line"></div><div class="line">```  </div><div class="line">@Slf4j</div><div class="line">public class OrderForm2OrderDTOConverter &#123;</div><div class="line">    public static OrderDTO convert(OrderForm orderForm) &#123;</div><div class="line">        Gson gson = new Gson();</div><div class="line">        OrderDTO orderDTO = new OrderDTO();</div><div class="line">        orderDTO.setBuyerName(orderForm.getName());</div><div class="line">        orderDTO.setBuyerPhone(orderForm.getPhone());</div><div class="line">        orderDTO.setBuyerAddress(orderForm.getAddress());</div><div class="line">        orderDTO.setBuyerOpenid(orderForm.getOpenid());</div><div class="line"></div><div class="line">        List&lt;OrderDetail&gt; orderDetailList = new ArrayList&lt;&gt;();</div><div class="line">        try &#123;</div><div class="line">            orderDetailList = gson.fromJson(orderForm.getItems(),</div><div class="line">                    new TypeToken&lt;List&lt;OrderDetail&gt;&gt;() &#123;</div><div class="line">                    &#125;.getType());</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            log.error(&quot;【json转换】错误, string=&#123;&#125;&quot;, orderForm.getItems());</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR);</div><div class="line">        &#125;</div><div class="line">        orderDTO.setOrderDetailList(orderDetailList);</div><div class="line">        return orderDTO;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>接口返回的结果data里面只有一个字段,所以不需要创建一个对象,一个封装一个map返回就行    </li>
+</ol>
+<pre><code>@RestController
+@RequestMapping(&quot;/order&quot;)
+@Slf4j
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    /**
+     * 1.参数校验
+     * 2.查询商品信息(调用商品服务)
+     * 3.计算总价
+     * 4.扣库存(调用商品服务)
+     * 5.订单入库
+     */
+    @PostMapping(&quot;/create&quot;)
+    private Object create(@Valid OrderForm orderForm,
+                          BindingResult bindingResult){
+        //检验不通过抛出自定义异常
+        if (bindingResult.hasErrors()){
+            //https://www.cnblogs.com/weiapro/p/7633645.html
+           log.error(&quot;【创建订单】参数不正确, orderForm={}&quot;, orderForm);
+            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),
+                    bindingResult.getFieldError().getDefaultMessage());
+        }
+        //orderForm-&gt;orderDTO
+        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);
+        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList())){
+            log.error(&quot;【创建订单】购物车信息为空&quot;);
+            throw new OrderException(ResultEnum.CART_EMPTY);
+        }
+        OrderDTO result = orderService.create(orderDTO);
+        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;orderId&quot;, result.getOrderId());
+        return ResultVOUtil.success(map);
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/13/SpringCloud-3-服务拆分/" class="archive-article-date">
+  	<time datetime="2019-04-13T11:49:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloud-2-服务注册与发现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/13/SpringCloud-2-服务注册与发现/">SpringCloud-2-服务注册与发现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-SpringCloud-Eureka"><a href="#1-SpringCloud-Eureka" class="headerlink" title="1.SpringCloud Eureka"></a>1.SpringCloud Eureka</h4><h5 id="1-1-简单微服务架构"><a href="#1-1-简单微服务架构" class="headerlink" title="1.1 简单微服务架构"></a>1.1 简单微服务架构</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/23.png" alt=""> </p>
+<p>上图中的服务注册和发现在SpringCloud中用的就是:Eureka  </p>
+<h5 id="1-2-简单介绍"><a href="#1-2-简单介绍" class="headerlink" title="1.2 简单介绍"></a>1.2 简单介绍</h5><ol>
+<li>基于Netflix Eureka做了二次封装  </li>
+<li>主要由两个组件组成: -Eureka Server(注册中心)  -Eureka Client(服务中心)  </li>
+</ol>
+<h4 id="2-Eureka-Server"><a href="#2-Eureka-Server" class="headerlink" title="2.Eureka Server"></a>2.Eureka Server</h4><h5 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1 简介"></a>2.1 简介</h5><ol>
+<li>注册中心好比老师手中名单 记录着所有同学名字  点名时候,根据手册名单</li>
+<li>注册中心记录着所有应用的信息和状态(应用名,所在服务器,是否正常工作),在微服务架构中,我们把应用叫做服务 </li>
+<li>由图所知:服务中心就是找到服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/24.png" alt="">  <h5 id="2-2-创建Eureka-Server应用"><a href="#2-2-创建Eureka-Server应用" class="headerlink" title="2.2 创建Eureka Server应用"></a>2.2 创建Eureka Server应用</h5><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/25.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/26.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/27.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/28.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/29.png" alt="">   </li>
+</ol>
+<p>项目创建后我们不着急启动,先看下pom.xml文件:<br>SpringBoot的版本和SpringCloud版本如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/30.png" alt=""><br>我们如何知道SpringBoot版本和SpringCloud的版本匹配呢?我们进入SpringCloud官网:<a href="https://spring.io/" target="_blank" rel="external">https://spring.io/</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/31.png" alt=""><br>将pom.xml中设置成统一匹配的:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/32.png" alt=""> </p>
+<h5 id="2-3-启动Eureka-Server"><a href="#2-3-启动Eureka-Server" class="headerlink" title="2.3 启动Eureka Server"></a>2.3 启动Eureka Server</h5><p>1.启动时候报错:没有出现注册中心界面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/33.png" alt=""><br>2.添加@EnableEurekaServer注解</p>
+<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">     </div><div class="line">     @SpringBootApplication</div><div class="line">	 @EnableEurekaServer</div><div class="line">	 public class EurekaApplication &#123;</div><div class="line">		public static void main(String[] args) &#123;</div><div class="line">			SpringApplication.run(EurekaApplication.class, args);</div><div class="line">		&#125;</div><div class="line">	</div><div class="line">	 &#125;</div><div class="line">    </div><div class="line">     ``</div><div class="line"></div><div class="line"></div><div class="line">重启发现出现注册中心的界面  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/34.png)  </div><div class="line"></div><div class="line"></div><div class="line">3.启动时候虽然可以访问,但是出现了下面的错误:</div></pre></td></tr></table></figure>
+
+com.netflix.discovery.shared.transport.TransportException: Cannot execute request on any known server
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">这是因为此应用不仅是一个server端同时也是一个client端。他也需要找到一个注册中心,把自己注册上去。我们配置一下他注册的地址:就是往自己身上注册。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/35.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/36.png)  </div><div class="line"></div><div class="line">点击service-url进入:EurekaClientConfigBean</div></pre></td></tr></table></figure>
+
+public void setServiceUrl(Map&lt;String, String&gt; serviceUrl) {
+    this.serviceUrl = serviceUrl;
+}
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">serviceUrl是一个map的key为:defaultZone</div></pre></td></tr></table></figure>
+
+eureka:
+ client:
+   service-url:
+     defaultZone: http://localhost:8080/eureka/
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">重启项目时候:注册时候是心跳检测注册,刚开始会有错误,等一会就可以了,如下已经注册上:  </div><div class="line">  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/37.png)  </div><div class="line"></div><div class="line">由于注册的Application的名字为:UNKNOWN  我们修改此应用的名字,添加如下配置:</div></pre></td></tr></table></figure>
+
+spring:
+  application:
+    name: eureka
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/38.png)   </div><div class="line"></div><div class="line">4.由于此应用本来就是一个注册中心,自己注册到自己不出现在注册实例中:添加如下配置:register-with-eureka: false</div></pre></td></tr></table></figure>
+
+eureka:
+ client:
+  service-url:
+    defaultZone: http://localhost:8080/eureka/
+  register-with-eureka: false  
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/39.png)   </div><div class="line"></div><div class="line">5.由于我们后面很多应用都是8080端口,所以我们修改注册中心的地址为默认端口:8761</div></pre></td></tr></table></figure>
+
+eureka:
+ client:
+   service-url:
+     defaultZone: http://localhost:8761/eureka/
+   register-with-eureka: false
+spring:
+  application:
+    name: eureka
+server:
+    port: 8761  
+
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">#### 3.Eureka Client(服务注册)  </div><div class="line">##### 3.1 启用注册中心  </div><div class="line">注册中心为了方便不需要每次在idea中启动,我们应该打成jar包,然后通过命令在后台启用。进入eureka的根目录,执行:  </div><div class="line"></div><div class="line">    mvn clean package  </div><div class="line"></div><div class="line">生成后端启动：</div><div class="line">  </div><div class="line">    nohup java -jar eureka-0.0.1-SNAPSHOT.jar &amp;  </div><div class="line"></div><div class="line">##### 3.2 创建Eureka Client应用  </div><div class="line">1. 创建应用</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/25.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/40.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/41.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/42.png)  </div><div class="line"></div><div class="line">删除不需要的文件:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/43.png)  </div><div class="line"></div><div class="line">client端和server端的版本保持一致:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/44.png) </div><div class="line"></div><div class="line">2. 添加注册中心地址:</div><div class="line"></div><div class="line">    eureka:</div><div class="line">      client:</div><div class="line">        service-url:</div><div class="line">          defaultZone: http://localhost:8761/eureka/</div><div class="line">    spring:</div><div class="line">      application:</div><div class="line">        name: client</div><div class="line">     </div><div class="line">3. 开启服务注册  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/45.png) </div><div class="line"></div><div class="line"></div><div class="line">有时候启动报错:</div><div class="line"></div><div class="line">    Invocation of destroy method failed on bean with name &apos;scopedTarget.eurekaClient&apos;: org.springframework.beans.factory.BeanCreationNotAllowedException: Error creating bean with name &apos;eurekaInstanceConfigBean&apos;: Singleton bean creation not allowed while singletons of this factory are in destruction (Do not request a bean from a BeanFactory in a destroy method implementation!)</div><div class="line"></div><div class="line">解决:添加web依赖</div><div class="line"></div><div class="line">       &lt;dependency&gt;</div><div class="line">			&lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;</div><div class="line">			&lt;artifactId&gt;spring-boot-starter-web&lt;/artifactId&gt;</div><div class="line">		&lt;/dependency&gt;</div><div class="line"></div><div class="line"></div><div class="line">4. 查看是否已经注册  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/46.png) </div><div class="line"></div><div class="line"></div><div class="line">5. 如果不停的启动client端,会在注册中心出现:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/47.png) </div><div class="line">client&lt;---&gt;server端是采用心跳的机制,server端会不听的检查client端是否存活上线,在一定时间会统计出client端的上线率,当低于某个比例时候 会报出以上警告,在开发环境我们可以把它关掉(在server端里面配置文件加上:)</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/48.png)  </div><div class="line"></div><div class="line">#### 4.Eureka高可用  </div><div class="line">##### 4.1 Eureka单节点 </div><div class="line">1. 上面的Eureka是单点的,如果挂了的话 所以client端服务都不可以运行了  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/49.png) </div><div class="line">##### 4.2 Eureka多节点之间互相注册,但是client注册到其中一个Eureka    </div><div class="line">1. 让Eureka Server开启两个,之间互相注册,虽然client只在server1上注册,但是会把client注册也会拷贝到server2注册  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/50.png)  </div><div class="line">2. 开启两个Eureka Server端口分别为:8761、8762   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/51.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/52.png)  </div><div class="line">以端口来区分:Eureka1:8761   Eureka2:8762</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/53.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/54.png)  </div><div class="line">注释掉yml中原来端口:</div></pre></td></tr></table></figure>
+
+    #server:
+    #port: 8761
+```
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/55.png" alt=""><br>启动  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/56.png" alt=""><br>启动</p>
+<p>访问:<a href="http://localhost:8762" target="_blank" rel="external">http://localhost:8762</a>  我们可以看到之前注册到8761的服务也注册到8762上了,这是因为:8761和8762之间互相注册了。互相注册后,他们之上的信息有所交换。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/57.png" alt=""> </p>
+<h5 id="4-3-Eureka1挂了-重启Eureka2和client"><a href="#4-3-Eureka1挂了-重启Eureka2和client" class="headerlink" title="4.3 Eureka1挂了 重启Eureka2和client"></a>4.3 Eureka1挂了 重启Eureka2和client</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/58.png" alt=""> </p>
+<p>此时我们重启client和Eureka2时候,我们发现在Eureka2上没有发现client,这个时候我们就需要把client注册到Eureka1和Eureka2上才行。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/59.png" alt="">   </p>
+<h5 id="4-4-Eureka包含3个以上"><a href="#4-4-Eureka包含3个以上" class="headerlink" title="4.4 Eureka包含3个以上"></a>4.4 Eureka包含3个以上</h5><p>有时候我们服务比较多,并且需要的注册中心也比较多,也就是Eureka Server比较多,我们该怎么做呢?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/60.png" alt="">  </p>
+<h4 id="5-Eureka总结"><a href="#5-Eureka总结" class="headerlink" title="5.Eureka总结"></a>5.Eureka总结</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/61.png" alt=""> </p>
+<h4 id="6-分布式下服务注册的地位和原理"><a href="#6-分布式下服务注册的地位和原理" class="headerlink" title="6.分布式下服务注册的地位和原理"></a>6.分布式下服务注册的地位和原理</h4><h5 id="6-1-传统服务发现"><a href="#6-1-传统服务发现" class="headerlink" title="6.1 传统服务发现"></a>6.1 传统服务发现</h5><p>传统服务A要找到服务B,是通过在服务A中配置B的地址从而找到B,在分布式系统中,各个系统之间是不共享内存的，如下A服务如果要找到B服务就需要,并且B服务是分布式集群的,B中的服务器是不确定多少台,在云服务时代,服务器根据压力容量可能会动态改变,此时如果还是在A里面配置多个B节点注册中心地址不可取。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/62.png" alt=""></p>
+<h5 id="6-2-注册中心服务发现"><a href="#6-2-注册中心服务发现" class="headerlink" title="6.2 注册中心服务发现"></a>6.2 注册中心服务发现</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/63.png" alt="">  </p>
+<ol>
+<li>类似于注册中心就是个代理,需要找谁就找谁</li>
+<li><p>通过以上可以知道注册中心 是分布式服务中最重要的基础部分。  </p>
+</li>
+<li><p>A是如何通过”注册中心”找导服务B的呢?<br>客户端发起:A通过注册中心可以找到需要B,从中只需要找到一个B(通过轮训、hash等负载均衡机制等方式)<br>服务端发现:通过代理的方式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/64.png" alt="">  </p>
+</li>
+</ol>
+<h5 id="6-3-思考"><a href="#6-3-思考" class="headerlink" title="6.3 思考"></a>6.3 思考</h5><ol>
+<li>SpringCloud是提供java应用程序之间的服务注册,那么如果有些服务是c/php/node.js写的服务,该怎样取进行服务发现和注册了，SpringCloud的Eureka使用客户端发现方式进行服务发现,SpringCloud是一个强大的我服务体系,但是是纯java的，山本大叔倡导轻量级的方式去实现微服务,所以采用了Http Restful API的方式,并且提供了Restful API接口让其他不同语言的服务区实现接口,达到服务注册。   </li>
+<li>微服务具有异构特点:各个服务间可以用不同语言,每个服务可以根据需要选择不通的数据库  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/13/SpringCloud-2-服务注册与发现/" class="archive-article-date">
+  	<time datetime="2019-04-13T02:46:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+  
+    <nav id="page-nav">
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+    </nav>
   
 
 
@@ -454,7 +1354,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 10px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
     			</div>
     	</section>
     

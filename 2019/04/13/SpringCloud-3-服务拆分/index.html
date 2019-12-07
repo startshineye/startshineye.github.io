@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>SpringCloud-3-服务拆分 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1.微服务拆分的起点1.1如何拆分微服务?现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  
+
+1.先明白起点和终点起点:既有架构的形态。终点:好的架构不是设计出来的,而是进化而来的。  
+典型架构
+
+1.2 适合上微服务么?业务形态不适合的1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)2.业务相对稳定、迭代周期长3.访问压力不大、">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud-3-服务拆分">
+<meta property="og:url" content="https://github.com/startshineye/2019/04/13/SpringCloud-3-服务拆分/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="1.微服务拆分的起点1.1如何拆分微服务?现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  
+
+1.先明白起点和终点起点:既有架构的形态。终点:好的架构不是设计出来的,而是进化而来的。  
+典型架构
+
+1.2 适合上微服务么?业务形态不适合的1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)2.业务相对稳定、迭代周期长3.访问压力不大、">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/65.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/66.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/67.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/68.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/69.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/70.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png">
+<meta property="og:updated_time" content="2019-04-18T17:21:39.289Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud-3-服务拆分">
+<meta name="twitter:description" content="1.微服务拆分的起点1.1如何拆分微服务?现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  
+
+1.先明白起点和终点起点:既有架构的形态。终点:好的架构不是设计出来的,而是进化而来的。  
+典型架构
+
+1.2 适合上微服务么?业务形态不适合的1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)2.业务相对稳定、迭代周期长3.访问压力不大、">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/65.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-SpringCloud-3-服务拆分" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloud-3-服务拆分
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-微服务拆分的起点"><a href="#1-微服务拆分的起点" class="headerlink" title="1.微服务拆分的起点"></a>1.微服务拆分的起点</h4><h5 id="1-1如何拆分微服务"><a href="#1-1如何拆分微服务" class="headerlink" title="1.1如何拆分微服务?"></a>1.1如何拆分微服务?</h5><p>现在微服务概念炒得很热,关于如何拆分微服务,有以下几点。  </p>
+<ol>
+<li>1.先明白起点和终点<br>起点:既有架构的形态。<br>终点:好的架构不是设计出来的,而是进化而来的。  </li>
+<li>典型架构<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/65.png" alt=""></li>
+</ol>
+<h5 id="1-2-适合上微服务么"><a href="#1-2-适合上微服务么" class="headerlink" title="1.2 适合上微服务么?"></a>1.2 适合上微服务么?</h5><p>业务形态不适合的<br>1.系统中包含很多很多强事务场景的(因为微服务是分布式的,分布式强事务CAP最多也就能达到最终一致性)<br>2.业务相对稳定、迭代周期长<br>3.访问压力不大、可用性要求不高(中小型企业的OA)  </p>
+<h4 id="2-康威定律和微服务"><a href="#2-康威定律和微服务" class="headerlink" title="2.康威定律和微服务"></a>2.康威定律和微服务</h4><h5 id="2-1-康威定律"><a href="#2-1-康威定律" class="headerlink" title="2.1 康威定律"></a>2.1 康威定律</h5><p>除了业务形态不适合的,其实还有其他条件,很可能导致不适合迁移到微服务中去,首先我们看一下微服务理论基础:康威定律<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/66.png" alt=""></p>
+<p>一句话概括就是:沟通的问题会影响系统设计<br>所以微服务都是强调小团队开发,大的系统拆分成微服务时候,大的团队随机也会拆分成小的团队。 </p>
+<h5 id="2-2-微服务和团队结构"><a href="#2-2-微服务和团队结构" class="headerlink" title="2.2 微服务和团队结构"></a>2.2 微服务和团队结构</h5><ol>
+<li>微服务特点<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/67.png" alt=""></li>
+<li>传统vs微服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/68.png" alt=""></li>
+</ol>
+<h4 id="3-点餐业务服务拆分分析"><a href="#3-点餐业务服务拆分分析" class="headerlink" title="3.点餐业务服务拆分分析"></a>3.点餐业务服务拆分分析</h4><p>点餐系统分为:买家端 和 卖家端  </p>
+<h5 id="3-1-服务拆分"><a href="#3-1-服务拆分" class="headerlink" title="3.1 服务拆分"></a>3.1 服务拆分</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/69.png" alt=""><br>上面:服务两种方式拆分:<br>第一种(按照终端):买家端(手机端)的ui单独为一个服务放到nginx里面,卖家端(PC端)的ui单独为一个服务,两个服务同时向后端的通用服务请求数据<br>第二种(按照业务):将订单ui,商品ui,支付ui都放到一个边缘服务。</p>
+<p>以上两种都不对,如果只是自己运营的的点餐应用:团队只有一个,并且业务变化也不大,没有微服务化的必要。如果是一个快速发展的IT公司点餐部门,业务快速发展，需求不断提出，所以需要拆分成微服务。</p>
+<p>所以说:起点和团队结构,沟通方式都会决定微服务的设计。  </p>
+<h5 id="3-2-服务拆分方法论"><a href="#3-2-服务拆分方法论" class="headerlink" title="3.2 服务拆分方法论"></a>3.2 服务拆分方法论</h5><p>下图出自&lt;&lt;可扩展的艺术&gt;&gt;书籍<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/70.png" alt=""></p>
+<ol>
+<li>X轴 水平复制:通过应用程序扩展,通过负载均衡运行多个父本一样的应用程序</li>
+<li>Z轴 数据分区:将服务按数据分区、每个服务器负责一个数据子集、每个服务器运行的代码是一样的  </li>
+<li>Y轴 功能解耦:不同职责模块分成不同服务</li>
+</ol>
+<p>通过以上模型,知道服务拆分的两个关键职责:功能和数据 </p>
+<h6 id="3-2-1-如何拆”功能”"><a href="#3-2-1-如何拆”功能”" class="headerlink" title="3.2.1 如何拆”功能”"></a>3.2.1 如何拆”功能”</h6><ol>
+<li>1.单一职责(每个服务负责业务功能的单独一部分)、松耦合(服务之间耦合度低,修改一个服务不用导致另一个服务修改)、高内聚(服务内部相关行为都聚集在一个服务内,而不是分散在不同服务中心)。</li>
+<li>2.关注点分离:-按职责  -按通用性 -按粒度级别(微服务并不是越小越好,要合适)  </li>
+</ol>
+<h6 id="3-2-2-如何拆”数据”"><a href="#3-2-2-如何拆”数据”" class="headerlink" title="3.2.2 如何拆”数据”"></a>3.2.2 如何拆”数据”</h6><p>拆分功能和拆分数据是有先后顺序  </p>
+<ol>
+<li>1.先考虑业务功能、再考虑业务功能对应的数据  </li>
+<li>2.无状态服务（状态:如果一个数据要被多个服务共享才能完成一个请求,那么这个数据就称为状态,进而依赖这个状态数据的服务称为有状态服务）<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/71.png" alt=""><br>如上所示把业务数据存放到有状态服务的数据库,缓存中实现前端微服务和后端微服务质检无状态服务,数据间没有太大耦合性。  </li>
+</ol>
+<p>如何拆数据:<br>1.每个微服务都有单独数据存储(微服务共有数据库,有可能其中一个数据库出现问题会影响其他微服务,一个服务要获取另一个服务的数据,不能直接连接库去请求,而是调用另一个服务接口去获取数据,服务之间有隔离)<br>2.依据服务特点选择不同结构的数据库类型(如果:数据基于搜索的,那么es合适,如果是非机构化数据,那么nosql的mongodb合适)<br>3.难点在确定边界  </p>
+<h6 id="3-2-3-点餐业务服务拆分分析"><a href="#3-2-3-点餐业务服务拆分分析" class="headerlink" title="3.2.3 点餐业务服务拆分分析"></a>3.2.3 点餐业务服务拆分分析</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/72.png" alt=""><br>1.不要期望服务拆分一次就正确,微服务是不断演进的  </p>
+<h4 id="4-商品服务"><a href="#4-商品服务" class="headerlink" title="4.商品服务"></a>4.商品服务</h4><h5 id="4-1-商品服务api和sql介绍"><a href="#4-1-商品服务api和sql介绍" class="headerlink" title="4.1 商品服务api和sql介绍"></a>4.1 商品服务api和sql介绍</h5><h3 id="商品列表"><a href="#商品列表" class="headerlink" title="商品列表"></a>商品列表</h3><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">GET /product/list</div></pre></td></tr></table></figure>
+<p>参数</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">无</div></pre></td></tr></table></figure>
+<p>返回</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">&#123;</div><div class="line">    &quot;code&quot;: 0,</div><div class="line">    &quot;msg&quot;: &quot;成功&quot;,</div><div class="line">    &quot;data&quot;: [</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;热榜&quot;,</div><div class="line">            &quot;type&quot;: 1,</div><div class="line">            &quot;foods&quot;: [</div><div class="line">                &#123;</div><div class="line">                    &quot;id&quot;: &quot;123456&quot;,</div><div class="line">                    &quot;name&quot;: &quot;皮蛋粥&quot;,</div><div class="line">                    &quot;price&quot;: 1.2,</div><div class="line">                    &quot;description&quot;: &quot;好吃的皮蛋粥&quot;,</div><div class="line">                    &quot;icon&quot;: &quot;http://xxx.com&quot;,</div><div class="line">                &#125;</div><div class="line">            ]</div><div class="line">        &#125;,</div><div class="line">        &#123;</div><div class="line">            &quot;name&quot;: &quot;好吃的&quot;,</div><div class="line">            &quot;type&quot;: 2,</div><div class="line">            &quot;foods&quot;: [</div><div class="line">                &#123;</div><div class="line">                    &quot;id&quot;: &quot;123457&quot;,</div><div class="line">                    &quot;name&quot;: &quot;慕斯蛋糕&quot;,</div><div class="line">                    &quot;price&quot;: 10.9,</div><div class="line">                    &quot;description&quot;: &quot;美味爽口&quot;,</div><div class="line">                    &quot;icon&quot;: &quot;http://xxx.com&quot;,</div><div class="line">                &#125;</div><div class="line">            ]</div><div class="line">        &#125;</div><div class="line">    ]</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">sql</div></pre></td></tr></table></figure>
+<p>– 类目<br>CREATE TABLE <code>product_category</code> (<br>    <code>category_id</code> INT NOT NULL AUTO_INCREMENT,<br>    <code>category_name</code> VARCHAR(64) NOT NULL COMMENT ‘类目名字’,<br>    <code>category_type</code> INT NOT NULL COMMENT ‘类目编号’,<br>    <code>create_time</code> TIMESTAMP NOT NULL COMMENT ‘创建时间’,<br>    <code>update_time</code> TIMESTAMP NOT NULL COMMENT ‘修改时间’,<br>    PRIMARY KEY (<code>category_id</code>),<br>    UNIQUE KEY <code>uqe_category_type</code> (<code>category_type</code>)<br>);<br>– 商品<br>CREATE TABLE <code>product_info</code> (<br>    <code>product_id</code> VARCHAR(32) NOT NULL,<br>    <code>product_name</code> VARCHAR(64) NOT NULL COMMENT ‘商品名称’,<br>    <code>product_price</code> DECIMAL(8,2) NOT NULL COMMENT ‘单价’,<br>    <code>product_stock</code> INT NOT NULL COMMENT ‘库存’,<br>    <code>product_description</code> VARCHAR(64) COMMENT ‘描述’,<br>    <code>product_icon</code> VARCHAR(512) COMMENT ‘小图’,<br>    <code>product_status</code> TINYINT(3) DEFAULT ‘0’ COMMENT ‘商品状态,0正常1下架’,<br>    <code>category_type</code> INT NOT NULL COMMENT ‘类目编号’,<br>    <code>create_time</code> TIMESTAMP NOT NULL COMMENT ‘创建时间’,<br>    <code>update_time</code> TIMESTAMP NOT NULL COMMENT ‘修改时间’,<br>    PRIMARY KEY (<code>product_id</code>)<br>);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 4.2 商品服务编码  </div><div class="line">###### 4.2.1 创建工程</div><div class="line">1. 创建一个Eureka客户端服务,并修改pom.xml文件 保持版本一致性。    </div><div class="line">2. 修改项目名称并注册到Eureka注册中心  </div><div class="line">3. 添加注解:@EnableDiscoveryClient</div><div class="line"></div><div class="line">###### 4.2.2 启动项目,查看Eureka Server是否有注册的服务  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/73.png)  </div><div class="line"> </div><div class="line">###### 4.2.3 书写业务</div><div class="line">1. 1.添加mysql驱动和jpa依赖</div><div class="line">2. application.yml中配置数据源  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/74.png)</div><div class="line"></div><div class="line"></div><div class="line">#### 5.订单服务 </div><div class="line">##### 5.1 业务逻辑分析    </div><div class="line">### 创建订单</div></pre></td></tr></table></figure></p>
+<p>POST /order/create<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">参数</div></pre></td></tr></table></figure></p>
+<p>name: “张三”<br>phone: “18868822111”<br>address: “总部”<br>openid: “ew3euwhd7sjw9diwkq” //用户的微信openid<br>items: [{<br>    productId: “1423113435324”,<br>    productQuantity: 2 //购买数量<br>}]</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">返回</div></pre></td></tr></table></figure>
+<p>{<br>  “code”: 0,<br>  “msg”: “成功”,<br>  “data”: {<br>      “orderId”: “147283992738221”<br>  }<br>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库   </div><div class="line"></div><div class="line">##### 5.2 编码实践    </div><div class="line">###### 5.2.1 创建应用 注册到注册中心</div><div class="line">略(按照:client客户端创建)  </div><div class="line"></div><div class="line">###### 5.2.2 dao</div><div class="line">订单服务业务逻辑思路:  </div><div class="line">1.参数校验  </div><div class="line">2.查询商品信息(此时信息有可能不在订单系统中,可能在商品微服务中,则调用商品服务查询)  </div><div class="line">3.计算总价  </div><div class="line">4.扣库存(调用商品服务)   </div><div class="line">5.订单入库  </div><div class="line"></div><div class="line">###### 5.2.3 service  </div><div class="line">1. 由于传递的参数包含:买家信息和订单信息,所以创建订单的service需要做一个数据转换 然后insert到对应买家和订单表里面,创建dto(Data Transfer Object)包,创建OrderDTO(买家和订单详情是一对多的关系,所以里面OrderDTO里是一个买家信息加许多商品信息)    </div><div class="line">2. OrderService里面创建订单的参数和返回为:OrderDTO  </div><div class="line">3. OrderServiceImpl里面实现创建订单:分为以下四步:1.查询商品 2.计算总价 3.扣除库存 4.订单入库。由于前3步都需要调用其他商品服务,所以我们写为:TODO  </div><div class="line">4. 创建OrderMaster时候,我们需要设置买家状态:orderStatus,payStatus我们用枚举实现如下:</div></pre></td></tr></table></figure>
+<p>public enum OrderStatusEnum {<br>    NEW(0, “新订单”),<br>    FINISHED(1, “完结”),<br>    CANCEL(2, “取消”),<br>    ;<br>    private Integer code;<br>    private String message;<br>    OrderStatusEnum(Integer code, String message) {<br>        this.code = code;<br>        this.message = message;<br>    }<br>    public Integer getCode() {<br>        return code;<br>    }<br>    public String getMessage() {<br>        return message;<br>    }<br>}  </p>
+<p>public enum PayStatusEnum {<br>    WAIT(0, “等待支付”),<br>    SUCCESS(1, “支付成功”),<br>    ;<br>    private Integer code;</p>
+<pre><code>private String message;
+
+PayStatusEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+
+public Integer getCode() {
+    return code;
+}
+
+public String getMessage() {
+    return message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. OrderId是主键,我们用简单的KeyUtil生成工具生成</div></pre></td></tr></table></figure></p>
+<p>public class KeyUtil {<br>    /**</p>
+<pre><code> * 生成唯一的主键
+ * 格式: 时间+随机数
+ */
+public static synchronized  String  genUniqueKey(){
+    Random random = new Random();
+    Integer number = random.nextInt(900000)+100000;
+    return System.currentTimeMillis()+String.valueOf(number);
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. service逻辑如下:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/82.png)</div><div class="line"></div><div class="line"></div><div class="line">###### 5.2.4 controller</div><div class="line">1. controller里面需要实现的业务逻辑大部分都是在service中,此处只是多了个参数校验，所以分为以下几步:1.参数校验 2.查询商品信息(调用商品服务) 3.计算总价 4.扣库存(调用商品服务) 5.订单入库  </div><div class="line">2.  涉及很多参数时候,我们封装前端参数,此处叫:OrderForm,并在里面添加了参数校验,不用在controller方法里面(使用@NotEmpty)校验。OrderForm此处省略getter,setter也可以用lombok加上@Data注解。</div></pre></td></tr></table></figure></p>
+<p>public class OrderForm {<br>    /**</p>
+<pre><code> * 买家姓名
+ */
+@NotEmpty(message = &quot;姓名必填&quot;)
+private String name;
+
+/**
+ * 买家手机号
+ */
+@NotEmpty(message = &quot;手机号必填&quot;)
+private String phone;
+
+/**
+ * 买家地址
+ */
+@NotEmpty(message = &quot;地址必填&quot;)
+private String address;
+
+/**
+ * 买家微信openid
+ */
+@NotEmpty(message = &quot;openid必填&quot;)
+private String openid;
+
+/**
+ * 购物车
+ */
+@NotEmpty(message = &quot;购物车不能为空&quot;)
+private String items;
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 在create方法中添加@Valid注解  </div><div class="line"></div><div class="line"></div><div class="line">4. 如果参数校验有错误时候抛出异常(自定义异常)OrderException(Integer code, String message)，其中code,message不使用硬编码,定义一个枚举:ResultEnum</div></pre></td></tr></table></figure>
+<p>public class OrderException extends RuntimeException {<br>    private Integer code;<br>    public OrderException(Integer code, String message){<br>      super(message);<br>      this.code = code;<br>    }<br>    public OrderException(ResultEnum resultEnum) {<br>        super(resultEnum.getMessage());<br>        this.code = resultEnum.getCode();<br>    }<br>}</p>
+<p>@Getter<br>public enum ResultEnum {<br>    PARAM_ERROR(1, “参数错误”),<br>    CART_EMPTY(2, “购物车为空”)<br>    ;</p>
+<pre><code>private Integer code;
+
+private String message;
+
+ResultEnum(Integer code, String message) {
+    this.code = code;
+    this.message = message;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">5. 在controller里面将校验过的参数：OrderForm转换成OrderDTO,此处转换封装成工具类处理(其中json转换成数据使用Gson)，转换失败时候抛出异常,打印日志      </div><div class="line"></div><div class="line">```  </div><div class="line">@Slf4j</div><div class="line">public class OrderForm2OrderDTOConverter &#123;</div><div class="line">    public static OrderDTO convert(OrderForm orderForm) &#123;</div><div class="line">        Gson gson = new Gson();</div><div class="line">        OrderDTO orderDTO = new OrderDTO();</div><div class="line">        orderDTO.setBuyerName(orderForm.getName());</div><div class="line">        orderDTO.setBuyerPhone(orderForm.getPhone());</div><div class="line">        orderDTO.setBuyerAddress(orderForm.getAddress());</div><div class="line">        orderDTO.setBuyerOpenid(orderForm.getOpenid());</div><div class="line"></div><div class="line">        List&lt;OrderDetail&gt; orderDetailList = new ArrayList&lt;&gt;();</div><div class="line">        try &#123;</div><div class="line">            orderDetailList = gson.fromJson(orderForm.getItems(),</div><div class="line">                    new TypeToken&lt;List&lt;OrderDetail&gt;&gt;() &#123;</div><div class="line">                    &#125;.getType());</div><div class="line">        &#125; catch (Exception e) &#123;</div><div class="line">            log.error(&quot;【json转换】错误, string=&#123;&#125;&quot;, orderForm.getItems());</div><div class="line">            throw new OrderException(ResultEnum.PARAM_ERROR);</div><div class="line">        &#125;</div><div class="line">        orderDTO.setOrderDetailList(orderDetailList);</div><div class="line">        return orderDTO;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<ol>
+<li>接口返回的结果data里面只有一个字段,所以不需要创建一个对象,一个封装一个map返回就行    </li>
+</ol>
+<pre><code>@RestController
+@RequestMapping(&quot;/order&quot;)
+@Slf4j
+public class OrderController {
+
+    @Autowired
+    private OrderService orderService;
+
+    /**
+     * 1.参数校验
+     * 2.查询商品信息(调用商品服务)
+     * 3.计算总价
+     * 4.扣库存(调用商品服务)
+     * 5.订单入库
+     */
+    @PostMapping(&quot;/create&quot;)
+    private Object create(@Valid OrderForm orderForm,
+                          BindingResult bindingResult){
+        //检验不通过抛出自定义异常
+        if (bindingResult.hasErrors()){
+            //https://www.cnblogs.com/weiapro/p/7633645.html
+           log.error(&quot;【创建订单】参数不正确, orderForm={}&quot;, orderForm);
+            throw new OrderException(ResultEnum.PARAM_ERROR.getCode(),
+                    bindingResult.getFieldError().getDefaultMessage());
+        }
+        //orderForm-&gt;orderDTO
+        OrderDTO orderDTO = OrderForm2OrderDTOConverter.convert(orderForm);
+        if(CollectionUtils.isEmpty(orderDTO.getOrderDetailList())){
+            log.error(&quot;【创建订单】购物车信息为空&quot;);
+            throw new OrderException(ResultEnum.CART_EMPTY);
+        }
+        OrderDTO result = orderService.create(orderDTO);
+        Map&lt;String, String&gt; map = new HashMap&lt;&gt;();
+        map.put(&quot;orderId&quot;, result.getOrderId());
+        return ResultVOUtil.success(map);
+    }
+}
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/83.png" alt=""></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/13/SpringCloud-3-服务拆分/" class="archive-article-date">
+  	<time datetime="2019-04-13T11:49:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2019/04/14/SpringCloud-4-应用通信/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          SpringCloud-4-应用通信
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/13/SpringCloud-2-服务注册与发现/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloud-2-服务注册与发现</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringCloud-3-服务拆分" data-title="SpringCloud-3-服务拆分" data-url="https://github.com/startshineye/2019/04/13/SpringCloud-3-服务拆分/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

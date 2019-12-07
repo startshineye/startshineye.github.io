@@ -1,0 +1,620 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>SpringCloud-4-应用通信 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="1.HTTP vs RPC
+应用(微服务)间通讯方式主要有两种:HTTP和RPC
+两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloud-4-应用通信">
+<meta property="og:url" content="https://github.com/startshineye/2019/04/14/SpringCloud-4-应用通信/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="1.HTTP vs RPC
+应用(微服务)间通讯方式主要有两种:HTTP和RPC
+两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/16.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/17.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/31.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/32.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/33.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/34.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/35.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/05/36.png">
+<meta property="og:updated_time" content="2019-12-07T09:35:23.910Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloud-4-应用通信">
+<meta name="twitter:description" content="1.HTTP vs RPC
+应用(微服务)间通讯方式主要有两种:HTTP和RPC
+两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  
+Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式
+SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。
+S">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-SpringCloud-4-应用通信" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloud-4-应用通信
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
+<li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
+<li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
+<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
+<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
+<li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
+</ol>
+<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
+<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
+<li>1.使用 “订单服务-&gt;商品服务”为例</li>
+<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
+<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
+<li>4.product端新建ServerController</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.order服务中新建ClientController<br>RestTemplate第一种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:18:18</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        //1.RestTemplate第一种方式 </div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png" alt=""><br>以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</p>
+<ol>
+<li>6.RestTemplate第二种方式  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private LoadBalancerClient loadBalancerClient;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line"></div><div class="line">        //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port</div><div class="line">        /**</div><div class="line">         * SpringCloud提供了LoadBalancerClient,将其注入到Spring中</div><div class="line">         */</div><div class="line">        RestTemplate restTemplate = new RestTemplate();</div><div class="line">        ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);</div><div class="line">        String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());</div><div class="line">        String response = restTemplate.getForObject(url, String.class);</div><div class="line">        log.info(&quot;response&#123;&#125;&quot;,response);</div><div class="line">        return response;</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">``` </div><div class="line"></div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure>
+<p>@Component<br>public class RestTemplateConfig {<br>    @Bean<br>    @LoadBalanced<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}</p>
+<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
+<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
+    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
+    log.info(&quot;response{}&quot;,response);
+    return response;
+}
+</code></pre><p>}</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line"></div><div class="line">#### 3.负载均衡器Ribbion  </div><div class="line">1. 1.前面我们在说Eureka时候,谈到了服务端发现和客户端发现。Eureka属于客户端发现的方式,他的负载均衡是软负载,也就是客户端会向服务器(例如:EurekaServer)拉取已经注册的可用服务信息，然后根据负载均衡策略直接命中哪台服务器、发送请求。这整个过程都是在客户端完成的，并不需要服务端参数。SpringCloud中客户端负载均衡就是Ribbion  。他是基于NetflexRibbion实现的。通过SpringCloud的封装可以轻松的实现面向服务的restful模板请求自动转化成客户端负载均衡服务调用。</div><div class="line"></div><div class="line">一下组件都使用到了Ribbon:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/9.png) </div><div class="line"></div><div class="line">2. 2.SpringCloud在结合了Ribbon的负载均衡实现中,封装增加了HttpClient和OkHttp两种请求端实现,默认使用了Ribbon对Eureka服务发现的负载均衡client。</div><div class="line"></div><div class="line">3. 3.在上一节小结中,我们介绍了RestTemplate的三种实现方式。其中通过添加@LoadBalanced注解或者 直接写代码时候使用LoadBalancerClient,其实用到的就是Ribbon的组件</div><div class="line">4. 4.添加@LoadBalanced注解后,Ribbon会通过LoadBalancerClient自动的帮助你基于某种规则,比如:随机简单的轮训去连接目标服务,从而很容易使用Ribbon实现自定义的负载均衡算法。  </div><div class="line">5. 5.Ribbon实现负载均衡核心有3点:1.服务发现(也就是发现依赖服务的列表,也就是依据服务的名字,把该服务下的实例全都找出来)   2.服务选择规则(依据规则策略:如何从多个服务中选择一个有效的服务)  3.服务监听(监测失效服务做到高效剔除)  </div><div class="line">6. 6.主要组件是：ServerList、IRule、ServerListFilter。总体流程是:首先通过ServerList获取所有的可用服务列表。然后通过ServerListFilter过滤掉一部分地址，最后剩下的地址中通过IRule选择一个实例作为最终目标结果。</div><div class="line"></div><div class="line"></div><div class="line">#### 4 追踪源码自定义负载均衡策略</div><div class="line">略</div><div class="line">#### 5 Feign的使用</div><div class="line">##### 5.1 Feign的基本使用</div><div class="line">1. 1.本节使用Feign实现应用间通信。  </div><div class="line">2. 2.现在我们使用了Feign就不用使用restTemplate了,我们现在在ClientController中将restTemplate相关删除,并将RestTemplateConfig删除</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/10.png)</div><div class="line">3. 3.添加依赖:</div></pre></td></tr></table></figure>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-feign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/11.png)  </div><div class="line"></div><div class="line"></div><div class="line">4. 4.启动类中添加注解  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/12.png)  </div><div class="line">5. 5.定义好feign要调用的Server端接口  </div><div class="line">建立client包,定义一个ProductClient接口(里面的方法就是调用product服务的方法),此client代表order服务是一个相对于product的客户端服务。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/13.png) </div><div class="line">product中ServerController里面调用的方法:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/14.png) </div><div class="line">6. 6.此接口定义完之后,在Controller里面定义,然后接口请求:http://localhost:8081/getProductMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/15.png)  </div><div class="line"></div><div class="line">##### 5.2 Feign的总结  </div><div class="line">1. 声明式REST客户端(伪RPC)  </div><div class="line">2. 采用了基于接口的注解(定义一个接口,然后在其上加注解)  </div><div class="line">3. 内部使用了Ribbon作为负载均衡  </div><div class="line"></div><div class="line">#### 6 Feign获取商品列表  </div><div class="line">在Oder服务的OrderServiceImpl中的create里面1、2、3是我们还没有做的,这节我们需要通过Feign获取商品列表  </div><div class="line"></div><div class="line">##### 6.1 Product服务中添加获取商品列表  </div><div class="line"></div><div class="line">###### 1.Product--&gt;dao  </div><div class="line">ProductInfoRepository:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductInfoRepository extends JpaRepository<productinfo,string>{<br>     List<productinfo> findByProductStatus(Integer productStatus);</productinfo></productinfo,string></p>
+<pre><code>List&lt;ProductInfo&gt; findByProductIdIn(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">###### 2.Product--&gt;service</div><div class="line">ProductService:</div></pre></td></tr></table></figure></p>
+<p>public interface ProductService {<br>    /**</p>
+<pre><code> * 查询所有在架商品列表
+ */
+List&lt;ProductInfo&gt; findUpAll();
+/**
+ * 查询商品列表
+ */
+List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList);
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">ProductServiceImpl:  </div><div class="line"></div><div class="line"></div><div class="line">```  </div><div class="line">@Service</div><div class="line">public class ProductServiceImpl implements ProductService &#123;</div><div class="line">    @Autowired</div><div class="line">    private ProductInfoRepository repository;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findUpAll() &#123;</div><div class="line">        return repository.findByProductStatus(ProductStatusEnum.UP.getCode());</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @Override</div><div class="line">    public List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList) &#123;</div><div class="line">        return repository.findByProductIdIn(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
+<h6 id="3-Product–-gt-controller"><a href="#3-Product–-gt-controller" class="headerlink" title="3.Product–&gt;controller"></a>3.Product–&gt;controller</h6><p>ProductController:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductCategoryService productCategoryService;</div><div class="line"></div><div class="line">    /**</div><div class="line">     * 获取商品列表(给订单服务使用)</div><div class="line">     * @param productIdList</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    public List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList)&#123;</div><div class="line">        return productService.findList(productIdList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="6-2-Order服务中调用商品列表"><a href="#6-2-Order服务中调用商品列表" class="headerlink" title="6.2 Order服务中调用商品列表"></a>6.2 Order服务中调用商品列表</h5><p>在client的ProductClient添加调用product的方法  </p>
+<h6 id="1-Order–-gt-ProductClient"><a href="#1-Order–-gt-ProductClient" class="headerlink" title="1.Order–&gt;ProductClient"></a>1.Order–&gt;ProductClient</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/listForOrder&quot;)</div><div class="line">    List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="2-Order–-gt-ClientController"><a href="#2-Order–-gt-ClientController" class="headerlink" title="2.Order–&gt;ClientController"></a>2.Order–&gt;ClientController</h6><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductClient productClient;</div><div class="line"></div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        String msg = productClient.productMsg();</div><div class="line">        log.info(&quot;getProductMsg()&quot;,msg);</div><div class="line">        return msg;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    @GetMapping(&quot;/getProductList&quot;)</div><div class="line">    public String getProductList()&#123;</div><div class="line">        List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));</div><div class="line">        return &quot;ok&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h6 id="3-Order–-gt-请求测试"><a href="#3-Order–-gt-请求测试" class="headerlink" title="3.Order–&gt;请求测试"></a>3.Order–&gt;请求测试</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/16.png" alt="">  </p>
+<h4 id="7-扣库存-Feign"><a href="#7-扣库存-Feign" class="headerlink" title="7.扣库存(Feign)"></a>7.扣库存(Feign)</h4><p>我们已经获取了商品列表,现在开始在Product微服务实现扣库存<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/17.png" alt=""><br>从创建订单接口我们知道,前端会传过来商品的信息和购买数量:我们在DTO中构造一个对象:CartDTO用来传送上面的对象  </p>
+<ol>
+<li>1.Product–&gt;CartDTO对象<br>新建DTO包,新建CartDTO类:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line">public class CartDTO &#123;</div><div class="line"> /**</div><div class="line">     * 商品id</div><div class="line">     */</div><div class="line">  private String productId;</div><div class="line">    /**</div><div class="line">     * 商品数量</div><div class="line">     */</div><div class="line">  private Integer productQuantity;</div><div class="line"></div><div class="line">  public CartDTO()&#123;</div><div class="line"></div><div class="line">  &#125;</div><div class="line">  public CartDTO(String productId,Integer productQuantity)&#123;</div><div class="line">      this.productId = productId;</div><div class="line">      this.productQuantity = productQuantity;</div><div class="line">  &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>2.Product–&gt;Exception自定义异常  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">public class ProductException extends RuntimeException &#123;</div><div class="line">    private Integer code;</div><div class="line"></div><div class="line">    public ProductException(Integer code,String message)&#123;</div><div class="line">      super(message);</div><div class="line">      this.code =code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public ProductException(ResultEnum resultEnum)&#123;</div><div class="line">           super(resultEnum.getMessage());</div><div class="line">           this.code = resultEnum.getCode();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.Product–&gt;返回枚举  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div></pre></td><td class="code"><pre><div class="line">public enum ResultEnum &#123;</div><div class="line">    PRODUCT_NOT_EXIST(1,&quot;商品不存在&quot;),</div><div class="line">    PRODUCT_STOCK_ERROE(2,&quot;商品库存错误&quot; );</div><div class="line">    private Integer code;</div><div class="line">    private String message;</div><div class="line"></div><div class="line">    ResultEnum(Integer code, String message) &#123;</div><div class="line">        this.code = code;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public String getMessage() &#123;</div><div class="line">        return message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setMessage(String message) &#123;</div><div class="line">        this.message = message;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public Integer getCode() &#123;</div><div class="line">        return code;</div><div class="line">    &#125;</div><div class="line"></div><div class="line">    public void setCode(Integer code) &#123;</div><div class="line">        this.code = code;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>4.Product–&gt;Service里面新建方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">@Override</div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">public void decreaseStock(List&lt;CartDTO&gt; cartDTOList) &#123;</div><div class="line">    /**</div><div class="line">     * 遍历:查看是否存在</div><div class="line">     */</div><div class="line">    for (CartDTO cartDTO:cartDTOList)&#123;</div><div class="line">        Optional&lt;ProductInfo&gt; productInfoOptional = repository.findById(cartDTO.getProductId());</div><div class="line">        //商品不存在</div><div class="line">        if(!productInfoOptional.isPresent())&#123;</div><div class="line">         throw new ProductException(ResultEnum.PRODUCT_NOT_EXIST);</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        //商品存在-库存错误</div><div class="line">        ProductInfo productInfo = productInfoOptional.get();</div><div class="line">        int result = productInfo.getProductStock() - cartDTO.getProductQuantity();</div><div class="line">        if(result&lt;0)&#123;</div><div class="line">            throw new ProductException(ResultEnum.PRODUCT_STOCK_ERROE);</div><div class="line">        &#125;</div><div class="line">        //保存</div><div class="line">        productInfo.setProductStock(result);</div><div class="line">        repository.save(productInfo);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>5.Product–&gt;controller</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line"></div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line"></div><div class="line">    @PostMapping(&quot;/decreaseStock&quot;)</div><div class="line">    public void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList)&#123;</div><div class="line">        productService.decreaseStock(cartDTOList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>6.在Order服务中client里面的ProductClient添加:减库存方法  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">    String productMsg();</div><div class="line"></div><div class="line">    @PostMapping(&quot;/product/decreaseStock&quot;)</div><div class="line">    void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">7. 7.Order服务中:ClientController</div></pre></td></tr></table></figure>
+<p>@RestController<br>@Slf4j<br>public class ClientController {</p>
+<pre><code>@Autowired
+private ProductClient productClient;
+
+
+@GetMapping(&quot;/getProductMsg&quot;)
+public String getProductMsg(){
+    String msg = productClient.productMsg();
+    log.info(&quot;getProductMsg()&quot;,msg);
+    return msg;
+}
+
+@GetMapping(&quot;/getProductList&quot;)
+public String getProductList(){
+    List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));
+    return productInfos.toString();
+}
+
+@GetMapping(&quot;/productDecreaseStock&quot;)
+public String productDecreaseStock(){
+   productClient.decreaseStock(Arrays.asList(new CartDTO(&quot;157875196366160022&quot;,1)));
+   return &quot;ok&quot;;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">8. 8.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/19.png)  </div><div class="line">库存减少了  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/20.png)  </div><div class="line"></div><div class="line"></div><div class="line">#### 8.整合接口打通下单流程(Feign)</div><div class="line">之前我们已经完善了,商品的查询,扣库存,那么我们这一节就要完成整套业务的打通。我们之前在Order服务中,创建订单时候,里面还有需要实现的如下几步:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/21.png)  </div><div class="line"></div><div class="line">1. 1.现在我们补充完毕：</div></pre></td></tr></table></figure></p>
+<p>@Service<br>public class OrderServiceImpl implements OrderService {<br>    @Autowired<br>    private OrderMasterRepository orderMasterRepository;</p>
+<pre><code>@Autowired
+private OrderDetailRepository orderDetailRepository;
+@Autowired
+private ProductClient productClient;
+@Override
+public OrderDTO create(OrderDTO orderDTO) {
+    String orderId = KeyUtil.genUniqueKey();
+    //1.TODO 查询商品信息(调用商品服务)
+    List&lt;String&gt; productIdList = orderDTO.getOrderDetailList().stream().map(OrderDetail::getProductId).collect(Collectors.toList());
+    List&lt;ProductInfo&gt; productInfoList = productClient.listForOrder(productIdList);
+    //2.TODO 计算订单总价
+    //定义总价
+    BigDecimal orderAmout = new BigDecimal(BigInteger.ZERO);
+    for(OrderDetail orderDetail:orderDTO.getOrderDetailList()){
+        //总价=(单价*数量)+总价
+        Integer productQuantity = orderDetail.getProductQuantity();
+        for(ProductInfo productInfo:productInfoList){
+            if(productInfo.getProductId().equals(orderDetail.getProductId())){
+                orderAmout = productInfo.getProductPrice().multiply(new BigDecimal(productQuantity)).add(orderAmout);
+
+               //订单详情赋值
+                BeanUtils.copyProperties(productInfo,orderDetail);
+                orderDetail.setOrderId(orderId);
+                orderDetail.setDetailId(KeyUtil.genUniqueKey());
+
+                //订单详情入库
+                orderDetailRepository.save(orderDetail);
+            }
+        }
+
+    }
+    //3.TODO 扣除库存(调用商品服务)
+    List&lt;CartDTO&gt; cartDTOList = orderDTO.getOrderDetailList().stream()
+            .map(e -&gt; new CartDTO(e.getProductId(), e.getProductQuantity()))
+            .collect(Collectors.toList());
+    productClient.decreaseStock(cartDTOList);
+
+    //4. 订单入库
+    OrderMaster orderMaster = new OrderMaster();
+    //先设置主键 会copy到orderMaster
+    orderDTO.setOrderId(orderId);
+    BeanUtils.copyProperties(orderDTO,orderMaster);
+    orderMaster.setOrderAmount(orderAmout);
+    orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());
+    orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());
+    orderMasterRepository.save(orderMaster);
+    return orderDTO;
+}
+</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.测试  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/22.png)</div><div class="line"></div><div class="line">#### 9.项目改造成多模块</div><div class="line">多模块改造参考:https://blog.csdn.net/yangshangwei/article/details/88809468  </div><div class="line">##### 9.1 项目缺陷</div><div class="line">虽然我们之前已经完成了下单并扣除库存，虽然通信是完成了,但是有些地方做的不好。有如下问题:  </div><div class="line">1.在Product微服务中,获取商品列表(给订单服务使用)</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/23.png)</div><div class="line">返回的ProductInfo是数据库实体:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/24.png)</div><div class="line">基本上,我们不会把自己数据库映射的表对象暴露给外部的。  </div><div class="line">2.在订单服务和商品服务之间都有共有的对象:CartDTO,ProductInfo.重复定义。对象属于哪一个服务就在那一个服务中定义。</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/25.png)    </div><div class="line">3.在Order(订单)服务里,定义了ProductClient接口使用Feign主键调用，我们在项目中可能一个服务就是很多人来做,各个服务费透明的,所以我们在Oder服务中不能把Product的服务代码请求路径等写到Order服务中.</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/26.png) </div><div class="line"></div><div class="line">##### 9.2 Product多模块拆分</div><div class="line">###### 9.2.1模块之间职责  </div><div class="line">针对解决以上情况,我们把项目分成3个模块:product-server、prodect-client、product-common  </div><div class="line"></div><div class="line">1. 1.product-server:存放所有业务逻辑:包括,controller、service</div><div class="line">2. 2.prodect-client:对外暴露的接口,商品模块对外暴露的接口:商品列表和扣库存。  </div><div class="line">3. 3.product-common:公用的对象:既会被内部模块调用,也会被外部模块调用。</div><div class="line">###### 9.2.2模块之间依赖关系  </div><div class="line">1. 1.product-common是公用的对象,所以product-server会依赖product-common,返回的商品对象prodect-client也会依赖product-common</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/27.png) </div><div class="line"></div><div class="line">2. 2.product商品多模块划分可以参考:https://blog.csdn.net/qq_29479041/article/details/84230669  </div><div class="line">3. 3.在本地打包</div></pre></td></tr></table></figure></p>
+<p>mvn -Dmaven.test.skip=true -U clean install<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">使用以上命令,会将对应模块打包并安装到本地maven仓库</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/28.png)  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">##### 9.3 Order多模块拆分</div><div class="line">1. 1.一次类推,Order服务也分为3个模块,但是order-client目前是没有代码:其目前不需要给外提供服务  order-common目前也没有代码:目前没有需求  </div><div class="line">2. 2.在订单服务需要注意的是:订单服务调用商品服务,那么需要在订单服务里面的启动类中添加扫描到商品服务的路径:@EnableFeignClients(basePackages = &quot;com.yxm.product.client&quot;)</div><div class="line">3. 3.最外层pom文件引入product-client的jar包  </div><div class="line">4. 4.&lt;dependencyManagement&gt;是管理jar包版本,不会下载对应依赖</div><div class="line"></div><div class="line"></div><div class="line">##### 9.5 测试  </div><div class="line">启动注册中心，通过product-server和order-server中的main函数启动俩微服务</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/29.png)  </div><div class="line"></div><div class="line">下单  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/30.png)   </div><div class="line"></div><div class="line">```  </div><div class="line">select * from order_master a where a.order_id = &apos;1558247336963513928&apos;</div><div class="line">select * from order_detail a  where a.order_id = &apos;1558247336963513928&apos;</div></pre></td></tr></table></figure></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/31.png" alt="">   </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/32.png" alt="">  </p>
+<p>源码:github地址:<a href="https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw">https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw</a>  </p>
+<h4 id="10-同步或者异步"><a href="#10-同步或者异步" class="headerlink" title="10.同步或者异步"></a>10.同步或者异步</h4><ol>
+<li>1.当前订单服务和商品服务,两个服务之间的通讯机制是同步的。订单会调用商品服务的扣库存接口。微服务中除了同步,有很多时候会集成到异步的场景下,通过队列和订阅主题,实现消息的 发布和订阅,一个微服务可以是消息的发布者,通过异步的方式发送到队列和订阅主题下,作为消费者的微服务,可以从队列或者主题中获取消息。通过消息中间件。把服务间的直接调用解耦。</li>
+<li>比如以下图中:用户登录的时候,用户服务需要调用短信服务发短信。要给用户加积分,需要调用积分服务。还可能有其他服务，如果都采用同步的机制，服务间耦合过大,用户登录成功，需要向多个服务同步响应后才会成功，就会造成不好的用户体验。这个时候，我们通过消息队列可以实现很好的异步调用。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/33.png" alt="">  </li>
+<li>3.再比如:订单服务在口库存前会调用查询商品服务,之后再调用减库存的接口来扣库存。我们对其改造:商品服务在更改库存的时候、发布库存变化的消息、订单服务来订阅这个消息、可以获取到商品的部分信息，比如:可购买的商品个数、商品id。订单服务在下单的时候不必同步的去查询数据确定商品的库存信息 而是查询自己服务中数据 然后在扣库存时候订单服务发布一个扣库存的消息、商品服务订阅这个消息。拿到消息后，减少本库存消息的库存量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/34.png" alt=""> </li>
+<li>4.消息中间件:目前常见的消息队列为:RabbitMQ、Kafka、ActiveMQ,我们现在使用RabbitMQ</li>
+</ol>
+<h4 id="11-RabbitMQ的安装"><a href="#11-RabbitMQ的安装" class="headerlink" title="11.RabbitMQ的安装"></a>11.RabbitMQ的安装</h4><p>进入下载网址:<a href="https://www.rabbitmq.com/download.html" target="_blank" rel="external">https://www.rabbitmq.com/download.html</a><br>我们使用docker安装RabbitMQ<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/35.png" alt=""><br>我们使用带有管理界面的mq:3.8.0-beta.4-management<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/36.png" alt="">  </p>
+<p><a href="https://blog.csdn.net/antma/article/details/81334932" target="_blank" rel="external">https://blog.csdn.net/antma/article/details/81334932</a><br><a href="https://www.jianshu.com/p/f3e49b495d74" target="_blank" rel="external">https://www.jianshu.com/p/f3e49b495d74</a>  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/14/SpringCloud-4-应用通信/" class="archive-article-date">
+  	<time datetime="2019-04-13T16:57:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+    <a href="/2019/04/15/SpringCloud-5-统一配置中心/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          SpringCloud-5-统一配置中心
+        
+      </div>
+    </a>
+  
+  
+    <a href="/2019/04/13/SpringCloud-3-服务拆分/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloud-3-服务拆分</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringCloud-4-应用通信" data-title="SpringCloud-4-应用通信" data-url="https://github.com/startshineye/2019/04/14/SpringCloud-4-应用通信/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2019 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>
