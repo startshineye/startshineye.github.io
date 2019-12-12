@@ -32,7 +32,12 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/20.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/21.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/22.png">
-<meta property="og:updated_time" content="2019-12-11T15:42:59.401Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/23.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/24.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/26.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/25.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/27.png">
+<meta property="og:updated_time" content="2019-12-12T00:44:44.957Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-8-Zuul综合使用">
 <meta name="twitter:description" content="项目整体架构图如下:   
@@ -249,7 +254,7 @@
 <li>3./product/list 都可以访问<br>*/<br>```</li>
 </ul>
 <p>分为以上3步,我们还差在Order服务中订单完结接口没有开发:”/order/finish”;我们现在实现此接。  </p>
-<h3 id="8-5-权限校验完成"><a href="#8-5-权限校验完成" class="headerlink" title="8.5 权限校验完成"></a>8.5 权限校验完成</h3><ol>
+<h3 id="8-5-权限校验完成"><a href="#8-5-权限校验完成" class="headerlink" title="8.5 权限校验完成"></a>8.5 权限校验完成</h3><h3 id="8-5-1-权限基本操作"><a href="#8-5-1-权限基本操作" class="headerlink" title="8.5.1 权限基本操作"></a>8.5.1 权限基本操作</h3><ol>
 <li>1.先访问user(卖家登录:<a href="http://localhost:8085/login/seller?openid=xyz" target="_blank" rel="external">http://localhost:8085/login/seller?openid=xyz</a>)<br>结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/16.png" alt=""><br>我们请求正常,并且也获取到cookie了,此时我们把cookie删掉.再次请求api-gateway(此时请求api-gateway的时候注释掉:TokenFilter中run认证)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/17.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/18.png" alt=""><br>以上返回的是成功,但是cookies中没有值,之前提过Zuul敏感头设置:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/19.png" alt="">  </li>
 </ol>
 <p>假如我们对所有服务都提供敏感头,都需要传递cookie,则:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/20.png" alt=""></p>
@@ -257,7 +262,26 @@
 <ol>
 <li>2.接下来我们书写AuthFilter中业务逻辑。  </li>
 </ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/22.png" alt=""></p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/22.png" alt="">  </p>
+<p>下面我们通过接口去调用:  </p>
+<ol>
+<li><p>3.我们通过postman创建订单(切记一定要加上order服务名)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/23.png" alt=""><br>我们改掉:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/24.png" alt=""><br>我们再次请求时候回返回401：权限不足-&gt;所以我们需要先登录<br>注意:在postman中,每一个窗口是互相隔离的,我们在一个窗口中登录,在另一个窗口中也是不能请求过的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/26.png" alt=""><br>所以我们自己需要写入一个cookie到postman中去<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/25.png" alt="">  </p>
+</li>
+<li><p>4.上面我们使用if语句来判断不同授权用户,其实这种写法以后相当不好维护,如果用户很多,耦合进来判断,有一天假如对卖家放开不限制,那么只能删掉,如何改造呢?我们一般对卖家和买家各自做一个filter:<br>a.拦截统一在shouldFilter方法中<br>b.拦截后处理统一在run方法中</p>
+</li>
+</ol>
+<p>AuthBuyerFilter:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/27.png" alt=""> </p>
+<p>AuthSellerFilter也是类似。  </p>
+<h3 id="8-5-2-权限补充"><a href="#8-5-2-权限补充" class="headerlink" title="8.5.2 权限补充"></a>8.5.2 权限补充</h3><ol>
+<li><p>1.大多数情况下,我们会把权限校验的uri存放到数据库中去,那是不是api-gateway直接去连接数据库进行判断呢?<br>这里牵涉到一个边界的问题,api-gateway要做的是网关,如果去连接user服务的数据库,显然是不合适的,那能不能去调用user服务呢?调用user服务是合理的,应该去调用,但是每次鉴权的时候去调用user服务,user服务那边又去调用数据库的话,这样对数据库压力很大,我们应该使用redis,api-gateway直接去redis里面获取用户权限，那么redis里面的数据怎样过来呢?可以像之前”异步扣库存的方式-&gt;用户信息一变动,就发一个信息过来,网关这边监听消息,并记录到redis”</p>
+</li>
+<li><p>2.微服务架构下对所有服务都得鉴权，每个服务都需要明确当前用户的权限,在Zuul的前置过滤器里面实现相关逻辑是一个值得考虑的方案,同时在微服务框架中,多个服务的无状态化一般会考虑两种技术方案:<br>a.分布式session(将用户认证信息存储在共享储存中,且通常用用户会话作为key来实现简单的分布式hash映射,当用户访问微服务时,用户数据可以从共享存储中获取,用户登录状态是不透明的,同时也是一个高可用且可扩展的解决方案)<br>b.OAuth2与Spring Security结合</p>
+</li>
+<li><p>3.我们这有一个细节:用户模块的utils代码一直在copy,相同的我们就拷贝过来,我们少了一个基础服务(如果公司是一个大型服务改造的话,基础服务比较容易,一目连然拆出来,但是是一个从头开发的项目,没有多大把握,类似我们现在,建议是将每个微服务的公用组件放到公用模块里面去,比如我们现在的user,order,product服务都有common模块,有了一定积累后,很自然的将这块代码剥离出来,作为公共组件,下沉,成为公共的一个服务)  </p>
+</li>
+<li><p>4.另外一点,在SpringCloud架构体系中的所有微服务都是通过Zuul对外提供统一访问入口,这个时候如果公司有两套系统,一套传统项目,一套微服务架构项目,让这两套项目在线上同时运行,Zuul会非常关键。  </p>
+</li>
+</ol>
 
       
     </div>
