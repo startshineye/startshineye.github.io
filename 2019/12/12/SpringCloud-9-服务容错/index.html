@@ -4,18 +4,39 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>常见问题 | Startshineye的博客</title>
+  <title>SpringCloud-9-服务容错 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="1. hexo编译错误之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:问题及解决方案参考如下:https://github.com/hexojs/hexo/issues/2384">
+  <meta name="description" content="9.1 服务容错和Hystrix
+1.雪崩效应:在微服务架构中,通常会有多个服务层调用,如果某个服务不可用,导致几连故障,造成整个系统不可用的情况。如上所示:服务A调用服务B,服务B调用服务C。当服务C发生故障时候,服务B调用不通服务C,则B发生故障,由于服务A也调用服务B,服务A调用不通服务B时候,会采取多次重连,同步等待会造成资源耗尽,则服务A也故障。最后都不可用。  
+
+2.SpringCl">
 <meta property="og:type" content="article">
-<meta property="og:title" content="常见问题">
-<meta property="og:url" content="https://github.com/startshineye/2019/12/07/常见问题/index.html">
+<meta property="og:title" content="SpringCloud-9-服务容错">
+<meta property="og:url" content="https://github.com/startshineye/2019/12/12/SpringCloud-9-服务容错/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="1. hexo编译错误之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:问题及解决方案参考如下:https://github.com/hexojs/hexo/issues/2384">
-<meta property="og:updated_time" content="2019-12-07T09:29:47.080Z">
+<meta property="og:description" content="9.1 服务容错和Hystrix
+1.雪崩效应:在微服务架构中,通常会有多个服务层调用,如果某个服务不可用,导致几连故障,造成整个系统不可用的情况。如上所示:服务A调用服务B,服务B调用服务C。当服务C发生故障时候,服务B调用不通服务C,则B发生故障,由于服务A也调用服务B,服务A调用不通服务B时候,会采取多次重连,同步等待会造成资源耗尽,则服务A也故障。最后都不可用。  
+
+2.SpringCl">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/31.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/32.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/33.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/34.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/35.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/36.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/39.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png">
+<meta property="og:updated_time" content="2019-12-12T15:08:55.335Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="常见问题">
-<meta name="twitter:description" content="1. hexo编译错误之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:问题及解决方案参考如下:https://github.com/hexojs/hexo/issues/2384">
+<meta name="twitter:title" content="SpringCloud-9-服务容错">
+<meta name="twitter:description" content="9.1 服务容错和Hystrix
+1.雪崩效应:在微服务架构中,通常会有多个服务层调用,如果某个服务不可用,导致几连故障,造成整个系统不可用的情况。如上所示:服务A调用服务B,服务B调用服务C。当服务C发生故障时候,服务B调用不通服务C,则B发生故障,由于服务A也调用服务B,服务A调用不通服务B时候,会采取多次重连,同步等待会造成资源耗尽,则服务A也故障。最后都不可用。  
+
+2.SpringCl">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/31.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -151,7 +172,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-常见问题" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloud-9-服务容错" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -161,7 +182,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      常见问题
+      SpringCloud-9-服务容错
     </h1>
   
 
@@ -169,19 +190,51 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="1-hexo编译错误"><a href="#1-hexo编译错误" class="headerlink" title="1. hexo编译错误"></a>1. hexo编译错误</h3><p>之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:<br>问题及解决方案参考如下:<br><a href="https://github.com/hexojs/hexo/issues/2384">https://github.com/hexojs/hexo/issues/2384</a></p>
+        <h3 id="9-1-服务容错和Hystrix"><a href="#9-1-服务容错和Hystrix" class="headerlink" title="9.1 服务容错和Hystrix"></a>9.1 服务容错和Hystrix</h3><ol>
+<li><p>1.雪崩效应:在微服务架构中,通常会有多个服务层调用,如果某个服务不可用,导致几连故障,造成整个系统不可用的情况。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/31.png" alt=""><br>如上所示:服务A调用服务B,服务B调用服务C。当服务C发生故障时候,服务B调用不通服务C,则B发生故障,由于服务A也调用服务B,服务A调用不通服务B时候,会采取多次重连,同步等待会造成资源耗尽,则服务A也故障。最后都不可用。  </p>
+</li>
+<li><p>2.SpringCloud家族中防雪崩的利器就是:SpringCloud Hystrix,它是基于Netflix的开源框架（Hystrix的中文意思是豪猪:defend you app）；Hystrix目的就是给微服务提供一系列服务容错保护机制;还记得Eureka的意思吗?Eureka就是找到了,也就是服务注册中心  </p>
+</li>
+<li><p>3.Spring Cloud Hystrix具有如下功能:<br>a.服务降级  b.依赖隔离  c.服务熔断  d.监控(Hystrix Dashboard)  </p>
+</li>
+</ol>
+<h4 id="9-1-1-服务降级"><a href="#9-1-1-服务降级" class="headerlink" title="9.1.1 服务降级"></a>9.1.1 服务降级</h4><p>比如双十一时候,刷新网站时候会出现”哎呦喂,被挤爆了”,还有秒杀的时候,某些app提示网络开小差,请稍后再试,诸如此类问题,服务降级知道思想是要区分业务,具体是:  </p>
+<ol>
+<li>1.优先核心服务,非核心服务不可用或弱可用。<br>(比如在订单,商品微服务中:买家查询是核心服务,卖家查询是弱可用服务,我们需要优先保证买家查询服务)  </li>
+<li>2.在应用层面,使用服务降级很简单,通过HystrixCommand注解制定。在fallbackMethod(回退函数)中具体实现降级逻辑。   </li>
+</ol>
+<h3 id="9-2-触发降级"><a href="#9-2-触发降级" class="headerlink" title="9.2 触发降级"></a>9.2 触发降级</h3><p>在order服务中有一个create接口调用商品服务代码块<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/32.png" alt=""><br>我们将其拎出来  </p>
+<p>我们单独在order服务的controller包中创建一个:HystrixController类,然后在里面使用restTemplate<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/33.png" alt=""></p>
+<p>然后通过浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/34.png" alt="">  </p>
+<p>我们此时关掉product服务,然后再次请求:发现连接被拒绝:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/35.png" alt="">  </p>
+<h4 id="9-2-1服务降级应用搭建"><a href="#9-2-1服务降级应用搭建" class="headerlink" title="9.2.1服务降级应用搭建"></a>9.2.1服务降级应用搭建</h4><p>我们这个时候使用Hystrix用作服务降级,然后就是老套路了  </p>
+<ol>
+<li>1.引入依赖:(order-server的pom.xml文件中)  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;spring-cloud-starter-hystrix&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<p>然后刷新一下:maven<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/36.png" alt="">  </p>
+<ol>
+<li>2.在启动类中加入注解:@EnableCircuitBreaker<br>此时我们发现在启动类上:OrderApplication有很多注解,这个时候,我们再看一个注解:@SpringCloudApplication  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">@Target(&#123;ElementType.TYPE&#125;)</div><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">@Documented</div><div class="line">@Inherited</div><div class="line">@SpringBootApplication</div><div class="line">@EnableDiscoveryClient</div><div class="line">@EnableCircuitBreaker</div><div class="line">public @interface SpringCloudApplication &#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>其实SpringCloudApplication可以替换上面 3个注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt="">  </p>
+<ol>
+<li>3.在请求的HystrixController类的方法中加入注解:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/39.png" alt="">  </li>
+</ol>
+<p>浏览器测试输入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt="">  </p>
+<p>当被调用的server端不能正常提供服务时候,我们换一个思路,被请求的服务不是client端调用server端的代码,而是抛出一个异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt=""><br>以上情况说明:降级不一定用在这种场景:被调用的server端不能正常提供服务了,触发降级,我们也可以用在我们自己服务内部来触发降级(比如:自己服务内部抛出异常，内部服务并发数太高,或者数据库连接数太多时候,我们抛出一个异常)</p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2019/12/07/常见问题/" class="archive-article-date">
-  	<time datetime="2019-12-07T09:21:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-07</time>
+      <a href="/2019/12/12/SpringCloud-9-服务容错/" class="archive-article-date">
+  	<time datetime="2019-12-12T12:39:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-12</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/problem/">problem</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
 	</div>
 
       
@@ -194,18 +247,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2019/12/12/SpringCloud-9-服务容错/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          SpringCloud-9-服务容错
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/09/14/acdgate-1-websocket404/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">acdgate-1-websocket404</div>
+    <a href="/2019/12/07/常见问题/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">常见问题</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -251,7 +295,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="常见问题" data-title="常见问题" data-url="https://github.com/startshineye/2019/12/07/常见问题/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloud-9-服务容错" data-title="SpringCloud-9-服务容错" data-url="https://github.com/startshineye/2019/12/12/SpringCloud-9-服务容错/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
