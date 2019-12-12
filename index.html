@@ -203,6 +203,17 @@
 </ol>
 <p>浏览器测试输入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt="">  </p>
 <p>当被调用的server端不能正常提供服务时候,我们换一个思路,被请求的服务不是client端调用server端的代码,而是抛出一个异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt=""><br>以上情况说明:降级不一定用在这种场景:被调用的server端不能正常提供服务了,触发降级,我们也可以用在我们自己服务内部来触发降级(比如:自己服务内部抛出异常，内部服务并发数太高,或者数据库连接数太多时候,我们抛出一个异常)</p>
+<h3 id="9-2-超时设置"><a href="#9-2-超时设置" class="headerlink" title="9.2 超时设置"></a>9.2 超时设置</h3><p>以上就调用了一个fallback方法,那么如果我们有很多业务逻辑都需要处理的话,是不是都需要降级呢?这样写会不会很麻烦,其实SpringCloud提供了一个在类型注解默认的fallback方法:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">@DefaultProperties(defaultFallback = &quot;defaultFallback&quot;)</div></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/41.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/42.png" alt="">  </p>
+<p>联系之前我们的介绍,比如我们上面getProductInfoList方法是我们核心业务的方法,比如就是买家查询商品时候,我们需要优先保证其正常使用,使用注解,自定义特殊的降级处理逻辑fallback,但是此时fallback中50%的概率是可以正常处理的,其他方法是非核心业务,统一的降级策略就是直接回到了一个静态页面之类。更多的场景其实要注意服务的时间,也就是超时的问题。比如我们在product服务中根据商品id查询商品时候,我们让其睡眠2秒。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/43.png" alt="">  </p>
+<p>我们在浏览器访问order服务获取商品接口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/44.png" alt="">  </p>
+<p>其实我们可以在HystrixCommand里面设置超时时间。<br>我们进入源码发现其配置的默认超时时间是1秒<br>点击注解:@HystrixProperty  再点击:package com.netflix.hystrix.contrib.javanica.annotation;然后我们看到左边的源码:HystrixCommandProperties属性配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/45.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/46.png" alt=""><br>默认1秒,所以控制台请求响应一般为1秒左右,那我们该如何配置呢?在类中搜索一下:default_executionTimeoutInMilliseconds<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/47.png" alt="">  </p>
+<p>然后我们设置getProductInfoList个超时时间为4秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/48.png" alt="">  </p>
+<p>然后我们在浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/49.png" alt="">  </p>
+<p>超时时间配置很重要,具体超时时间设置需要看调用方和具体业务,比如有些场景请求到第三方:开发、充值等需要将超时时间设置为长一些。  </p>
 
       
     </div>
