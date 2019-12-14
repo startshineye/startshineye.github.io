@@ -43,7 +43,17 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/52.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/53.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/54.png">
-<meta property="og:updated_time" content="2019-12-13T00:52:42.378Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/55.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/56.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/57.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/58.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/59.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/60.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/61.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/62.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/63.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/64.png">
+<meta property="og:updated_time" content="2019-12-13T15:19:45.189Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="SpringCloud-9-服务容错">
 <meta name="twitter:description" content="9.1 服务容错和Hystrix
@@ -272,6 +282,21 @@
 <ol>
 <li>4.参数含义:<br>circuitBreaker.sleepWindowInMilliseconds：这里面的Window很多地方会翻译成时间窗口,断路器确定是否需要断开统计一些请求和错误数据的时候,是有一个时间范围的,这个时间范围就被称为时间窗口；当断路器打开对主逻辑进行熔断之后,Hystrix会启动一个休眠时间窗,在这个时间窗内降级逻辑临时成为主逻辑,当休眠时间窗到期,断路器将进为半开状态,释放一些请求到原来的主逻辑上,如果此次请求正常返回,那么断路器将继续闭合,主逻辑恢复,如果此次请求依然有问题,断路器将继续进入打开状态,休眠时间窗重新计时。我们上面将此参数设置为10000ms。<br>circuitBreaker.requestVolumeThreshold :设置在滚动窗中,断路器的最小请求数<br>circuitBreaker.errorThresholdPercentage:设置断路器打开的错误百分比条件,上面设置的是60,表示在滚动时间窗口中,如果发生了10次调用,有7次异常超过60%,此时断路器设置为打开状态,否则设置为关闭状态。  </li>
 </ol>
+<h3 id="9-5-使用配置项"><a href="#9-5-使用配置项" class="headerlink" title="9.5 使用配置项"></a>9.5 使用配置项</h3><p>我们先注释掉所有配置:</p>
+<p>之前的关于断路器的配置都是在代码里面配置的，如下图所示，不利于后期的维护<br>我们能把上面的配置写到配置文件中去吗?我们先写到本地文件中的yml格式<br>现在要改成用配置文件的方式进行，我们针对超时时间来做一个配置,<br>Hystrix全局超时时间配置如下图所示,表示3秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/55.png" alt="">  </p>
+<p>有时候我们发现我们配置不起作用,服务器不触发降级,原因是我们没有在方法上添加@HystrixCommand注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/56.png" alt="">   </p>
+<p>加上之后就可以了。上面是配置的全局的default配置,如果我们想给某一个类单独配置:在方法上注解:@HystrixComman然后配置属性里面的comandKey,然后再配置文件中加上。  </p>
+<h3 id="9-6-feign-hystrix的使用"><a href="#9-6-feign-hystrix的使用" class="headerlink" title="9.6 feign-hystrix的使用"></a>9.6 feign-hystrix的使用</h3><p>feign如何搭配hystrix,我们先看一下feign依赖了哪些组件?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/57.png" alt=""><br>再按:Ctrl+F<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/58.png" alt=""><br>说明feign已经依赖了hystrix,所以使用按照如下方式:  </p>
+<ol>
+<li><p>1.order服务添加依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/59.png" alt="">  </p>
+</li>
+<li><p>2.product服务在client端改造:@FeignClient注解属性里面添加fallback<br>a.在fallback填写ProductClientFallback.class类。<br>b.书写内部静态类并且实现ProductClient接口。<br>c.内部静态类需要添加@Component注解。<br>d.将此包打出去:在Terminal中输入:mvn install<br>此时我们进入order服务里面OrderServiceImpl里面的productClient,然后点击进去：发现就有了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/60.png" alt=""><br>启动order服务,我们发现报错了:<br>org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name ‘orderServiceImpl’: Unsatisfied dependency expressed through field ‘productClient’; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name ‘com.yxm.product.client.ProductClient’: FactoryBean threw exception on object creation; nested exception is java.lang.IllegalStateException: No fallback instance of type class com.yxm.product.client.ProductClient$ProductClientFallback found for feign client product</p>
+</li>
+</ol>
+<p>以上说明orderServiceImpl里面引入的com.yxm.product.client.ProductClient$ProductClientFallbac没有实例化。  </p>
+<p>原因:以上order服务引入productClient时候,已经把其当做order服务代码的一部分引入,productClient已经是order服务里面的一块代码了，所以运行的时候是在order服务中运行的,为什么不起作用了,原因是我们的启动类中没有扫描到。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/61.png" alt=""><br>明显和com.yxm.product.client.ProductClient不一样了,所以我们需要把扫描扩大:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/62.png" alt=""><br>然后启动正常。  </p>
+<p>使用post下单(此时我们的product服务没有启动)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/63.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/64.png" alt=""><br>以上说明我们已经达到了我们的要求。  </p>
 
       
     </div>
