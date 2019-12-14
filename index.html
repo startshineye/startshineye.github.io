@@ -152,6 +152,57 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-10-服务追踪" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/14/SpringCloud-10-服务追踪/">SpringCloud-10-服务追踪</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  </p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/12/14/SpringCloud-10-服务追踪/" class="archive-article-date">
+  	<time datetime="2019-12-14T02:32:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-9-服务容错" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -183,10 +234,13 @@
 <li>1.优先核心服务,非核心服务不可用或弱可用。<br>(比如在订单,商品微服务中:买家查询是核心服务,卖家查询是弱可用服务,我们需要优先保证买家查询服务)  </li>
 <li>2.在应用层面,使用服务降级很简单,通过HystrixCommand注解制定。在fallbackMethod(回退函数)中具体实现降级逻辑。   </li>
 </ol>
-<h3 id="9-2-触发降级"><a href="#9-2-触发降级" class="headerlink" title="9.2 触发降级"></a>9.2 触发降级</h3><p>在order服务中有一个create接口调用商品服务代码块<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/32.png" alt=""><br>我们将其拎出来  </p>
-<p>我们单独在order服务的controller包中创建一个:HystrixController类,然后在里面使用restTemplate<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/33.png" alt=""></p>
-<p>然后通过浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/34.png" alt="">  </p>
-<p>我们此时关掉product服务,然后再次请求:发现连接被拒绝:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/35.png" alt="">  </p>
+<h3 id="9-2-触发降级"><a href="#9-2-触发降级" class="headerlink" title="9.2 触发降级"></a>9.2 触发降级</h3><p>在order服务中有一个create接口调用商品服务代码块    </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/32.png" alt="">  </p>
+<p>我们将其拎出来    </p>
+<p>我们单独在order服务的controller包中创建一个:HystrixController类,然后在里面使用restTemplate  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/33.png" alt="">  </p>
+<p>然后通过浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/34.png" alt="">    </p>
+<p>我们此时关掉product服务,然后再次请求:发现连接被拒绝:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/35.png" alt="">    </p>
 <h4 id="9-2-1服务降级应用搭建"><a href="#9-2-1服务降级应用搭建" class="headerlink" title="9.2.1服务降级应用搭建"></a>9.2.1服务降级应用搭建</h4><p>我们这个时候使用Hystrix用作服务降级,然后就是老套路了  </p>
 <ol>
 <li>1.引入依赖:(order-server的pom.xml文件中)  </li>
@@ -201,18 +255,20 @@
 <ol>
 <li>3.在请求的HystrixController类的方法中加入注解:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/39.png" alt="">  </li>
 </ol>
-<p>浏览器测试输入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt="">  </p>
-<p>当被调用的server端不能正常提供服务时候,我们换一个思路,被请求的服务不是client端调用server端的代码,而是抛出一个异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt=""><br>以上情况说明:降级不一定用在这种场景:被调用的server端不能正常提供服务了,触发降级,我们也可以用在我们自己服务内部来触发降级(比如:自己服务内部抛出异常，内部服务并发数太高,或者数据库连接数太多时候,我们抛出一个异常)</p>
+<p>浏览器测试输入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/38.png" alt="">    </p>
+<p>当被调用的server端不能正常提供服务时候,我们换一个思路,被请求的服务不是client端调用server端的代码,而是抛出一个异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/38.png" alt=""><br>以上情况说明:降级不一定用在这种场景:被调用的server端不能正常提供服务了,触发降级,我们也可以用在我们自己服务内部来触发降级(比如:自己服务内部抛出异常，内部服务并发数太高,或者数据库连接数太多时候,我们抛出一个异常)</p>
 <h3 id="9-2-超时设置"><a href="#9-2-超时设置" class="headerlink" title="9.2 超时设置"></a>9.2 超时设置</h3><p>以上就调用了一个fallback方法,那么如果我们有很多业务逻辑都需要处理的话,是不是都需要降级呢?这样写会不会很麻烦,其实SpringCloud提供了一个在类型注解默认的fallback方法:  </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">@DefaultProperties(defaultFallback = &quot;defaultFallback&quot;)</div></pre></td></tr></table></figure>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/41.png" alt="">  </p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/42.png" alt="">  </p>
 <p>联系之前我们的介绍,比如我们上面getProductInfoList方法是我们核心业务的方法,比如就是买家查询商品时候,我们需要优先保证其正常使用,使用注解,自定义特殊的降级处理逻辑fallback,但是此时fallback中50%的概率是可以正常处理的,其他方法是非核心业务,统一的降级策略就是直接回到了一个静态页面之类。更多的场景其实要注意服务的时间,也就是超时的问题。比如我们在product服务中根据商品id查询商品时候,我们让其睡眠2秒。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/43.png" alt="">  </p>
-<p>我们在浏览器访问order服务获取商品接口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/44.png" alt="">  </p>
-<p>其实我们可以在HystrixCommand里面设置超时时间。<br>我们进入源码发现其配置的默认超时时间是1秒<br>点击注解:@HystrixProperty  再点击:package com.netflix.hystrix.contrib.javanica.annotation;然后我们看到左边的源码:HystrixCommandProperties属性配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/45.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/46.png" alt=""><br>默认1秒,所以控制台请求响应一般为1秒左右,那我们该如何配置呢?在类中搜索一下:default_executionTimeoutInMilliseconds<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/47.png" alt="">  </p>
-<p>然后我们设置getProductInfoList个超时时间为4秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/48.png" alt="">  </p>
-<p>然后我们在浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/49.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/43.png" alt="">    </p>
+<p>我们在浏览器访问order服务获取商品接口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/44.png" alt="">    </p>
+<p>其实我们可以在HystrixCommand里面设置超时时间。<br>我们进入源码发现其配置的默认超时时间是1秒<br>点击注解:@HystrixProperty  再点击:package com.netflix.hystrix.contrib.javanica.annotation;然后我们看到左边的源码:HystrixCommandProperties属性配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/45.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/46.png" alt="">  </p>
+<p>默认1秒,所以控制台请求响应一般为1秒左右,那我们该如何配置呢?在类中搜索一下:default_executionTimeoutInMilliseconds<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/47.png" alt="">    </p>
+<p>然后我们设置getProductInfoList个超时时间为4秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/48.png" alt="">    </p>
+<p>然后我们在浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/49.png" alt="">    </p>
 <p>超时时间配置很重要,具体超时时间设置需要看调用方和具体业务,比如有些场景请求到第三方:开发、充值等需要将超时时间设置为长一些。  </p>
 <h3 id="9-4-依赖隔离"><a href="#9-4-依赖隔离" class="headerlink" title="9.4 依赖隔离"></a>9.4 依赖隔离</h3><ol>
 <li><p>1.线程池隔离(依赖隔离)<br>SpringCloud Hystrix的依赖隔离类似于docker的”舱壁模式”；docker通过”舱壁模式”实现进程隔离,使得容器之间互不影响,而Hystrix使用该模式实现:“线程池隔离”；会为每一个HystrixCommand创建一个独立线程池,这样就算某个在Hystrix包装下的依赖服务出现延迟过高情况,也只是对该依赖服务的调用产生影响,并不会拖慢其他服务,使用HystrixCommand来将某个函数包装成了Hystrix命令时候,Hystrix框架自动地为这个函数实现了依赖隔离。所以依赖隔离,服务降级在使用时候都是一体化实现的,这样就可以实现服务容错保护。在编程模型上就会非常方便。</p>
@@ -221,38 +277,90 @@
 </li>
 </ol>
 <h4 id="9-4-1-服务熔断"><a href="#9-4-1-服务熔断" class="headerlink" title="9.4.1 服务熔断"></a>9.4.1 服务熔断</h4><ol>
-<li>1.服务熔断还是使用@HystrixCommand注解:<br>我们如何配置了,我们还是打开HystrixCommandProperties类:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/50.png" alt=""> </li>
+<li>1.服务熔断还是使用@HystrixCommand注解:<br>我们如何配置了,我们还是打开HystrixCommandProperties类:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/50.png" alt="">   </li>
 </ol>
-<p>我们将上面注解拷贝出来,使用在Order服务的getProductInfoList上<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/51.png" alt=""></p>
+<p>我们将上面注解拷贝出来,使用在Order服务的getProductInfoList上  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/51.png" alt=""></p>
 <p>然后我们在浏览器测试:<a href="http://localhost:8082/getProductInfoList" target="_blank" rel="external">http://localhost:8082/getProductInfoList</a><br>发现其一直返回”默认提示:太拥挤了，请稍后再试~~~”  </p>
-<p>此时发现一直返回错误,我们该如何进行测试呢？我们加一个请求参数,如果number为偶数直接返回success,否则调用product服务;注意此时调用product服务肯定会进入服务降级回调,原因是因为上面execution.isolation.thread.timeoutInMilliseconds已经注释掉了并且product服务里面线程等待为2秒,并且execution.isolation.thread.timeoutInMilliseconds默认等待时间是1秒。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/52.png" alt=""></p>
+<p>此时发现一直返回错误,我们该如何进行测试呢？我们加一个请求参数,如果number为偶数直接返回success,否则调用product服务;注意此时调用product服务肯定会进入服务降级回调,原因是因为上面execution.isolation.thread.timeoutInMilliseconds已经注释掉了并且product服务里面线程等待为2秒,并且execution.isolation.thread.timeoutInMilliseconds默认等待时间是1秒。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/52.png" alt=""></p>
 <ol>
-<li><p>2.产生熔断:我们不停地访问:<a href="http://localhost:8082/getProductInfoList?number=1让其错误率达到60%" target="_blank" rel="external">http://localhost:8082/getProductInfoList?number=1让其错误率达到60%</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/53.png" alt="">  </p>
-</li>
-<li><p>3.服务熔断:<br>circuitBreaker.requestVolumeThreshold<br>circuitBreaker.sleepWindowInMilliseconds<br>circuitBreaker.errorThresholdPercentage  </p>
-</li>
+<li>2.产生熔断:我们不停地访问:<a href="http://localhost:8082/getProductInfoList?number=1让其错误率达到60%" target="_blank" rel="external">http://localhost:8082/getProductInfoList?number=1让其错误率达到60%</a>  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/53.png" alt="">  </p>
+<ol>
+<li>3.服务熔断:<br>circuitBreaker.requestVolumeThreshold<br>circuitBreaker.sleepWindowInMilliseconds<br>circuitBreaker.errorThresholdPercentage  </li>
 </ol>
 <p>这是我们上面用到的3个配置,3个配置前面都有一个共同的词:circuitBreaker<br>a.circuitBreaker:断路器(当某个服务发生故障,类似用电器发生短路,通过断路器的故障监控,就类似于熔断的保险丝,直接切断原来的主逻辑调用)<br>b.微服务和分布式里面容错必须是要考虑的,通常做法有两种:<br>1)重试机制：对于预期的短暂的故障问题,可以重试解决的<br>2)断路器模式:对于更长时间的故障问题,不断重试也是没有意义的,这个时候就可以使用断路器模式。  </p>
 <p>断路器模式是将受保护的服务封装在一个可监控的断路器对象里面,当故障到达一定的值,断路器将会跳闸,断路器对象返回错误。如下所示: </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/54.png" alt=""><br>上图描述了断路器模式的3中状态积:<br>1)close:熔断器的关闭状态,调用失败次数累计到一定阈值/比例时候,就会启动熔断机制。<br>2)open:熔断器的打开状态,对服务直接返回错误,但是有一个时钟,到达这个时钟之后,会进入半熔断状态,也就是half open,允许定量的服务请求,如果调用成功到一定比例就认为恢复了,就会关闭熔断器。否则,认为还没有好,又回到熔断器打开状态。<br>3):half open:</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/54.png" alt="">  </p>
+<p>上图描述了断路器模式的3中状态积:<br>1)close:熔断器的关闭状态,调用失败次数累计到一定阈值/比例时候,就会启动熔断机制。<br>2)open:熔断器的打开状态,对服务直接返回错误,但是有一个时钟,到达这个时钟之后,会进入半熔断状态,也就是half open,允许定量的服务请求,如果调用成功到一定比例就认为恢复了,就会关闭熔断器。否则,认为还没有好,又回到熔断器打开状态。<br>3):half open:</p>
 <ol>
 <li>4.参数含义:<br>circuitBreaker.sleepWindowInMilliseconds：这里面的Window很多地方会翻译成时间窗口,断路器确定是否需要断开统计一些请求和错误数据的时候,是有一个时间范围的,这个时间范围就被称为时间窗口；当断路器打开对主逻辑进行熔断之后,Hystrix会启动一个休眠时间窗,在这个时间窗内降级逻辑临时成为主逻辑,当休眠时间窗到期,断路器将进为半开状态,释放一些请求到原来的主逻辑上,如果此次请求正常返回,那么断路器将继续闭合,主逻辑恢复,如果此次请求依然有问题,断路器将继续进入打开状态,休眠时间窗重新计时。我们上面将此参数设置为10000ms。<br>circuitBreaker.requestVolumeThreshold :设置在滚动窗中,断路器的最小请求数<br>circuitBreaker.errorThresholdPercentage:设置断路器打开的错误百分比条件,上面设置的是60,表示在滚动时间窗口中,如果发生了10次调用,有7次异常超过60%,此时断路器设置为打开状态,否则设置为关闭状态。  </li>
 </ol>
 <h3 id="9-5-使用配置项"><a href="#9-5-使用配置项" class="headerlink" title="9.5 使用配置项"></a>9.5 使用配置项</h3><p>我们先注释掉所有配置:</p>
-<p>之前的关于断路器的配置都是在代码里面配置的，如下图所示，不利于后期的维护<br>我们能把上面的配置写到配置文件中去吗?我们先写到本地文件中的yml格式<br>现在要改成用配置文件的方式进行，我们针对超时时间来做一个配置,<br>Hystrix全局超时时间配置如下图所示,表示3秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/55.png" alt="">  </p>
-<p>有时候我们发现我们配置不起作用,服务器不触发降级,原因是我们没有在方法上添加@HystrixCommand注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/56.png" alt="">   </p>
+<p>之前的关于断路器的配置都是在代码里面配置的，如下图所示，不利于后期的维护<br>我们能把上面的配置写到配置文件中去吗?我们先写到本地文件中的yml格式<br>现在要改成用配置文件的方式进行，我们针对超时时间来做一个配置,<br>Hystrix全局超时时间配置如下图所示,表示3秒  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/55.png" alt="">  </p>
+<p>有时候我们发现我们配置不起作用,服务器不触发降级,原因是我们没有在方法上添加@HystrixCommand注解  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/56.png" alt="">   </p>
 <p>加上之后就可以了。上面是配置的全局的default配置,如果我们想给某一个类单独配置:在方法上注解:@HystrixComman然后配置属性里面的comandKey,然后再配置文件中加上。  </p>
-<h3 id="9-6-feign-hystrix的使用"><a href="#9-6-feign-hystrix的使用" class="headerlink" title="9.6 feign-hystrix的使用"></a>9.6 feign-hystrix的使用</h3><p>feign如何搭配hystrix,我们先看一下feign依赖了哪些组件?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/57.png" alt=""><br>再按:Ctrl+F<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/58.png" alt=""><br>说明feign已经依赖了hystrix,所以使用按照如下方式:  </p>
+<h3 id="9-6-feign-hystrix的使用"><a href="#9-6-feign-hystrix的使用" class="headerlink" title="9.6 feign-hystrix的使用"></a>9.6 feign-hystrix的使用</h3><p>feign如何搭配hystrix,我们先看一下feign依赖了哪些组件?  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/57.png" alt="">  </p>
+<p>再按:Ctrl+F  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/58.png" alt="">  </p>
+<p>说明feign已经依赖了hystrix,所以使用按照如下方式:  </p>
 <ol>
-<li><p>1.order服务添加依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/59.png" alt="">  </p>
-</li>
-<li><p>2.product服务在client端改造:@FeignClient注解属性里面添加fallback<br>a.在fallback填写ProductClientFallback.class类。<br>b.书写内部静态类并且实现ProductClient接口。<br>c.内部静态类需要添加@Component注解。<br>d.将此包打出去:在Terminal中输入:mvn install<br>此时我们进入order服务里面OrderServiceImpl里面的productClient,然后点击进去：发现就有了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/60.png" alt=""><br>启动order服务,我们发现报错了:<br>org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name ‘orderServiceImpl’: Unsatisfied dependency expressed through field ‘productClient’; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name ‘com.yxm.product.client.ProductClient’: FactoryBean threw exception on object creation; nested exception is java.lang.IllegalStateException: No fallback instance of type class com.yxm.product.client.ProductClient$ProductClientFallback found for feign client product</p>
-</li>
+<li>1.order服务添加依赖   </li>
 </ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/59.png" alt="">  </p>
+<ol>
+<li>2.product服务在client端改造:@FeignClient注解属性里面添加fallback<br>a.在fallback填写ProductClientFallback.class类。<br>b.书写内部静态类并且实现ProductClient接口。<br>c.内部静态类需要添加@Component注解。<br>d.将此包打出去:在Terminal中输入:mvn install<br>此时我们进入order服务里面OrderServiceImpl里面的productClient,然后点击进去：发现就有了。    </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/60.png" alt="">  </p>
+<p>启动order服务,我们发现报错了:<br>org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name ‘orderServiceImpl’: Unsatisfied dependency expressed through field ‘productClient’; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name ‘com.yxm.product.client.ProductClient’: FactoryBean threw exception on object creation; nested exception is java.lang.IllegalStateException: No fallback instance of type class com.yxm.product.client.ProductClient$ProductClientFallback found for feign client product</p>
 <p>以上说明orderServiceImpl里面引入的com.yxm.product.client.ProductClient$ProductClientFallbac没有实例化。  </p>
-<p>原因:以上order服务引入productClient时候,已经把其当做order服务代码的一部分引入,productClient已经是order服务里面的一块代码了，所以运行的时候是在order服务中运行的,为什么不起作用了,原因是我们的启动类中没有扫描到。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/61.png" alt=""><br>明显和com.yxm.product.client.ProductClient不一样了,所以我们需要把扫描扩大:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/62.png" alt=""><br>然后启动正常。  </p>
-<p>使用post下单(此时我们的product服务没有启动)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/63.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/64.png" alt=""><br>以上说明我们已经达到了我们的要求。  </p>
+<p>原因:以上order服务引入productClient时候,已经把其当做order服务代码的一部分引入,productClient已经是order服务里面的一块代码了，所以运行的时候是在order服务中运行的,为什么不起作用了,原因是我们的启动类中没有扫描到。  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/61.png" alt="">  </p>
+<p>明显和com.yxm.product.client.ProductClient不一样了,所以我们需要把扫描扩大:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/62.png" alt="">  </p>
+<p>然后启动正常。  </p>
+<p>使用post下单(此时我们的product服务没有启动)  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/63.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/64.png" alt="">  </p>
+<p>以上说明我们已经达到了我们的要求。  </p>
+<h3 id="9-7-hystrix-dashboard使用"><a href="#9-7-hystrix-dashboard使用" class="headerlink" title="9.7 hystrix-dashboard使用"></a>9.7 hystrix-dashboard使用</h3><p>hystrix-dashboard是进行可视化的一个组件,使用老套路  </p>
+<ol>
+<li>1.引入依赖  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;spring-cloud-netflix-hystrix-dashboard&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">有时候一些网站博客里面可能需要让我们再引入:</div></pre></td></tr></table></figure>
+<p><dependency></dependency></p>
+<p><groupid>org.springframework.boot</groupid></p>
+<p><artifactid>spring-boot-starter-actuator</artifactid><br><br>```  </p>
+<p>但是其实我们这里不需要再次引入了:</p>
+<p>有时候我们会遇到@EnableHystrixDashboard注解始终加不上问题,我们统一下SpringBoot和SpringCloud版本。<br>SpringBoot:2.1.8.RELEASE<br>SpringCloud:Greenwich.SR3     </p>
+<ol>
+<li>2.启动类加注解  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/65.png" alt="">  </p>
+<ol>
+<li>3.浏览器访问:<br><a href="http://localhost:8082/hystrix" target="_blank" rel="external">http://localhost:8082/hystrix</a><br>a.最上面输入框:填写应用地址<br>b.填写应用的3种方式,我们这里是Single Hystrix App所以使用：<a href="https://hystrix-app:port/actuator/hystrix.stream" target="_blank" rel="external">https://hystrix-app:port/actuator/hystrix.stream</a><br>Cluster via Turbine (default cluster): <a href="https://turbine-hostname:port/turbine.stream" target="_blank" rel="external">https://turbine-hostname:port/turbine.stream</a><br>Cluster via Turbine (custom cluster): <a href="https://turbine-hostname:port/turbine.stream?cluster=[clusterName" target="_blank" rel="external">https://turbine-hostname:port/turbine.stream?cluster=[clusterName</a>]<br>Single Hystrix App: <a href="https://hystrix-app:port/actuator/hystrix.stream" target="_blank" rel="external">https://hystrix-app:port/actuator/hystrix.stream</a></li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/66.png" alt="">  </p>
+<p>我们点击Monitor Stream进去后进入:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/67.png" alt="">   </p>
+<p>Unable to connect to Command Metric Stream.<br>查看控制台发现:java.lang.IllegalArgumentException: Invalid character found in method name. HTTP method names must be tokens<br>参考:<br><a href="https://blog.csdn.net/HonsonNgai/article/details/89300789" target="_blank" rel="external">https://blog.csdn.net/HonsonNgai/article/details/89300789</a>  </p>
+<p>如果一直loading,我无意中的测试，发现这个Loading…是一直在等待负载均衡的提供方要去消费服务，即访问负载均衡服务器，去调用客户端，如果有数据响应则监控界面就会有图形数据展示：</p>
+<p>如果想让图中的数据发生变化，则需要循环多次的去访问负载均衡的提供方，让其消费服务，以至于达到监控的目的。<br><a href="http://localhost:8082/getProductInfoList?number=1" target="_blank" rel="external">http://localhost:8082/getProductInfoList?number=1</a>  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/69.png" alt="">   </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/68.png" alt="">  </p>
+<p>a.上面颜色小圈对应的就是:Success | Short-Circuited | Bad Request | Timeout | Rejected | Failure | Error<br>b.Circuit Closed表明已经是熔断了<br>c.中间有一个圆；圆越大说明流量就越大;圆颜色偏向于红色,表示服务越不健康。线条表示流量的相对变化。<br>d.最上面百分比是错误率；下面两个百分比是请求的频率。   </p>
+<p>在HystrixController中打开之前设置的参数,然后请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/70.png" alt="">  </p>
+<p>有时候,我们如果把熔断百分比设置比较大的话,我们一次次请求是很耗费时间的,其实postman提供了一个多次发送的功能:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/71.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/72.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/73.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/74.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/75.png" alt="">  </p>
 
       
     </div>
@@ -1046,205 +1154,6 @@
       
       <a href="/2019/04/15/SpringCloud-5-统一配置中心/" class="archive-article-date">
   	<time datetime="2019-04-15T14:42:12.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-15</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloud-4-应用通信" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/14/SpringCloud-4-应用通信/">SpringCloud-4-应用通信</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-HTTP-vs-RPC"><a href="#1-HTTP-vs-RPC" class="headerlink" title="1.HTTP vs RPC"></a>1.HTTP vs RPC</h4><ol>
-<li>应用(微服务)间通讯方式主要有两种:HTTP和RPC</li>
-<li>两种方式的主角:RPC–Dubbo  HTTP–SpringCloud  </li>
-<li>Dubbo定位始终是一个RPC远程调用框架,而SpringCloud是微服务下的一站式解决方式</li>
-<li>SpringCloud微服务下服务调用使用的是:HTTP Restful,HTTP Restful本身轻量、适应性强、可以很容易跨语言跨平台。</li>
-<li>SpringCloud中服务间两种restful调用方式:1. RestTemplate 2.Feign  </li>
-</ol>
-<h4 id="2-RestTemplate的三种使用方式"><a href="#2-RestTemplate的三种使用方式" class="headerlink" title="2.RestTemplate的三种使用方式"></a>2.RestTemplate的三种使用方式</h4><ol>
-<li>1.RestTemplate是一个HTTP客户端,类似于HttpClient,功能差不多,但是用法上更加简单。  <h4 id="2-1-RestTemplate例子"><a href="#2-1-RestTemplate例子" class="headerlink" title="2.1 RestTemplate例子"></a>2.1 RestTemplate例子</h4></li>
-<li>1.使用 “订单服务-&gt;商品服务”为例</li>
-<li>2.订单服务调用商品服务,我们把商品服务当做server端,订单服务当做client端</li>
-<li>3.为了不影响之前的代码逻辑,我们新建单独的包为例子。  </li>
-<li>4.product端新建ServerController</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">/**</div><div class="line"> * @author yxm</div><div class="line"> * @date 2019/4/20 0:16:16</div><div class="line"> */</div><div class="line">@RestController</div><div class="line">public class ServerController &#123;</div><div class="line">    </div><div class="line">    @GetMapping(&quot;/msg&quot;)</div><div class="line">   public String msg()&#123;</div><div class="line">       return &quot;this is product server mmsg&quot;;</div><div class="line">   &#125;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">5. 5.order服务中新建ClientController  </div><div class="line">RestTemplate第一种方式</div></pre></td></tr></table></figure>
-<p>/**</p>
-<ul>
-<li>@author yxm</li>
-<li><p>@date 2019/4/20 0:18:18<br>*/<br>@RestController<br>@Slf4j<br>public class ClientController {</p>
-<p> @GetMapping(“/getProductMsg”)<br> public String getProductMsg(){</p>
-<pre><code>//1.RestTemplate第一种方式 
-RestTemplate restTemplate = new RestTemplate();
-String response = restTemplate.getForObject(&quot;http://localhost:8080/msg&quot;, String.class);
-log.info(&quot;response{}&quot;,response);
-return response;
-</code></pre><p> }<br>}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">由于product服务已经启用了8080端口,我们用-D指令在order服务中用-Dserver.port=8081,不建议直接写到配置文件。  </div><div class="line">  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/84.png)</div><div class="line">  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png)</div><div class="line">  </div><div class="line">以上是第一种调用方式。缺点:1.url为固定写死的,上线时候部署多台服务器,有时候连部署到哪台服务器都不知道。2.对方可能启动了多个实例,如果写死到一台实现不了负载均衡,其他服务器就不能访问了。</div><div class="line"></div><div class="line">6. 6.RestTemplate第二种方式</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>@RestController<br>@Slf4j<br>public class ClientController {</p>
-<pre><code>@Autowired
-private LoadBalancerClient loadBalancerClient;
-
-@GetMapping(&quot;/getProductMsg&quot;)
-public String getProductMsg(){
-
-    //2.第二种方式:通过LoadBalancerClient获取服务名,ip和port
-    /**
-     * SpringCloud提供了LoadBalancerClient,将其注入到Spring中
-     */
-    RestTemplate restTemplate = new RestTemplate();
-    ServiceInstance product = loadBalancerClient.choose(&quot;PRODUCT&quot;);
-    String url = String.format(&quot;http://%s:%s&quot;, product.getHost(), product.getPort());
-    String response = restTemplate.getForObject(url, String.class);
-    log.info(&quot;response{}&quot;,response);
-    return response;
-}
-</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">第二种方式每次都需要那么写(创建对象,获取ip,获取port,在调用获取),还是比较麻烦   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line">7. 7.第三种方式</div></pre></td></tr></table></figure></p>
-<p>@Component<br>public class RestTemplateConfig {<br>@Bean<br>@LoadBalanced<br>public RestTemplate restTemplate(){<br>    return new RestTemplate();<br>}<br>}</p>
-<p>@RestController<br>@Slf4j<br>public class ClientController {<br>   @Autowired<br>   private RestTemplate restTemplate;</p>
-<pre><code>@GetMapping(&quot;/getProductMsg&quot;)
-public String getProductMsg(){
-    //3.第三种方式:通过RestTemplate的配置加LoadBalancerClient注解
-    String response = restTemplate.getForObject(&quot;http://PRODUCT/msg&quot;, String.class);
-    log.info(&quot;response{}&quot;,response);
-    return response;
-}
-</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/85.png) </div><div class="line"></div><div class="line"></div><div class="line">#### 3.负载均衡器Ribbion    </div><div class="line">1. 1.前面我们在说Eureka时候,谈到了服务端发现和客户端发现。Eureka属于客户端发现的方式,他的负载均衡是软负载,也就是客户端会向服务器(例如:EurekaServer)拉取已经注册的可用服务信息，然后根据负载均衡策略直接命中哪台服务器、发送请求。这整个过程都是在客户端完成的，并不需要服务端参数。SpringCloud中客户端负载均衡就是Ribbion  。他是基于NetflexRibbion实现的。通过SpringCloud的封装可以轻松的实现面向服务的restful模板请求自动转化成客户端负载均衡服务调用。</div><div class="line"></div><div class="line">一下组件都使用到了Ribbon:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/9.png) </div><div class="line"></div><div class="line">2. 2.SpringCloud在结合了Ribbon的负载均衡实现中,封装增加了HttpClient和OkHttp两种请求端实现,默认使用了Ribbon对Eureka服务发现的负载均衡client。</div><div class="line"></div><div class="line">3. 3.在上一节小结中,我们介绍了RestTemplate的三种实现方式。其中通过添加@LoadBalanced注解或者 直接写代码时候使用LoadBalancerClient,其实用到的就是Ribbon的组件</div><div class="line">4. 4.添加@LoadBalanced注解后,Ribbon会通过LoadBalancerClient自动的帮助你基于某种规则,比如:随机简单的轮训去连接目标服务,从而很容易使用Ribbon实现自定义的负载均衡算法。  </div><div class="line">5. 5.Ribbon实现负载均衡核心有3点:1.服务发现(也就是发现依赖服务的列表,也就是依据服务的名字,把该服务下的实例全都找出来)   2.服务选择规则(依据规则策略:如何从多个服务中选择一个有效的服务)  3.服务监听(监测失效服务做到高效剔除)  </div><div class="line">6. 6.主要组件是：ServerList、IRule、ServerListFilter。总体流程是:首先通过ServerList获取所有的可用服务列表。然后通过ServerListFilter过滤掉一部分地址，最后剩下的地址中通过IRule选择一个实例作为最终目标结果。</div><div class="line"></div><div class="line"></div><div class="line">#### 4 追踪源码自定义负载均衡策略</div><div class="line">略</div><div class="line">#### 5 Feign的使用</div><div class="line">##### 5.1 Feign的基本使用</div><div class="line">1. 1.本节使用Feign实现应用间通信。  </div><div class="line">2. 2.现在我们使用了Feign就不用使用restTemplate了,我们现在在ClientController中将restTemplate相关删除,并将RestTemplateConfig删除</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/10.png)</div><div class="line">3. 3.添加依赖:</div></pre></td></tr></table></figure></p>
-<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-feign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/11.png)  </div><div class="line"></div><div class="line"></div><div class="line">4. 4.启动类中添加注解  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/12.png)  </div><div class="line">5. 5.定义好feign要调用的Server端接口  </div><div class="line">建立client包,定义一个ProductClient接口(里面的方法就是调用product服务的方法),此client代表order服务是一个相对于product的客户端服务。  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/13.png) </div><div class="line">product中ServerController里面调用的方法:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/14.png) </div><div class="line">6. 6.此接口定义完之后,在Controller里面定义,然后接口请求:http://localhost:8081/getProductMsg  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/15.png)  </div><div class="line"></div><div class="line">##### 5.2 Feign的总结  </div><div class="line">1. 声明式REST客户端(伪RPC)  </div><div class="line">2. 采用了基于接口的注解(定义一个接口,然后在其上加注解)  </div><div class="line">3. 内部使用了Ribbon作为负载均衡  </div><div class="line"></div><div class="line">#### 6 Feign获取商品列表  </div><div class="line">在Oder服务的OrderServiceImpl中的create里面1、2、3是我们还没有做的,这节我们需要通过Feign获取商品列表  </div><div class="line"></div><div class="line">##### 6.1 Product服务中添加获取商品列表  </div><div class="line"></div><div class="line">###### 1.Product--&gt;dao  </div><div class="line">  </div><div class="line">ProductInfoRepository:</div></pre></td></tr></table></figure></p>
-<p>public interface ProductInfoRepository extends JpaRepository<productinfo,string>{<br> List<productinfo> findByProductStatus(Integer productStatus);<br> List<productinfo> findByProductIdIn(List<string> productIdList);<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">###### 2.Product--&gt;service</div><div class="line">ProductService:</div></pre></td></tr></table></figure></string></productinfo></productinfo></productinfo,string></p>
-<p>public interface ProductService {<br>    /**</p>
-<pre><code> * 查询所有在架商品列表
- */
-List&lt;ProductInfo&gt; findUpAll();
-/**
- * 查询商品列表
- */
-List&lt;ProductInfo&gt; findList(List&lt;String&gt; productIdList);
-</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">ProductServiceImpl:</div></pre></td></tr></table></figure></p>
-<p>@Service<br>public class ProductServiceImpl implements ProductService {<br>    @Autowired<br>    private ProductInfoRepository repository;<br>    @Override<br>    public List<productinfo> findUpAll() {<br>        return repository.findByProductStatus(ProductStatusEnum.UP.getCode());<br>    }<br>    @Override<br>    public List<productinfo> findList(List<string> productIdList) {<br>        return repository.findByProductIdIn(productIdList);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 3.Product--&gt;controller  </div><div class="line">ProductController:</div></pre></td></tr></table></figure></string></productinfo></productinfo></p>
-<p>@RestController<br>@RequestMapping(“/product”)<br>public class ProductController {<br>    @Autowired<br>    private ProductService productService;<br>    @Autowired<br>    private ProductCategoryService productCategoryService;<br>    /**</p>
-<pre><code> * 获取商品列表(给订单服务使用)
- * @param productIdList
- * @return
- */
-@GetMapping(&quot;/listForOrder&quot;)
-public List&lt;ProductInfo&gt; listForOrder(@RequestBody List&lt;String&gt; productIdList){
-    return productService.findList(productIdList);
-}
-</code></pre><p>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">##### 6.2 Order服务中调用商品列表  </div><div class="line">在client的ProductClient添加调用product的方法  </div><div class="line"></div><div class="line">###### 1.Order--&gt;ProductClient</div></pre></td></tr></table></figure></p>
-<p>@FeignClient(name = “product”)<br>public interface ProductClient {<br>    @GetMapping(“/listForOrder”)<br>    List<productinfo> listForOrder(@RequestBody List<string> productIdList);<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">###### 2.Order--&gt;ClientController</div></pre></td></tr></table></figure></string></productinfo></p>
-<p>@RestController<br>@Slf4j<br>public class ClientController {<br>    @Autowired<br>    private ProductClient productClient;<br>    @GetMapping(“/getProductMsg”)<br>    public String getProductMsg(){<br>        String msg = productClient.productMsg();<br>        log.info(“getProductMsg()”,msg);<br>        return msg;<br>    }<br>    @GetMapping(“/getProductList”)<br>    public String getProductList(){<br>        List<productinfo> productInfos = productClient.listForOrder(Arrays.asList(“157875196366160022”));<br>        return “ok”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">###### 3.Order--&gt;请求测试</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/16.png)  </div><div class="line"></div><div class="line"></div><div class="line">#### 7.扣库存(Feign) </div><div class="line">我们已经获取了商品列表,现在开始在Product微服务实现扣库存    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/05/17.png)  </div><div class="line">从创建订单接口我们知道,前端会传过来商品的信息和购买数量:我们在DTO中构造一个对象:CartDTO用来传送上面的对象  </div><div class="line"></div><div class="line">1. 1.Product--&gt;CartDTO对象  </div><div class="line">新建DTO包,新建CartDTO类:</div></pre></td></tr></table></figure></productinfo></p>
-<p>public class CartDTO {<br>/**</p>
-<ul>
-<li>商品id<br><em>/<br>private String productId;<br>/*</em><ul>
-<li>商品数量<br>*/<br>private Integer productQuantity;<br>public CartDTO(){<br>}<br>public CartDTO(String productId,Integer productQuantity){<br>this.productId = productId;<br>this.productQuantity = productQuantity;<br>}<br>}<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">  </div><div class="line"></div><div class="line">2. 2.Product--&gt;Exception自定义异常</div></pre></td></tr></table></figure>
-</li>
-</ul>
-</li>
-</ul>
-<p>public class ProductException extends RuntimeException {<br>    private Integer code;<br>    public ProductException(Integer code,String message){<br>      super(message);<br>      this.code =code;<br>    }<br>    public ProductException(ResultEnum resultEnum){<br>           super(resultEnum.getMessage());<br>           this.code = resultEnum.getCode();<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">3. 3.Product--&gt;返回枚举</div></pre></td></tr></table></figure></p>
-<p>public enum ResultEnum {<br>    PRODUCT_NOT_EXIST(1,”商品不存在”),<br>    PRODUCT_STOCK_ERROE(2,”商品库存错误” );<br>    private Integer code;<br>    private String message;<br>    ResultEnum(Integer code, String message) {<br>        this.code = code;<br>        this.message = message;<br>    }<br>    public String getMessage() {<br>        return message;<br>    }<br>    public void setMessage(String message) {<br>        this.message = message;<br>    }<br>    public Integer getCode() {<br>        return code;<br>    }<br>    public void setCode(Integer code) {<br>        this.code = code;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4. 4.Product--&gt;Service里面新建方法  </div><div class="line"></div><div class="line"></div><div class="line">```   </div><div class="line">@Override</div><div class="line">@Transactional(rollbackFor = Exception.class)</div><div class="line">public void decreaseStock(List&lt;CartDTO&gt; cartDTOList) &#123;</div><div class="line">/**</div><div class="line"> * 遍历:查看是否存在</div><div class="line"> */</div><div class="line">for (CartDTO cartDTO:cartDTOList)&#123;</div><div class="line">    Optional&lt;ProductInfo&gt; productInfoOptional = repository.findById(cartDTO.getProductId());</div><div class="line">    //商品不存在</div><div class="line">    if(!productInfoOptional.isPresent())&#123;</div><div class="line">     throw new ProductException(ResultEnum.PRODUCT_NOT_EXIST);</div><div class="line">    &#125;</div><div class="line">    //商品存在-库存错误</div><div class="line">    ProductInfo productInfo = productInfoOptional.get();</div><div class="line">    int result = productInfo.getProductStock() - cartDTO.getProductQuantity();</div><div class="line">    if(result&lt;0)&#123;</div><div class="line">        throw new ProductException(ResultEnum.PRODUCT_STOCK_ERROE);</div><div class="line">    &#125;</div><div class="line">    //保存</div><div class="line">    productInfo.setProductStock(result);</div><div class="line">    repository.save(productInfo);</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure></p>
-<ol>
-<li>5.Product–&gt;controller</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@RequestMapping(&quot;/product&quot;)</div><div class="line">public class ProductController &#123;</div><div class="line">    @Autowired</div><div class="line">    private ProductService productService;</div><div class="line">    @PostMapping(&quot;/decreaseStock&quot;)</div><div class="line">    public void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList)&#123;</div><div class="line">        productService.decreaseStock(cartDTOList);</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>6.在Order服务中client里面的ProductClient添加:减库存方法  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@FeignClient(name = &quot;product&quot;)</div><div class="line">public interface ProductClient &#123;</div><div class="line">@GetMapping(&quot;/msg&quot;)</div><div class="line">String productMsg();</div><div class="line">@PostMapping(&quot;/product/decreaseStock&quot;)</div><div class="line">void decreaseStock(@RequestBody List&lt;CartDTO&gt; cartDTOList);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>7.Order服务中:ClientController  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">@Slf4j</div><div class="line">public class ClientController &#123;</div><div class="line">    @Autowired</div><div class="line">    private ProductClient productClient;</div><div class="line">    @GetMapping(&quot;/getProductMsg&quot;)</div><div class="line">    public String getProductMsg()&#123;</div><div class="line">        String msg = productClient.productMsg();</div><div class="line">        log.info(&quot;getProductMsg()&quot;,msg);</div><div class="line">        return msg;</div><div class="line">    &#125;</div><div class="line">    @GetMapping(&quot;/getProductList&quot;)</div><div class="line">    public String getProductList()&#123;</div><div class="line">        List&lt;ProductInfo&gt; productInfos = productClient.listForOrder(Arrays.asList(&quot;157875196366160022&quot;));</div><div class="line">        return productInfos.toString();</div><div class="line">    &#125;</div><div class="line">    @GetMapping(&quot;/productDecreaseStock&quot;)</div><div class="line">    public String productDecreaseStock()&#123;</div><div class="line">       productClient.decreaseStock(Arrays.asList(new CartDTO(&quot;157875196366160022&quot;,1)));</div><div class="line">       return &quot;ok&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>8.测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/19.png" alt=""><br>库存减少了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/20.png" alt="">  </li>
-</ol>
-<h4 id="8-整合接口打通下单流程-Feign"><a href="#8-整合接口打通下单流程-Feign" class="headerlink" title="8.整合接口打通下单流程(Feign)"></a>8.整合接口打通下单流程(Feign)</h4><p>之前我们已经完善了,商品的查询,扣库存,那么我们这一节就要完成整套业务的打通。我们之前在Order服务中,创建订单时候,里面还有需要实现的如下几步:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/21.png" alt="">  </p>
-<ol>
-<li>1.现在我们补充完毕：  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div></pre></td><td class="code"><pre><div class="line">@Service</div><div class="line">public class OrderServiceImpl implements OrderService &#123;</div><div class="line">    @Autowired</div><div class="line">    private OrderMasterRepository orderMasterRepository;</div><div class="line">    @Autowired</div><div class="line">    private OrderDetailRepository orderDetailRepository;</div><div class="line">    @Autowired</div><div class="line">    private ProductClient productClient;</div><div class="line">    @Override</div><div class="line">    public OrderDTO create(OrderDTO orderDTO) &#123;</div><div class="line">        String orderId = KeyUtil.genUniqueKey();</div><div class="line">        //1.TODO 查询商品信息(调用商品服务)</div><div class="line">        List&lt;String&gt; productIdList = orderDTO.getOrderDetailList().stream().map(OrderDetail::getProductId).collect(Collectors.toList());</div><div class="line">        List&lt;ProductInfo&gt; productInfoList = productClient.listForOrder(productIdList);</div><div class="line">        //2.TODO 计算订单总价</div><div class="line">        //定义总价</div><div class="line">        BigDecimal orderAmout = new BigDecimal(BigInteger.ZERO);</div><div class="line">        for(OrderDetail orderDetail:orderDTO.getOrderDetailList())&#123;</div><div class="line">            //总价=(单价*数量)+总价</div><div class="line">            Integer productQuantity = orderDetail.getProductQuantity();</div><div class="line">            for(ProductInfo productInfo:productInfoList)&#123;</div><div class="line">                if(productInfo.getProductId().equals(orderDetail.getProductId()))&#123;</div><div class="line">                    orderAmout = productInfo.getProductPrice().multiply(new BigDecimal(productQuantity)).add(orderAmout);</div><div class="line">                   //订单详情赋值</div><div class="line">                    BeanUtils.copyProperties(productInfo,orderDetail);</div><div class="line">                    orderDetail.setOrderId(orderId);</div><div class="line">                    orderDetail.setDetailId(KeyUtil.genUniqueKey());</div><div class="line">                    //订单详情入库</div><div class="line">                    orderDetailRepository.save(orderDetail);</div><div class="line">                &#125;</div><div class="line">            &#125;</div><div class="line">        &#125;</div><div class="line">        //3.TODO 扣除库存(调用商品服务)</div><div class="line">        List&lt;CartDTO&gt; cartDTOList = orderDTO.getOrderDetailList().stream()</div><div class="line">                .map(e -&gt; new CartDTO(e.getProductId(), e.getProductQuantity()))</div><div class="line">                .collect(Collectors.toList());</div><div class="line">        productClient.decreaseStock(cartDTOList);</div><div class="line">        //4. 订单入库</div><div class="line">        OrderMaster orderMaster = new OrderMaster();</div><div class="line">        //先设置主键 会copy到orderMaster</div><div class="line">        orderDTO.setOrderId(orderId);</div><div class="line">        BeanUtils.copyProperties(orderDTO,orderMaster);</div><div class="line">        orderMaster.setOrderAmount(orderAmout);</div><div class="line">        orderMaster.setOrderStatus(OrderStatusEnum.NEW.getCode());</div><div class="line">        orderMaster.setPayStatus(PayStatusEnum.WAIT.getCode());</div><div class="line">        orderMasterRepository.save(orderMaster);</div><div class="line">        return orderDTO;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<ol>
-<li>2.测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/22.png" alt=""></li>
-</ol>
-<h4 id="9-项目改造成多模块"><a href="#9-项目改造成多模块" class="headerlink" title="9.项目改造成多模块"></a>9.项目改造成多模块</h4><p>多模块改造参考:<a href="https://blog.csdn.net/yangshangwei/article/details/88809468" target="_blank" rel="external">https://blog.csdn.net/yangshangwei/article/details/88809468</a>  </p>
-<h5 id="9-1-项目缺陷"><a href="#9-1-项目缺陷" class="headerlink" title="9.1 项目缺陷"></a>9.1 项目缺陷</h5><p>虽然我们之前已经完成了下单并扣除库存，虽然通信是完成了,但是有些地方做的不好。有如下问题:<br>1.在Product微服务中,获取商品列表(给订单服务使用)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/23.png" alt=""><br>返回的ProductInfo是数据库实体:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/24.png" alt=""><br>基本上,我们不会把自己数据库映射的表对象暴露给外部的。<br>2.在订单服务和商品服务之间都有共有的对象:CartDTO,ProductInfo.重复定义。对象属于哪一个服务就在那一个服务中定义。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/25.png" alt=""><br>3.在Order(订单)服务里,定义了ProductClient接口使用Feign主键调用，我们在项目中可能一个服务就是很多人来做,各个服务费透明的,所以我们在Oder服务中不能把Product的服务代码请求路径等写到Order服务中.<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/26.png" alt=""> </p>
-<h5 id="9-2-Product多模块拆分"><a href="#9-2-Product多模块拆分" class="headerlink" title="9.2 Product多模块拆分"></a>9.2 Product多模块拆分</h5><h6 id="9-2-1模块之间职责"><a href="#9-2-1模块之间职责" class="headerlink" title="9.2.1模块之间职责"></a>9.2.1模块之间职责</h6><p>针对解决以上情况,我们把项目分成3个模块:product-server、prodect-client、product-common  </p>
-<ol>
-<li>1.product-server:存放所有业务逻辑:包括,controller、service</li>
-<li>2.prodect-client:对外暴露的接口,商品模块对外暴露的接口:商品列表和扣库存。  </li>
-<li>3.product-common:公用的对象:既会被内部模块调用,也会被外部模块调用。<h6 id="9-2-2模块之间依赖关系"><a href="#9-2-2模块之间依赖关系" class="headerlink" title="9.2.2模块之间依赖关系"></a>9.2.2模块之间依赖关系</h6></li>
-<li><p>1.product-common是公用的对象,所以product-server会依赖product-common,返回的商品对象prodect-client也会依赖product-common<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/27.png" alt=""> </p>
-</li>
-<li><p>2.product商品多模块划分可以参考:<a href="https://blog.csdn.net/qq_29479041/article/details/84230669" target="_blank" rel="external">https://blog.csdn.net/qq_29479041/article/details/84230669</a>  </p>
-</li>
-<li>3.在本地打包  <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">mvn -Dmaven.test.skip=true -U clean install</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<p>使用以上命令,会将对应模块打包并安装到本地maven仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/28.png" alt="">  </p>
-<h5 id="9-3-Order多模块拆分"><a href="#9-3-Order多模块拆分" class="headerlink" title="9.3 Order多模块拆分"></a>9.3 Order多模块拆分</h5><ol>
-<li>1.以此类推,Order服务也分为3个模块,但是order-client目前是没有代码:其目前不需要给外提供服务  order-common目前也没有代码:目前没有需求  </li>
-<li>2.在订单服务需要注意的是:订单服务调用商品服务,那么需要在订单服务里面的启动类中添加扫描到商品服务的路径:@EnableFeignClients(basePackages = “com.yxm.product.client”)</li>
-<li>3.最外层pom文件引入product-client的jar包  </li>
-<li>4.<dependencymanagement>是管理jar包版本,不会下载对应依赖</dependencymanagement></li>
-</ol>
-<h5 id="9-5-测试"><a href="#9-5-测试" class="headerlink" title="9.5 测试"></a>9.5 测试</h5><p>启动注册中心，通过product-server和order-server中的main函数启动俩微服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/29.png" alt="">  </p>
-<p>下单<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/30.png" alt="">   </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">select * from order_master a where a.order_id = &apos;1558247336963513928&apos;</div><div class="line">select * from order_detail a  where a.order_id = &apos;1558247336963513928&apos;</div></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/31.png" alt="">   </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/32.png" alt="">  </p>
-<p>源码:github地址:<a href="https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw">https://github.com/startshineye/SpringCloud_Shell/tree/develop_multimodulw</a>  </p>
-<h4 id="10-同步或者异步"><a href="#10-同步或者异步" class="headerlink" title="10.同步或者异步"></a>10.同步或者异步</h4><ol>
-<li>1.当前订单服务和商品服务,两个服务之间的通讯机制是同步的。订单会调用商品服务的扣库存接口。微服务中除了同步,有很多时候会集成到异步的场景下,通过队列和订阅主题,实现消息的 发布和订阅,一个微服务可以是消息的发布者,通过异步的方式发送到队列和订阅主题下,作为消费者的微服务,可以从队列或者主题中获取消息。通过消息中间件。把服务间的直接调用解耦。</li>
-<li>比如以下图中:用户登录的时候,用户服务需要调用短信服务发短信。要给用户加积分,需要调用积分服务。还可能有其他服务，如果都采用同步的机制，服务间耦合过大,用户登录成功，需要向多个服务同步响应后才会成功，就会造成不好的用户体验。这个时候，我们通过消息队列可以实现很好的异步调用。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/33.png" alt="">  </li>
-<li>3.再比如:订单服务在口库存前会调用查询商品服务,之后再调用减库存的接口来扣库存。我们对其改造:商品服务在更改库存的时候、发布库存变化的消息、订单服务来订阅这个消息、可以获取到商品的部分信息，比如:可购买的商品个数、商品id。订单服务在下单的时候不必同步的去查询数据确定商品的库存信息 而是查询自己服务中数据 然后在扣库存时候订单服务发布一个扣库存的消息、商品服务订阅这个消息。拿到消息后，减少本库存消息的库存量。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/34.png" alt=""> </li>
-<li>4.消息中间件:目前常见的消息队列为:RabbitMQ、Kafka、ActiveMQ,我们现在使用RabbitMQ</li>
-</ol>
-<h4 id="11-RabbitMQ的安装"><a href="#11-RabbitMQ的安装" class="headerlink" title="11.RabbitMQ的安装"></a>11.RabbitMQ的安装</h4><p>进入下载网址:<a href="https://www.rabbitmq.com/download.html" target="_blank" rel="external">https://www.rabbitmq.com/download.html</a><br>我们使用docker安装RabbitMQ<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/35.png" alt=""><br>我们使用带有管理界面的mq:3.8.0-beta.4-management<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/36.png" alt="">  </p>
-<p><a href="https://blog.csdn.net/antma/article/details/81334932" target="_blank" rel="external">https://blog.csdn.net/antma/article/details/81334932</a><br><a href="https://www.jianshu.com/p/f3e49b495d74" target="_blank" rel="external">https://www.jianshu.com/p/f3e49b495d74</a>  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/04/14/SpringCloud-4-应用通信/" class="archive-article-date">
-  	<time datetime="2019-04-13T16:57:11.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-14</time>
 </a>
       
 	<div class="article-tag tagcloud">
