@@ -152,6 +152,125 @@
       <div class="body-wrap">
         
   
+    <article id="post-docker-1-docker基础入门" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: docker-1-docker基础入门<br>date: 2019-12-15 08:53:59<br>tags:</p>
+<h2 id="docker"><a href="#docker" class="headerlink" title=" docker"></a> docker</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们基础入门,从以下几方面讲解:<br>1.什么是docker<br>2.理解docker<br>3.走进docker<br>4.Hello World运行docker<br>5.Nginx服务<br>6.docker化Java web  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>docker官网:<a href="https://www.docker.com/" target="_blank" rel="external">https://www.docker.com/</a></p>
+<h4 id="1-什么是docker"><a href="#1-什么是docker" class="headerlink" title="1.什么是docker"></a>1.什么是docker</h4><h5 id="1-1-Docker历史"><a href="#1-1-Docker历史" class="headerlink" title="1.1 Docker历史"></a>1.1 Docker历史</h5><ol>
+<li>1.2010年几个年轻人在旧金山成立了做paas平台公司dotCloud,后面由于微软,亚马逊竞争  </li>
+<li>2.2013年公司发展受限,又不想之前东西付之东流,docker开源  </li>
+<li>3.2014.6 Docker1.0  </li>
+<li>4.2014.7 C轮$4000万  </li>
+<li>5.2015.4 D轮9500万  </li>
+<li>6.至今Docker1.13  </li>
+</ol>
+<h5 id="1-2-什么是docker"><a href="#1-2-什么是docker" class="headerlink" title="1.2 什么是docker"></a>1.2 什么是docker</h5><ol>
+<li>1.docker是一个装应用的容器,就像杯子可以装水,笔筒可以放笔,你可以把Hello world放在docker里,你可以把网站放到docker里,你可以把你任何想到的程序放到docker里面。  </li>
+<li>2.Docker is the world’s leading software containerization platform </li>
+<li>3.Docker公司开发，开源，托管在github上  </li>
+<li>4.跨平台、支持Windows、Macos、Linux  </li>
+</ol>
+<h4 id="2-理解docker"><a href="#2-理解docker" class="headerlink" title="2.理解docker"></a>2.理解docker</h4><h5 id="2-1-docker思想"><a href="#2-1-docker思想" class="headerlink" title="2.1 docker思想"></a>2.1 docker思想</h5><p>docker的logo是一条鲸鱼驮着很多集装箱；<br>docker思想体现在:  </p>
+<ol>
+<li>1.集装箱(没有集装箱之前运输货物是非常零散,没有规矩,运输过程中某一个东西可能就掉落了,有了集装箱之后,我们的东西装到集装箱里面去了,箱子是密封的，并很大,保证货物安全原样送到目的地,这些货物就是类似于我们的各种程序)      </li>
+<li><p>2.标准化-&gt;标准化主要体现在以下3个方面:<br>a.传输方式:docker运输程序有一个超级码头,任何一个地方需要货物时候,都是由鲸鱼将获取送到超级码头,然后由鲸鱼将货物从超级码头送到目的地。例子:假如你要把你台式机上面的应用部署到你的笔记本上,一般选择u盘或者qq传输过去,但是docker标准化了这个过程,你要做的只需要在台式机上执行一个docker命令把程序输送到超级码头去；然后在你的笔记本上执行一个docker命令-&gt;由鲸鱼把程序从超级码头送到笔记本上去。<br>b.存储方式:比如你把程序从台式机拷贝到你笔记本,你还得创建目录,并且记住这个目录,有了docker之后存储方式标准化了你不需要关心程序在哪个目录下,你只需要执行或者停止一个命令就可以了。docker标准化让快速扩展、弹性伸缩变得简单。<br>c.API接口标准化:docker提供了一系列api接口,包括了docker对我们应用的控制:查看,删除,停止等等。  </p>
+</li>
+<li><p>3.隔离:轻量级创建销毁docker,你创建虚拟机可能需要几分钟,但是创建docker只需要1秒。最底层的技术其实是linux的内核限制机制,叫做LXC(轻量级的容器虚拟化技术,最大效率地隔离了进程和资源)  </p>
+</li>
+</ol>
+<h5 id="2-2-docker解决了什么问题"><a href="#2-2-docker解决了什么问题" class="headerlink" title="2.2 docker解决了什么问题"></a>2.2 docker解决了什么问题</h5><p>docker解决了运行环境不一致导致的问题。  </p>
+<ol>
+<li><p>1.我们本地运行没有问题,线上测试有问题<br>很多时候我们开发程序员说我们开发没有问题,但是运维说他那边部署没有问题、测试说就有问题，如果一个应用正常运行需要什么?,比如一个java web应用运行需要什么？<br>一般需要:1.最底层的操作系统 2.JDK 3.Tomcat 4.依赖于程序代码和配置文件<br>以上任何一个条件多个环境下不一致可能就会导致系统问题；下面docker来了,他把操作系统、JDK、Tomcat、程序放在一个个的集装箱里面再打包放到鲸鱼上,鲸鱼将其运输到服务器上。你机器上怎么运行，他在服务器上也是怎样运行的</p>
+</li>
+<li><p>2.系统好卡,哪个人又写死循环了?!<br>linux本身就是一个多用户的操作系统，登录的每个人都有可能修改配置,那怎么办呢?用docker,docker的隔离性很好的解决了这个问题。如果把大家的应用程序都放到docker里面运行,就算别人的程序是死循环都不会导致别人的程序？原因是docker启动的时候就限定好了每个程序使用的最大的cpu,内存,硬盘  </p>
+</li>
+<li><p>3.双11来了,服务器撑不住啦!<br>大部分系统每天的业务量并不是平均的,特别是一些电商系统每年总会有那么几天业务量比平时多几倍甚至几十倍。如果按照平时量准备服务器,那么双十一来了肯定撑不住,如果按照双十一规模准备服务器,那么平时就是极大浪费。所以只能在节日前临时扩展机器,过完节给其他服务下线,这给运维带来非常大工作量,节日时候需要在各个服务器上部署各种各样服务,装好只有还不一定能运行,还得调试,这是多么烦躁的事情。使用docker使事情变得好多了,我们只需要点击一下,就可以变成几十台、几百台、几千几万台；   </p>
+</li>
+</ol>
+<h4 id="3-走进docker"><a href="#3-走进docker" class="headerlink" title="3.走进docker"></a>3.走进docker</h4><h5 id="3-1-docker核心技术"><a href="#3-1-docker核心技术" class="headerlink" title="3.1 docker核心技术"></a>3.1 docker核心技术</h5><p>docker里面有3个核心词汇,叫做:仓库(超级码头)、镜像(集装箱)、容器(运行程序的地方)  </p>
+<p>用docker运行一个程序的过程就是:从仓库，把镜像拉到本地、然后用一条命令把镜像运行起来变成容器  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/80.png" alt="">  </p>
+<p>上面图有:build、ship、run<br>a.build(构建)-&gt;构建镜像<br>b.ship(运输)-&gt;运输镜像<br>c.run(运行)-&gt;运行镜像就是个容器  </p>
+<h5 id="3-2-docker镜像"><a href="#3-2-docker镜像" class="headerlink" title="3.2 docker镜像"></a>3.2 docker镜像</h5><p>鲸鱼驮着的集装箱就是一个镜像,镜像本质其实就是文件(应用程序文件、运行环境文件)既然是文件docker是将其保存到本地了,既然保存了,那么是以什么样的格式来保存呢?说到镜像存储格式,就需要提到linux的存储技术叫做联合文件系统:unionfs  是一个分层的文件系统,可以将不同的文件挂载到同一个虚拟文件下</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/81.png" alt="">  </p>
+<p>以上可以看到test1和test2下面都有各自的文件,unionfs系统就像test可以看到上面所有文件，类似于把test1看成第一层，test2看做第二层。docker镜像就是利用这种分层实现镜像存储。     </p>
+<p>docker镜像存储格式如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/82.png" alt=""><br>a.最底层是操作系统的引导<br>b.第二层是linux的操作系统<br>c.第三层,第四层是我们的应用程序，我们可以控制<br>d.第五层是容器相关东西,先不管  </p>
+<p>docker镜像的每一层文件系统都是只读的,然后把每一层加载完成之后,文件都会被看成同一个目录,相当于只有一个文件系统,叫做镜像。  </p>
+<h5 id="3-3-docker容器"><a href="#3-3-docker容器" class="headerlink" title="3.3 docker容器"></a>3.3 docker容器</h5><ol>
+<li>1.容器的本质就是一个进程,便于理解我们可以把容器看成一个虚拟机。  </li>
+<li>2.每个虚拟机都有自己的文件系统<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/82.png" alt=""><br>可以把上面看成是容器的文件系统,和虚拟机的区别是这里的文件系统是一层一层的,并且最下面的四层都是只读的,最上面的一层是可写的,为什么需要可写的呢?大家程序运行起来,势必需要一些日志,一些文件,对系统文件修改。所以创建一个可读可写系统。  </li>
+</ol>
+<p>如何修改镜像里面可读的文件，因为镜像每一层只读,所以会把镜像可读的文件拷贝到可写的文件一层,然后再对他进行修改,修改之后我们的应用要读一个文件时候,就会从最上层开始查找,如果没有才会找下一层。所以容器是可以修改的,镜像是不可以修改的，这样保证同一个镜像生成不同容器独立运行,并且之间无直接干扰。 </p>
+<h5 id="3-4-docker仓库"><a href="#3-4-docker仓库" class="headerlink" title="3.4 docker仓库"></a>3.4 docker仓库</h5><ol>
+<li>1.镜像已经构建完了,镜像构建目的是要在其他机器、其他环境运行我们的程序,如果在本机上运行就不需要构建镜像了。构建完之后如果运输到其他环境中去,这里就运用到了docker仓库。我们先把我们的镜像传递到仓库里面去,再由目的地把docker仓库拉过去。这样就完成了这样的传输过程。</li>
+<li>2.谁提供了docker仓库呢?需要有一个中央服务器提供一个地址,让我们去访问,docker自己就提供了这个服务,提供服务的地址就叫:hub.docker.com,但是有一个问题是最开始这个网站是被墙掉的,国内根本访问不了,现在虽然可以访问了,但是加载镜像速度还是很慢,为了解决这个问题,国内很多也在做这个仓库,国内比较著名的是国内一个c.163.com的仓库  </li>
+</ol>
+<ol>
+<li>3.以上是共有的镜像中心,假如我们自己的镜像比较私密,不想被其他人看到呢?docker也是支持我们自己搭建一个镜像中心  </li>
+</ol>
+<h3 id="4-docker安装"><a href="#4-docker安装" class="headerlink" title="4.docker安装"></a>4.docker安装</h3><h4 id="4-1-window安装docker"><a href="#4-1-window安装docker" class="headerlink" title="4.1 window安装docker"></a>4.1 window安装docker</h4><p>Windows  </p>
+<p>docker下载地址：<br>win10: www.docker.com/products/docker#/windows<br>win10之外：<a href="http://www.docker.com/products/docker-toolbox" target="_blank" rel="external">http://www.docker.com/products/docker-toolbox</a><br>国内下载地址：<a href="http://get.daocloud.io" target="_blank" rel="external">http://get.daocloud.io</a></p>
+<p>boot2docker.iso下载地址：<br><a href="http://pan.baidu.com/s/1qYyc0ag" target="_blank" rel="external">http://pan.baidu.com/s/1qYyc0ag</a>  </p>
+<ol>
+<li>1.下载后默认安装  </li>
+</ol>
+<p>安装完之后,在桌面上会有3个快捷方式,其中Docker Quickstart Terminal是我们启动docker的按钮。  </p>
+<ol>
+<li>2.缺包之后,我们从百度云盘去下载:boot2docker.iso下载地址:<a href="http://pan.baidu.com/s/1qYyc0ag" target="_blank" rel="external">http://pan.baidu.com/s/1qYyc0ag</a><br>第一次运行可能比较慢<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/84.png" alt=""><br>上面说从github上下载文件失败,因为github是外国网站,所以慢,需要我们自己下载:<br>我们现在下载好iso文件后,我们把他存放到:C:\Users\yxm.docker\machine\cache里面的docker文件:  </li>
+</ol>
+<h4 id="4-2-linux安装docker"><a href="#4-2-linux安装docker" class="headerlink" title="4.2 linux安装docker"></a>4.2 linux安装docker</h4><p>Linux<br>1.Redhat&amp;CentOS:<br>系统要求:64-bit OS and version 3.10<br>安装连接:<a href="http://www.imooc.com/article/16448" target="_blank" rel="external">http://www.imooc.com/article/16448</a>  </p>
+<p>linux下安装完之后,如果执行docker version出现:Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?<br>说明docker服务没有起来。我们需要执行如下指令:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">systemctl start docker.service</div></pre></td></tr></table></figure>
+<p>2.Ubuntu:<br>系统要求:64-bit OS and version 3.10  </p>
+<h3 id="5-docker实践"><a href="#5-docker实践" class="headerlink" title="5.docker实践"></a>5.docker实践</h3><h4 id="5-1-第一个docker镜像"><a href="#5-1-第一个docker镜像" class="headerlink" title="5.1 第一个docker镜像"></a>5.1 第一个docker镜像</h4><h5 id="5-1-1-二个命令"><a href="#5-1-1-二个命令" class="headerlink" title="5.1.1 二个命令"></a>5.1.1 二个命令</h5><p>第一个初体验就是运行hello world,运行这个的时候,我们需要运行两条命令。  </p>
+<ol>
+<li><p>1.docker pull [OPTIONS] NAME[:TAG]<br>a.从docker远程仓库拉取一个镜像到我们本地<br>b.NAME表示:拉取镜像的名称  :TAG是可选的,如果不加的话默认会是:latest表示我们镜像的最新版本,如果指定一个tag的话；中间的options是拉取时候的一些参数  </p>
+</li>
+<li><p>2.docker images  [OPTIONS][REPOSITORY[:tag]]<br>查看我们本机都有哪些镜像?也可以验证我们pull是否成功了?  </p>
+</li>
+</ol>
+<h5 id="5-1-2-具体操作"><a href="#5-1-2-具体操作" class="headerlink" title="5..1.2 具体操作"></a>5..1.2 具体操作</h5><ol>
+<li><p>1.查看本机所有镜像列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/85.png" alt=""><br>我们发现本地没有任何镜像,只打印了每列的列头  </p>
+</li>
+<li><ol>
+<li></li>
+</ol>
+</li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/12/15/docker-1-docker基础入门/" class="archive-article-date">
+  	<time datetime="2019-12-15T00:53:59.778Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-15</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-10-服务追踪" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -171,7 +290,24 @@
     <div class="article-entry" itemprop="articleBody">
       
         <p>服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  </p>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。  </p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设已经定位出问题是调用商品服务返回商品信息耗时严重,此时我们就会通知此接口开发者解决,但是获取商品信息接口又是调用了其他服务,<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/77.png" alt=""><br>就像上面的服务:A调用B,B调用C,这是一整套链路,当服务调用越来越多,链路越来越长时候,通过日志计时打点效率非常低而且排查起来不方便，这就牵涉到服务追踪。我们要做的其实就是链路监控。     </p>
+<h3 id="10-1-服务追踪"><a href="#10-1-服务追踪" class="headerlink" title="10.1 服务追踪"></a>10.1 服务追踪</h3><p>针对于链路监控,SpringCloud提供了非常方便的组件:Spring Cloud Sleuth,Sleuth是侦查,链路监控这一章节,要写的东西并不多,主要是要会看。  </p>
+<h4 id="10-1-1-使用SpringCloudSleuth"><a href="#10-1-1-使用SpringCloudSleuth" class="headerlink" title="10.1.1 使用SpringCloudSleuth"></a>10.1.1 使用SpringCloudSleuth</h4><ol>
+<li>1.引入依赖  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+<ol>
+<li>2.使用postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/78.png" alt=""><br>从上图我们知道:<br>a.第一列:order-&gt;代表order服务<br>b.第二列:代表traceId(链路id);一条链路里面最多包含一个id,也就是说traceId是一条链路的唯一标识。<br>c.第三列:spanId,是一个基本单元；一条链路里面可以包含多个spanid,spanid可以理解成最基本的工作单元。<br>d.第四列:true表示要把这些信息输出到其他服务搜集和展示,false就是不搜集。  </li>
+</ol>
+<p>我们现在在本地配置文件中将日志级别改为debug模式  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">logging:</div><div class="line">  level:</div><div class="line">   org.springframework.cloud.openfeign: debug</div></pre></td></tr></table></figure>
+<p>此时展示出更多的日志:  </p>
+<pre><code>2019-12-15 08:15:41.058 DEBUG [order,dc93086b3bb2856a,eec9e8de8adb4274,false] 16616 --- [strix-product-2] o.s.c.openfeign.support.SpringEncoder    : Writing [[DecreaseStockInput{productId=&apos;157875227953464068&apos;, productQuantity=2}]] using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@d43328]
+Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_address as buyer_ad2_1_0_, ordermaste0_.buyer_name as buyer_na3_1_0_, ordermaste0_.buyer_openid as buyer_op4_1_0_, ordermaste0_.buyer_phone as buyer_ph5_1_0_, ordermaste0_.create_time as create_t6_1_0_, ordermaste0_.order_amount as order_am7_1_0_, ordermaste0_.order_status as order_st8_1_0_, ordermaste0_.pay_status as pay_stat9_1_0_, ordermaste0_.update_time as update_10_1_0_ from order_master ordermaste0_ where ordermaste0_.order_id=?
+</code></pre><p>一条链路请求里面只有1个reaceId,order服务是调用product服务的,那么product服务是否也是拥有此traceId,我们在product服务也加上服务追踪的sleuth  </p>
+<p>我们用postman再次请求1次:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/79.png" alt="">  </p>
+<p>现在指标已经出来了,但是我们不可能一直在控制台上看,我们需要友好的,有计划的展示出来。这里我们用到Zipkin框架展示。  </p>
+<h4 id="10-1-1-使用Zipkin"><a href="#10-1-1-使用Zipkin" class="headerlink" title="10.1.1 使用Zipkin"></a>10.1.1 使用Zipkin</h4><p>访问官网:<a href="https://zipkin.io/" target="_blank" rel="external">https://zipkin.io/</a>     </p>
 
       
     </div>
@@ -1013,147 +1149,6 @@
       
       <a href="/2019/04/16/SpringCloud-6-消息和异步/" class="archive-article-date">
   	<time datetime="2019-04-16T01:12:08.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-16</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloud-5-统一配置中心" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/15/SpringCloud-5-统一配置中心/">SpringCloud-5-统一配置中心</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-统一配置中心概述"><a href="#1-统一配置中心概述" class="headerlink" title="1.统一配置中心概述"></a>1.统一配置中心概述</h3><h4 id="1-1-为什么需要统一配置中心"><a href="#1-1-为什么需要统一配置中心" class="headerlink" title="1.1 为什么需要统一配置中心"></a>1.1 为什么需要统一配置中心</h4><p>之前我们写的order微服务和product微服务其实是不足的,有以下几个原因:  </p>
-<ol>
-<li>1.不方便维护:(每个人负责单独的模块,有一个人把配置修改后,push到远程,然后另一个人pull后修改代码,测试相同功能,此时配置文件已经改的面目全非了。)</li>
-<li>2.配置内容安全与权限:一个公司线上的配置不会对开发者进行开发公开的,特别熟数据库账号密码,按理说只有运维才知道。我们需要把数据库信息隔离,不放到数据库密码里面去。  </li>
-<li>3.更新配置项目需重启:每次更新项目都要重启,线上有可能修改一些配置,比如更改项目发送短信接口次数，我们怎样做到不重启。</li>
-</ol>
-<h4 id="1-2-统一配置中心"><a href="#1-2-统一配置中心" class="headerlink" title="1.2 统一配置中心"></a>1.2 统一配置中心</h4><p>我们到时候会专门做一个项目:config-server单独的微服务,他也有server端和client端。server端,这些配置我们为了方便管理都把他放到git上,这样子版本控制起来比较方便,他会从远端git把配置给拉取下来,以下图的箭头表示配置信息流的流动方向,最开始我们把他放到远端git,远端git的话,有gitlab,github，config-server把配置拉取下来之后,会把其配置放置到本地git上,注意config&lt;-&gt;本地git之前是双向流动的,他既会把远端git放到本地git去,也可以假如远端git不能使用了,被墙了,那么他会把本地的git拿出来，后面给product和order服务使用(两个服务都会集成config-server的客户端)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/38.png" alt="">  </p>
-<h3 id="2-统一配置中心server端-config-server"><a href="#2-统一配置中心server端-config-server" class="headerlink" title="2.统一配置中心server端(config-server)"></a>2.统一配置中心server端(config-server)</h3><p>新建一个项目:</p>
-<ol>
-<li>1.Spring Initializr<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/39.png" alt=""></li>
-<li>2.填写Project Metadata<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/40.png" alt="">  </li>
-<li>3.添加依赖(本身是个微服务,需要注册到Eureka上去,所以添加Cloud Discovery中的Eureka Discovery和本身是一个配置类:作为config的server端 添加Cloud Config依赖)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/41.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/42.png" alt=""> </li>
-<li>4.创建完毕之后,删除不必要的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/43.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/44.png" alt="">   </li>
-<li>5.更改pom使各个微服务版本号统一<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/45.png" alt="">  </li>
-<li>6.在启动类中添加注解:将其注册到Eureka中去<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/46.png" alt="">   </li>
-<li>7.修改其配置文件application.yml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/47.png" alt="">  </li>
-<li>8.启用Eureka服务,再启用config服务,一下出现config服务,说明启用成功。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/48.png" alt="">  </li>
-<li>9.要成功config-server端,需要添加对应注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/49.png" alt=""><br>此时启动报错</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Caused by: java.lang.IllegalStateException: You need to configure a uri for the git repository</div></pre></td></tr></table></figure>
-<p>我们在远程github仓库创建配置文件:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/50.png" alt=""><br>在远程仓库的config-repo下添加order服务的配置信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/51.png" alt=""></p>
-<p>输入一下信息回车:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/52.png" alt=""><br>配置信息的username和password没有配置因为config-repo是公开仓库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/53.png" alt=""></p>
-<p>然后重启项目完之后,校验我们的配置文件是否被config-server从github仓库中拉取下来了。然后我们在浏览器输入：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/54.png" alt=""><br>为什么需要多写一个a呢?:<a href="http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。" target="_blank" rel="external">http://localhost:8083/order-a.yml，http://localhost:8083/order-b.yml也是可以访问的,但是http://localhost:8083/order.yml不可以访问。</a><br>我们查看config-server启动时候的日志如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/55.png" alt=""><br>上面是支持properties,yml,json格式见转换的，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/56.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/57.png" alt=""><br>具体的访问配置文件格式说明:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/58.png" alt="">  </p>
-<p>查看config-server把远程的文件:order.yml拉取到了本地的哪个文件:如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/59.png" alt=""><br>当然我们自己也可以自定义这个配置文件路径:浏览器访问:<a href="http://localhost:8083/order-a.yml然后再配置的文件下" target="_blank" rel="external">http://localhost:8083/order-a.yml然后再配置的文件下</a>:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/60.png" alt=""><br>如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/61.png" alt="">  </p>
-<h3 id="2-统一配置中心client端"><a href="#2-统一配置中心client端" class="headerlink" title="2.统一配置中心client端"></a>2.统一配置中心client端</h3><p>我们以order服务为例集成config-client,按理来说我们把order的全部配置已经放到git上了,不应该放在order的appliaction.yml文件中了,那我们要如何使用了?老套路来了。<br>1.引入依赖  2.启动类上不需要加注解  3.添加配置 </p>
-<h4 id="2-1-引入依赖"><a href="#2-1-引入依赖" class="headerlink" title="2.1 引入依赖"></a>2.1 引入依赖</h4><dependency><br><groupid>org.springframework.cloud</groupid><br><artifactid>spring-cloud-config-client</artifactid><br></dependency>
-
-
-<h4 id="2-2-启动类上不需要加注解"><a href="#2-2-启动类上不需要加注解" class="headerlink" title="2.2 启动类上不需要加注解"></a>2.2 启动类上不需要加注解</h4><p>不加注解  </p>
-<h4 id="2-3-添加配置"><a href="#2-3-添加配置" class="headerlink" title="2.3 添加配置"></a>2.3 添加配置</h4><p>我们需要找到github上的通过config-server拉取到本地的一个配置，那么就需要服务名(配置文件中应用名)加开启环境(dev)找到此配置。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/65.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/66.png" alt="">  </p>
-<p>启动应用:报错:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/67.png" alt="">  </p>
-<p>思路:我们的期望启动流程是:1.通过配置文件的service-id:CONFIG找到，config-server,然后config-server把这些配置拉取到本地 2.order服务拿到配置之后才能进行数据库的初始化</p>
-<p>现在我们把所有信息都写在applaction.yml文件里面,SpringBoot项目不知道哪个在前,哪个在后面,他直接找数据库相关的,那么就启动失败了。  </p>
-<p>我们希望config-client的配置先加载,先启动。SpringBoot提供了bootstrap.yml(启动引导的文件)，我们把application..yml改成bootstrap.yml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/68.png" alt="">  </p>
-<p>测试是否加载了order-dev.yml里面的配置信息:<br>我们看能不能拿去到env: dev信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/69.png" alt=""><br>浏览器访问:<a href="http://localhost:8082/env/dev" target="_blank" rel="external">http://localhost:8082/env/dev</a><br>结果如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/70.png" alt="">  </p>
-<h4 id="2-4-统一配置中心的高可用"><a href="#2-4-统一配置中心的高可用" class="headerlink" title="2.4 统一配置中心的高可用"></a>2.4 统一配置中心的高可用</h4><p>关于统一配置中心的高可用,我们可以以后在服务器上部署多个,多个服务注册在EurekaServer时候,我们通过Order服务连接CONFIG自动可以实现负载均衡，下面我们以开启多个启动端口为例  </p>
-<ol>
-<li><p>1.config-server配置多个启动类<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/71.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/72.png" alt=""><br>然后启用ConfigApplication、ConfigApplication(1)、ConfigApplication(2)三个应用。在EurekaServer端可以看到3个服务已经启动:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/73.png" alt="">  </p>
-</li>
-<li><p>2.我们多次启动Order服务,可以看到其连接的地址多次变动。<br>第一次启动出现:  </p>
-</li>
-</ol>
-<p>2019-05-25 16:38:58.471  INFO 11424 — [           main] c.c.c.ConfigServicePropertySourceLocator : Fetching config from server at : <a href="http://JSKJ-PC:9002/" target="_blank" rel="external">http://JSKJ-PC:9002/</a> </p>
-<p>第二次启动出现：  </p>
-<p>2019-05-25 16:40:01.977  INFO 10640 — [           main] c.c.c.ConfigServicePropertySourceLocator : Fetching config from server at : <a href="http://JSKJ-PC:8083/" target="_blank" rel="external">http://JSKJ-PC:8083/</a></p>
-<p>可以看出他是获取的不同配置。  </p>
-<h4 id="2-5-统一配置中心和EurekaServer的注意点"><a href="#2-5-统一配置中心和EurekaServer的注意点" class="headerlink" title="2.5 统一配置中心和EurekaServer的注意点"></a>2.5 统一配置中心和EurekaServer的注意点</h4><p>Eureka注册中心默认的端口是8761,如果我们将8761改成8762，我们再来看一下情况。  </p>
-<ol>
-<li>1.修改eureka注册中心的端口为:8762,重启   </li>
-<li>2.修改config服务注册中心地址端口为:8762,重启  </li>
-<li><p>3.修改config服务对应的远程配置文件的信息:打开<a href="http://localhost:8083/order-dev.yml发现配置中心的远程配置已经修改并加载到本地" target="_blank" rel="external">http://localhost:8083/order-dev.yml发现配置中心的远程配置已经修改并加载到本地</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/74.png" alt="">  </p>
-</li>
-<li><p>4.启动Order服务,加载Order服务的配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/75.png" alt=""><br>我们发现我们的Oder服务已经连接不上config服务<br>这是什么原因呢?我们理一下流程:Order服务首先要做的其实首先是访问eureka,只有通过访问eureka,才能找到eureka下注册的config服务<br>现在是根本获取不到，获取不到的时候默认就会访问:<a href="http://localhost:8888,这是由于eureka地址没有配置对。但是我们不是在order-dev.yml中已经配置了这个地址吗?还是一个顺序的原因,之前8761之所以可以,是因为:8761是默认的一个地址。访问不到微服务就会默认访问8761注册中心,所以是没有问题的。所以当eureka不是默认端口:8761的是时候,我们把eureka的配置信息放到github远程配置上是不合理的。所以我们需要把这个配置拿出来放到Order服务里面的配置文件里面来,Order服务首先加载本地的bootstrap.yml,然后找到注册中心,从注册中心中找到config服务。" target="_blank" rel="external">http://localhost:8888,这是由于eureka地址没有配置对。但是我们不是在order-dev.yml中已经配置了这个地址吗?还是一个顺序的原因,之前8761之所以可以,是因为:8761是默认的一个地址。访问不到微服务就会默认访问8761注册中心,所以是没有问题的。所以当eureka不是默认端口:8761的是时候,我们把eureka的配置信息放到github远程配置上是不合理的。所以我们需要把这个配置拿出来放到Order服务里面的配置文件里面来,Order服务首先加载本地的bootstrap.yml,然后找到注册中心,从注册中心中找到config服务。</a><br>做法:远程去掉eureka注册配置,将其保存到order服务的bootstrap.yml中。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/76.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/77.png" alt="">  </p>
-</li>
-<li><p>5.在启动Order服务前,我们看一下config下访问的远程配置文件order-dev.yml文件是否已经已经加载到本地<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/74.png" alt=""><br>发现配置信息并没有加载正确到本地,这个是为什么呢?我们先清空config的控制台,然后再浏览器端访问那个配置：<a href="http://localhost:8083/order-dev.yml。发现" target="_blank" rel="external">http://localhost:8083/order-dev.yml。发现</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/78.png" alt=""><br>说明:会拿到两份配置,并会合并,我们之前的order.yml文件里面配置了eureka注册信息。这个时候是不是应该把order.yml删除了,其实不是的,既然,不管加载哪个配置都需要加载order.yml配置文件,那麽我们就应该把通用的配置信息加载到order.yml文件。这里我们先把order.yml文件里面信息先注释掉。<br>然后重新访问就可以了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/79.png" alt=""> </p>
-</li>
-</ol>
-<h4 id="2-6-统一配置中心延伸"><a href="#2-6-统一配置中心延伸" class="headerlink" title="2.6 统一配置中心延伸"></a>2.6 统一配置中心延伸</h4><p>我们想用统一配置中心的原因是:更新配置项目需重启,但是我们现在也没有达到。我们修改github上面的配置时候,我们还是没有变化。那么如何做到统一配置的的动态刷新呢?下节我们再学习。</p>
-<h3 id="3-SpringCloud-Bus自动刷新配置"><a href="#3-SpringCloud-Bus自动刷新配置" class="headerlink" title="3.SpringCloud Bus自动刷新配置"></a>3.SpringCloud Bus自动刷新配置</h3><h4 id="3-1-引言"><a href="#3-1-引言" class="headerlink" title="3.1 引言"></a>3.1 引言</h4><p>Bus就是想上就上的公共汽车。他还有信息通路,总线,这里就是总线的意思。<br>以下是之前统一配置的架构图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/80.png" alt=""><br>我们修改远程git配置,order服务、product服务不会更新修改的配置,原因是我们修改远端git配置后没有及时通知order、product微服务。消息的传递需要载体-消息队列。消息的通知SpringCloud中推荐使用消息队列。要操作消息和操作数据库一样,肯定要使用组件、引入依赖。SpringCloud Bus就是用来操作消息队列的。config-server和order通过消息队列传递信息。config-server使用SpringCloud Bus之后会对外提供一个http接口叫做/bus-refresh,访问这个接口，config-server就会把远程git的配置信息发送到mq里面,那谁来访问这个接口呢?自然是远端git访问这个接口最合适。git服务器基本会提供WebHooks功能,你只要把web服务器配置上就好了。      </p>
-<h4 id="3-2-实战"><a href="#3-2-实战" class="headerlink" title="3.2 实战"></a>3.2 实战</h4><h5 id="1-config服务配置"><a href="#1-config服务配置" class="headerlink" title="1.config服务配置"></a>1.config服务配置</h5><ol>
-<li>1.修改config中pom.xml中SpringBoot版本<br>由于其他版本有bug,我们引入:2.0.0.BUILD-SNAPSHOT<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/81.png" alt="">  </li>
-<li>2.引入SpringCloud Bus组件  </li>
-</ol>
-<dependency><br><groupid>org.springframework.cloud</groupid><br><artifactid>spring-cloud-starter-bus-amqp</artifactid><br></dependency>
-
-
-
-<ol>
-<li>3.启动config服务<br>提前安装好RabbitMQ。<br>安装请参考:<br>可以参考:<a href="http://www.chinacion.cn/article/1700.html" target="_blank" rel="external">http://www.chinacion.cn/article/1700.html</a><br><a href="https://www.cnblogs.com/cvol/p/8818823.html" target="_blank" rel="external">https://www.cnblogs.com/cvol/p/8818823.html</a><br>启动服务后我们登录RabbitMQ发现了以下队列。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/82.png" alt=""> </li>
-</ol>
-<h5 id="2-order服务配置"><a href="#2-order服务配置" class="headerlink" title="2.order服务配置"></a>2.order服务配置</h5><ol>
-<li>1.引入Bus依赖  </li>
-</ol>
-<dependency><br><groupid>org.springframework.cloud</groupid><br><artifactid>spring-cloud-starter-bus-amqp</artifactid><br></dependency>
-
-
-<ol>
-<li>2.启动服务<br>启动服务我们发现了其他一个mq执行了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/83.png" alt="">  </li>
-</ol>
-<h5 id="3-测试修改github上配置看config服务是否不重启可以获取到"><a href="#3-测试修改github上配置看config服务是否不重启可以获取到" class="headerlink" title="3.测试修改github上配置看config服务是否不重启可以获取到"></a>3.测试修改github上配置看config服务是否不重启可以获取到</h5><p>我们修改github上的order-dev.yml文件的env值为：dev11 然后刷新<a href="http://localhost:8083/order-dev.yml获取到的env为:dev111" target="_blank" rel="external">http://localhost:8083/order-dev.yml获取到的env为:dev111</a> 但是order服务获取到的值:<a href="http://localhost:8082/env/dev中的值还是dev。说明order服务动态获取不到远程修改的配置。" target="_blank" rel="external">http://localhost:8082/env/dev中的值还是dev。说明order服务动态获取不到远程修改的配置。</a></p>
-<p>现在config服务和order服务都已经跟消息队列RabbitMQ打通了,还差的是访问config的http接口:/bus-refresh  </p>
-<p>我们访问:发现报404错误,我们重启config发现重启日志中确实没有/bus-refresh的接口。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/84.png" alt=""> </p>
-<p>解决,我们需要配置一下,让 /bus-refresh接口暴露出来。在config服务的application.yml文件中添加:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/85.png" alt=""><br>重启后我们发现有相关日志打出:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/86.png" alt=""> </p>
-<p>我们使用postman请求一下:看对应的队列是否已经收到消息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/87.png" alt=""> </p>
-<p>然后再消息队列中查看下消息是否有:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/88.png" alt="">  </p>
-<p>然后再刷新：<a href="http://localhost:8082/env/dev" target="_blank" rel="external">http://localhost:8082/env/dev</a><br>还是dev 为什么没有变成:dev111呢?<br>其实通过查看本地日志 发现order服务已经加载了此配置。  </p>
-<p>这个时候我们通过注解@RequestScope实现<br>再次请求：<a href="http://localhost:8082/env/dev" target="_blank" rel="external">http://localhost:8082/env/dev</a>  发现已经变化了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/89.png" alt="">  </p>
-<h3 id="4-集成WebHooks实现动态更新"><a href="#4-集成WebHooks实现动态更新" class="headerlink" title="4.集成WebHooks实现动态更新"></a>4.集成WebHooks实现动态更新</h3><p>我们每次修改了github上的配置信息后,都需要在Order服务中通过http调用此接口才能让Order服务获取到对应的信息。我们现在需要把它做成自动实现。我们可以通过webhooks实现，</p>
-<h4 id="4-1-github上绑定webhooks"><a href="#4-1-github上绑定webhooks" class="headerlink" title="4.1 github上绑定webhooks"></a>4.1 github上绑定webhooks</h4><p>在github上绑定对应的请求:<br>注意:github上配置url地址不是:<a href="http://yyv7tg.natappfree.cc/actuator/bus-refresh" target="_blank" rel="external">http://yyv7tg.natappfree.cc/actuator/bus-refresh</a><br>config组件专门提供了一个用于webhooks的路由,叫做monitor<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/90.png" alt=""></p>
-<p>我们需要把config-server对应的本地服务映射到公网<br>我们使用ngrok  也可以使用natapp.cn:使用说明:<a href="https://blog.csdn.net/weixin_38959210/article/details/80401208" target="_blank" rel="external">https://blog.csdn.net/weixin_38959210/article/details/80401208</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/91.png" alt=""><br>我们在github上的webhooks更新地址:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/93.png" alt=""></p>
-<p>修改远程的配置：env: dev11111<br>访问项目后:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/92.png" alt=""><br>说明成功。</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/04/15/SpringCloud-5-统一配置中心/" class="archive-article-date">
-  	<time datetime="2019-04-15T14:42:12.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-15</time>
 </a>
       
 	<div class="article-tag tagcloud">
