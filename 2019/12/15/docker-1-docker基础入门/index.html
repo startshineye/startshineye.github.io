@@ -24,7 +24,10 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/82.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/84.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/85.png">
-<meta property="og:updated_time" content="2019-12-15T14:56:54.982Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/86.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/87.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/88.png">
+<meta property="og:updated_time" content="2019-12-17T00:02:38.426Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
 <meta name="twitter:description" content="title: docker-1-docker基础入门date: 2019-12-15 08:53:59tags:
@@ -212,7 +215,7 @@
 </ol>
 <h4 id="3-走进docker"><a href="#3-走进docker" class="headerlink" title="3.走进docker"></a>3.走进docker</h4><h5 id="3-1-docker核心技术"><a href="#3-1-docker核心技术" class="headerlink" title="3.1 docker核心技术"></a>3.1 docker核心技术</h5><p>docker里面有3个核心词汇,叫做:仓库(超级码头)、镜像(集装箱)、容器(运行程序的地方)  </p>
 <p>用docker运行一个程序的过程就是:从仓库，把镜像拉到本地、然后用一条命令把镜像运行起来变成容器  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/80.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/80.png" alt="">    </p>
 <p>上面图有:build、ship、run<br>a.build(构建)-&gt;构建镜像<br>b.ship(运输)-&gt;运输镜像<br>c.run(运行)-&gt;运行镜像就是个容器  </p>
 <h5 id="3-2-docker镜像"><a href="#3-2-docker镜像" class="headerlink" title="3.2 docker镜像"></a>3.2 docker镜像</h5><p>鲸鱼驮着的集装箱就是一个镜像,镜像本质其实就是文件(应用程序文件、运行环境文件)既然是文件docker是将其保存到本地了,既然保存了,那么是以什么样的格式来保存呢?说到镜像存储格式,就需要提到linux的存储技术叫做联合文件系统:unionfs  是一个分层的文件系统,可以将不同的文件挂载到同一个虚拟文件下</p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/81.png" alt="">  </p>
@@ -249,17 +252,29 @@
 <ol>
 <li><p>1.docker pull [OPTIONS] NAME[:TAG]<br>a.从docker远程仓库拉取一个镜像到我们本地<br>b.NAME表示:拉取镜像的名称  :TAG是可选的,如果不加的话默认会是:latest表示我们镜像的最新版本,如果指定一个tag的话；中间的options是拉取时候的一些参数  </p>
 </li>
-<li><p>2.docker images  [OPTIONS][REPOSITORY[:tag]]<br>查看我们本机都有哪些镜像?也可以验证我们pull是否成功了?  </p>
+<li><p>2.docker images [OPTIONS][REPOSITORY[:tag]]<br>查看我们本机都有哪些镜像?也可以验证我们pull是否成功了?  </p>
 </li>
 </ol>
-<h5 id="5-1-2-具体操作"><a href="#5-1-2-具体操作" class="headerlink" title="5..1.2 具体操作"></a>5..1.2 具体操作</h5><ol>
+<h5 id="5-1-2-具体操作"><a href="#5-1-2-具体操作" class="headerlink" title="5.1.2 具体操作"></a>5.1.2 具体操作</h5><ol>
 <li><p>1.查看本机所有镜像列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/85.png" alt=""><br>我们发现本地没有任何镜像,只打印了每列的列头  </p>
 </li>
-<li><ol>
-<li></li>
-</ol>
+<li><p>2.拉取hello-world镜像<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/86.png" alt=""><br>a.Using default tag: latest—表示默认拉取最新分支<br>b.Digest: sha256:4fe721ccc2e8dc7362278a29dc660d833570ec2682f4e4194f4ee23e415e1064—摘要<br>c.Status: Downloaded newer image for docker.io/hello-world:latest—状态  </p>
 </li>
 </ol>
+<p>再使用docker images查看时候,出现如下:<br>a.REPOSITORY:镜像名称<br>b.TAG:分支<br>c.IMAGEID:id标识<br>d.CREATED:最后修改时间<br>e:SIZE:镜像大小  </p>
+<ol>
+<li>3.2点说明:<br>a.我们这里的镜像名称为：hello-world是docker镜像官网限制的<br>b.我们pull取镜像的时候,没有填写镜像的地址,他是如何找到的呢?他会默认从docker自己仓库下载:hub.docker.com  </li>
+</ol>
+<h4 id="5-2-第一个docker容器"><a href="#5-2-第一个docker容器" class="headerlink" title="5.2 第一个docker容器"></a>5.2 第一个docker容器</h4><p>我们已经把docker镜像下载下来了,下面我们需要运行docker容器  </p>
+<ol>
+<li>1.docker运行指令</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run [OPTIONS] IMAGE[:TAG][COMMAND][ARG...]</div></pre></td></tr></table></figure>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/87.png" alt="">  </p>
+<p>以上是docker运行后的输出,指明了docker运行时候经历的4步。  </p>
+<p>为了形象理解,我们使用一张图表示:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/88.png" alt=""><br>a.上图分为3个部分:Client、DOCKER_HOST、Register<br>b.client:在我们本机;就是我们终端,执行指令的地方<br>c.DOCKER_HOST也是在我们本机的Docker daemon<br>d.Register:Docker的远程仓库  </p>
+<p>以上执行分析:<br>1.docker pull:把我们的命令发到docker daemon,docker daemon去找Images镜像,daemon去检查我们本地是否存在对应版本,如果存在直接返回到,如果镜像不存在就去远程仓库去拉取到本地<br>2.docker run:把我们的命令发到docker daemon，daemon检查镜像在本机是否已经存在,如果不存在,就去远端拉取。存放到本地images,然后产生一个docker容器。  </p>
 
       
     </div>
