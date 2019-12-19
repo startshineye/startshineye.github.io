@@ -27,7 +27,16 @@
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/86.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/87.png">
 <meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/88.png">
-<meta property="og:updated_time" content="2019-12-17T00:02:38.426Z">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/89.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/90.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/91.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/92.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/93.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/94.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/95.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/96.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/97.png">
+<meta property="og:updated_time" content="2019-12-18T04:57:38.911Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
 <meta name="twitter:description" content="title: docker-1-docker基础入门date: 2019-12-15 08:53:59tags:
@@ -275,6 +284,34 @@
 <p>为了形象理解,我们使用一张图表示:  </p>
 <p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/88.png" alt=""><br>a.上图分为3个部分:Client、DOCKER_HOST、Register<br>b.client:在我们本机;就是我们终端,执行指令的地方<br>c.DOCKER_HOST也是在我们本机的Docker daemon<br>d.Register:Docker的远程仓库  </p>
 <p>以上执行分析:<br>1.docker pull:把我们的命令发到docker daemon,docker daemon去找Images镜像,daemon去检查我们本地是否存在对应版本,如果存在直接返回到,如果镜像不存在就去远程仓库去拉取到本地<br>2.docker run:把我们的命令发到docker daemon，daemon检查镜像在本机是否已经存在,如果不存在,就去远端拉取。存放到本地images,然后产生一个docker容器。  </p>
+<h3 id="6-docker运行nginx"><a href="#6-docker运行nginx" class="headerlink" title="6.docker运行nginx"></a>6.docker运行nginx</h3><p>nginx是一个web服务器,nginx镜像的特点:<br>1):持久运行的容器<br>2):前台挂起&amp;后台运行(前台运行我们使用Ctrl+c即可关闭,我们用后端运行)<br>3):进入容器内部  </p>
+<h4 id="6-1-docker运行nginx"><a href="#6-1-docker运行nginx" class="headerlink" title="6.1 docker运行nginx"></a>6.1 docker运行nginx</h4><p>去网易镜像中心查看:<a href="https://c.163.com/hub#/home" target="_blank" rel="external">https://c.163.com/hub#/home</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/89.png" alt="">  </p>
+<ol>
+<li><p>1.拉取镜像:hub.c.163.com/library/nginx:latest<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/90.png" alt="">  </p>
+</li>
+<li><p>2.运行镜像:<br>前台运行镜像:docker run hub.c.163.com/library/nginx<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/91.png" alt="">    </p>
+</li>
+</ol>
+<p>我们发现没有什么反应:我们打开另一个终端,查看下docker运行的进程<br>docker ps<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/92.png" alt="">  </p>
+<p>从上面可以看出我们的docker已经运行了，说明上面是前台运行  </p>
+<p>通过:docker run –help:查看docker run有哪些参数<br>后台启动:docker run -d<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/93.png" alt="">  </p>
+<p>id:656dea8798aefb5699df96f623835d6df34b2c839de1876efe9842052bfb5757</p>
+<ol>
+<li>3.查看容器内部结构<br>容器已经运行起来了,我们如何查看容器内部的结构呢?我们有时候需要看下运行的容器是否正常,内部日志等。  </li>
+</ol>
+<p>docker exec –help<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/94.png" alt="">  </p>
+<p>我们一般用到的是-i和-t参数,一般是可以合并的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/95.png" alt="">  </p>
+<p>进入自带的镜像目录:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/96.png" alt="">  </p>
+<h4 id="6-2-docker的网络"><a href="#6-2-docker的网络" class="headerlink" title="6.2 docker的网络"></a>6.2 docker的网络</h4><p>上面我们已经用docker运行了一个nginx，但是我们还没有在浏览器访问nginx,这一章节我们看下docker的网络,然后从浏览器上访问下nginx  </p>
+<h5 id="6-2-1-docker网络类型"><a href="#6-2-1-docker网络类型" class="headerlink" title="6.2.1 docker网络类型"></a>6.2.1 docker网络类型</h5><ol>
+<li><p>1.网络也是隔离性一部分,linux使用namespace来实现隔离的,pid namespace就是用来隔离进程的,mount namespace就是用来隔离文件系统的,network namespace就是用来隔离网络的,每一个network namespace都提供了独立的网络环境(包括:网卡、路由等)  </p>
+</li>
+<li><p>2.docker容器默认情况下会分配默认的独立的network namespace也就是网络类型中的:Bridge模式 还有一种Host模式(如果启动时候使用Host模式,那么这个容器将不会获得独立的network namespace而是和主机共同使用一个,这个时候容器将不会虚拟出自己网卡,ip等,而是会使用宿主机上的ip和port，也就是在docker里面使用网络和在主机上使用网络没有区别的 还有一种网络类型是没有网络：none;这种情况docker将不会和外界任何东西进行通讯)  </p>
+</li>
+<li><p>3.Bridge模式时候涉及到,既然是独立的network namespace,这就需要一种技术:这就需要容器内部的端口可以在主机上访问到，这种技术就是端口映射,docker可以实现容器内部端口和容器所在的主机上端口进行映射,也就是访问主机里面这个端口就是访问容器里面的端口;   </p>
+</li>
+<li>4.docker网络模式图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/97.png" alt=""><br>a.host模式(最左边):eth0是我们主机网卡,host模式时候,容器会直接连接到主机的网卡上,跟主机使用同一块网卡,所以说容器内看到的网络和主机看到的网络是一样的。<br>b.Bridge模式(中间)：首先会创建一个docker0的网桥,这个网桥跟主机eth0相连接,使用同一块网卡,所以说启动容器的时候,容器内部会虚拟出一个容器内部的虚拟网卡跟网桥相连通过这种方式docker与主机进行通信，这种情况容器里面会有自己独有的ip、port;端口映射的过程:在主机上有一个端口80,通过访问80端口会到主机的eth0网卡,通过这个网卡,会访问到</li>
+</ol>
 
       
     </div>
@@ -293,6 +330,15 @@
 
   
 <nav id="article-nav">
+  
+    <a href="/2019/12/19/ipcc-4-批次event排查/" id="article-nav-newer" class="article-nav-link-wrap">
+      <i class="icon-circle-left"></i>
+      <div class="article-nav-title">
+        
+          ipcc-4-批次event排查
+        
+      </div>
+    </a>
   
   
     <a href="/2019/12/14/SpringCloud-10-服务追踪/" id="article-nav-older" class="article-nav-link-wrap">
@@ -421,7 +467,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 10px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 15px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a>
     			</div>
     	</section>
     
