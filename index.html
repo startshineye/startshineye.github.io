@@ -708,6 +708,80 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 
 
   
+    <article id="post-ipcc-3-日常运维" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/11/28/ipcc-3-日常运维/">ipcc-3-日常运维</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-中间跳过的名单拨打处理"><a href="#1-中间跳过的名单拨打处理" class="headerlink" title="1.中间跳过的名单拨打处理"></a>1.中间跳过的名单拨打处理</h3><p>先查看未拨打批次:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT DISTINCT(ocm_buslist.event_id) FROM ocm_buslist ocm_buslist</div><div class="line">  LEFT JOIN cti_cdr cdr ON ocm_buslist.list_id = cdr.memberid LEFT JOIN ocm_event e ON e.event_id = ocm_buslist.event_id</div><div class="line">WHERE e.event_state IN(0,1,2) AND ocm_buslist.create_time&lt;&apos;2019-12-22 23:59:59&apos; AND cdr.id IS NULL ORDER BY ocm_buslist.list_id DESC</div></pre></td></tr></table></figure>
+<h4 id="1-1-数据量小时候处理"><a href="#1-1-数据量小时候处理" class="headerlink" title="1.1 数据量小时候处理"></a>1.1 数据量小时候处理</h4><p>1.查询出未拨打的数据保存成.sql文件:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT ocm_buslist.* FROM ocm_buslist ocm_buslist</div><div class="line">  LEFT JOIN cti_cdr cdr ON ocm_buslist.list_id = cdr.memberid</div><div class="line">WHERE ocm_buslist.event_id = xxx  AND  cdr.id IS NULL ORDER BY ocm_buslist.list_id DESC</div></pre></td></tr></table></figure>
+<p>2.查询批次(比较max_member_id和查询的list_id大小)  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SELECT event_name,max_member_id FROM ocm_event WHERE event_id = xxx;</div></pre></td></tr></table></figure>
+<p>2.然后执行插入  </p>
+<p>3.最后删除之前list_id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">DELETE FROM ocm_buslist WHERE event_id = xxx AND list_id IN(xxx1,xxx2);</div></pre></td></tr></table></figure></p>
+<p>4.查询导入之后数据大小  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">select count(*)  from ocm_buslist where list_id &gt; max_memberid</div></pre></td></tr></table></figure>
+<h4 id="1-2-数据量大时候处理"><a href="#1-2-数据量大时候处理" class="headerlink" title="1.2 数据量大时候处理"></a>1.2 数据量大时候处理</h4><p>批次是按照大于ocm_event表中的max_member_id对比进行拨打,在名单表中小于max_member_id将不会拨打。如果出现跳过拨打的数据,我们需要按照如下步骤处理:注意:首先先要查看对应的名单是否已经拨打但是没有插入扫cti_cdr表,防止重复导入拨打。[<br>操作:<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">grep 5314900 callnotify_callnotifysql01_1574*;</div></pre></td></tr></table></figure></p>
+<p>]</p>
+<ol>
+<li><p>1.未拨打数据采集:[查询未拨打客户名单-&gt;将其导入到名单模板中重新导入]</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT ob.customer_name,ob.customer_phone,ob.car_no,ob.cust_id FROM ocm_buslist ob</div><div class="line">  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid</div><div class="line">WHERE ob.event_id = xxx  AND  cdr.id IS NULL ORDER BY ob.list_id DESC</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.ocm_base_shbo处理:[删除未拨打的数据,删除之前先查询]<br>a.查询未拨打的数据:  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">SELECT sb.* FROM ocm_base_shbo sb WHERE sb.event_id = xxx AND sb.cust_id IN (SELECT DISTINCT ob.cust_id FROM ocm_buslist ob</div><div class="line">  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid</div><div class="line">WHERE ob.event_id = xxx  AND  cdr.id IS NULL);</div><div class="line">```  </div><div class="line"></div><div class="line">b.删除未拨打数据:</div></pre></td></tr></table></figure>
+</li>
+</ol>
+<p>DELETE FROM ocm_base_shbo  WHERE event_id = xxx AND cust_id IN (SELECT  ob.cust_id FROM ocm_buslist ob<br>  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid<br>WHERE ob.event_id = xxx  AND  cdr.id IS NULL);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.ocm_buslist处理:[删除未拨打的数据,删除之前先查询]  </div><div class="line">a.查询未拨打数据</div></pre></td></tr></table></figure></p>
+<p>select * FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">b.删除未拨打数据</div></pre></td></tr></table></figure></p>
+<p>DELETE FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4. 4.最后导入数据，修改批次统计:</div></pre></td></tr></table></figure></p>
+<p>select * from ocm_event_statistics where event_id = xxx<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">### 2.统计批次进度问题  </div><div class="line"></div><div class="line">SELECT * FROM ocm_event_statistics WHERE event_id = 1417;</div><div class="line"></div><div class="line">SELECT * FROM ocm_buslist_timing WHERE event_id = 1417;</div><div class="line"></div><div class="line">SELECT COUNT(DISTINCT cust_id) FROM ocm_buslist WHERE event_id = 1417;  16433</div><div class="line"></div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417;   11510;</div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417 AND valid_flag = 0;   </div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417 AND valid_flag = 1;  </div><div class="line"></div><div class="line">### 3.重呼数据未拨打问题  </div><div class="line">有时候,我们的重呼数据一直可能存在于:ocm_buslist_timing表中而不会拨打,所以我们需要处理这些批次,重新启用停用(对于在执行时间段内的批次)。  </div><div class="line"></div><div class="line">1. 1.查看在当前时间前未重呼的批次</div></pre></td></tr></table></figure></p>
+<p>SELECT event_id,event_state,event_name,send_time,over_time FROM ocm_event WHERE event_id IN (SELECT DISTINCT event_id FROM ocm_buslist_timing WHERE call_next_time&lt;xxx);<br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/11/28/ipcc-3-日常运维/" class="archive-article-date">
+  	<time datetime="2019-11-28T09:49:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-11-28</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ipcc/">ipcc</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-acdgate-1-websocket404" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -912,7 +986,7 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 
 
   
-    <article id="post-SpringCloud-8-Zuul综合使用" class="article article-type-post" itemscope itemprop="blogPost">
+    <article id="post-ipcc-1-ipcc整体架构" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -922,7 +996,7 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
         
   
     <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/18/SpringCloud-8-Zuul综合使用/">SpringCloud-8-Zuul综合使用</a>
+      <a class="article-title" href="/2019/05/14/ipcc-1-ipcc整体架构/">ipcc-1-ipcc整体架构</a>
     </h1>
   
 
@@ -930,187 +1004,151 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>项目整体架构图如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/8.png" alt="">   </p>
-<h4 id="8-1-Zuul-Pre和Post过滤器"><a href="#8-1-Zuul-Pre和Post过滤器" class="headerlink" title="8.1 Zuul:Pre和Post过滤器"></a>8.1 Zuul:Pre和Post过滤器</h4><ol>
-<li>1.从以上架构图知道:所有的请求都会到Zuul,然后到ServicreA、然后到ServiceB、再到ServiceC、现在我们对整体服务做一个权限校验。假如没有zuul服务、那么ServicreA、ServicreB、ServicreC都得校验一次做的太多受不了。所以权限校验我们放在Zuul里面统一处理。</li>
-<li>2.接下来我们演示如何对请求进行统一的校验,我们现在做一个所有经过Zuul的请求都要有一个token,并且内容不能为空,如果不带token参数的话,权限校验不通过。我们以:<a href="http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。" target="_blank" rel="external">http://localhost:8084/myProduct/product/list?token=12121为例子.。我们只有在连接后面添加:token=？才允许校验通过。</a>  <h5 id="8-1-1-Zuul统一校验"><a href="#8-1-1-Zuul统一校验" class="headerlink" title="8.1.1 Zuul统一校验"></a>8.1.1 Zuul统一校验</h5>我们在api-gateway项目下面创建filter包,并新建一个TokenFilter类    </li>
-<li>1.新建TokenFilter做PRE过滤<br>a.这里面我们做的是参数校验:所以filterType是:PRE_TYPE。<br>b.我们在run()方法里面实现具体的逻辑。    </li>
+        <h3 id="1-ipcc总体架构模块"><a href="#1-ipcc总体架构模块" class="headerlink" title="1.ipcc总体架构模块"></a>1.ipcc总体架构模块</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/37.png" alt=""> </p>
+<h3 id="2-系统模块图"><a href="#2-系统模块图" class="headerlink" title="2.系统模块图"></a>2.系统模块图</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/213.png" alt=""></p>
+<h4 id="2-1-acd模块"><a href="#2-1-acd模块" class="headerlink" title="2.1 acd模块"></a>2.1 acd模块</h4><ol>
+<li><p>1.acd模块<br>acd在平台中的位置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/214.png" alt="">  </p>
+</li>
+<li><p>2.配置坐席呼出<br><a href="https://blog.csdn.net/weixin_34242819/article/details/90492301" target="_blank" rel="external">https://blog.csdn.net/weixin_34242819/article/details/90492301</a><br>对于登录坐席工号进行呼出的情况,我们有如下步骤:1.坐席签入后能上线成功  2.坐席能够正确路由到运营商的sip电话进行呼叫  </p>
+</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class TokenFilter extends ZuulFilter&#123;</div><div class="line">@Override</div><div class="line">public String filterType() &#123;</div><div class="line">    return PRE_TYPE;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public int filterOrder() &#123;</div><div class="line">    /**</div><div class="line">     * filter的顺序:对应的值越低优先级越高</div><div class="line">     * 我们把此Filter放在PRE_DECORATION_FILTER_ORDER前面</div><div class="line">     */</div><div class="line">    return PRE_DECORATION_FILTER_ORDER-1;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public boolean shouldFilter() &#123;</div><div class="line">    /**</div><div class="line">     * 开启过滤</div><div class="line">     */</div><div class="line">    return true;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public Object run() throws ZuulException &#123;</div><div class="line">    //1.获取当前上下文</div><div class="line">    RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">    HttpServletRequest request = requestContext.getRequest();</div><div class="line">    //这里从url参数里面获取,也可以从cookie,header里获取</div><div class="line">    String token = request.getParameter(&quot;token&quot;);</div><div class="line">    if(StringUtils.isEmpty(token))&#123;</div><div class="line">        requestContext.setSendZuulResponse(false);</div><div class="line">        requestContext.setResponseStatusCode(HttpStatus.UNAUTHORIZED.value());</div><div class="line">    &#125;</div><div class="line">    return null;</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>测试:<a href="http://localhost:8084/myProduct/product/list" target="_blank" rel="external">http://localhost:8084/myProduct/product/list</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/4.png" alt=""> </p>
-<p>携带token测试:<a href="http://localhost:8084/myProduct/product/list?token=112" target="_blank" rel="external">http://localhost:8084/myProduct/product/list?token=112</a><br>正常返回  </p>
-<p>当然我们的判断逻辑可能不止token为空,也可以拿到token值之后从数据库读。  </p>
+<h5 id="2-1-1-坐席签入后能上线成功"><a href="#2-1-1-坐席签入后能上线成功" class="headerlink" title="2.1.1 坐席签入后能上线成功"></a>2.1.1 坐席签入后能上线成功</h5><h6 id="坐席上线"><a href="#坐席上线" class="headerlink" title="坐席上线"></a>坐席上线</h6><p>1.在cti_work表中找到分机,如:100003。<br>2.配置100003到cti_work_queue中去<br>3.在cti_outcaller中配置上线的主叫<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/64.png" alt=""><br>3.在cti_telno中配置分机路由:100003分机呼出使用内线字段、长度在1-6(因为:100003是6位数)、<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/215.png" alt=""><br>4.查看/cc/bin/log下面的日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/62.png" alt=""><br>发现话机没有注册,打开一看:是注册的服务错了<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/63.png" alt=""><br>5.如果出问题,查看Acdgate模块下Tomcat日志,在查看/cc/log/acd_acd01.log下的日志<br>acd_acd01.log里面r:开头的。   </p>
+<h6 id="机器人锁定坐席转人工"><a href="#机器人锁定坐席转人工" class="headerlink" title="机器人锁定坐席转人工"></a>机器人锁定坐席转人工</h6><p>我们在排查之前可以关掉hmp,设置:hmpcheck=0<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/69.png" alt=""><br>1.在确保坐席能够上线情况下,先配置转人工的机器人场景:1013502011<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/65.png" alt=""><br>2.在批次场景里面创建人批次场景,然后创建对应批次,进行外呼<br>3.查看acd_acd01_xxxx.log下的日志:锁定坐席成功与否?—&gt;TRptque::getandlockagent<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/66.png" alt=""><br>4.外呼后查看日志:httpg_httpg01_xxxx.log<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/67.png" alt=""><br>查看机器人转人工文档说明书知道:”att_status”:”0”不在线，”att_status”:”1”在线<br>5.如果和ai交互时候,传递的参数不对的话,我们查看acd模块:<br>TRptque::getandlockagent res=[-1]表示没有获取到空闲坐席<br>6.如果转人工时候,坐席挂不断,说明是坐席表里面的相同workno有多条。  </p>
+<p>6.正常交互如下:<br>acd:2019-09-15 09:48:03.453 TRptque::getandlockagent res=[0], workno=[100002] quueueid=[52] usid = [90046126300563]<br>httpg:ai获取空闲坐席:key:[{“userid”:”900461263”,”inaction”:0,”inparams”:{“call_id”:”900461263”,”call_sor_id”:”15188317019”,”call_dst_id”:”051289578445”,”att_status”:”1”}}].<br>ai转人工传递queueid:ok:0,resultbuf[{“ret”:0,”userid”:”900461263”,”outaction”:”11”,”outparams”:{“call_dst_id”:”051289578445”,”queue_id”:”52”,”call_id”:”900461263”,”inter_idx”:”8”,”call_sor_id”:”15188317019”}}].   </p>
+<h5 id="2-1-2-正确路由到运营商的sip电话进行呼叫"><a href="#2-1-2-正确路由到运营商的sip电话进行呼叫" class="headerlink" title="2.1.2 正确路由到运营商的sip电话进行呼叫"></a>2.1.2 正确路由到运营商的sip电话进行呼叫</h5><p>1.acd.cfg配置(配置是不是开启did,did是优先级最高的,如果开启,呼叫客户的主叫号码将会是did号码-DID的中文意思是直接拨入，是运营商提出的概念，通过这个号码，运营商可以呼叫到voip系统内，freeswitch上实现外乎呼叫的方式为配置一个网关，指定运营商的接入号和密码，有呼叫这个号码时，运营商会把这个号码送给freeswitch。)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/216.png" alt=""><br>2.acd.cfg配置(设置使用的主叫号码:usefromcaller,如果想要使用cti_work里面的,需要配置为1)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/217.png" alt=""><br>3.配置坐席呼出的主叫显示:cti_outcaller<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/218.png" alt=""><br>4.使用web页面上的软电话条进行呼叫,然后查看呼叫的结果里面是不是我们配置的主叫<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/219.png" alt=""><br>从上面我们可以知道,坐席呼出时候是两通电话。</p>
+<h4 id="2-2-fsg模块"><a href="#2-2-fsg模块" class="headerlink" title="2.2.fsg模块"></a>2.2.fsg模块</h4><p>FSG模块作为:AG(CTI)和FS进行交互模块,其作用就是一个接口调用服务。<br>对应的配置文件是:/cc/cfg/fsg.cfg<br>对应的日志文件是:/cc/log/fsg<em>**</em>.log和/cc/bin/log/log*.log<br>其日志记录了ipcc内部和外部中继网络交互的日志详情。  </p>
+<h5 id="2-2-1-fsg模块修改日志"><a href="#2-2-1-fsg模块修改日志" class="headerlink" title="2.2.1.fsg模块修改日志"></a>2.2.1.fsg模块修改日志</h5><p>有时候,我们为了排查和外部对接的错误信息时候,可以通过两种方式:<br>1.修改fsg的日志级别为6<br>2.通过tcpdump -w xx.cap抓包<br>以下为修改fsg的日志级别为6的设置  </p>
+<h6 id="2-2-1-1-删除原来的fsg相关日志文件"><a href="#2-2-1-1-删除原来的fsg相关日志文件" class="headerlink" title="2.2.1.1.删除原来的fsg相关日志文件"></a>2.2.1.1.删除原来的fsg相关日志文件</h6><ol>
+<li>删除/cc/bin/log文件目录下的文件  </li>
+<li>删除/cc/log/fsg*.log文件  <h6 id="2-2-1-2-修改日志级别配置文件fsg-cfg"><a href="#2-2-1-2-修改日志级别配置文件fsg-cfg" class="headerlink" title="2.2.1.2.修改日志级别配置文件fsg.cfg"></a>2.2.1.2.修改日志级别配置文件fsg.cfg</h6></li>
+<li>修改fsg.cfg里面SET下的日志级别文件为6<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/18.png" alt=""><br>acd在平台起到用户转座席排队，座席分配，座席操作控制等和座席呼叫相关的功能。<h6 id="2-2-1-3-以写入文件的方式启动fsg-sh"><a href="#2-2-1-3-以写入文件的方式启动fsg-sh" class="headerlink" title="2.2.1.3.以写入文件的方式启动fsg.sh"></a>2.2.1.3.以写入文件的方式启动fsg.sh</h6>进入/cc/bin下输入</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">fsg.sh restart &gt; /cc/bin/log/xxx.log</div></pre></td></tr></table></figure>
+<h4 id="2-3-ag模块"><a href="#2-3-ag模块" class="headerlink" title="2.3 ag模块"></a>2.3 ag模块</h4><h5 id="2-3-1-概述"><a href="#2-3-1-概述" class="headerlink" title="2.3.1 概述"></a>2.3.1 概述</h5><p>AG在整个YC平台中起着集中管理的作用。AG模块就是我们常说的CTI模块。<br>AG起的作用有以下几点：<br>1、    管理多个适配节点的接入。<br>2、    统一对多个节点的电路进行全局编号。<br>3、    对电路进行分组管理。<br>4、    呼入电话路由相应的IVR流程进行处理。<br>5、    呼出电话路由到相应的电路组。<br>6、    管理呼叫电话分配媒体资源（播音，录音，会议，传真等媒体资源）</p>
+<h5 id="2-3-2-呼叫问题排查-AG问题排查"><a href="#2-3-2-呼叫问题排查-AG问题排查" class="headerlink" title="2.3.2 呼叫问题排查(AG问题排查)"></a>2.3.2 呼叫问题排查(AG问题排查)</h5><p>理解T、HT、R、HR是理解ag模块的关键  </p>
 <ol>
-<li>2.新建Post过滤器<br>我们也可以定义postfilter,在请求到结果之后,对请求的结果进行处理加工。 这里我们往请求返回的header里面写一些东西，新建AddResponseHeaderFilter类。<br>a.filterType-&gt;POST_TYPE<br>b.自定义post filter时候,我们选择使用:SEND_RESPONSE_FILTER_ORDER之前的filter     </li>
+<li>1.按照流程来:T是收到  R是发送 HR是收到发送端的消息 HT是给T端返回信息  </li>
+<li>2.对于AG来说:T端是ACD、Dyflow等;R端是fsg  </li>
+<li>3.对于FSG来说: T端是ag  R是fsapi  </li>
+<li>4.ACD等来说:T端是自己 R端是ag  </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line">@Component</div><div class="line">public class AddResponseHeaderFilter extends ZuulFilter&#123;</div><div class="line">@Override</div><div class="line">public String filterType() &#123;</div><div class="line">    return POST_TYPE;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public int filterOrder() &#123;</div><div class="line">    /**</div><div class="line">    *我们自定义post filter时候我们filter的顺序放到SEND_RESPONSE_FILTER_ORDER之前。</div><div class="line">    **/</div><div class="line">    return SEND_RESPONSE_FILTER_ORDER - 1;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public boolean shouldFilter() &#123;</div><div class="line">    return true;</div><div class="line">&#125;</div><div class="line">@Override</div><div class="line">public Object run() &#123;</div><div class="line">    RequestContext requestContext = RequestContext.getCurrentContext();</div><div class="line">    HttpServletResponse response = requestContext.getResponse();</div><div class="line">    /**</div><div class="line">    *请求成功之后,我们往header里面添加一些信息。  </div><div class="line">    **/</div><div class="line">    response.setHeader(&quot;X-Foo&quot;, UUID.randomUUID().toString());</div><div class="line">    return null;</div><div class="line">&#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>测试:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/6.png" alt=""> </p>
-<h4 id="8-2-Zuul-限流"><a href="#8-2-Zuul-限流" class="headerlink" title="8.2 Zuul:限流"></a>8.2 Zuul:限流</h4><h5 id="8-2-1-限流基本理论"><a href="#8-2-1-限流基本理论" class="headerlink" title="8.2.1 限流基本理论"></a>8.2.1 限流基本理论</h5><ol>
-<li>1.Zuul充当的是api网关的角色、每个请求都会经过它、在他上面做api限流保护、防止攻击。比如我们的api是发短信的、我们需要限制客户端请求速度、从而在一定程序上抵制短信大攻击、降低损失。</li>
-<li><p>2.Zuul的限流是放在前置过滤器去做的、更具体来说、时机是在请求被转发之前调用。如果前置过滤器有多个操作、限流放到最靠前那个。比如:Zuul前置过滤器里面有限流、鉴权。那么限流应该早于鉴权。  </p>
-</li>
-<li><p>3.限流方案很多，这里以一种来说:令牌桶流。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/16.png" alt=""><br>a.中间桶(token bucket)：是存放令牌的、所以叫做令牌桶。<br>b.最上面会以固定的速率往令牌桶中添加令牌、如果已经放满了就丢掉。<br>c.外部请求过来、会从令牌桶中获取令牌、拿到令牌之后才可以继续往前走。如果拿不到令牌直接被拒绝。其实是和买房一样。 </p>
-</li>
+<p>我们查相关日志时候,先从ag模块(cti模块)查询起,然后一次找到T、R。<br>分析:看ag的日志—&gt;这种交互ag的日志是两边都有的–&gt;从ag里面开始分析—&gt;平台挂机0、200是用户挂的—&gt;从ag开始看确定消息在什么地方不对了 然后再分析fsg测 或者是ivr测的日志<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/10/37.png" alt="">  </p>
+<h4 id="2-日志文件模块"><a href="#2-日志文件模块" class="headerlink" title="2.日志文件模块"></a>2.日志文件模块</h4><h5 id="2-1-查看和机器人交互日志"><a href="#2-1-查看和机器人交互日志" class="headerlink" title="2.1.查看和机器人交互日志"></a>2.1.查看和机器人交互日志</h5><p>和机器人交互日志都是通过ivr流程中http传数据,所以在httpg日志,需要看就提详细信息可以看dyflow日志</p>
+<h5 id="2-2-查看任务加载-工作日-时间段-呼叫情况"><a href="#2-2-查看任务加载-工作日-时间段-呼叫情况" class="headerlink" title="2.2.查看任务加载,工作日,时间段,呼叫情况"></a>2.2.查看任务加载,工作日,时间段,呼叫情况</h5><ol>
+<li>1.任务即是notify,但是任务在呼叫前任务加载,工作日,时间段都是在dbg_dbg01模块</li>
+<li>2.查看任务呼叫情况:callnotify_callnotify01.log  </li>
+<li>3.查看任务调用api模块:callnotify_callnotifyapi.log  </li>
+<li>4.查看任务呼叫失败情况,没有数据插入到cti_cdr、ocm_result：查看callnotify_callnotifyfailsql.log  </li>
 </ol>
-<h5 id="8-2-2-限流代码实现"><a href="#8-2-2-限流代码实现" class="headerlink" title="8.2.2 限流代码实现"></a>8.2.2 限流代码实现</h5><p>限流也是一个Filter,我们以RateFilter<br>a.filterType–&gt;PRE_TYPE<br>b.filterOrder–&gt;优先级最高:优先级为最高:组件自带的优先级最高位-3 我们这边比他还高(SERVLET_DETECTION_FILTER_ORDER-1)  </p>
-<h6 id="1-新建RateFilter类"><a href="#1-新建RateFilter类" class="headerlink" title="1.新建RateFilter类"></a>1.新建RateFilter类</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/17.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" alt="">     </p>
-<h4 id="8-3-Zuul-鉴权和添加用户服务"><a href="#8-3-Zuul-鉴权和添加用户服务" class="headerlink" title="8.3 Zuul:鉴权和添加用户服务"></a>8.3 Zuul:鉴权和添加用户服务</h4><h5 id="8-3-1-Zuul权限校验"><a href="#8-3-1-Zuul权限校验" class="headerlink" title="8.3.1 Zuul权限校验"></a>8.3.1 Zuul权限校验</h5><p>我们使用Zuul的权限校验实现下面3个功能。</p>
+<h4 id="3-ipcc对接其他server"><a href="#3-ipcc对接其他server" class="headerlink" title="3.ipcc对接其他server"></a>3.ipcc对接其他server</h4><p>参考:<a href="https://blog.csdn.net/gredn/article/details/40581871" target="_blank" rel="external">https://blog.csdn.net/gredn/article/details/40581871</a></p>
+<h5 id="3-1-修改freeswitch配置"><a href="#3-1-修改freeswitch配置" class="headerlink" title="3.1 修改freeswitch配置"></a>3.1 修改freeswitch配置</h5><p>从平台架构我们知道,我们现在需要和外部第三方sipServer对接,首先需要打通各自的网络,然后就是配置相关的网管  </p>
 <ol>
-<li>1./order/create 只能买家访问(创建订单)  </li>
-<li>2./order/finish 只能卖家访问(完结订单) </li>
-<li><p>3./product/list 都可以访问(商品列表)  </p>
-</li>
-<li><p>1.新建鉴权Filter(AuthFilter)<br>新建鉴权Filter、用来区分买家和卖家</p>
-</li>
-<li><p>2.实现逻辑<br>怎样区分买家和卖家呢?有些人想到cookie、既然想到了cookie那么必须买家和卖家登录了之后才能获取到信息。那么登录功能写到哪里了，就需要有一个用户服务。</p>
+<li>1.进入freeswitch目录下freeswitch/conf/sip_profiles/external其中有外部网管模块。 拷贝存在的一个网关配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/62.png" alt="">  </li>
+<li>2.修改gw3.xml中对接的外部sipServer地址和端口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/63.png" alt=""> </li>
+<li>3.重启freeswitch<br>进入freeswitch的bin目录停止fs:./freeswitch -stop<br>进入freeswitch的bin目录启动fs:./freeswitch -nc -nonat  </li>
+</ol>
+<h5 id="3-2-修改号码网管路由"><a href="#3-2-修改号码网管路由" class="headerlink" title="3.2 修改号码网管路由"></a>3.2 修改号码网管路由</h5><ol>
+<li>1.修改cti_route表<br>打开数据库表cti_route配置主叫外显号码和网关对应的关系<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/05/64.png" alt=""> </li>
+<li>2.重启fsg<br>进入/cc/bin目录下:执行:./fsg.sh restart  </li>
+</ol>
+<h5 id="3-3-使用抓包工具抓包"><a href="#3-3-使用抓包工具抓包" class="headerlink" title="3.3 使用抓包工具抓包"></a>3.3 使用抓包工具抓包</h5><p>对接完之后,如果电话不通,那么就需要使用wireshake进行网络抓包,分析包  </p>
+<h4 id="4-ipcc对每个号码并发进行控制"><a href="#4-ipcc对每个号码并发进行控制" class="headerlink" title="4.ipcc对每个号码并发进行控制"></a>4.ipcc对每个号码并发进行控制</h4><p>在/cc/cfg/notify.cfg下的callnotify添加:examentline=1表明开启了号码并发设置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/6.png" alt="">  </p>
+<h4 id="5-ipcc配置空号检测"><a href="#5-ipcc配置空号检测" class="headerlink" title="5.ipcc配置空号检测"></a>5.ipcc配置空号检测</h4><h5 id="5-1-安装空号检测"><a href="#5-1-安装空号检测" class="headerlink" title="5.1 安装空号检测"></a>5.1 安装空号检测</h5><ol>
+<li>1.首先正常安装并启用空号检测da2(安装数据库、程序)  </li>
+<li>2.如果空号检测部署在一台服务器上，我们呼叫平台部署在多台服务器上，我们如何配置呢?  </li>
+<li>3.查看/usr/local/freeswitch/conf下面文件:da2.json<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/7.png" alt="">  </li>
+<li>4.重启freeswitch:进入freeswitch的bin目录:执行:./freeswitch -stop 再执行:./freeswitch -nc -nonat  </li>
+<li>5.打开freeswitch客户端:<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./fs_cli -P 8031 -p testtest</div></pre></td></tr></table></figure>
 </li>
 </ol>
-<h5 id="8-3-2-添加用户服务"><a href="#8-3-2-添加用户服务" class="headerlink" title="8.3.2 添加用户服务"></a>8.3.2 添加用户服务</h5><ol>
-<li>1.API接口登录区分<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/18.png" alt=""></li>
-</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/8.png" alt=""> </p>
 <ol>
-<li>2.数据库  </li>
+<li>6.在fs控制台客户端输入:da2 show<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/9.png" alt=""><br>出现上面问题说明成功,如果一直不成功检查对应数据库表  </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `user_info` (</div><div class="line">  `id` varchar(32) NOT NULL,</div><div class="line">  `username` varchar(32) DEFAULT &apos;&apos;,</div><div class="line">  `password` varchar(32) DEFAULT &apos;&apos;,</div><div class="line">  `openid` varchar(64) DEFAULT &apos;&apos; COMMENT &apos;微信openid&apos;,</div><div class="line">  `role` tinyint(1) NOT NULL COMMENT &apos;1买家2卖家&apos;,</div><div class="line">  `create_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT &apos;创建时间&apos;,</div><div class="line">  `update_time` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT &apos;修改时间&apos;,</div><div class="line">  PRIMARY KEY (`id`)</div><div class="line">);</div><div class="line">```  </div><div class="line"></div><div class="line">userInfo中买家和卖家区分是根据:role字段。</div><div class="line"></div><div class="line">3. 3.创建应用  </div><div class="line">选择的依赖组件:</div><div class="line">1.配置:Cloud Config--&gt;Config Cient</div><div class="line">2.注册中心:Cloud Discovery--&gt;Eureka Discovery</div><div class="line">3.数据库:SQL--&gt;Mysql/JPA</div><div class="line">4.缓存:NoSQL--&gt;redis  </div><div class="line"></div><div class="line">4. 4.修改版本依赖</div><div class="line"></div><div class="line">5. 5.统一配置中心远端服务器创建user-dev.yml文件  </div><div class="line">我们只添加数据库连接信息和redis连接信息，其他信息在bootstrap.yml文件里面  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">6. 6.在config服务中访问:http://localhost:8083/user-dev.yml可以查看到对应文件</div><div class="line"></div><div class="line">7. 7.因为user服务后面肯定会对外提供接口的、所以我们将其改造成多模块  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/7.png)  </div><div class="line"></div><div class="line">8. 8.添加dataobject</div></pre></td></tr></table></figure>
-<p>@Entity<br>public class UserInfo {<br>@Id<br>private String id;<br>private String username;<br>private String password;<br>private String openid;<br>private Integer role;<br>public String getId() {<br>    return id;<br>}<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">9. 9.service和serviceImpl</div></pre></td></tr></table></figure></p>
-<p>public interface UserService {<br>/**</p>
-<ul>
-<li>通过openid来查询用户信息</li>
-<li>@param openid</li>
-<li><p>@return<br>*/<br>UserInfo findByOpenid(String openid);<br>}<br>@Service<br>public class UserServiceImpl implements UserService {<br>@Autowired<br>private UserInfoRepository repository;<br>@Override<br>public UserInfo findByOpenid(String openid) {<br> return repository.findByOpenid(openid);<br>}<br>}</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">#### 8.3 Zuul:鉴权和添加用户服务  </div><div class="line">1. 1.拷贝ResultVOUtil、ResultEnum到user  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/8.png)    </div><div class="line">2. 2.书写买家登录:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/9.png)  </div><div class="line">3. 3.测试:  </div><div class="line">a.正确输入:![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/10.png)  </div><div class="line">b.错误输入:![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/11.png)  </div><div class="line">c.数据库角色修成成2:![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/12.png)    </div><div class="line"></div><div class="line">4. 4.往redis里面书写数据  </div><div class="line">买家登录时候先去redis里面找,如果有说明已经登录了,没有的话才设置cookie  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/13.png)  </div><div class="line"></div><div class="line">上面代码会出现一个问题,就是每次页面刷新,都会在redis里面写数据,导致很多脏数据产生,所以需要在卖家最前面添加判断。    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/14.png)   </div><div class="line"> </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/15.png)    </div><div class="line"></div><div class="line">### 8.4 订单完结接口开发  </div><div class="line">我们在api-gateway的AuthFilter里面进行过滤校验时候:</div></pre></td></tr></table></figure>
-<p>/**</p>
-</li>
-<li>1./order/create 只能买家访问</li>
-<li>2./order/finish 只能卖家访问</li>
-<li>3./product/list 都可以访问<br>*/<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">分为以上3步,我们还差在Order服务中订单完结接口没有开发:&quot;/order/finish&quot;;我们现在实现此接。  </div><div class="line"></div><div class="line">### 8.5 权限校验完成  </div><div class="line"></div><div class="line">#### 8.5.1 权限基本操作  </div><div class="line"></div><div class="line">1. 1.先访问user(卖家登录:http://localhost:8085/login/seller?openid=xyz)    </div><div class="line">结果如下:    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/16.png)  </div><div class="line">我们请求正常,并且也获取到cookie了,此时我们把cookie删掉.再次请求api-gateway(此时请求api-gateway的时候注释掉:TokenFilter中run认证)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/17.png)    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/18.png)    </div><div class="line">以上返回的是成功,但是cookies中没有值,之前提过Zuul敏感头设置:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/19.png)    </div><div class="line"></div><div class="line">假如我们对所有服务都提供敏感头,都需要传递cookie,则:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/20.png)  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/21.png)    </div><div class="line">此时我们能够确保通过api-gateway是可以正常登录的。  </div><div class="line"></div><div class="line">2. 2.接下来我们书写AuthFilter中业务逻辑。  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/22.png)  </div><div class="line"></div><div class="line">下面我们通过接口去调用:  </div><div class="line"></div><div class="line">3. 3.我们通过postman创建订单(切记一定要加上order服务名)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/23.png)  </div><div class="line">我们改掉:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/24.png)  </div><div class="line">我们再次请求时候回返回401：权限不足-&gt;所以我们需要先登录  </div><div class="line">注意:在postman中,每一个窗口是互相隔离的,我们在一个窗口中登录,在另一个窗口中也是不能请求过的。    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/26.png)   </div><div class="line">所以我们自己需要写入一个cookie到postman中去    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/25.png)  </div><div class="line"></div><div class="line">4. 4.上面我们使用if语句来判断不同授权用户,其实这种写法以后相当不好维护,如果用户很多,耦合进来判断,有一天假如对卖家放开不限制,那么只能删掉,如何改造呢?我们一般对卖家和买家各自做一个filter:</div><div class="line">a.拦截统一在shouldFilter方法中  </div><div class="line">b.拦截后处理统一在run方法中</div><div class="line"></div><div class="line">AuthBuyerFilter:      </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/27.png) </div><div class="line"></div><div class="line">AuthSellerFilter也是类似。  </div><div class="line"></div><div class="line"></div><div class="line">#### 8.5.2 权限补充  </div><div class="line">  </div><div class="line">1. 1.大多数情况下,我们会把权限校验的uri存放到数据库中去,那是不是api-gateway直接去连接数据库进行判断呢?  </div><div class="line">这里牵涉到一个边界的问题,api-gateway要做的是网关,如果去连接user服务的数据库,显然是不合适的,那能不能去调用user服务呢?调用user服务是合理的,应该去调用,但是每次鉴权的时候去调用user服务,user服务那边又去调用数据库的话,这样对数据库压力很大,我们应该使用redis,api-gateway直接去redis里面获取用户权限，那么redis里面的数据怎样过来呢?可以像之前&quot;异步扣库存的方式-&gt;用户信息一变动,就发一个信息过来,网关这边监听消息,并记录到redis&quot;</div><div class="line"></div><div class="line">2. 2.微服务架构下对所有服务都得鉴权，每个服务都需要明确当前用户的权限,在Zuul的前置过滤器里面实现相关逻辑是一个值得考虑的方案,同时在微服务框架中,多个服务的无状态化一般会考虑两种技术方案:  </div><div class="line">a.分布式session(将用户认证信息存储在共享储存中,且通常用用户会话作为key来实现简单的分布式hash映射,当用户访问微服务时,用户数据可以从共享存储中获取,用户登录状态是不透明的,同时也是一个高可用且可扩展的解决方案)  </div><div class="line">b.OAuth2与Spring Security结合</div><div class="line"></div><div class="line">3. 3.我们这有一个细节:用户模块的utils代码一直在copy,相同的我们就拷贝过来,我们少了一个基础服务(如果公司是一个大型服务改造的话,基础服务比较容易,一目连然拆出来,但是是一个从头开发的项目,没有多大把握,类似我们现在,建议是将每个微服务的公用组件放到公用模块里面去,比如我们现在的user,order,product服务都有common模块,有了一定积累后,很自然的将这块代码剥离出来,作为公共组件,下沉,成为公共的一个服务)  </div><div class="line"></div><div class="line">4. 4.另外一点,在SpringCloud架构体系中的所有微服务都是通过Zuul对外提供统一访问入口,这个时候如果公司有两套系统,一套传统项目,一套微服务架构项目,让这两套项目在线上同时运行,Zuul会非常关键。  </div><div class="line"></div><div class="line">### 8.6 跨域  </div><div class="line">#### 8.6.1 跨域问题  </div><div class="line">1. 1.我们一般的大型项目都是前后端分离的,前端通过ajax发送请求,浏览器的ajax是有同源策略的,如果违反了同源策略就会有跨域问题,Zuul作为微服务的api网关,在它上面处理跨域也是一种选择。  </div><div class="line">2. 2.跨域其实可以看成是Spring的跨域,Spring跨域常用的一种方法是在:被调用的类或方法上增加@CrossOrigin注解来声明自己支持跨域访问,这种方式的缺点其实很明显,作用域在类或者方法上,微服务里面的应用就有很多个,一个应用里面的类和方法更加多  </div><div class="line">3. 3.解决跨域的另一种方法是:在Zuul里增加CorsFilter过滤器,此方案是添加到网关上,对内部应用代码没有任何改造。  </div><div class="line"></div><div class="line">#### 8.6.2 跨域改造 </div><div class="line"></div><div class="line">##### 1.单个接口跨域   </div><div class="line">1. 1.项目中跨域：我们在product服务里面的ProductController的list方法里面添加跨域注解:  </div><div class="line">allowCredentials = &quot;true&quot;-&gt;true允许cookie跨域</div></pre></td></tr></table></figure>
-</li>
-</ul>
-<p>@CrossOrigin(allowCredentials = “true”)<br>```</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/29.png" alt="">  </p>
-<h5 id="2-统一跨域设置"><a href="#2-统一跨域设置" class="headerlink" title="2.统一跨域设置"></a>2.统一跨域设置</h5><ol>
-<li>1.在api-gateway上添加配置文件:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/30.png" alt="">  </li>
+<h5 id="5-2-添加新的授权"><a href="#5-2-添加新的授权" class="headerlink" title="5.2 添加新的授权"></a>5.2 添加新的授权</h5><p>部署新的话务平台节点时候需要添加新的授权,修改两个表:user,bill;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/11/83.png" alt="">   </p>
+<h4 id="6-ipcc中cdr关于服务"><a href="#6-ipcc中cdr关于服务" class="headerlink" title="6.ipcc中cdr关于服务"></a>6.ipcc中cdr关于服务</h4><ol>
+<li>1.服务水平只对呼入而言的 呼出不用管  calltype=100 and dir=1  </li>
+<li>2.starttime  connecttime和endtime 是整个电话的开始 接起和结束时间</li>
+<li>3.workstarttime 是电话进入acd的时间  workconnect是坐席接起电话的时间 workendtime是坐席服务结束的时间 acmtime 在呼入的时候是坐席开始振铃时间（注意  在呼出的时候是用户振铃时间）</li>
+<li>4.acmtime是服务水平的统计标志</li>
+<li>5.用户呼叫系统的全部电话（呼入我们目前都要进入ivr ）：calltype&lt;300 and dir = 1 </li>
+<li>6.坐席呼出用户的电话  calltype=100 || calltype=113||calltype=114  and dir=0</li>
+<li>7.自动外呼呼出的电话   notifyid is not null</li>
+<li>8.里面 connecttime  workconnecttime字段很重要 判断是否接通的依据</li>
+<li>9.建议：现在数据除了cdr表外 通话数据 坐席数据 其实已经通过ice推送给ccms了、ccms能不能做一些文件存储 然后通过一些外部工具进行数据分析、毕竟cdr是生产上的 不能频繁访问、 ZeroC ICE提供一种打补丁方式，名为IcePatch2。基本功能就是通过ICE通讯将服务器上的最近软件部署到各个客户端中，这间接的实现了文件传输功能，</li>
 </ol>
+<h4 id="7-ipcc中任务呼叫失败原因"><a href="#7-ipcc中任务呼叫失败原因" class="headerlink" title="7.ipcc中任务呼叫失败原因"></a>7.ipcc中任务呼叫失败原因</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/81.png" alt="">  </p>
+<h4 id="8-ipcc中任务脚本通知"><a href="#8-ipcc中任务脚本通知" class="headerlink" title="8.ipcc中任务脚本通知"></a>8.ipcc中任务脚本通知</h4><p>通过shell脚本的iniwrite和ice不能并存,如果用ice需要把iniwrite改成iniwrite1或者其他<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/82.png" alt=""> </p>
+<h4 id="9-ipcc中配置"><a href="#9-ipcc中配置" class="headerlink" title="9.ipcc中配置"></a>9.ipcc中配置</h4><p>ipcc各种配置请参考对应的doc文档。  </p>
+<h3 id="2-空号检测模块搭建及录音库文件更新"><a href="#2-空号检测模块搭建及录音库文件更新" class="headerlink" title="2.空号检测模块搭建及录音库文件更新"></a>2.空号检测模块搭建及录音库文件更新</h3><p>注意:金服空号检测服务器由于私有云不能访问到外网,所以将空号检测license所在服务部署到了金服金融云。(金融云是连通公有云和私有云的桥梁)  </p>
+<p>空号检测服务daserver是根据局端返回的录音文件:然后通过asr识别来返回信令结果:dropcause  </p>
+<h4 id="2-1服务搭建"><a href="#2-1服务搭建" class="headerlink" title="2.1服务搭建"></a>2.1服务搭建</h4><ol>
+<li>1.解压da.tar.gz数据库  </li>
+<li>2.安装mysql<br>centos6<br>-yum install mysql-server<br>-service mysqld start<br>-chkconfig mysqld on   </li>
+</ol>
+<p>centos7<br>-yum install mariadb-server<br>-systemctl start mariadb.service<br>-systemctl enable mariadb.service   </p>
+<ol>
+<li><p>3.创建数据库da<br>mysqladmin -uroot -p create da  </p>
+</li>
+<li><p>4.导入数据到da<br>mysql -uroot -p da &lt; da.sql<br>生成的数据库和表如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/99.png" alt=""></p>
+</li>
+<li>5.执行machinecode获取机器码,发给cdevelop@qq.com申请授权码,写入 license.txt .<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/95.png" alt="">    </li>
+<li><p>6.根据安装文档word版本,配置数据库和JSON  </p>
+</li>
+<li><p>7.启动daserver<br>临时启动: ./daserver<br>后台启动: nohup ./daserver &amp;  </p>
+</li>
+</ol>
+<p>注意:启动出现 ./daserver: relocation error: ./libssl.so.10: symbol private_ossl_minimum_dh_bits, version libcrypto.so.10 not defined in file libcrypto.so.10 with link time reference<br>一般是系统已经有了其他版本的ssl,删除 本目录的 libssl.so.10 文件  </p>
+<h4 id="2-2更新录音文件库"><a href="#2-2更新录音文件库" class="headerlink" title="2.2更新录音文件库"></a>2.2更新录音文件库</h4><p>电话在拨打过程中出现了运营商返回的错误信令:dropcause为480<br>通过查询da模块(空号检测模块)录制的录音知道:”您拨打的号码是非本地号码,请在拨打号码前加0” 我们知道空号检测模块的录音库中没有识别到此空号录音，所以我们需要更新录音库(使用da提供的win下的工具samplemgr,连接da所在license的库数据库da)，有时候我们是无法直接连接license所在的da数据，而只能连接测试数据库，所以我们需要在测试环境下操作，然后把对应的数据替换到生产库。  </p>
+<h5 id="2-2-1更新da语音库"><a href="#2-2-1更新da语音库" class="headerlink" title="2.2.1更新da语音库"></a>2.2.1更新da语音库</h5><ol>
+<li>1.打开samplemgr,连接对应的数据库<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/96.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/97.png" alt="">      </li>
+<li><p>2.启动服务,输入key(key是da数据库中)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/100.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/98.png" alt=""><br>启动成功日志:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/101.png" alt="">  </p>
+</li>
+<li><p>3.添加录音库测试<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/102.png" alt=""><br>文件要求 8000hz 16位 单声道，文件名要是数字，比如 电话号码.wav 这样子。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/103.png" alt=""><br>后续步骤按照samplemgr里面的文档:添加样本例子.docx  </p>
+</li>
+</ol>
+<h5 id="2-2-2-测试环境da数据导入到生产环境"><a href="#2-2-2-测试环境da数据导入到生产环境" class="headerlink" title="2.2.2 测试环境da数据导入到生产环境"></a>2.2.2 测试环境da数据导入到生产环境</h5><p>注意:1.由于da表结构中字段类型是:blob所以我们不能使用SQLyog或者Navicat工具直接将表数据导出，经测试直接导出的数据通过source导入到生产环境时候会由于乱码导入报错。而只能直接在测试环境所在服务是使用mysqldump指令导出数据。  </p>
+<h6 id="1-测试环境da数据导出"><a href="#1-测试环境da数据导出" class="headerlink" title="1.测试环境da数据导出"></a>1.测试环境da数据导出</h6><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/104.png" alt=""></p>
+<ol>
+<li>1.进入测试环境da数据库数据(以导出mfcc数据为例)<br>mysqldump -u <username> -p <dbname> &gt; /path/to/<em>*</em>.sql<br>我们直接输入:mysqldump -u root -p123456 da mfcc&gt;mfcc.sql 报错如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/105.png" alt=""><br>说明我们导出表数据时候不能直接输入密码。我们更换成如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/106.png" alt="">  <h6 id="2-生产环境da数据导入"><a href="#2-生产环境da数据导入" class="headerlink" title="2.生产环境da数据导入"></a>2.生产环境da数据导入</h6></dbname></username></li>
+<li>1.连接生产环境数据库(注：如果连接不上时候加上-h 127.0.01参数)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/107.png" alt=""> </li>
+<li>2.数据导入<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/108.png" alt="">  </li>
+</ol>
+<h6 id="3-启动da的license所在服务"><a href="#3-启动da的license所在服务" class="headerlink" title="3.启动da的license所在服务"></a>3.启动da的license所在服务</h6><p>从数据导入之后使用./daserver启用之后,大概到了下午4点11分左右,局端又返回许多480结果,然后查看da的录音<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/110.png" alt=""><br>听录音是没有识别到,于是进入freeswitch里面的log下的da.log打开后发现下午4点11分左右就不开始识别了:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/111.png" alt=""><br>查看daserver进程发现进程挂了,所以使用下面后太启动方式。  </p>
+<ol>
+<li>1.进入daserver所在目录下执行后台启动指令:<br>nohup ./daserver &amp;<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/109.png" alt="">  </li>
+</ol>
+<h4 id="10-定时备份日志"><a href="#10-定时备份日志" class="headerlink" title="10.定时备份日志"></a>10.定时备份日志</h4><ol>
+<li><p>1.编写clearlog.sh  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">cd /cc/log/bak</div><div class="line">find /cc/bin/log -mtime +1 -type f -name &quot;log*.log&quot; -exec mv &#123;&#125; /cc/log/bak/. \;</div><div class="line">tar zcvf fslog$(date +&quot;%Y%m%d%H%M&quot;)tar.gz log*.log </div><div class="line">rm -f log*.log</div><div class="line">find /cc/log -mtime +1 -type f -name &quot;*.log&quot; -exec mv &#123;&#125; /cc/log/bak/. \;</div><div class="line">tar zcvf log$(date +&quot;%Y%m%d%H%M&quot;).log.tar.gz *.log </div><div class="line">rm -f *.log</div></pre></td></tr></table></figure>
+</li>
+<li><p>2.添加到系统定时任务中去<br>a.在root下执行 crontab -e<br>b.将0 0 <em> </em> *  /cc/bin/cleanlog.sh &gt; /dev/null 2&gt;&amp;1 放进去 保存退出。</p>
+</li>
+<li><p>3.运维查询每天日志的最小、最大拨打时间  </p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line">SELECT MIN(starttime),MAX(starttime),SUBSTRING(starttime,1,10) FROM cti_cdr WHERE entid = 1308 GROUP BY SUBSTRING(starttime,1,10) ORDER BY starttime ASC;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">#### 11.停止掉空号检测</div><div class="line">  </div><div class="line">1.进入:/cc/freeswitch/conf;不是删除da2.json  </div><div class="line">2.注释掉:load mod_da2  </div><div class="line">进入:/cc/freeswitch/conf/autoload_configs找到文件:modules.conf.xml</div><div class="line">然后注释掉:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/114.png)  </div><div class="line">3.fsg.cfg里面:注释掉:识别da2的注释掉</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/10/116.png)</div><div class="line"></div><div class="line">#### 12.fs中注释掉影响通话质量的元素  </div><div class="line">1.conf/vars.xml里面的以下几行注释掉:</div></pre></td></tr></table></figure>
+<!--RECORD_SILENCE_THRESHOLD vad调节阀值,声音能量，配置太小旁边人说话会被当成说话800 -->
+  <!--X-PRE-PROCESS cmd="set" data="RECORD_SILENCE_THRESHOLD=800"/->
+
+  <!-- EOS_SILENCE_THRESHOLD 没说话的静音阈值200-->
+  <!--X-PRE-PROCESS cmd="set" data="EOS_SILENCE_THRESHOLD=200"/-->
+  <!--RECORD_FINAL_TIMEOUT_MS 停顿超时，说话结束-->
+  <!--X-PRE-PROCESS cmd="set" data="RECORD_FINAL_TIMEOUT_MS=600"/-->
+ <!--X-PRE-PROCESS cmd="set" data="RECORD_STEREO=true"/-->
+<p>```</p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2019/04/18/SpringCloud-8-Zuul综合使用/" class="archive-article-date">
-  	<time datetime="2019-04-18T04:13:24.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-18</time>
+      <a href="/2019/05/14/ipcc-1-ipcc整体架构/" class="archive-article-date">
+  	<time datetime="2019-05-14T11:36:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-05-14</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloud-7-服务网管" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/17/SpringCloud-7-服务网管/">SpringCloud-7-服务网管</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-服务网关和Zuul"><a href="#1-服务网关和Zuul" class="headerlink" title="1.服务网关和Zuul"></a>1.服务网关和Zuul</h3><h4 id="1-1-为什么需要服务网关"><a href="#1-1-为什么需要服务网关" class="headerlink" title="1.1 为什么需要服务网关"></a>1.1 为什么需要服务网关</h4><p>假如没有网关服务,当前系统起了多个服务,比如：订单、广告、商品、支付、用户。等等…<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/38.png" alt=""> </p>
-<p>那么客户端怎么调用呢?和每个服务一步步打交道、显然不现实。需要一个接收request请求的统一入口。充当这个角色的是服务网关。一旦有了服务网关,所有请求都通过他,所以我们需要了解他发挥什么作用,具备什么要素?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/39.png" alt=""></p>
-<h4 id="1-2-服务网关的作用"><a href="#1-2-服务网关的作用" class="headerlink" title="1.2 服务网关的作用"></a>1.2 服务网关的作用</h4><h5 id="1-稳定性、高可用"><a href="#1-稳定性、高可用" class="headerlink" title="1.稳定性、高可用"></a>1.稳定性、高可用</h5><p>保证24小时可用；网络瘫痪、系统全挂、不能提供外面的服务。 </p>
-<h5 id="2-性能、并发性"><a href="#2-性能、并发性" class="headerlink" title="2.性能、并发性"></a>2.性能、并发性</h5><p>所有的请求都经过网关、所以网关的压力是巨大的、所以网关的性能也必须高。</p>
-<h5 id="3-安全性"><a href="#3-安全性" class="headerlink" title="3.安全性"></a>3.安全性</h5><p>要确保使用服务的安全、防止外部随意访问、比如金融行业、会进行通讯数据的加密措施。</p>
-<h5 id="4-扩展性"><a href="#4-扩展性" class="headerlink" title="4.扩展性"></a>4.扩展性</h5><p>各种请求都经过网关服务、所以网关上大有文章可做、可进行扩展。<br>理论上、网关是处理各种非业务功能的绝佳场所。诸如:协议转发、防刷、流量管控、日志监控等。</p>
-<h4 id="1-3-常用的网关方案"><a href="#1-3-常用的网关方案" class="headerlink" title="1.3 常用的网关方案"></a>1.3 常用的网关方案</h4><p>网关并非是微服务出来后的新鲜事物。业界成熟的网关服务有:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/40.png" alt=""><br>一代的Zuul在性能上确实没有优势、不能和nginx比较。当然，二代Zuul有较大的提升。</p>
-<p>原始的点餐项目是如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/41.png" alt=""></p>
-<ol>
-<li>1.nginx在前,tomcat在后、nginx做了负载均衡和反向代理。现在我们可以让nginx发挥他负载均衡和反向代理的优势后面的tomcat可以换成Zuul  </li>
-<li>2.项目改造过程中、合理利用原来的资源、发挥新加入事物的优势、因地制宜解决问题。<h4 id="1-4-Zuul的特点"><a href="#1-4-Zuul的特点" class="headerlink" title="1.4 Zuul的特点"></a>1.4 Zuul的特点</h4>Zuul相对nginx来说有所不足、但是作为SpringCloud完整微服务生态体系的前置网关服务是一个很不错的选择。有一种说法路由加过滤器等于Zuul<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/42.png" alt="">  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/43.png" alt=""><br>Zuul的组织架构图如下所示:<br>可以看到,过滤器之间是没有直接通信的,他们是通过Request Context进行数据通信的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/44.png" alt="">  </p>
-<p>Zuul的一次Http的生命周期:  </p>
-<ol>
-<li>1.Origin Server就是我们的业务服务。    </li>
-<li>2.请求先过来之后会到pre filters这种类型的过滤器,比如我们的参数校验就可以在这里面来做。    </li>
-<li>3.routing filters作用就是将http请求转发到Origin Server中去：如果重写http请求可以在这里面做。  </li>
-<li>4.post filters 这个时候你已经拿到了返回的结果,这个时候如果你想对结果进行处理和加工,可以在这里面来做  </li>
-<li>5.error Filters如果在前两个filter发生异常时候,就可以在error filter中进行全局异常处理。  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/45.png" alt=""> </p>
-<h3 id="2-Zuul的使用"><a href="#2-Zuul的使用" class="headerlink" title="2.Zuul的使用"></a>2.Zuul的使用</h3><ol>
-<li>1.新建项目api-gateway<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/46.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/47.png" alt=""> </li>
-<li>2.选择依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/48.png" alt="">   </li>
-<li>3.删除不需要的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/49.png" alt="">   </li>
-<li>4.修改版本一致<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/50.png" alt=""></li>
-<li>5.修改配置文件(从统一配置文件中获取配置信息)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/51.png" alt=""></li>
-</ol>
-<h4 id="2-1-路由转发"><a href="#2-1-路由转发" class="headerlink" title="2.1 路由转发"></a>2.1 路由转发</h4><p>我们现在实现Zuul的路由转发功能,我们在api-gateway项目的启动类上添加:@EnableZuulProxy。我们现在要实现product服务下请求里面的/product/list</p>
-<ol>
-<li><p>1.启动我们的product服务(8081端口),然后访问:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/52.png" alt="">  </p>
-</li>
-<li><p>2.通过Zuul服务(8084端口)路由转发请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/53.png" alt=""><br>只要注册到Eureka上的服务都可以通过:ip:port/服务名/url  </p>
-</li>
-</ol>
-<ol>
-<li><p>3.自定义Zuul路由转发地址<br>以上我们是通过默认的路由转发、默认的地址是:ip:port/服务名/url。但是有时候我们不想把服务名暴露出来 而是想用自己定义的路由地址。此时就需要配置Zuul了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/55.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/54.png" alt="">  </p>
-</li>
-<li><p>4.查询Zuul的所有routes,我们可以通过Zuul对应的服务api-gateway启动地址:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/117.png" alt="">  </p>
-</li>
-</ol>
-<ol>
-<li>5.我们如果想要拦截某些请求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/1.png" alt=""> </li>
-</ol>
-<h4 id="2-3-Cookie和动态路由"><a href="#2-3-Cookie和动态路由" class="headerlink" title="2.3 Cookie和动态路由"></a>2.3 Cookie和动态路由</h4><h5 id="2-3-1-Cookie"><a href="#2-3-1-Cookie" class="headerlink" title="2.3.1 Cookie"></a>2.3.1 Cookie</h5><p>我们在开发搭建web项目的时候,经常要使用cookie,需要把cookie返回到后端。在这里使用了Zuul组件、默认情况下Cookie是无法传递过去的。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/2.png" alt=""><br>我们从Zuul的配置中可以设置cookie的开启和关闭<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/4.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/5.png" alt="">  </p>
-<h5 id="2-3-2-动态路由"><a href="#2-3-2-动态路由" class="headerlink" title="2.3.2 动态路由"></a>2.3.2 动态路由</h5><p>我们能不能改了路由配置之后自动生效了,就是动态路由。如果需要达到动态路由效果。我们只需要将api-gateway的配置放到config配置中心中去。我们如何做到config统一配置中配置改变了我们的api-gateway服务也动态改变了代码。我们添加Zuul的配置类。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/6.png" alt="">  </p>
-<h4 id="2-4-路由和高可用小结"><a href="#2-4-路由和高可用小结" class="headerlink" title="2.4 路由和高可用小结"></a>2.4 路由和高可用小结</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/7.png" alt="">  </p>
-<h5 id="2-4-1-典型应用场景"><a href="#2-4-1-典型应用场景" class="headerlink" title="2.4.1 典型应用场景"></a>2.4.1 典型应用场景</h5><ol>
-<li><p>1.Zuul的前置过滤器(Pre)<br>a.限流   b.鉴权    c.参数校验调整   d.请求转发  </p>
-</li>
-<li><p>2.Zuul的后置过滤器(Post)<br>人过留名<br>a.统计  b.日志  </p>
-</li>
-</ol>
-<h5 id="2-4-2-高可用"><a href="#2-4-2-高可用" class="headerlink" title="2.4.2 高可用"></a>2.4.2 高可用</h5><p>所有的请求都需要经过Zuul、所以生产环境中、我们需要部署多台Zuul,以避免单点故障。Zuul的高可用是必须的。  </p>
-<ol>
-<li>1.多个Zuul节点注册到Eureka Server(将多个节点注册到Eureka Server就可以实现高可用)  </li>
-<li>2.Nginx和Zuul “混搭”(使用nginx对外暴露一个url,nginx把请求转发到多个zuul服务上、这样可以做到彼此的取长补短)。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/04/17/SpringCloud-7-服务网管/" class="archive-article-date">
-  	<time datetime="2019-04-17T03:01:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ipcc/">ipcc</a></li></ul>
 	</div>
 
       
