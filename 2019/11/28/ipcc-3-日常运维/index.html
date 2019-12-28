@@ -14,7 +14,7 @@
 <meta property="og:site_name" content="Startshineye的博客">
 <meta property="og:description" content="1.中间跳过的名单拨打处理先查看未拨打批次:  
 123SELECT DISTINCT(ocm_buslist.event_id) FROM ocm_buslist ocm_buslist  LEFT JOIN cti_cdr cdr ON ocm_buslist.list_id = cdr.memberid LEFT JOIN ocm_event e ON e.event_id = ocm_bu">
-<meta property="og:updated_time" content="2019-12-23T02:20:05.605Z">
+<meta property="og:updated_time" content="2019-12-24T11:35:23.348Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="ipcc-3-日常运维">
 <meta name="twitter:description" content="1.中间跳过的名单拨打处理先查看未拨打批次:  
@@ -196,7 +196,16 @@
 <p>select * FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">b.删除未拨打数据</div></pre></td></tr></table></figure></p>
 <p>DELETE FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4. 4.最后导入数据，修改批次统计:</div></pre></td></tr></table></figure></p>
 <p>select * from ocm_event_statistics where event_id = xxx<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">### 2.统计批次进度问题  </div><div class="line"></div><div class="line">SELECT * FROM ocm_event_statistics WHERE event_id = 1417;</div><div class="line"></div><div class="line">SELECT * FROM ocm_buslist_timing WHERE event_id = 1417;</div><div class="line"></div><div class="line">SELECT COUNT(DISTINCT cust_id) FROM ocm_buslist WHERE event_id = 1417;  16433</div><div class="line"></div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417;   11510;</div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417 AND valid_flag = 0;   </div><div class="line"></div><div class="line">SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = 1417 AND valid_flag = 1;  </div><div class="line"></div><div class="line">### 3.重呼数据未拨打问题  </div><div class="line">有时候,我们的重呼数据一直可能存在于:ocm_buslist_timing表中而不会拨打,所以我们需要处理这些批次,重新启用停用(对于在执行时间段内的批次)。  </div><div class="line"></div><div class="line">1. 1.查看在当前时间前未重呼的批次</div></pre></td></tr></table></figure></p>
-<p>SELECT event_id,event_state,event_name,send_time,over_time FROM ocm_event WHERE event_id IN (SELECT DISTINCT event_id FROM ocm_buslist_timing WHERE call_next_time&lt;xxx);<br>```</p>
+<p>SELECT event_id,event_state,event_name,send_time,over_time FROM ocm_event WHERE event_id IN (SELECT DISTINCT event_id FROM ocm_buslist_timing WHERE call_next_time<xxx); <figure="" class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">### 4.查看某个租户是否配置了重呼轮呼策略</div></pre></td></tr></table></xxx);></p>
+<p>SELECT enti.id,enti.entname,enti.state,oc.id,oc.parameter FROM cti_entinfo enti LEFT JOIN ocm_after_call_action oc ON enti.id = oc.entid<br>```  </p>
+<p><a href="https://blog.csdn.net/xiaosongbk/article/details/77199007" target="_blank" rel="external">https://blog.csdn.net/xiaosongbk/article/details/77199007</a></p>
+<p>update forumdata_userttt set userLink=right(userLink,length(userLink)-2) where id &gt;= 137;  </p>
+<p>UPDATE ocm_buslist SET customer_phone=RIGHT(customer_phone,LENGTH(customer_phone)-2) WHERE event_id = 1658 AND list_id&gt;6253939;  </p>
+<p>SELECT * FROM cti_cdr WHERE memberid = 5307512;</p>
+<p>SELECT MAX(memberid) AS memberid FROM cti_cdr WHERE notifyid = 1364; 5307512</p>
+<p>memberid<br>5307512</p>
+<p>UPDATE ocm_buslist SET customer_phone=RIGHT(customer_phone,LENGTH(customer_phone)-2) WHERE event_id =  1364 AND list_id&gt;5307512;  </p>
+<p>UPDATE ocm_buslist_timing SET customer_phone RIGHT(customer_phone,LENGTH(customer_phone)-2) WHERE customer_phone LIKE ‘93%’;</p>
 
       
     </div>
