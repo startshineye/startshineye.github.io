@@ -152,6 +152,128 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-1-nacos服务注册与发现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/">SpringCloudAlibaba-1-nacos服务注册与发现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="组件说明"><a href="#组件说明" class="headerlink" title="组件说明"></a>组件说明</h3><ol>
+<li>服务注册与发现:适配Spring Cloud服务注册与发现标准，默认集成了Ribbon的支持  </li>
+<li>服务限流降级：默认支持servlet、Feign、RestTemplate、Dubbo和RocketMQ限流降级接入，可以在运行时通过控制台实时修改限流配置规则，还支持查看限流降级Metrics监控。  </li>
+<li>分布式配置管理：支持分布式系统中的外部化配置，配置更改时自动刷新。  </li>
+<li>消息驱动能力：基于Spring Cloud Stream 为微服务应用构建消息驱动能力。  </li>
+<li>分布式事务：使用@GlobalTransactional注解，高效并且对业务零侵入地解决分布式事务问题。  </li>
+<li>阿里云对象存储：阿里云提供海量、安全、低成本、高可靠的云存储服务。支持在任何应用、任何时间、任何地点存储和访问任意类型的数据。  </li>
+<li>分布式任务调度：提供秒级、精准、高可靠、高可用的定时(基于Cron表达式) 任务调度服务。同时提供分布式的任务执行模型，如网格任务。网格任务支持海量子任务均匀分配到所有Worker(schedulerx-client)上执行。  </li>
+<li>阿里云短信服务：覆盖全球的短信服务，友好、高效、智能的互联化通讯能力，帮助企业迅速搭建客户触达通道。  </li>
+</ol>
+<h3 id="nacos"><a href="#nacos" class="headerlink" title="nacos"></a>nacos</h3><p>nacos=eureka+Spring Cloud Config  </p>
+<h4 id="1-下载运行nacos"><a href="#1-下载运行nacos" class="headerlink" title="1.下载运行nacos"></a>1.下载运行nacos</h4><p>下载地址:<br><a href="https://github.com/alibaba/nacos/releases">https://github.com/alibaba/nacos/releases</a><br>也可参考:<a href="https://nacos.io/en-us/docs/quick-start.html" target="_blank" rel="external">https://nacos.io/en-us/docs/quick-start.html</a>  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/8.png" alt="">  </p>
+<h4 id="2-服务注册与发现实例"><a href="#2-服务注册与发现实例" class="headerlink" title="2.服务注册与发现实例"></a>2.服务注册与发现实例</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/9.png" alt=""><br>运行3个实例:8050、8051注册到nacos上面  </p>
+<h5 id="2-1创建父工程"><a href="#2-1创建父工程" class="headerlink" title="2.1创建父工程"></a>2.1创建父工程</h5><p>1.创建工程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/10.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/11.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/12.png" alt="">  </p>
+<p>2.修改pom.xml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/13.png" alt="">  </p>
+<h5 id="2-2-创建consumer工程"><a href="#2-2-创建consumer工程" class="headerlink" title="2.2 创建consumer工程"></a>2.2 创建consumer工程</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/14.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/15.png" alt=""> </p>
+<p>添加相关依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/16.png" alt="">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;!--依赖版本定义--&gt;</div><div class="line">   &lt;dependencyManagement&gt;</div><div class="line">       &lt;dependencies&gt;</div><div class="line">           &lt;dependency&gt;</div><div class="line">               &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">               &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</div><div class="line">               &lt;version&gt;Greenwich.RELEASE&lt;/version&gt;</div><div class="line">               &lt;type&gt;pom&lt;/type&gt;</div><div class="line">               &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">           &lt;/dependency&gt;</div><div class="line">           &lt;dependency&gt;</div><div class="line">               &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">               &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;</div><div class="line">               &lt;version&gt;0.2.1.RELEASE&lt;/version&gt;</div><div class="line">               &lt;type&gt;pom&lt;/type&gt;</div><div class="line">               &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">           &lt;/dependency&gt;</div><div class="line">       &lt;/dependencies&gt;</div><div class="line">   &lt;/dependencyManagement&gt;</div></pre></td></tr></table></figure>
+<p>再次添加:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">添加Application服务发现客户端</div></pre></td></tr></table></figure>
+<p>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">application.yml</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-discovery-consumer<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>server:<br>  port: 8050<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">先启动nacos    </div><div class="line">https://nacos.io/en-us/docs/quick-start.html  </div><div class="line"></div><div class="line">然后输入:http://127.0.0.1:8848/nacos/  </div><div class="line">查看服务列表:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/17.png)  </div><div class="line"> </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"> </div><div class="line">##### 2.3 创建provider工程  </div><div class="line"></div><div class="line">类似的我们创建nacos-discovery-provider工程,并添加对应配置  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/18.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 2.4  让consumer去调用provider  </div><div class="line">1. 1.provider创建HelloController</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class HelloController {<br>    @GetMapping(“/hello”)<br>    public String hello(String name){<br>        return “Hello “+name;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.provider创建HelloController</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private RestTemplate restTemplate;<br>    @Autowired<br>    private LoadBalancerClient loadBalancerClient;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        ServiceInstance serviceInstance = loadBalancerClient.choose(“nacos-discovery-provider”);<br>        URI uri = serviceInstance.getUri();<br>        return restTemplate.getForObject(uri+”/hello?name=”+name, String.class);<br>    }<br>}<br>//NacosDiscoveryConsumerApplication注入:RestTemplate<br>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>    @Bean<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}<br>```   </p>
+<p>3.测试<br><a href="http://127.0.0.1:8050/test?name=qaws" target="_blank" rel="external">http://127.0.0.1:8050/test?name=qaws</a><br>结果返回:<br>Hello qaws  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/" class="archive-article-date">
+  	<time datetime="2020-01-25T15:38:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloud-11-服务追踪11" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/25/SpringCloud-11-服务追踪11/">SpringCloud-11-服务追踪11</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/25/SpringCloud-11-服务追踪11/" class="archive-article-date">
+  	<time datetime="2020-01-25T15:27:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-linux-防火墙命令" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -911,182 +1033,6 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 
 
   
-    <article id="post-work-11-nginx安装配置https" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/31/work-11-nginx安装配置https/">work-11-nginx安装配置https</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>参考1:<a href="https://www.cnblogs.com/wanghuaijun/p/5480554.html" target="_blank" rel="external">https://www.cnblogs.com/wanghuaijun/p/5480554.html</a><br>参考2:<a href="https://www.runoob.com/linux/nginx-install-setup.html" target="_blank" rel="external">https://www.runoob.com/linux/nginx-install-setup.html</a>  </p>
-<h3 id="安装nginx"><a href="#安装nginx" class="headerlink" title="安装nginx"></a>安装nginx</h3><p>软件需求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/63.png" alt=""><br>下载地址:<br>链接：<a href="https://pan.baidu.com/s/1OTFCGaTXOEQ54cnMtv8JJw" target="_blank" rel="external">https://pan.baidu.com/s/1OTFCGaTXOEQ54cnMtv8JJw</a><br>提取码：z3h5 </p>
-<h4 id="1-创建nginx用户"><a href="#1-创建nginx用户" class="headerlink" title="1.创建nginx用户"></a>1.创建nginx用户</h4><ol>
-<li>1.groupadd -r nginx</li>
-<li>2.useradd -r -g nginx -M nginx  </li>
-</ol>
-<h4 id="2-解压缩nginx的源码并安装"><a href="#2-解压缩nginx的源码并安装" class="headerlink" title="2.解压缩nginx的源码并安装"></a>2.解压缩nginx的源码并安装</h4><ol>
-<li>1.nginx-1.10.2.tar.gz、pcre-8.33.tar.gz、zlib-1.2.8.tar.gz上传文件到tools目录  </li>
-<li>2.解压:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/64.png" alt="">    </li>
-<li><p>3.cd nginx-1.10.2 执行:configure  </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">./configure --user=nginx --group=nginx --prefix=/founder/tools/nginx --with-http_stub_status_module --with-http_ssl_module</div><div class="line">--with-http_realip_module --with-http_addition_module --with-pcre=/founder/tools/pcre-8.33 --with-zlib=/founder/tools/zlib-1.2.8</div></pre></td></tr></table></figure>
-</li>
-<li><p>4.编译  make &amp;&amp; make install<br>如果出现以下错误按照要求修改即可:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/01.png" alt="">   </p>
-</li>
-<li><p>5.查看nginx版本<br>进入前面configure中配置的prefix下,执行如下命令: </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./nginx/sbin/nginx -v</div></pre></td></tr></table></figure>
-</li>
-<li><p>6.启动nginx  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./nginx/sbin/nginx</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h3 id="2-配置https"><a href="#2-配置https" class="headerlink" title="2.配置https"></a>2.配置https</h3><h4 id="2-1-配置前需要准备"><a href="#2-1-配置前需要准备" class="headerlink" title="2.1 配置前需要准备"></a>2.1 配置前需要准备</h4><ol>
-<li>1.配置前需要准备：域名、私钥文件、key文件、密码文件。如下图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/03.png" alt="">  </li>
-</ol>
-<h5 id="2-2-开始配置"><a href="#2-2-开始配置" class="headerlink" title="2.2 开始配置"></a>2.2 开始配置</h5><ol>
-<li>1.安装证书<br>将证书置于服务器中，一般放于<code>/nginx/sslcrt</code>下。  </li>
-<li><p>2.修改配置文件<br>早期的配置文件是<code>/opt/nginx/conf/nginx.conf</code>，较新的项目是<code>/opt/nginx/conf.d/*.conf</code><br>找到需要添加https的服务所在的位置。进行如下配置：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/04.png" alt=""></p>
-</li>
-<li><p>3.重载nginx配置文件<br>/nginx/sbin/nginx -s reload</p>
-</li>
-</ol>
-<h3 id="3-nginx常见错误"><a href="#3-nginx常见错误" class="headerlink" title="3.nginx常见错误"></a>3.nginx常见错误</h3><ol>
-<li>1.解决nginx: [error] open() ＂/usr/local/nginx/logs/nginx.pid＂ failed错误<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/02.png" alt="">  </li>
-</ol>
-<h3 id="4-nginx其他命令"><a href="#4-nginx其他命令" class="headerlink" title="4.nginx其他命令"></a>4.nginx其他命令</h3><p>以下包含了 Nginx 常用的几个命令：</p>
-<ol>
-<li>1./usr/local/webserver/nginx/sbin/nginx -s reload            # 重新载入配置文件</li>
-<li>2./usr/local/webserver/nginx/sbin/nginx -s reopen            # 重启 Nginx</li>
-<li>3./usr/local/webserver/nginx/sbin/nginx -s stop              # 停止 Nginx</li>
-</ol>
-<h3 id="5-编译nginx平滑添加stream模块"><a href="#5-编译nginx平滑添加stream模块" class="headerlink" title="5.编译nginx平滑添加stream模块"></a>5.编译nginx平滑添加stream模块</h3><p>有时候我们如果直接不能连接服务器c,但是B服务器能够连接服务器c,所有我们通过在B服务器做代理直接连接c。<br><a href="http://www.mamicode.com/info-detail-2272209.html。" target="_blank" rel="external">http://www.mamicode.com/info-detail-2272209.html。</a></p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">./configure --user=nginx --group=nginx --prefix=/founder/tools/nginx --with-http_stub_status_module --with-http_ssl_module</div><div class="line">--with-http_realip_module --with-http_addition_module --with-pcre=/founder/tools/pcre-8.33 --with-zlib=/founder/tools/zlib-1.2.8 --with-stream  </div><div class="line">--with-stream_ssl_module</div></pre></td></tr></table></figure>
-</code></pre><p>nginx实现端口监听:  </p>
-<p><a href="https://www.jianshu.com/p/c5097147ace3" target="_blank" rel="external">https://www.jianshu.com/p/c5097147ace3</a>  </p>
-<h3 id="6-安装stream模块"><a href="#6-安装stream模块" class="headerlink" title="6.安装stream模块"></a>6.安装stream模块</h3><p>./configure –with-stream –prefix=/usr/local/nginx &amp;&amp; make &amp;&amp; make install</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/31/work-11-nginx安装配置https/" class="archive-article-date">
-  	<time datetime="2019-07-31T06:59:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-ipcc-2-常见问题记录" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/29/ipcc-2-常见问题记录/">ipcc-2-常见问题记录</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h4 id="1-ipcc对接第三方话务平台"><a href="#1-ipcc对接第三方话务平台" class="headerlink" title="1.ipcc对接第三方话务平台"></a>1.ipcc对接第三方话务平台</h4><h5 id="1-1抓包找不到对应ip数据包"><a href="#1-1抓包找不到对应ip数据包" class="headerlink" title="1.1抓包找不到对应ip数据包"></a>1.1抓包找不到对应ip数据包</h5><ol>
-<li>1.分析:ipcc对接第三方话务平台的时候、我们抓包时候压根抓不到对应的ip网络交互、说明ipcc没能和第三方话务平台建立链接、说明freeswitch的sip对接地址注册有问题  </li>
-<li>2.解决:a.查看对应的网关对接信息是否有问题,在freeswitch的/usr/local/freeswitch/conf/sip_profiles/external/gw5.xml配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/35.png" alt="">  </li>
-<li>3.解决:b.查看freeswitch启动时候日志信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/36.png" alt=""><br>从上面看是gw5.xml网关对应的配置信息有误  </li>
-<li>4.解决:c.打开fs的客户端fs_cli通过sofia status 查看网关注册状态<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/37.png" alt=""><br>从上面可以知道网关注册失败  </li>
-</ol>
-<p>综上:找相关人员再次获取相关信息。</p>
-<h5 id="1-2-fs通过mrcp对接asr时候对接不上"><a href="#1-2-fs通过mrcp对接asr时候对接不上" class="headerlink" title="1.2.fs通过mrcp对接asr时候对接不上"></a>1.2.fs通过mrcp对接asr时候对接不上</h5><p>在测试环境下fs通过mrcp对接asr时候对接时候、启动fs和ipcc平台时候、发现和机器人交互时候总是感觉机器人获取不到用户说话的声音并且抓包时候也没有抓到包<br>解决: </p>
-<ol>
-<li>1.查看asr的配置信息并确认没问题<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/38.png" alt="">  </li>
-<li>2.查看fs的启动日志:然后查看端口信息、发现端口被占用<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/39.png" alt=""><br>综上:杀掉端口对应进程、然后重启即可。</li>
-</ol>
-<h4 id="2-ipcc通话录音不存在"><a href="#2-ipcc通话录音不存在" class="headerlink" title="2.ipcc通话录音不存在"></a>2.ipcc通话录音不存在</h4><h5 id="2-1-现象"><a href="#2-1-现象" class="headerlink" title="2.1 现象"></a>2.1 现象</h5><p>gs在拨打电话测试时候,测试时候交互都很正常,但是在拨打完听录音时候出现:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/184.png" alt=""><br>HTTP Status 404-<br>/record/ivrrecord2/20190820/10/42/90043811800411.wav</p>
-<h5 id="2-2-排查"><a href="#2-2-排查" class="headerlink" title="2.2 排查"></a>2.2 排查</h5><ol>
-<li><p>1.查询服务器磁盘录音是否存在<br>-进入/cc/data/ivrrecord2/20190820/10目录下确实没有此文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/185.png" alt="">  </p>
-</li>
-<li><p>2.查看fsg日志<br>fsg是freeswitch和ag进行交互的枢纽,所以fsg日志里面会记录相关的日志信息,fsg的日志文件在/cc/bin/log下:log0819060907.log<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/186.png" alt=""><br>从上面我们知道fsg和freeswitch已经断开过连接,然后重新建立了连接。  </p>
-</li>
-</ol>
-<p>我们在查看freeswitch.log知道:丢失了很多交互信息<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/187.png" alt="">  </p>
-<ol>
-<li>3.查看fsg.cfg的配置<br>从配置中我们知道连接的freeswitch是127.0.0.1,对应的录音文件是:/cc/data<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/188.png" alt=""><br>说明在连接本地freeswitch的时候,也出现了网络抖动问题。  </li>
-</ol>
-<h4 id="2-查看批次数据不拨打"><a href="#2-查看批次数据不拨打" class="headerlink" title="2.查看批次数据不拨打"></a>2.查看批次数据不拨打</h4><ol>
-<li><p>1.首先我们需要查看批次暂停/启用是否生效<br>启停 之前给过你grep方法 搜一下<br>停用:grep “end taskid”<br>启用:init notifyid<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/3.png" alt="">  </p>
-</li>
-<li><p>2.查看具体原因:</p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">grep &quot;批次id&quot; callnotify_callnotify01_1575880253.log;</div><div class="line">```  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/12/4.png)  </div><div class="line"></div><div class="line">3. 3.查看是否有对应主叫</div></pre></td></tr></table></figure>
-<p>grep “ocm_enti_exinfo_sub” dbg_dbgnotify01_xxx.log<br>```</p>
-<p>再去到数据库执行,查找批次下的comcode是否有下对应是否有次主叫:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/5.png" alt=""> </p>
-<p>有时候我们查询出后发现:主叫表里面有对应comcode的主叫,但是还是报:caller is empty这个时候我们就需要再去:dbgnotify查看日志。  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/29/ipcc-2-常见问题记录/" class="archive-article-date">
-  	<time datetime="2019-07-29T08:29:04.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-29</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ipcc/">ipcc</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -1152,7 +1098,7 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 10px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
     			</div>
     	</section>
     
