@@ -152,6 +152,65 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用<br>date: 2020-01-27 13:12:39<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  </p>
+<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><h3 id="1-Gateway"><a href="#1-Gateway" class="headerlink" title="1.Gateway"></a>1.Gateway</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png" alt="">  </p>
+<h3 id="2-本节简介"><a href="#2-本节简介" class="headerlink" title="2.本节简介"></a>2.本节简介</h3><p>使用SpringCloud GateWay实现如下功能:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/28.png" alt="">  </p>
+<p>1.浏览器通过gateway(8054)端口访问到:provider(8051)服务<br>2.需要通过网关请求到provider服务,需要使用：LoadBalancerClient Filter  </p>
+<p>实现如下:  </p>
+<ol>
+<li>1.创建项目:nacos-discovery-gateway-server  </li>
+<li>2.修改pom.xml:去除spring-boot-starter-web和spring-boot-starter-test,引入：  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.父工程里面添加: &lt;module&gt;nacos-discovery-gateway-server&lt;/module&gt;  </div><div class="line">4. 4.配置gateway路由策略</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/hello
+</code></pre><p>server:<br>  port: 8054<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. 5.测试:  </div><div class="line">http://127.0.0.1:8054/hello?name=123   </div><div class="line">返回:Hello 123 port:8051  </div><div class="line">以上说明通过8054的网关访问到了8051的provider服务  </div><div class="line"></div><div class="line"></div><div class="line">6. 6.默认情况下:  </div><div class="line">我们访问:http://127.0.0.1:8054/provider/hello就可以访问到:http://127.0.0.1:8054/hello,所以我们访问某个微服务时候不能每次都配置一个路由前缀，需要我们统一管理:</div><div class="line"></div><div class="line">方法一:我们通过配置context-path作为微服务路由前缀；比如配置nacos-discovery-provider服务的context</div></pre></td></tr></table></figure></p>
+<p>//设置nacos-discovery-gatewayr的application.yml<br>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/provider
+</code></pre><p>//设置nacos-discovery-provider的context-path<br>server:<br>  port: 8051<br>  servlet:<br>    context-path: provider<br>```</p>
+<p>方法二:<br>我们跳过前缀的第一个uri  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/" class="archive-article-date">
+  	<time datetime="2020-01-27T05:12:39.783Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-27</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -172,7 +231,7 @@
 <p>a.创建feign的cient端口,并且其是nacos-discovery-provider的调用接口  </p>
 <p>接口:HelloFeignService  </p>
 <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//FeignClient注解里面填写的是provider服务名称</div><div class="line">@FeignClient(&quot;nacos-discovery-provider&quot;)</div><div class="line">public interface HelloFeignService &#123;</div><div class="line">    @GetMapping(&quot;/hello&quot;)</div><div class="line">    String hello(@RequestParam(&quot;name&quot;) String name);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">类:TestController</div></pre></td></tr></table></figure>
-<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private HelloFeignService helloFeignService;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        return helloFeignService.hello(name);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">测试:  </div><div class="line">http://127.0.0.1:8052/test?name=111  </div><div class="line">返回:  </div><div class="line">Hello 111 port:8051  </div><div class="line">  </div><div class="line"></div><div class="line">### 4.webflux  </div><div class="line">webflux是和Spring-webmvc进行的对比，如下:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/26.png)  </div><div class="line"></div><div class="line">步骤：  </div><div class="line">1. 1.引入webflux的依赖  </div><div class="line">我们创建nacos-discovery-consumer-webflux;  </div><div class="line">修改里面的pom.xml文件:</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private HelloFeignService helloFeignService;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        return helloFeignService.hello(name);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">测试:  </div><div class="line">http://127.0.0.1:8052/test?name=111  </div><div class="line">返回:  </div><div class="line">Hello 111 port:8051  </div><div class="line">  </div><div class="line"></div><div class="line">### 4.webflux  </div><div class="line">webflux是和Spring-webmvc进行的对比，如下:    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/26.png)  </div><div class="line"></div><div class="line">步骤：  </div><div class="line">1. 1.引入webflux的依赖  </div><div class="line">我们创建nacos-discovery-consumer-webflux;  </div><div class="line">修改里面的pom.xml文件:</div></pre></td></tr></table></figure></p>
 <p><dependency><br>   <groupid>org.springframework.boot</groupid><br>   <artifactid>spring-boot-starter-web</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">为:</div></pre></td></tr></table></figure></p>
 <p><dependency><br>    <groupid>org.springframework.boot</groupid><br>    <artifactid>spring-boot-starter-webflux</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">2. 2.创建WebClient.Builder(类似于mvc中的restTemplate)</div></pre></td></tr></table></figure></p>
 <p>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>    @Bean<br>    @LoadBalanced<br>    public WebClient.Builder webClientBuilder(){<br>          return WebClient.builder();<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.Controller中调用</div></pre></td></tr></table></figure></p>
@@ -925,56 +984,6 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-常见问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/07/常见问题/">常见问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-hexo编译错误"><a href="#1-hexo编译错误" class="headerlink" title="1. hexo编译错误"></a>1. hexo编译错误</h3><p>之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:<br>问题及解决方案参考如下:<br><a href="https://github.com/hexojs/hexo/issues/2384">https://github.com/hexojs/hexo/issues/2384</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/12/07/常见问题/" class="archive-article-date">
-  	<time datetime="2019-12-07T09:21:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/problem/">problem</a></li></ul>
 	</div>
 
       

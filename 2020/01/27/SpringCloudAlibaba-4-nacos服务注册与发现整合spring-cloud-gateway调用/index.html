@@ -6,22 +6,28 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: ‘SpringCloudAlibaba-3-nacos服务注册与发现整合feign:webflux调用’date: 2020-01-26 22:36:11tags:
- SpringCloudAlibaba1.FeignFeign是从Netflix中分离出来的轻量级项目，能够在类接口上添加注解，成为一个RES API客户端。  
-2.OpenFeginSpring Cloud在net">
+  <meta name="description" content="title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用date: 2020-01-27 13:12:39tags:
+ SpringCloudAlibaba前言我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  
+内容1.Gateway  
+2.本节">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/2020/01/26/SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用/index.html">
+<meta property="og:url" content="https://github.com/startshineye/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="title: ‘SpringCloudAlibaba-3-nacos服务注册与发现整合feign:webflux调用’date: 2020-01-26 22:36:11tags:
- SpringCloudAlibaba1.FeignFeign是从Netflix中分离出来的轻量级项目，能够在类接口上添加注解，成为一个RES API客户端。  
-2.OpenFeginSpring Cloud在net">
-<meta property="og:updated_time" content="2020-01-27T05:09:40.824Z">
+<meta property="og:description" content="title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用date: 2020-01-27 13:12:39tags:
+ SpringCloudAlibaba前言我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  
+内容1.Gateway  
+2.本节">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/28.png">
+<meta property="og:updated_time" content="2020-01-29T05:50:15.271Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="title: ‘SpringCloudAlibaba-3-nacos服务注册与发现整合feign:webflux调用’date: 2020-01-26 22:36:11tags:
- SpringCloudAlibaba1.FeignFeign是从Netflix中分离出来的轻量级项目，能够在类接口上添加注解，成为一个RES API客户端。  
-2.OpenFeginSpring Cloud在net">
+<meta name="twitter:description" content="title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用date: 2020-01-27 13:12:39tags:
+ SpringCloudAlibaba前言我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  
+内容1.Gateway  
+2.本节">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -157,7 +163,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -166,29 +172,37 @@
     <div class="article-entry" itemprop="articleBody">
       
         <hr>
-<p>title: ‘SpringCloudAlibaba-3-nacos服务注册与发现整合feign:webflux调用’<br>date: 2020-01-26 22:36:11<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="1-Feign"><a href="#1-Feign" class="headerlink" title="1.Feign"></a>1.Feign</h3><p>Feign是从Netflix中分离出来的轻量级项目，能够在类接口上添加注解，成为一个RES API客户端。  </p>
-<h3 id="2-OpenFegin"><a href="#2-OpenFegin" class="headerlink" title="2.OpenFegin"></a>2.OpenFegin</h3><p>Spring Cloud在netflix feign的基础上扩展了支持Spring MVC注解,并通过自动配置为Spring Boot应用程序提供快速集成。  </p>
-<h3 id="3-使用Fegin"><a href="#3-使用Fegin" class="headerlink" title="3.使用Fegin"></a>3.使用Fegin</h3><p>1.复制nacos-discovery-consumer项目，修改maven坐标及其在父工程里面添加module即可。<br>2.在nacos-discovery-consumer-fegin引入fegin依赖  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
-<p>3.开启feign  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">@EnableFeignClients</div><div class="line">@EnableDiscoveryClient</div><div class="line">@SpringBootApplication</div><div class="line">public class NacosDiscoveryConsumerFeignApplication &#123;</div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        SpringApplication.run(NacosDiscoveryConsumerFeignApplication.class, args);</div><div class="line">    &#125;</div><div class="line">    @Bean</div><div class="line">    @LoadBalanced</div><div class="line">    public RestTemplate restTemplate()&#123;</div><div class="line">        return new RestTemplate();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>4.nacos-discovery-consumer-fegin调用nacos-discovery-provider  </p>
-<p>a.创建feign的cient端口,并且其是nacos-discovery-provider的调用接口  </p>
-<p>接口:HelloFeignService  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//FeignClient注解里面填写的是provider服务名称</div><div class="line">@FeignClient(&quot;nacos-discovery-provider&quot;)</div><div class="line">public interface HelloFeignService &#123;</div><div class="line">    @GetMapping(&quot;/hello&quot;)</div><div class="line">    String hello(@RequestParam(&quot;name&quot;) String name);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">类:TestController</div></pre></td></tr></table></figure>
-<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private HelloFeignService helloFeignService;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        return helloFeignService.hello(name);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">测试:  </div><div class="line">http://127.0.0.1:8052/test?name=111  </div><div class="line">返回:  </div><div class="line">Hello 111 port:8051  </div><div class="line">  </div><div class="line"></div><div class="line">### 4.webflux  </div><div class="line">webflux是和Spring-webmvc进行的对比，如下:    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/26.png)  </div><div class="line"></div><div class="line">步骤：  </div><div class="line">1. 1.引入webflux的依赖  </div><div class="line">我们创建nacos-discovery-consumer-webflux;  </div><div class="line">修改里面的pom.xml文件:</div></pre></td></tr></table></figure></p>
-<p><dependency><br>   <groupid>org.springframework.boot</groupid><br>   <artifactid>spring-boot-starter-web</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">为:</div></pre></td></tr></table></figure></p>
-<p><dependency><br>    <groupid>org.springframework.boot</groupid><br>    <artifactid>spring-boot-starter-webflux</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">2. 2.创建WebClient.Builder(类似于mvc中的restTemplate)</div></pre></td></tr></table></figure></p>
-<p>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>    @Bean<br>    @LoadBalanced<br>    public WebClient.Builder webClientBuilder(){<br>          return WebClient.builder();<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.Controller中调用</div></pre></td></tr></table></figure></p>
-<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private WebClient.Builder webClientBuilder;<br>    @GetMapping(“/test”)<br>    public Mono<string> test(String name){<br>       return  webClientBuilder.build()<br>                .get()<br>                .uri(“<a href="http://nacos-discovery-provider/hello?name=" target="_blank" rel="external">http://nacos-discovery-provider/hello?name=</a>“ + name)<br>                .retrieve()<br>                .bodyToMono(String.class);<br>    }<br>}<br>```</string></p>
+<p>title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用<br>date: 2020-01-27 13:12:39<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  </p>
+<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><h3 id="1-Gateway"><a href="#1-Gateway" class="headerlink" title="1.Gateway"></a>1.Gateway</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png" alt="">  </p>
+<h3 id="2-本节简介"><a href="#2-本节简介" class="headerlink" title="2.本节简介"></a>2.本节简介</h3><p>使用SpringCloud GateWay实现如下功能:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/28.png" alt="">  </p>
+<p>1.浏览器通过gateway(8054)端口访问到:provider(8051)服务<br>2.需要通过网关请求到provider服务,需要使用：LoadBalancerClient Filter  </p>
+<p>实现如下:  </p>
+<ol>
+<li>1.创建项目:nacos-discovery-gateway-server  </li>
+<li>2.修改pom.xml:去除spring-boot-starter-web和spring-boot-starter-test,引入：  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.父工程里面添加: &lt;module&gt;nacos-discovery-gateway-server&lt;/module&gt;  </div><div class="line">4. 4.配置gateway路由策略</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/hello
+</code></pre><p>server:<br>  port: 8054<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. 5.测试:  </div><div class="line">http://127.0.0.1:8054/hello?name=123   </div><div class="line">返回:Hello 123 port:8051  </div><div class="line">以上说明通过8054的网关访问到了8051的provider服务  </div><div class="line"></div><div class="line"></div><div class="line">6. 6.默认情况下:  </div><div class="line">我们访问:http://127.0.0.1:8054/provider/hello就可以访问到:http://127.0.0.1:8054/hello,所以我们访问某个微服务时候不能每次都配置一个路由前缀，需要我们统一管理:</div><div class="line"></div><div class="line">方法一:我们通过配置context-path作为微服务路由前缀；比如配置nacos-discovery-provider服务的context</div></pre></td></tr></table></figure></p>
+<p>//设置nacos-discovery-gatewayr的application.yml<br>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/provider
+</code></pre><p>//设置nacos-discovery-provider的context-path<br>server:<br>  port: 8051<br>  servlet:<br>    context-path: provider<br>```</p>
+<p>方法二:<br>我们跳过前缀的第一个uri  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/01/26/SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用/" class="archive-article-date">
-  	<time datetime="2020-01-26T14:36:11.524Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-26</time>
+      <a href="/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/" class="archive-article-date">
+  	<time datetime="2020-01-27T05:12:39.783Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-27</time>
 </a>
       
       
@@ -201,17 +215,8 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          (no title)
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/01/26/SpringCloudAlibaba-2-nacos负载均衡、服务上下线、权重元信息/" id="article-nav-older" class="article-nav-link-wrap">
+    <a href="/2020/01/26/SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用/" id="article-nav-older" class="article-nav-link-wrap">
       <div class="article-nav-title"></div>
       <i class="icon-circle-right"></i>
     </a>
@@ -258,7 +263,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用" data-title="" data-url="https://github.com/startshineye/2020/01/26/SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用" data-title="" data-url="https://github.com/startshineye/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
