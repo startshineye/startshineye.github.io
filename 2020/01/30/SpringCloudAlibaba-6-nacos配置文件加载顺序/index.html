@@ -4,26 +4,34 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>SpringCloud-10-服务追踪 | Startshineye的博客</title>
+  <title>SpringCloudAlibaba-6-nacos配置文件加载顺序 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  
-前言有时候,我们订单服务创建订单时候耗时很严重以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设">
+  <meta name="description" content="前言上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  
+内容当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  
+1.profile新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载
+1Located property sour">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SpringCloud-10-服务追踪">
-<meta property="og:url" content="https://github.com/startshineye/2019/12/14/SpringCloud-10-服务追踪/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-6-nacos配置文件加载顺序">
+<meta property="og:url" content="https://github.com/startshineye/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  
-前言有时候,我们订单服务创建订单时候耗时很严重以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/77.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/78.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/79.png">
-<meta property="og:updated_time" content="2019-12-15T00:37:39.717Z">
+<meta property="og:description" content="前言上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  
+内容当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  
+1.profile新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载
+1Located property sour">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/38.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/39.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/40.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/44.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/45.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/46.png">
+<meta property="og:updated_time" content="2020-01-30T01:37:26.666Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="SpringCloud-10-服务追踪">
-<meta name="twitter:description" content="服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  
-前言有时候,我们订单服务创建订单时候耗时很严重以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-6-nacos配置文件加载顺序">
+<meta name="twitter:description" content="前言上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  
+内容当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  
+1.profile新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载
+1Located property sour">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/01/38.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -159,7 +167,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloud-10-服务追踪" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-6-nacos配置文件加载顺序" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -169,7 +177,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      SpringCloud-10-服务追踪
+      SpringCloudAlibaba-6-nacos配置文件加载顺序
     </h1>
   
 
@@ -177,37 +185,55 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  </p>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设已经定位出问题是调用商品服务返回商品信息耗时严重,此时我们就会通知此接口开发者解决,但是获取商品信息接口又是调用了其他服务,<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/77.png" alt=""><br>就像上面的服务:A调用B,B调用C,这是一整套链路,当服务调用越来越多,链路越来越长时候,通过日志计时打点效率非常低而且排查起来不方便，这就牵涉到服务追踪。我们要做的其实就是链路监控。     </p>
-<h3 id="10-1-服务追踪"><a href="#10-1-服务追踪" class="headerlink" title="10.1 服务追踪"></a>10.1 服务追踪</h3><p>针对于链路监控,SpringCloud提供了非常方便的组件:Spring Cloud Sleuth,Sleuth是侦查,链路监控这一章节,要写的东西并不多,主要是要会看。  </p>
-<h4 id="10-1-1-使用SpringCloudSleuth"><a href="#10-1-1-使用SpringCloudSleuth" class="headerlink" title="10.1.1 使用SpringCloudSleuth"></a>10.1.1 使用SpringCloudSleuth</h4><ol>
-<li>1.引入依赖  </li>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  </p>
+<h4 id="1-profile"><a href="#1-profile" class="headerlink" title="1.profile"></a>1.profile</h4><p>新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load-dev.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;]&#125;</div></pre></td></tr></table></figure>
+<p>通过上面的启动日志我们知道，除了加载:nacos-config-client-load-dev.yml还会加载:nacos-config-client-load.yml  </p>
+<p>我们此时搜索data id发现控制台确实没有输出，这个说明我们在nacos配置文件是没有创建  </p>
+<p>我们创建<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/38.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/39.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/40.png" alt="">  </p>
+<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load-dev.yml  </p>
+<p>如果我们删除nacos-config-client-load-dev.yml<br>应用控制台会打印日志:nacos-config-client-load-dev.yml  </p>
+<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load.yml  </p>
+<p>结论:  </p>
+<ul>
+<li>优先使用配置是 applicationname-profile</li>
+<li>不存在时读取 applicationname </li>
+</ul>
+<h4 id="2-GROUP"><a href="#2-GROUP" class="headerlink" title="2.GROUP"></a>2.GROUP</h4><h5 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1 简介"></a>2.1 简介</h5><ol>
+<li>1.我们创建的配置文件,里面都有一个组的概念：Group，我们没有输入时候默认都是:DEFAULT_GROUP  </li>
+<li>2.组的概念主要是为了让我们创建的配置文件属于同一个组里面,各个应用之间的隔离都是可以通过这个属性来配置</li>
+<li>3.那么我们怎样去声明加载哪一个组呢?<br>我们在配置文件添加group属性,group默认属性是:DEFAULT_GROUP  </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+<h5 id="2-2-实践"><a href="#2-2-实践" class="headerlink" title="2.2 实践"></a>2.2 实践</h5><ol>
+<li>1.修改bootstrap.yml配置文件<br>我们在配置文件中添加group属性，其值为:alibaba<br>此时重启服务时候发现其加载的data id不存在,访问:<br><a href="http://127.0.0.1:8056/test/config输出结果是&#39;空test" target="_blank" rel="external">http://127.0.0.1:8056/test/config输出结果是&#39;空test</a>‘<br>原因是我们在配置中心没有添加 组为:alibaba的配置文件  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client-load</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">        file-extension: yml</div><div class="line">        group: alibaba</div><div class="line">server:</div><div class="line">  port: 8056</div><div class="line">```  </div><div class="line"></div><div class="line">2. 2.nacos控制台创建alibaba组下配置文件    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/41.png)  </div><div class="line"></div><div class="line">此时控制台打印出:  </div><div class="line">oading nacos data, dataId: &apos;nacos-config-client-load.yml&apos;, group: &apos;alibaba&apos;  </div><div class="line"></div><div class="line">测试:访问:http://127.0.0.1:8056/test/config  </div><div class="line">返回结果:nacos-config-client-load-alibaba.yml  </div><div class="line"></div><div class="line"></div><div class="line">#### 3.namespace  </div><div class="line">更深层次隔离:namespace  </div><div class="line">namespace-命名空间，在nacos里面简称租户  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/42.png)  </div><div class="line"></div><div class="line">##### 3.1 实践  </div><div class="line">1. 1.在nacos控制台创建命名空间  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/43.png)  </div><div class="line"></div><div class="line">2. 2.在bootstrap.yml配置文件添加属性:namespace</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: NS<br>server:<br>  port: 8056<br>```  </p>
+<p>此时重启服务发现我们没有产生data id<br>因为我们没有在nacos控制台创建NS下的配置文件  </p>
 <ol>
-<li>2.使用postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/78.png" alt=""><br>从上图我们知道:<br>a.第一列:order-&gt;代表order服务<br>b.第二列:代表traceId(链路id);一条链路里面最多包含一个id,也就是说traceId是一条链路的唯一标识。<br>c.第三列:spanId,是一个基本单元；一条链路里面可以包含多个spanid,spanid可以理解成最基本的工作单元。<br>d.第四列:true表示要把这些信息输出到其他服务搜集和展示,false就是不搜集。  </li>
+<li>3.在nacos控制台下的NS命名空间下创建对应的配置文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/44.png" alt="">  </li>
 </ol>
-<p>我们现在在本地配置文件中将日志级别改为debug模式  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">logging:</div><div class="line">  level:</div><div class="line">   org.springframework.cloud.openfeign: debug</div></pre></td></tr></table></figure>
-<p>此时展示出更多的日志:  </p>
-<pre><code>2019-12-15 08:15:41.058 DEBUG [order,dc93086b3bb2856a,eec9e8de8adb4274,false] 16616 --- [strix-product-2] o.s.c.openfeign.support.SpringEncoder    : Writing [[DecreaseStockInput{productId=&apos;157875227953464068&apos;, productQuantity=2}]] using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@d43328]
-Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_address as buyer_ad2_1_0_, ordermaste0_.buyer_name as buyer_na3_1_0_, ordermaste0_.buyer_openid as buyer_op4_1_0_, ordermaste0_.buyer_phone as buyer_ph5_1_0_, ordermaste0_.create_time as create_t6_1_0_, ordermaste0_.order_amount as order_am7_1_0_, ordermaste0_.order_status as order_st8_1_0_, ordermaste0_.pay_status as pay_stat9_1_0_, ordermaste0_.update_time as update_10_1_0_ from order_master ordermaste0_ where ordermaste0_.order_id=?
-</code></pre><p>一条链路请求里面只有1个reaceId,order服务是调用product服务的,那么product服务是否也是拥有此traceId,我们在product服务也加上服务追踪的sleuth  </p>
-<p>我们用postman再次请求1次:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/79.png" alt="">  </p>
-<p>现在指标已经出来了,但是我们不可能一直在控制台上看,我们需要友好的,有计划的展示出来。这里我们用到Zipkin框架展示。  </p>
-<h4 id="10-1-1-使用Zipkin"><a href="#10-1-1-使用Zipkin" class="headerlink" title="10.1.1 使用Zipkin"></a>10.1.1 使用Zipkin</h4><p>访问官网:<a href="https://zipkin.io/" target="_blank" rel="external">https://zipkin.io/</a>     </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/45.png" alt="">  </p>
+<p>我们此时在控制台搜索data id发现还是没有对应文件生成。  </p>
+<ol>
+<li>4.我们修改下配置文件中namespace为命名空间ID<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/46.png" alt="">  </li>
+</ol>
+<p>测试:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>返回:<br>nacos-config-client-load-NS.yml  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2019/12/14/SpringCloud-10-服务追踪/" class="archive-article-date">
-  	<time datetime="2019-12-14T02:32:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-14</time>
+      <a href="/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/" class="archive-article-date">
+  	<time datetime="2020-01-29T16:06:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
 	</div>
 
       
@@ -220,18 +246,9 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
   
 <nav id="article-nav">
   
-    <a href="/2019/12/15/docker-1-docker基础入门/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          (no title)
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/12/12/SpringCloud-9-服务容错/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloud-9-服务容错</div>
+    <a href="/2020/01/29/SpringCloudAlibaba-5-nacos配置中心快速使用/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-5-nacos配置中心快速使用</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -277,7 +294,7 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloud-10-服务追踪" data-title="SpringCloud-10-服务追踪" data-url="https://github.com/startshineye/2019/12/14/SpringCloud-10-服务追踪/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-6-nacos配置文件加载顺序" data-title="SpringCloudAlibaba-6-nacos配置文件加载顺序" data-url="https://github.com/startshineye/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

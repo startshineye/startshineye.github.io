@@ -152,6 +152,74 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-10-服务追踪" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/12/14/SpringCloud-10-服务追踪/">SpringCloud-10-服务追踪</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  </p>
+<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设已经定位出问题是调用商品服务返回商品信息耗时严重,此时我们就会通知此接口开发者解决,但是获取商品信息接口又是调用了其他服务,<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/77.png" alt=""><br>就像上面的服务:A调用B,B调用C,这是一整套链路,当服务调用越来越多,链路越来越长时候,通过日志计时打点效率非常低而且排查起来不方便，这就牵涉到服务追踪。我们要做的其实就是链路监控。     </p>
+<h3 id="10-1-服务追踪"><a href="#10-1-服务追踪" class="headerlink" title="10.1 服务追踪"></a>10.1 服务追踪</h3><p>针对于链路监控,SpringCloud提供了非常方便的组件:Spring Cloud Sleuth,Sleuth是侦查,链路监控这一章节,要写的东西并不多,主要是要会看。  </p>
+<h4 id="10-1-1-使用SpringCloudSleuth"><a href="#10-1-1-使用SpringCloudSleuth" class="headerlink" title="10.1.1 使用SpringCloudSleuth"></a>10.1.1 使用SpringCloudSleuth</h4><ol>
+<li>1.引入依赖  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
+<ol>
+<li>2.使用postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/78.png" alt=""><br>从上图我们知道:<br>a.第一列:order-&gt;代表order服务<br>b.第二列:代表traceId(链路id);一条链路里面最多包含一个id,也就是说traceId是一条链路的唯一标识。<br>c.第三列:spanId,是一个基本单元；一条链路里面可以包含多个spanid,spanid可以理解成最基本的工作单元。<br>d.第四列:true表示要把这些信息输出到其他服务搜集和展示,false就是不搜集。  </li>
+</ol>
+<p>我们现在在本地配置文件中将日志级别改为debug模式  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">logging:</div><div class="line">  level:</div><div class="line">   org.springframework.cloud.openfeign: debug</div></pre></td></tr></table></figure>
+<p>此时展示出更多的日志:  </p>
+<pre><code>2019-12-15 08:15:41.058 DEBUG [order,dc93086b3bb2856a,eec9e8de8adb4274,false] 16616 --- [strix-product-2] o.s.c.openfeign.support.SpringEncoder    : Writing [[DecreaseStockInput{productId=&apos;157875227953464068&apos;, productQuantity=2}]] using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@d43328]
+Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_address as buyer_ad2_1_0_, ordermaste0_.buyer_name as buyer_na3_1_0_, ordermaste0_.buyer_openid as buyer_op4_1_0_, ordermaste0_.buyer_phone as buyer_ph5_1_0_, ordermaste0_.create_time as create_t6_1_0_, ordermaste0_.order_amount as order_am7_1_0_, ordermaste0_.order_status as order_st8_1_0_, ordermaste0_.pay_status as pay_stat9_1_0_, ordermaste0_.update_time as update_10_1_0_ from order_master ordermaste0_ where ordermaste0_.order_id=?
+</code></pre><p>一条链路请求里面只有1个reaceId,order服务是调用product服务的,那么product服务是否也是拥有此traceId,我们在product服务也加上服务追踪的sleuth  </p>
+<p>我们用postman再次请求1次:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/79.png" alt="">  </p>
+<p>现在指标已经出来了,但是我们不可能一直在控制台上看,我们需要友好的,有计划的展示出来。这里我们用到Zipkin框架展示。  </p>
+<h4 id="10-1-1-使用Zipkin"><a href="#10-1-1-使用Zipkin" class="headerlink" title="10.1.1 使用Zipkin"></a>10.1.1 使用Zipkin</h4><p>访问官网:<a href="https://zipkin.io/" target="_blank" rel="external">https://zipkin.io/</a>     </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/12/14/SpringCloud-10-服务追踪/" class="archive-article-date">
+  	<time datetime="2019-12-14T02:32:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-14</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-9-服务容错" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -1066,114 +1134,6 @@
 
 
   
-    <article id="post-SpringCloud-7-服务网管" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/04/17/SpringCloud-7-服务网管/">SpringCloud-7-服务网管</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-服务网关和Zuul"><a href="#1-服务网关和Zuul" class="headerlink" title="1.服务网关和Zuul"></a>1.服务网关和Zuul</h3><h4 id="1-1-为什么需要服务网关"><a href="#1-1-为什么需要服务网关" class="headerlink" title="1.1 为什么需要服务网关"></a>1.1 为什么需要服务网关</h4><p>假如没有网关服务,当前系统起了多个服务,比如：订单、广告、商品、支付、用户。等等…<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/38.png" alt=""> </p>
-<p>那么客户端怎么调用呢?和每个服务一步步打交道、显然不现实。需要一个接收request请求的统一入口。充当这个角色的是服务网关。一旦有了服务网关,所有请求都通过他,所以我们需要了解他发挥什么作用,具备什么要素?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/39.png" alt=""></p>
-<h4 id="1-2-服务网关的作用"><a href="#1-2-服务网关的作用" class="headerlink" title="1.2 服务网关的作用"></a>1.2 服务网关的作用</h4><h5 id="1-稳定性、高可用"><a href="#1-稳定性、高可用" class="headerlink" title="1.稳定性、高可用"></a>1.稳定性、高可用</h5><p>保证24小时可用；网络瘫痪、系统全挂、不能提供外面的服务。 </p>
-<h5 id="2-性能、并发性"><a href="#2-性能、并发性" class="headerlink" title="2.性能、并发性"></a>2.性能、并发性</h5><p>所有的请求都经过网关、所以网关的压力是巨大的、所以网关的性能也必须高。</p>
-<h5 id="3-安全性"><a href="#3-安全性" class="headerlink" title="3.安全性"></a>3.安全性</h5><p>要确保使用服务的安全、防止外部随意访问、比如金融行业、会进行通讯数据的加密措施。</p>
-<h5 id="4-扩展性"><a href="#4-扩展性" class="headerlink" title="4.扩展性"></a>4.扩展性</h5><p>各种请求都经过网关服务、所以网关上大有文章可做、可进行扩展。<br>理论上、网关是处理各种非业务功能的绝佳场所。诸如:协议转发、防刷、流量管控、日志监控等。</p>
-<h4 id="1-3-常用的网关方案"><a href="#1-3-常用的网关方案" class="headerlink" title="1.3 常用的网关方案"></a>1.3 常用的网关方案</h4><p>网关并非是微服务出来后的新鲜事物。业界成熟的网关服务有:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/40.png" alt=""><br>一代的Zuul在性能上确实没有优势、不能和nginx比较。当然，二代Zuul有较大的提升。</p>
-<p>原始的点餐项目是如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/41.png" alt=""></p>
-<ol>
-<li>1.nginx在前,tomcat在后、nginx做了负载均衡和反向代理。现在我们可以让nginx发挥他负载均衡和反向代理的优势后面的tomcat可以换成Zuul  </li>
-<li>2.项目改造过程中、合理利用原来的资源、发挥新加入事物的优势、因地制宜解决问题。<h4 id="1-4-Zuul的特点"><a href="#1-4-Zuul的特点" class="headerlink" title="1.4 Zuul的特点"></a>1.4 Zuul的特点</h4>Zuul相对nginx来说有所不足、但是作为SpringCloud完整微服务生态体系的前置网关服务是一个很不错的选择。有一种说法路由加过滤器等于Zuul<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/42.png" alt="">  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/43.png" alt=""><br>Zuul的组织架构图如下所示:<br>可以看到,过滤器之间是没有直接通信的,他们是通过Request Context进行数据通信的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/44.png" alt="">  </p>
-<p>Zuul的一次Http的生命周期:  </p>
-<ol>
-<li>1.Origin Server就是我们的业务服务。    </li>
-<li>2.请求先过来之后会到pre filters这种类型的过滤器,比如我们的参数校验就可以在这里面来做。    </li>
-<li>3.routing filters作用就是将http请求转发到Origin Server中去：如果重写http请求可以在这里面做。  </li>
-<li>4.post filters 这个时候你已经拿到了返回的结果,这个时候如果你想对结果进行处理和加工,可以在这里面来做  </li>
-<li>5.error Filters如果在前两个filter发生异常时候,就可以在error filter中进行全局异常处理。  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/45.png" alt=""> </p>
-<h3 id="2-Zuul的使用"><a href="#2-Zuul的使用" class="headerlink" title="2.Zuul的使用"></a>2.Zuul的使用</h3><ol>
-<li>1.新建项目api-gateway<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/46.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/47.png" alt=""> </li>
-<li>2.选择依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/48.png" alt="">   </li>
-<li>3.删除不需要的文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/49.png" alt="">   </li>
-<li>4.修改版本一致<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/50.png" alt=""></li>
-<li>5.修改配置文件(从统一配置文件中获取配置信息)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/51.png" alt=""></li>
-</ol>
-<h4 id="2-1-路由转发"><a href="#2-1-路由转发" class="headerlink" title="2.1 路由转发"></a>2.1 路由转发</h4><p>我们现在实现Zuul的路由转发功能,我们在api-gateway项目的启动类上添加:@EnableZuulProxy。我们现在要实现product服务下请求里面的/product/list</p>
-<ol>
-<li><p>1.启动我们的product服务(8081端口),然后访问:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/52.png" alt="">  </p>
-</li>
-<li><p>2.通过Zuul服务(8084端口)路由转发请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/53.png" alt=""><br>只要注册到Eureka上的服务都可以通过:ip:port/服务名/url  </p>
-</li>
-</ol>
-<ol>
-<li><p>3.自定义Zuul路由转发地址<br>以上我们是通过默认的路由转发、默认的地址是:ip:port/服务名/url。但是有时候我们不想把服务名暴露出来 而是想用自己定义的路由地址。此时就需要配置Zuul了。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/55.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/54.png" alt="">  </p>
-</li>
-<li><p>4.查询Zuul的所有routes,我们可以通过Zuul对应的服务api-gateway启动地址:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/06/117.png" alt="">  </p>
-</li>
-</ol>
-<ol>
-<li>5.我们如果想要拦截某些请求<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/1.png" alt=""> </li>
-</ol>
-<h4 id="2-3-Cookie和动态路由"><a href="#2-3-Cookie和动态路由" class="headerlink" title="2.3 Cookie和动态路由"></a>2.3 Cookie和动态路由</h4><h5 id="2-3-1-Cookie"><a href="#2-3-1-Cookie" class="headerlink" title="2.3.1 Cookie"></a>2.3.1 Cookie</h5><p>我们在开发搭建web项目的时候,经常要使用cookie,需要把cookie返回到后端。在这里使用了Zuul组件、默认情况下Cookie是无法传递过去的。如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/3.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/2.png" alt=""><br>我们从Zuul的配置中可以设置cookie的开启和关闭<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/4.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/5.png" alt="">  </p>
-<h5 id="2-3-2-动态路由"><a href="#2-3-2-动态路由" class="headerlink" title="2.3.2 动态路由"></a>2.3.2 动态路由</h5><p>我们能不能改了路由配置之后自动生效了,就是动态路由。如果需要达到动态路由效果。我们只需要将api-gateway的配置放到config配置中心中去。我们如何做到config统一配置中配置改变了我们的api-gateway服务也动态改变了代码。我们添加Zuul的配置类。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/6.png" alt="">  </p>
-<h4 id="2-4-路由和高可用小结"><a href="#2-4-路由和高可用小结" class="headerlink" title="2.4 路由和高可用小结"></a>2.4 路由和高可用小结</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/7.png" alt="">  </p>
-<h5 id="2-4-1-典型应用场景"><a href="#2-4-1-典型应用场景" class="headerlink" title="2.4.1 典型应用场景"></a>2.4.1 典型应用场景</h5><ol>
-<li><p>1.Zuul的前置过滤器(Pre)<br>a.限流   b.鉴权    c.参数校验调整   d.请求转发  </p>
-</li>
-<li><p>2.Zuul的后置过滤器(Post)<br>人过留名<br>a.统计  b.日志  </p>
-</li>
-</ol>
-<h5 id="2-4-2-高可用"><a href="#2-4-2-高可用" class="headerlink" title="2.4.2 高可用"></a>2.4.2 高可用</h5><p>所有的请求都需要经过Zuul、所以生产环境中、我们需要部署多台Zuul,以避免单点故障。Zuul的高可用是必须的。  </p>
-<ol>
-<li>1.多个Zuul节点注册到Eureka Server(将多个节点注册到Eureka Server就可以实现高可用)  </li>
-<li>2.Nginx和Zuul “混搭”(使用nginx对外暴露一个url,nginx把请求转发到多个zuul服务上、这样可以做到彼此的取长补短)。</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/04/17/SpringCloud-7-服务网管/" class="archive-article-date">
-  	<time datetime="2019-04-17T03:01:28.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-17</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <a class="extend prev" rel="prev" href="/">&laquo; Prev</a><a class="page-number" href="/">1</a><span class="page-number current">2</span><a class="page-number" href="/page/3/">3</a><a class="extend next" rel="next" href="/page/3/">Next &raquo;</a>
@@ -1239,7 +1199,7 @@
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 13.33px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 15px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 17.5px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 12.5px;">work</a>
     			</div>
     	</section>
     
