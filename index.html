@@ -152,6 +152,67 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-7-nacos配置文件共享规则" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: SpringCloudAlibaba-7-nacos配置文件共享规则<br>date: 2020-01-30 13:19:26<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="nacos配置文件共享"><a href="#nacos配置文件共享" class="headerlink" title="nacos配置文件共享"></a>nacos配置文件共享</h3><h4 id="1-为什么需要配置文件共享"><a href="#1-为什么需要配置文件共享" class="headerlink" title="1.为什么需要配置文件共享?"></a>1.为什么需要配置文件共享?</h4><p>比如我们定义了一个application.yml文件,其他微服务全部依赖于此配置文件。比如:feign的一些参数、超时、可能所有微服务配置的时间都是一样的，但是每个微服务都有一个个性化的配置。因此需要一个通用的和个性化的配置文件。在微服务nacos里面的额客户端里面需要同时加载，那么nacos也对这种情况进行了支持-shared-dataIds。</p>
+<h4 id="2-实现同时加载2个配置文件"><a href="#2-实现同时加载2个配置文件" class="headerlink" title="2.实现同时加载2个配置文件"></a>2.实现同时加载2个配置文件</h4><ol>
+<li><p>1.nacos控制台创建common.yml文件<br>除了一个以:application为名称的yml文件外，我们再创建一个common.yml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/48.png" alt="">  </p>
+</li>
+<li><p>2.在配置文件中添加如下配置:  </p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client-load</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">        file-extension: yml</div><div class="line">        namespace: 83aa3869-684c-43af-919a-74bcceea120b</div><div class="line">        shared-dataids: common.yml</div><div class="line">server:</div><div class="line">  port: 8056</div><div class="line">```  </div><div class="line"></div><div class="line">重启服务:      </div><div class="line">Loading nacos data, dataId: &apos;common.yml&apos;, group: &apos;DEFAULT_GROUP&apos;    </div><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;common.yml&apos;&#125;]&#125;  </div><div class="line"></div><div class="line">以上具备data id 所以我们进行测试:  </div><div class="line"></div><div class="line">测试：http://127.0.0.1:8056/test/config  </div><div class="line">返回结果:  </div><div class="line">common-DEFAULT_GROUP.yml  </div><div class="line"></div><div class="line">以上是我们没有应用配置文件:$&#123;application&#125;.yml,现在我们在NS租户下创建nacos-config-client-load.yml  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/49.png)    </div><div class="line"></div><div class="line">再次请求：http://127.0.0.1:8056/test/config</div><div class="line">返回结果:</div><div class="line">NS-nacos-config-client-load.yml</div><div class="line"></div><div class="line"></div><div class="line">#### 3.配置group</div><div class="line">上面所有情况都是我们没有配置group参数进行的一些验证,现在我们配置group  </div><div class="line"></div><div class="line">1. 1.bootstrap.yml配置</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        shared-dataids: common.yml<br>        group: alibaba<br>server:<br>  port: 8056<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.nacos控制台配置   </div><div class="line">nacos控制台新增group为alibaba的common.yml  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/50.png)    </div><div class="line"></div><div class="line">我们测试：http://127.0.0.1:8056/test/config  </div><div class="line">返回:   </div><div class="line">common-DEFAULT_GROUP.yml  </div><div class="line"></div><div class="line">这个其实是SpringCloudAlibaba的一个问题:  </div><div class="line">对于共享文件，他只传递了租户(namespace),并没有把我们的配置group传递过去  </div><div class="line"></div><div class="line">  </div><div class="line">#### 4.公共配置文件刷新  </div><div class="line">当我们修改common.yml文件里面的test属性值时候,我们在浏览器测试 访问时候，其test对应的值是没有刷新的,此时我们需要添加共享文件的另一个属性值:refreshable-dataids: common.yml  </div><div class="line"></div><div class="line">#### 5.ext-config  </div><div class="line">上面共享文件读取传递属性值时候,只是传递了namespace属性值,没有传递group属性值,那么有没有另外的解决方案呢?(注意: ext-config是一个list)</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        group: alibaba</p>
+<pre><code>#shared-dataids: common.yml
+#refreshable-dataids: common.yml
+ext-config:
+  - data-id: common.yml
+    group: alibaba
+    refresh: true
+</code></pre><p>server:<br>  port: 8056<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">重启服务后:  </div><div class="line">Loading nacos data, dataId: &apos;common.yml&apos;, group: &apos;alibaba&apos;  </div><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;common.yml&apos;&#125;]&#125;  </div><div class="line"></div><div class="line">测试后返回：alibaba-NS-common.yml  </div><div class="line"></div><div class="line">#### 6.ext-config与其他配置共存  </div><div class="line">nacos控制台配置的文件为：  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/51.png)  </div><div class="line"></div><div class="line">bootstrap.yml配置文件为:</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        group: alibaba<br>        ext-config:</p>
+<pre><code>  - data-id: common.yml
+    group: alibaba
+    refresh: true
+shared-dataids: common.yml
+</code></pre><p>server:<br>  port: 8056<br>```  </p>
+<p>重启后日志:<br>Loading nacos data, dataId: ‘common.yml’, group: ‘DEFAULT_GROUP’<br>Loading nacos data, dataId: ‘common.yml’, group: ‘alibaba’  </p>
+<p>由于后加载的配置文件会覆盖前面加载的配置文件；所以我们测试访问时候，返回结果为:<br>alibaba-NS-common.yml  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/30/SpringCloudAlibaba-7-nacos配置文件共享规则/" class="archive-article-date">
+  	<time datetime="2020-01-30T05:19:26.347Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-6-nacos配置文件加载顺序" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -724,165 +785,6 @@
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ipcc/">ipcc</a></li></ul>
 	</div>
 
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-docker-1-docker基础入门" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>title: docker-1-docker基础入门<br>date: 2019-12-15 08:53:59<br>tags:</p>
-<h2 id="docker"><a href="#docker" class="headerlink" title=" docker"></a> docker</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们基础入门,从以下几方面讲解:<br>1.什么是docker<br>2.理解docker<br>3.走进docker<br>4.Hello World运行docker<br>5.Nginx服务<br>6.docker化Java web  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>docker官网:<a href="https://www.docker.com/" target="_blank" rel="external">https://www.docker.com/</a></p>
-<h4 id="1-什么是docker"><a href="#1-什么是docker" class="headerlink" title="1.什么是docker"></a>1.什么是docker</h4><h5 id="1-1-Docker历史"><a href="#1-1-Docker历史" class="headerlink" title="1.1 Docker历史"></a>1.1 Docker历史</h5><ol>
-<li>1.2010年几个年轻人在旧金山成立了做paas平台公司dotCloud,后面由于微软,亚马逊竞争  </li>
-<li>2.2013年公司发展受限,又不想之前东西付之东流,docker开源  </li>
-<li>3.2014.6 Docker1.0  </li>
-<li>4.2014.7 C轮$4000万  </li>
-<li>5.2015.4 D轮9500万  </li>
-<li>6.至今Docker1.13  </li>
-</ol>
-<h5 id="1-2-什么是docker"><a href="#1-2-什么是docker" class="headerlink" title="1.2 什么是docker"></a>1.2 什么是docker</h5><ol>
-<li>1.docker是一个装应用的容器,就像杯子可以装水,笔筒可以放笔,你可以把Hello world放在docker里,你可以把网站放到docker里,你可以把你任何想到的程序放到docker里面。  </li>
-<li>2.Docker is the world’s leading software containerization platform </li>
-<li>3.Docker公司开发，开源，托管在github上  </li>
-<li>4.跨平台、支持Windows、Macos、Linux  </li>
-</ol>
-<h4 id="2-理解docker"><a href="#2-理解docker" class="headerlink" title="2.理解docker"></a>2.理解docker</h4><h5 id="2-1-docker思想"><a href="#2-1-docker思想" class="headerlink" title="2.1 docker思想"></a>2.1 docker思想</h5><p>docker的logo是一条鲸鱼驮着很多集装箱；<br>docker思想体现在:  </p>
-<ol>
-<li>1.集装箱(没有集装箱之前运输货物是非常零散,没有规矩,运输过程中某一个东西可能就掉落了,有了集装箱之后,我们的东西装到集装箱里面去了,箱子是密封的，并很大,保证货物安全原样送到目的地,这些货物就是类似于我们的各种程序)      </li>
-<li><p>2.标准化-&gt;标准化主要体现在以下3个方面:<br>a.传输方式:docker运输程序有一个超级码头,任何一个地方需要货物时候,都是由鲸鱼将获取送到超级码头,然后由鲸鱼将货物从超级码头送到目的地。例子:假如你要把你台式机上面的应用部署到你的笔记本上,一般选择u盘或者qq传输过去,但是docker标准化了这个过程,你要做的只需要在台式机上执行一个docker命令把程序输送到超级码头去；然后在你的笔记本上执行一个docker命令-&gt;由鲸鱼把程序从超级码头送到笔记本上去。<br>b.存储方式:比如你把程序从台式机拷贝到你笔记本,你还得创建目录,并且记住这个目录,有了docker之后存储方式标准化了你不需要关心程序在哪个目录下,你只需要执行或者停止一个命令就可以了。docker标准化让快速扩展、弹性伸缩变得简单。<br>c.API接口标准化:docker提供了一系列api接口,包括了docker对我们应用的控制:查看,删除,停止等等。  </p>
-</li>
-<li><p>3.隔离:轻量级创建销毁docker,你创建虚拟机可能需要几分钟,但是创建docker只需要1秒。最底层的技术其实是linux的内核限制机制,叫做LXC(轻量级的容器虚拟化技术,最大效率地隔离了进程和资源)  </p>
-</li>
-</ol>
-<h5 id="2-2-docker解决了什么问题"><a href="#2-2-docker解决了什么问题" class="headerlink" title="2.2 docker解决了什么问题"></a>2.2 docker解决了什么问题</h5><p>docker解决了运行环境不一致导致的问题。  </p>
-<ol>
-<li><p>1.我们本地运行没有问题,线上测试有问题<br>很多时候我们开发程序员说我们开发没有问题,但是运维说他那边部署没有问题、测试说就有问题，如果一个应用正常运行需要什么?,比如一个java web应用运行需要什么？<br>一般需要:1.最底层的操作系统 2.JDK 3.Tomcat 4.依赖于程序代码和配置文件<br>以上任何一个条件多个环境下不一致可能就会导致系统问题；下面docker来了,他把操作系统、JDK、Tomcat、程序放在一个个的集装箱里面再打包放到鲸鱼上,鲸鱼将其运输到服务器上。你机器上怎么运行，他在服务器上也是怎样运行的</p>
-</li>
-<li><p>2.系统好卡,哪个人又写死循环了?!<br>linux本身就是一个多用户的操作系统，登录的每个人都有可能修改配置,那怎么办呢?用docker,docker的隔离性很好的解决了这个问题。如果把大家的应用程序都放到docker里面运行,就算别人的程序是死循环都不会导致别人的程序？原因是docker启动的时候就限定好了每个程序使用的最大的cpu,内存,硬盘  </p>
-</li>
-<li><p>3.双11来了,服务器撑不住啦!<br>大部分系统每天的业务量并不是平均的,特别是一些电商系统每年总会有那么几天业务量比平时多几倍甚至几十倍。如果按照平时量准备服务器,那么双十一来了肯定撑不住,如果按照双十一规模准备服务器,那么平时就是极大浪费。所以只能在节日前临时扩展机器,过完节给其他服务下线,这给运维带来非常大工作量,节日时候需要在各个服务器上部署各种各样服务,装好只有还不一定能运行,还得调试,这是多么烦躁的事情。使用docker使事情变得好多了,我们只需要点击一下,就可以变成几十台、几百台、几千几万台；   </p>
-</li>
-</ol>
-<h4 id="3-走进docker"><a href="#3-走进docker" class="headerlink" title="3.走进docker"></a>3.走进docker</h4><h5 id="3-1-docker核心技术"><a href="#3-1-docker核心技术" class="headerlink" title="3.1 docker核心技术"></a>3.1 docker核心技术</h5><p>docker里面有3个核心词汇,叫做:仓库(超级码头)、镜像(集装箱)、容器(运行程序的地方)  </p>
-<p>用docker运行一个程序的过程就是:从仓库，把镜像拉到本地、然后用一条命令把镜像运行起来变成容器  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/80.png" alt="">    </p>
-<p>上面图有:build、ship、run<br>a.build(构建)-&gt;构建镜像<br>b.ship(运输)-&gt;运输镜像<br>c.run(运行)-&gt;运行镜像就是个容器  </p>
-<h5 id="3-2-docker镜像"><a href="#3-2-docker镜像" class="headerlink" title="3.2 docker镜像"></a>3.2 docker镜像</h5><p>鲸鱼驮着的集装箱就是一个镜像,镜像本质其实就是文件(应用程序文件、运行环境文件)既然是文件docker是将其保存到本地了,既然保存了,那么是以什么样的格式来保存呢?说到镜像存储格式,就需要提到linux的存储技术叫做联合文件系统:unionfs  是一个分层的文件系统,可以将不同的文件挂载到同一个虚拟文件下</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/81.png" alt="">  </p>
-<p>以上可以看到test1和test2下面都有各自的文件,unionfs系统就像test可以看到上面所有文件，类似于把test1看成第一层，test2看做第二层。docker镜像就是利用这种分层实现镜像存储。     </p>
-<p>docker镜像存储格式如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/82.png" alt=""><br>a.最底层是操作系统的引导<br>b.第二层是linux的操作系统<br>c.第三层,第四层是我们的应用程序，我们可以控制<br>d.第五层是容器相关东西,先不管  </p>
-<p>docker镜像的每一层文件系统都是只读的,然后把每一层加载完成之后,文件都会被看成同一个目录,相当于只有一个文件系统,叫做镜像。  </p>
-<h5 id="3-3-docker容器"><a href="#3-3-docker容器" class="headerlink" title="3.3 docker容器"></a>3.3 docker容器</h5><ol>
-<li>1.容器的本质就是一个进程,便于理解我们可以把容器看成一个虚拟机。  </li>
-<li>2.每个虚拟机都有自己的文件系统<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/82.png" alt=""><br>可以把上面看成是容器的文件系统,和虚拟机的区别是这里的文件系统是一层一层的,并且最下面的四层都是只读的,最上面的一层是可写的,为什么需要可写的呢?大家程序运行起来,势必需要一些日志,一些文件,对系统文件修改。所以创建一个可读可写系统。  </li>
-</ol>
-<p>如何修改镜像里面可读的文件，因为镜像每一层只读,所以会把镜像可读的文件拷贝到可写的文件一层,然后再对他进行修改,修改之后我们的应用要读一个文件时候,就会从最上层开始查找,如果没有才会找下一层。所以容器是可以修改的,镜像是不可以修改的，这样保证同一个镜像生成不同容器独立运行,并且之间无直接干扰。 </p>
-<h5 id="3-4-docker仓库"><a href="#3-4-docker仓库" class="headerlink" title="3.4 docker仓库"></a>3.4 docker仓库</h5><ol>
-<li>1.镜像已经构建完了,镜像构建目的是要在其他机器、其他环境运行我们的程序,如果在本机上运行就不需要构建镜像了。构建完之后如果运输到其他环境中去,这里就运用到了docker仓库。我们先把我们的镜像传递到仓库里面去,再由目的地把docker仓库拉过去。这样就完成了这样的传输过程。</li>
-<li>2.谁提供了docker仓库呢?需要有一个中央服务器提供一个地址,让我们去访问,docker自己就提供了这个服务,提供服务的地址就叫:hub.docker.com,但是有一个问题是最开始这个网站是被墙掉的,国内根本访问不了,现在虽然可以访问了,但是加载镜像速度还是很慢,为了解决这个问题,国内很多也在做这个仓库,国内比较著名的是国内一个c.163.com的仓库  </li>
-</ol>
-<ol>
-<li>3.以上是共有的镜像中心,假如我们自己的镜像比较私密,不想被其他人看到呢?docker也是支持我们自己搭建一个镜像中心  </li>
-</ol>
-<h3 id="4-docker安装"><a href="#4-docker安装" class="headerlink" title="4.docker安装"></a>4.docker安装</h3><h4 id="4-1-window安装docker"><a href="#4-1-window安装docker" class="headerlink" title="4.1 window安装docker"></a>4.1 window安装docker</h4><p>Windows  </p>
-<p>docker下载地址：<br>win10: www.docker.com/products/docker#/windows<br>win10之外：<a href="http://www.docker.com/products/docker-toolbox" target="_blank" rel="external">http://www.docker.com/products/docker-toolbox</a><br>国内下载地址：<a href="http://get.daocloud.io" target="_blank" rel="external">http://get.daocloud.io</a></p>
-<p>boot2docker.iso下载地址：<br><a href="http://pan.baidu.com/s/1qYyc0ag" target="_blank" rel="external">http://pan.baidu.com/s/1qYyc0ag</a>  </p>
-<ol>
-<li>1.下载后默认安装  </li>
-</ol>
-<p>安装完之后,在桌面上会有3个快捷方式,其中Docker Quickstart Terminal是我们启动docker的按钮。  </p>
-<ol>
-<li>2.缺包之后,我们从百度云盘去下载:boot2docker.iso下载地址:<a href="http://pan.baidu.com/s/1qYyc0ag" target="_blank" rel="external">http://pan.baidu.com/s/1qYyc0ag</a><br>第一次运行可能比较慢<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/84.png" alt=""><br>上面说从github上下载文件失败,因为github是外国网站,所以慢,需要我们自己下载:<br>我们现在下载好iso文件后,我们把他存放到:C:\Users\yxm.docker\machine\cache里面的docker文件:  </li>
-</ol>
-<h4 id="4-2-linux安装docker"><a href="#4-2-linux安装docker" class="headerlink" title="4.2 linux安装docker"></a>4.2 linux安装docker</h4><p>Linux<br>1.Redhat&amp;CentOS:<br>系统要求:64-bit OS and version 3.10<br>安装连接:<a href="http://www.imooc.com/article/16448" target="_blank" rel="external">http://www.imooc.com/article/16448</a>  </p>
-<p>linux下安装完之后,如果执行docker version出现:Cannot connect to the Docker daemon at unix:///var/run/docker.sock. Is the docker daemon running?<br>说明docker服务没有起来。我们需要执行如下指令:  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">systemctl start docker.service</div></pre></td></tr></table></figure>
-<p>2.Ubuntu:<br>系统要求:64-bit OS and version 3.10  </p>
-<h3 id="5-docker实践"><a href="#5-docker实践" class="headerlink" title="5.docker实践"></a>5.docker实践</h3><h4 id="5-1-第一个docker镜像"><a href="#5-1-第一个docker镜像" class="headerlink" title="5.1 第一个docker镜像"></a>5.1 第一个docker镜像</h4><h5 id="5-1-1-二个命令"><a href="#5-1-1-二个命令" class="headerlink" title="5.1.1 二个命令"></a>5.1.1 二个命令</h5><p>第一个初体验就是运行hello world,运行这个的时候,我们需要运行两条命令。  </p>
-<ol>
-<li><p>1.docker pull [OPTIONS] NAME[:TAG]<br>a.从docker远程仓库拉取一个镜像到我们本地<br>b.NAME表示:拉取镜像的名称  :TAG是可选的,如果不加的话默认会是:latest表示我们镜像的最新版本,如果指定一个tag的话；中间的options是拉取时候的一些参数  </p>
-</li>
-<li><p>2.docker images [OPTIONS][REPOSITORY[:tag]]<br>查看我们本机都有哪些镜像?也可以验证我们pull是否成功了?  </p>
-</li>
-</ol>
-<h5 id="5-1-2-具体操作"><a href="#5-1-2-具体操作" class="headerlink" title="5.1.2 具体操作"></a>5.1.2 具体操作</h5><ol>
-<li><p>1.查看本机所有镜像列表<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/85.png" alt=""><br>我们发现本地没有任何镜像,只打印了每列的列头  </p>
-</li>
-<li><p>2.拉取hello-world镜像<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/86.png" alt=""><br>a.Using default tag: latest—表示默认拉取最新分支<br>b.Digest: sha256:4fe721ccc2e8dc7362278a29dc660d833570ec2682f4e4194f4ee23e415e1064—摘要<br>c.Status: Downloaded newer image for docker.io/hello-world:latest—状态  </p>
-</li>
-</ol>
-<p>再使用docker images查看时候,出现如下:<br>a.REPOSITORY:镜像名称<br>b.TAG:分支<br>c.IMAGEID:id标识<br>d.CREATED:最后修改时间<br>e:SIZE:镜像大小  </p>
-<ol>
-<li>3.2点说明:<br>a.我们这里的镜像名称为：hello-world是docker镜像官网限制的<br>b.我们pull取镜像的时候,没有填写镜像的地址,他是如何找到的呢?他会默认从docker自己仓库下载:hub.docker.com  </li>
-</ol>
-<h4 id="5-2-第一个docker容器"><a href="#5-2-第一个docker容器" class="headerlink" title="5.2 第一个docker容器"></a>5.2 第一个docker容器</h4><p>我们已经把docker镜像下载下来了,下面我们需要运行docker容器  </p>
-<ol>
-<li>1.docker运行指令</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">docker run [OPTIONS] IMAGE[:TAG][COMMAND][ARG...]</div></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/87.png" alt="">  </p>
-<p>以上是docker运行后的输出,指明了docker运行时候经历的4步。  </p>
-<p>为了形象理解,我们使用一张图表示:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/88.png" alt=""><br>a.上图分为3个部分:Client、DOCKER_HOST、Register<br>b.client:在我们本机;就是我们终端,执行指令的地方<br>c.DOCKER_HOST也是在我们本机的Docker daemon<br>d.Register:Docker的远程仓库  </p>
-<p>以上执行分析:<br>1.docker pull:把我们的命令发到docker daemon,docker daemon去找Images镜像,daemon去检查我们本地是否存在对应版本,如果存在直接返回到,如果镜像不存在就去远程仓库去拉取到本地<br>2.docker run:把我们的命令发到docker daemon，daemon检查镜像在本机是否已经存在,如果不存在,就去远端拉取。存放到本地images,然后产生一个docker容器。  </p>
-<h3 id="6-docker运行nginx"><a href="#6-docker运行nginx" class="headerlink" title="6.docker运行nginx"></a>6.docker运行nginx</h3><p>nginx是一个web服务器,nginx镜像的特点:<br>1):持久运行的容器<br>2):前台挂起&amp;后台运行(前台运行我们使用Ctrl+c即可关闭,我们用后端运行)<br>3):进入容器内部  </p>
-<h4 id="6-1-docker运行nginx"><a href="#6-1-docker运行nginx" class="headerlink" title="6.1 docker运行nginx"></a>6.1 docker运行nginx</h4><p>去网易镜像中心查看:<a href="https://c.163.com/hub#/home" target="_blank" rel="external">https://c.163.com/hub#/home</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/89.png" alt="">  </p>
-<ol>
-<li><p>1.拉取镜像:hub.c.163.com/library/nginx:latest<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/90.png" alt="">  </p>
-</li>
-<li><p>2.运行镜像:<br>前台运行镜像:docker run hub.c.163.com/library/nginx<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/91.png" alt="">    </p>
-</li>
-</ol>
-<p>我们发现没有什么反应:我们打开另一个终端,查看下docker运行的进程<br>docker ps<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/92.png" alt="">  </p>
-<p>从上面可以看出我们的docker已经运行了，说明上面是前台运行  </p>
-<p>通过:docker run –help:查看docker run有哪些参数<br>后台启动:docker run -d<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/93.png" alt="">  </p>
-<p>id:656dea8798aefb5699df96f623835d6df34b2c839de1876efe9842052bfb5757</p>
-<ol>
-<li>3.查看容器内部结构<br>容器已经运行起来了,我们如何查看容器内部的结构呢?我们有时候需要看下运行的容器是否正常,内部日志等。  </li>
-</ol>
-<p>docker exec –help<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/94.png" alt="">  </p>
-<p>我们一般用到的是-i和-t参数,一般是可以合并的。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/95.png" alt="">  </p>
-<p>进入自带的镜像目录:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/96.png" alt="">  </p>
-<h4 id="6-2-docker的网络"><a href="#6-2-docker的网络" class="headerlink" title="6.2 docker的网络"></a>6.2 docker的网络</h4><p>上面我们已经用docker运行了一个nginx，但是我们还没有在浏览器访问nginx,这一章节我们看下docker的网络,然后从浏览器上访问下nginx  </p>
-<h5 id="6-2-1-docker网络类型"><a href="#6-2-1-docker网络类型" class="headerlink" title="6.2.1 docker网络类型"></a>6.2.1 docker网络类型</h5><ol>
-<li><p>1.网络也是隔离性一部分,linux使用namespace来实现隔离的,pid namespace就是用来隔离进程的,mount namespace就是用来隔离文件系统的,network namespace就是用来隔离网络的,每一个network namespace都提供了独立的网络环境(包括:网卡、路由等)  </p>
-</li>
-<li><p>2.docker容器默认情况下会分配默认的独立的network namespace也就是网络类型中的:Bridge模式 还有一种Host模式(如果启动时候使用Host模式,那么这个容器将不会获得独立的network namespace而是和主机共同使用一个,这个时候容器将不会虚拟出自己网卡,ip等,而是会使用宿主机上的ip和port，也就是在docker里面使用网络和在主机上使用网络没有区别的 还有一种网络类型是没有网络：none;这种情况docker将不会和外界任何东西进行通讯)  </p>
-</li>
-<li><p>3.Bridge模式时候涉及到,既然是独立的network namespace,这就需要一种技术:这就需要容器内部的端口可以在主机上访问到，这种技术就是端口映射,docker可以实现容器内部端口和容器所在的主机上端口进行映射,也就是访问主机里面这个端口就是访问容器里面的端口;   </p>
-</li>
-<li>4.docker网络模式图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/97.png" alt=""><br>a.host模式(最左边):eth0是我们主机网卡,host模式时候,容器会直接连接到主机的网卡上,跟主机使用同一块网卡,所以说容器内看到的网络和主机看到的网络是一样的。<br>b.Bridge模式(中间)：首先会创建一个docker0的网桥,这个网桥跟主机eth0相连接,使用同一块网卡,所以说启动容器的时候,容器内部会虚拟出一个容器内部的虚拟网卡跟网桥相连通过这种方式docker与主机进行通信，这种情况容器里面会有自己独有的ip、port;端口映射的过程:在主机上有一个端口80,通过访问80端口会到主机的eth0网卡,通过这个网卡,会访问到</li>
-</ol>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/12/15/docker-1-docker基础入门/" class="archive-article-date">
-  	<time datetime="2019-12-15T00:53:59.778Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-15</time>
-</a>
-      
       
 
       <div class="clearfix"></div>
