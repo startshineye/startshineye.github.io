@@ -152,6 +152,135 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-10-sentinel限流功能使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/01/SpringCloudAlibaba-10-sentinel限流功能使用/">SpringCloudAlibaba-10-sentinel限流功能使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="1-Sentinel简介"><a href="#1-Sentinel简介" class="headerlink" title="1.Sentinel简介"></a>1.Sentinel简介</h3><p>Sentinel 是什么？<br>随着微服务的流行，服务和服务之间的稳定性变得越来越重要。Sentinel 以流量为切入点，从流量控制、熔断降级、系统负载保护等多个维度保护服务的稳定性。<br>Sentinel 具有以下特征:  </p>
+<ol>
+<li>丰富的应用场景：Sentinel 承接了阿里巴巴近 10 年的双十一大促流量的核心场景，例如秒杀（即突发流量控制在系统容量可以承受的范围）、消息削峰填谷、集群流量控制、实时熔断下游不可用应用等。  </li>
+<li>完备的实时监控：Sentinel 同时提供实时的监控功能。您可以在控制台中看到接入应用的单台机器秒级数据，甚至 500 台以下规模的集群的汇总运行情况。  </li>
+<li>广泛的开源生态：Sentinel 提供开箱即用的与其它开源框架/库的整合模块，例如与 Spring Cloud、Dubbo、gRPC 的整合。您只需要引入相应的依赖并进行简单的配置即可快速地接入 Sentinel。  </li>
+<li>完善的 SPI 扩展点：Sentinel 提供简单易用、完善的 SPI 扩展接口。您可以通过实现扩展接口来快速地定制逻辑。例如定制规则管理、适配动态数据源等。  </li>
+</ol>
+<h3 id="2-Sentinel控制台"><a href="#2-Sentinel控制台" class="headerlink" title="2.Sentinel控制台"></a>2.Sentinel控制台</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/13.png" alt="">  </p>
+<p>我们也可以从官网下载源代码,然后mvn编译打包<br><a href="https://github.com/alibaba/Sentinel">https://github.com/alibaba/Sentinel</a>  </p>
+<p>初始账号/密码:sentinel/sentinel</p>
+<p>登录进去是空的,因为我们没有接入任何应用。  </p>
+<h3 id="3-Sentinel接入应用"><a href="#3-Sentinel接入应用" class="headerlink" title="3.Sentinel接入应用"></a>3.Sentinel接入应用</h3><ol>
+<li>1.创建Spring Initializr子模块   </li>
+<li>2.引入sentinel依赖  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-sentinel&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;</div><div class="line"> &lt;/dependency&gt;</div><div class="line">```   </div><div class="line"></div><div class="line"></div><div class="line">3. 3.配置文件</div></pre></td></tr></table></figure>
+<p>server:<br>  port: 18080<br>spring:<br>  application:<br>    name: sentinel-core-example<br>  cloud:<br>    sentinel:<br>      transport:<br>        dashboard: 127.0.0.1:8080<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">4. 4.启动</div><div class="line">启动服务时候,发现sentinel的控制端没有新的消息出现。原因是因为sentinel控制台是一个懒加载,只有当有流量的时候才会显示具有流量的应用。我们创建controller</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/15.png)  </div><div class="line"></div><div class="line">默认情况下是根据url进行限流的,我们可以设置下流控  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/17.png)  </div><div class="line">  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/16.png)  </div><div class="line"></div><div class="line">设置为1，说明我们每秒只能访问一次  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/18.png)  </div><div class="line"></div><div class="line">5. 5.基于资源限流的我们使用注解:</div></pre></td></tr></table></figure></p>
+<p>@GetMapping(“/resource”)<br>    @SentinelResource(“/resource”)<br>    public String resource(){<br>        return “Hello resource”;<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### 4.重写基于URL的限流自定义输出    </div><div class="line"></div><div class="line">1. 1.自定义url限流处理器</div></pre></td></tr></table></figure></p>
+<p>public class DemoUrlBlockHandler implements UrlBlockHandler {<br>    @Override<br>    public void blocked(HttpServletRequest httpServletRequest, HttpServletResponse httpServletResponse, BlockException e) throws IOException {<br>        httpServletResponse.getWriter().println(“error  url request”);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.我们需要把自定义的DemoUrlBlockHandler添加到Sentinel限流配置中去</div></pre></td></tr></table></figure></p>
+<p>@Configuration<br>public class SentinelConfig {<br>    @PostConstruct<br>    public void innit(){<br>        WebCallbackManager.setUrlBlockHandler(new DemoUrlBlockHandler());<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">然后我们重启服务,重启服务时候,之前的监控信息会丢失,重新设置流控为0,然后请求，返回如下结果:    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/19.png) </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">### 4.重写基于资源名称的限流自定义输出  </div><div class="line">通过blockHandler方法名，默认情况下，会找本类下的上面方法,返回值和目标方法一致,也是String,入参和请求的接口入参一致,但是会返回一个BlockException    </div><div class="line">   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/20.png)  </div><div class="line"></div><div class="line">对于每一个资源resource,我们不可能都单独写一个限流的方法，能不能统一写一个统一的类作为限流。blockHandlerClass =&#123;ExceptionUtil.class&#125; 使用上面 blockHandlerClass属性自定义一个ExceptionUtil</div></pre></td></tr></table></figure></p>
+<p>public class ExceptionUtil  {<br>    public static String exHandler(BlockException ex) {<br>        return “exHandler error”;<br>    }<br>}<br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/01/SpringCloudAlibaba-10-sentinel限流功能使用/" class="archive-article-date">
+  	<time datetime="2020-02-01T12:33:13.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloudAlibaba-9-nacos集群搭建及使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/01/SpringCloudAlibaba-9-nacos集群搭建及使用/">SpringCloudAlibaba-9-nacos集群搭建及使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>Nacos的单节点，也就是我们最开始使用的standalone模式，配置的数据是默认存储到内嵌的数据库derby中。</p>
+<p>如果我们要搭建集群的话，那么肯定是不能用内嵌的数据库，不然数据无法共享。集群搭建的时候我们需要将Nacos对接Mysql进行数据存储。</p>
+<p>集群模式跟我们平时进行扩容是一样的，可以通过Nginx转发到多个节点，最前面挂一个域名即可，如下图：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/8.png" alt="">  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="1-nacos集群部署方案"><a href="#1-nacos集群部署方案" class="headerlink" title="1.nacos集群部署方案"></a>1.nacos集群部署方案</h4><ol>
+<li>我们开启3个nacos节点，对外提供一个可访问的虚拟ip、3个是通过nginx作为负载均衡  </li>
+<li>我们微服务通过注册到1111实现到3个节点，3个节点连接到同一个数据库mysql数据源，实现数据的统一  </li>
+</ol>
+<h4 id="2-修改启动脚本"><a href="#2-修改启动脚本" class="headerlink" title="2.修改启动脚本"></a>2.修改启动脚本</h4><p>修改启动脚本，支持自定义端口,自带的startup.cmd不具备更改端口功能,我们通过修改脚本实现上面三个节点及不同的端口。<br> nacos默认有个问题,就是默认启动时候端口8848是没有定义的，如果我们想修改成:1111,2222,3333等就需要扩展我们的启动脚本。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/10.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/11.png" alt=""> </p>
+<h4 id="3-修配置cluster文件"><a href="#3-修配置cluster文件" class="headerlink" title="3.修配置cluster文件"></a>3.修配置cluster文件</h4><p>拷贝cluster.conf.example为:cluster.conf。填写如下信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/9.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/01/SpringCloudAlibaba-9-nacos集群搭建及使用/" class="archive-article-date">
+  	<time datetime="2020-02-01T07:37:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-8-nacos配置中心持久化" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -659,111 +788,6 @@ shared-dataids: common.yml
 
 
   
-    <article id="post-SpringCloud-11-服务追踪11" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/25/SpringCloud-11-服务追踪11/">SpringCloud-11-服务追踪11</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/25/SpringCloud-11-服务追踪11/" class="archive-article-date">
-  	<time datetime="2020-01-25T15:27:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-防火墙命令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/06/linux-防火墙命令/">linux-防火墙命令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Linux关闭防火墙命令<br>问题:老是关闭防火墙太麻烦，所以选择彻底关闭防火墙，发现每次都记不住命令!</p>
-<p>下面是red hat/CentOs7关闭防火墙的命令!</p>
-<p>1:查看防火状态</p>
-<p>systemctl status firewalld</p>
-<p>service  iptables status</p>
-<p>2:暂时关闭防火墙</p>
-<p>systemctl stop firewalld</p>
-<p>service  iptables stop</p>
-<p>3:永久关闭防火墙</p>
-<p>systemctl disable firewalld</p>
-<p>chkconfig iptables off</p>
-<p>4:重启防火墙</p>
-<p>systemctl enable firewalld</p>
-<p>service iptables restart  </p>
-<p>5:永久关闭后重启</p>
-<p>//暂时还没有试过</p>
-<p>chkconfig iptables on</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/06/linux-防火墙命令/" class="archive-article-date">
-  	<time datetime="2020-01-06T02:26:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-06</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -829,7 +853,7 @@ shared-dataids: common.yml
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 15px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 17.5px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 12.5px;">work</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 17.5px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 15px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 12.5px;">work</a>
     			</div>
     	</section>
     
