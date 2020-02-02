@@ -4,17 +4,32 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Archives: 2020 | Startshineye的博客</title>
+  <title>Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
-<meta property="og:type" content="website">
+  <meta name="description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
+ SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
+内容
+1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
+<meta property="og:type" content="article">
 <meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/archives/2020/page/2/index.html">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta property="og:description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
+ SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
+内容
+1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/22.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/23.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/24.png">
+<meta property="og:updated_time" content="2020-02-01T16:47:45.722Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="毕业于石大，相信技术可以改变人与人之间的生活，码农一枚">
+<meta name="twitter:description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
+ SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
+内容
+1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -150,112 +165,116 @@
 </nav>
 
       <div class="body-wrap">
-        
-  
-  
+        <article id="post-SpringCloudAlibaba-11-sentinel黑白名单控制" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
     
     
+    <div class="article-entry" itemprop="articleBody">
       
-      
-      <section class="archives-wrap">
-        <div class="archive-year-wrap">
-          <a href="/archives/2020" class="archive-year">2020</a>
-        </div>
-        <div class="archives">
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/" class="archive-article-date">
-  	<time datetime="2020-01-25T15:38:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/">SpringCloudAlibaba-1-nacos服务注册与发现</a>
-    </h1>
-  
+        <hr>
+<p>title: SpringCloudAlibaba-11-sentinel黑白名单控制<br>date: 2020-02-02 00:02:07<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一节我们讲了sentinel的基于url和基于资源流量控制。<br>这一章节我们说一下黑白名单  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><ol>
+<li>1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则<br>自定义:IpRequestOriginParser实现RequestOriginParser接口:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public class IpRequestOriginParser implements RequestOriginParser &#123;</div><div class="line">    @Override</div><div class="line">    public String parseOrigin(HttpServletRequest request) &#123;</div><div class="line">        return request.getRemoteAddr();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<ol>
+<li>2.将此配置绑定到Sentinel上去  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@Configuration</div><div class="line">public class SentinelConfig &#123;</div><div class="line">    @PostConstruct</div><div class="line">    public void init()&#123;</div><div class="line">        WebCallbackManager.setUrlBlockHandler(new DemoUrlBlockHandler());</div><div class="line">        WebCallbackManager.setRequestOriginParser(new IpRequestOriginParser());</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.定义一个SecurityController用作测试</div></pre></td></tr></table></figure>
+<p>@RestController<br>public class SecurityController {<br>    @GetMapping(“/white”)<br>    public String white() {<br>        return “hello white”;<br>    }<br>    @GetMapping(“/black”)<br>    public String black() {<br>        return “hello black”;<br>    }<br>}<br>```</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/22.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/23.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/24.png" alt="">  </p>
 
-        <div class="article-info info-on-right">
-          
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/" class="archive-article-date">
+  	<time datetime="2020-02-01T16:02:07.736Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/02/01/SpringCloudAlibaba-10-sentinel限流功能使用/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-10-sentinel限流功能使用</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
 	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
 
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
   </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/01/25/SpringCloud-11-服务追踪11/" class="archive-article-date">
-  	<time datetime="2020-01-25T15:27:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/01/25/SpringCloud-11-服务追踪11/">SpringCloud-11-服务追踪11</a>
-    </h1>
-  
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-    
-    
-    <article class="archive-article archive-type-post">
-  <div class="archive-article-inner">
-    <header class="archive-article-header">
-      	<div class="article-meta">
-	      	<a href="/2020/01/06/linux-防火墙命令/" class="archive-article-date">
-  	<time datetime="2020-01-06T02:26:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-06</time>
-</a>
-        </div>
-    	 
-  
-    <h1 itemprop="name">
-      <a class="archive-article-title" href="/2020/01/06/linux-防火墙命令/">linux-防火墙命令</a>
-    </h1>
-  
 
-        <div class="article-info info-on-right">
-          
-          
 
-        </div>
-        <div class="clearfix"></div>
-    </header>
-  </div>
-</article>
-  
-  
-    </div></section>
-  
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-11-sentinel黑白名单控制" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
 
-    
-    <nav id="page-nav">
-      <a class="extend prev" rel="prev" href="/archives/2020/">&laquo; Prev</a><a class="page-number" href="/archives/2020/">1</a><span class="page-number current">2</span>
-    </nav>
-  
+
+
 
 
       </div>
@@ -278,8 +297,8 @@
 		mathjax: false,
 		animate: true,
 		isHome: false,
-		isPost: false,
-		isArchive: true,
+		isPost: true,
+		isArchive: false,
 		isTag: false,
 		isCategory: false,
 		open_in_new: false,

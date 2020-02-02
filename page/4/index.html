@@ -152,6 +152,108 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloud-2-服务注册与发现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2019/04/13/SpringCloud-2-服务注册与发现/">SpringCloud-2-服务注册与发现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-SpringCloud-Eureka"><a href="#1-SpringCloud-Eureka" class="headerlink" title="1.SpringCloud Eureka"></a>1.SpringCloud Eureka</h4><h5 id="1-1-简单微服务架构"><a href="#1-1-简单微服务架构" class="headerlink" title="1.1 简单微服务架构"></a>1.1 简单微服务架构</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/23.png" alt=""> </p>
+<p>上图中的服务注册和发现在SpringCloud中用的就是:Eureka  </p>
+<h5 id="1-2-简单介绍"><a href="#1-2-简单介绍" class="headerlink" title="1.2 简单介绍"></a>1.2 简单介绍</h5><ol>
+<li>基于Netflix Eureka做了二次封装  </li>
+<li>主要由两个组件组成: -Eureka Server(注册中心)  -Eureka Client(服务中心)  </li>
+</ol>
+<h4 id="2-Eureka-Server"><a href="#2-Eureka-Server" class="headerlink" title="2.Eureka Server"></a>2.Eureka Server</h4><h5 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1 简介"></a>2.1 简介</h5><ol>
+<li>注册中心好比老师手中名单 记录着所有同学名字  点名时候,根据手册名单</li>
+<li>注册中心记录着所有应用的信息和状态(应用名,所在服务器,是否正常工作),在微服务架构中,我们把应用叫做服务 </li>
+<li>由图所知:服务中心就是找到服务<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/24.png" alt="">  <h5 id="2-2-创建Eureka-Server应用"><a href="#2-2-创建Eureka-Server应用" class="headerlink" title="2.2 创建Eureka Server应用"></a>2.2 创建Eureka Server应用</h5><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/25.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/26.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/27.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/28.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/29.png" alt="">   </li>
+</ol>
+<p>项目创建后我们不着急启动,先看下pom.xml文件:<br>SpringBoot的版本和SpringCloud版本如下所示:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/30.png" alt=""><br>我们如何知道SpringBoot版本和SpringCloud的版本匹配呢?我们进入SpringCloud官网:<a href="https://spring.io/" target="_blank" rel="external">https://spring.io/</a><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/31.png" alt=""><br>将pom.xml中设置成统一匹配的:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/32.png" alt=""> </p>
+<p>关于版本的具体问题,请参考：<a href="https://blog.csdn.net/sinat_33889619/article/details/89403796" target="_blank" rel="external">https://blog.csdn.net/sinat_33889619/article/details/89403796</a></p>
+<h5 id="2-3-启动Eureka-Server"><a href="#2-3-启动Eureka-Server" class="headerlink" title="2.3 启动Eureka Server"></a>2.3 启动Eureka Server</h5><p>1.启动时候报错:没有出现注册中心界面<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/33.png" alt="">  </p>
+<p>2.添加@EnableEurekaServer注解</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">@SpringBootApplication</div><div class="line">@EnableEurekaServer</div><div class="line">public class EurekaApplication &#123;</div><div class="line">  public static void main(String[] args) &#123;</div><div class="line">	SpringApplication.run(EurekaApplication.class, args);</div><div class="line"> &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>重启发现出现注册中心的界面:  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/34.png" alt="">  </p>
+<p>3.启动时候虽然可以访问,但是出现了下面的错误:   </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">com.netflix.discovery.shared.transport.TransportException: Cannot execute request on any known server</div></pre></td></tr></table></figure>
+<p>这是因为此应用不仅是一个server端同时也是一个client端。他也需要找到一个注册中心,把自己注册上去。我们配置一下他注册的地址:就是往自己身上注册。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/35.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/36.png" alt="">  </p>
+<p>点击service-url进入:EurekaClientConfigBean</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">public void setServiceUrl(Map&lt;String, String&gt; serviceUrl) &#123;</div><div class="line"> this.serviceUrl = serviceUrl;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">serviceUrl是一个map的key为:defaultZone</div></pre></td></tr></table></figure>
+<p>eureka:<br>client:<br>service-url:<br>defaultZone: <a href="http://localhost:8080/eureka/" target="_blank" rel="external">http://localhost:8080/eureka/</a><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">重启项目时候:注册时候是心跳检测注册,刚开始会有错误,等一会就可以了,如下已经注册上:  </div><div class="line">  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/37.png)  </div><div class="line"></div><div class="line">由于注册的Application的名字为:UNKNOWN  我们修改此应用的名字,添加如下配置:</div></pre></td></tr></table></figure></p>
+<p>spring:<br> application:<br>  name: eureka<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/38.png)   </div><div class="line"></div><div class="line">4.由于此应用本来就是一个注册中心,自己注册到自己不出现在注册实例中:添加如下配置:register-with-eureka: false</div></pre></td></tr></table></figure></p>
+<p>eureka:<br> client:<br>  service-url:<br>    defaultZone: <a href="http://localhost:8080/eureka/" target="_blank" rel="external">http://localhost:8080/eureka/</a><br>   register-with-eureka: false<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/39.png)   </div><div class="line"></div><div class="line">5.由于我们后面很多应用都是8080端口,所以我们修改注册中心的地址为默认端口:8761</div></pre></td></tr></table></figure></p>
+<p>eureka:<br>  client:<br>    service-url:<br>      defaultZone: <a href="http://localhost:8761/eureka/" target="_blank" rel="external">http://localhost:8761/eureka/</a><br>    register-with-eureka: false<br>spring:<br>  application:<br>    name: eureka<br>  server:<br>    port: 8761<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">#### 3.Eureka Client(服务注册)    </div><div class="line">##### 3.1 启用注册中心    </div><div class="line">注册中心为了方便不需要每次在idea中启动,我们应该打成jar包,然后通过命令在后台启用。进入eureka的根目录,执行:</div></pre></td></tr></table></figure></p>
+<p>mvn clean package<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">生成后端启动：</div></pre></td></tr></table></figure></p>
+<p>nohup java -jar eureka-0.0.1-SNAPSHOT.jar &amp;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">##### 3.2 创建Eureka Client应用  </div><div class="line">  </div><div class="line">1. 创建应用</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/25.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/40.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/41.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/42.png)  </div><div class="line"></div><div class="line">删除不需要的文件:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/43.png)  </div><div class="line"></div><div class="line">client端和server端的版本保持一致:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/44.png) </div><div class="line"></div><div class="line">2. 添加注册中心地址:</div></pre></td></tr></table></figure></p>
+<p>eureka:<br>  client:<br>    service-url:<br>      defaultZone: <a href="http://localhost:8761/eureka/" target="_blank" rel="external">http://localhost:8761/eureka/</a><br>spring:<br>  application:<br>    name: client<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">3. 开启服务注册  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/45.png) </div><div class="line"></div><div class="line"></div><div class="line">有时候启动报错:</div></pre></td></tr></table></figure></p>
+<p>Invocation of destroy method failed on bean with name ‘scopedTarget.eurekaClient’: org.springframework.beans.factory.BeanCreationNotAllowedException: Error creating bean with name ‘eurekaInstanceConfigBean’: Singleton bean creation not allowed while singletons of this factory are in destruction (Do not request a bean from a BeanFactory in a destroy method implementation!)<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">解决:添加web依赖</div></pre></td></tr></table></figure></p>
+<p><dependency><br>    <groupid>org.springframework.boot</groupid><br>    <artifactid>spring-boot-starter-web</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">4. 查看是否已经注册  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/46.png) </div><div class="line"></div><div class="line"></div><div class="line">5. 如果不停的启动client端,会在注册中心出现:</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/47.png) </div><div class="line">client&lt;---&gt;server端是采用心跳的机制,server端会不听的检查client端是否存活上线,在一定时间会统计出client端的上线率,当低于某个比例时候 会报出以上警告,在开发环境我们可以把它关掉(在server端里面配置文件加上:)</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/48.png)  </div><div class="line"></div><div class="line">#### 4.Eureka高可用  </div><div class="line">##### 4.1 Eureka单节点 </div><div class="line">1. 上面的Eureka是单点的,如果挂了的话 所以client端服务都不可以运行了  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/49.png) </div><div class="line">##### 4.2 Eureka多节点之间互相注册,但是client注册到其中一个Eureka    </div><div class="line">1. 让Eureka Server开启两个,之间互相注册,虽然client只在server1上注册,但是会把client注册也会拷贝到server2注册  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/50.png)  </div><div class="line">2. 开启两个Eureka Server端口分别为:8761、8762   </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/51.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/52.png)  </div><div class="line">以端口来区分:Eureka1:8761   Eureka2:8762</div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/53.png)  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2019/04/54.png)  </div><div class="line">注释掉yml中原来端口:</div></pre></td></tr></table></figure></p>
+<p>//server:<br>//port: 8761<br>```</p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/55.png" alt=""><br>启动  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/56.png" alt=""><br>启动</p>
+<p>访问:<a href="http://localhost:8762" target="_blank" rel="external">http://localhost:8762</a>  我们可以看到之前注册到8761的服务也注册到8762上了,这是因为:8761和8762之间互相注册了。互相注册后,他们之上的信息有所交换。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/57.png" alt=""> </p>
+<h5 id="4-3-Eureka1挂了-重启Eureka2和client"><a href="#4-3-Eureka1挂了-重启Eureka2和client" class="headerlink" title="4.3 Eureka1挂了 重启Eureka2和client"></a>4.3 Eureka1挂了 重启Eureka2和client</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/58.png" alt=""> </p>
+<p>此时我们重启client和Eureka2时候,我们发现在Eureka2上没有发现client,这个时候我们就需要把client注册到Eureka1和Eureka2上才行。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/59.png" alt="">   </p>
+<h5 id="4-4-Eureka包含3个以上"><a href="#4-4-Eureka包含3个以上" class="headerlink" title="4.4 Eureka包含3个以上"></a>4.4 Eureka包含3个以上</h5><p>有时候我们服务比较多,并且需要的注册中心也比较多,也就是Eureka Server比较多,我们该怎么做呢?<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/60.png" alt="">  </p>
+<h4 id="5-Eureka总结"><a href="#5-Eureka总结" class="headerlink" title="5.Eureka总结"></a>5.Eureka总结</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/61.png" alt=""> </p>
+<h4 id="6-分布式下服务注册的地位和原理"><a href="#6-分布式下服务注册的地位和原理" class="headerlink" title="6.分布式下服务注册的地位和原理"></a>6.分布式下服务注册的地位和原理</h4><h5 id="6-1-传统服务发现"><a href="#6-1-传统服务发现" class="headerlink" title="6.1 传统服务发现"></a>6.1 传统服务发现</h5><p>传统服务A要找到服务B,是通过在服务A中配置B的地址从而找到B,在分布式系统中,各个系统之间是不共享内存的，如下A服务如果要找到B服务就需要,并且B服务是分布式集群的,B中的服务器是不确定多少台,在云服务时代,服务器根据压力容量可能会动态改变,此时如果还是在A里面配置多个B节点注册中心地址不可取。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/62.png" alt=""></p>
+<h5 id="6-2-注册中心服务发现"><a href="#6-2-注册中心服务发现" class="headerlink" title="6.2 注册中心服务发现"></a>6.2 注册中心服务发现</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/63.png" alt="">  </p>
+<ol>
+<li>类似于注册中心就是个代理,需要找谁就找谁</li>
+<li><p>通过以上可以知道注册中心 是分布式服务中最重要的基础部分。  </p>
+</li>
+<li><p>A是如何通过”注册中心”找导服务B的呢?<br>客户端发起:A通过注册中心可以找到需要B,从中只需要找到一个B(通过轮训、hash等负载均衡机制等方式)<br>服务端发现:通过代理的方式<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/04/64.png" alt="">  </p>
+</li>
+</ol>
+<h5 id="6-3-思考"><a href="#6-3-思考" class="headerlink" title="6.3 思考"></a>6.3 思考</h5><ol>
+<li>SpringCloud是提供java应用程序之间的服务注册,那么如果有些服务是c/php/node.js写的服务,该怎样取进行服务发现和注册了，SpringCloud的Eureka使用客户端发现方式进行服务发现,SpringCloud是一个强大的我服务体系,但是是纯java的，山本大叔倡导轻量级的方式去实现微服务,所以采用了Http Restful API的方式,并且提供了Restful API接口让其他不同语言的服务区实现接口,达到服务注册。   </li>
+<li>微服务具有异构特点:各个服务间可以用不同语言,每个服务可以根据需要选择不通的数据库  </li>
+</ol>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2019/04/13/SpringCloud-2-服务注册与发现/" class="archive-article-date">
+  	<time datetime="2019-04-13T02:46:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-04-13</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-1-微服务介绍" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     

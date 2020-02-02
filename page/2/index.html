@@ -152,6 +152,84 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-1-nacos服务注册与发现" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/">SpringCloudAlibaba-1-nacos服务注册与发现</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="组件说明"><a href="#组件说明" class="headerlink" title="组件说明"></a>组件说明</h3><ol>
+<li>服务注册与发现:适配Spring Cloud服务注册与发现标准，默认集成了Ribbon的支持  </li>
+<li>服务限流降级：默认支持servlet、Feign、RestTemplate、Dubbo和RocketMQ限流降级接入，可以在运行时通过控制台实时修改限流配置规则，还支持查看限流降级Metrics监控。  </li>
+<li>分布式配置管理：支持分布式系统中的外部化配置，配置更改时自动刷新。  </li>
+<li>消息驱动能力：基于Spring Cloud Stream 为微服务应用构建消息驱动能力。  </li>
+<li>分布式事务：使用@GlobalTransactional注解，高效并且对业务零侵入地解决分布式事务问题。  </li>
+<li>阿里云对象存储：阿里云提供海量、安全、低成本、高可靠的云存储服务。支持在任何应用、任何时间、任何地点存储和访问任意类型的数据。  </li>
+<li>分布式任务调度：提供秒级、精准、高可靠、高可用的定时(基于Cron表达式) 任务调度服务。同时提供分布式的任务执行模型，如网格任务。网格任务支持海量子任务均匀分配到所有Worker(schedulerx-client)上执行。  </li>
+<li>阿里云短信服务：覆盖全球的短信服务，友好、高效、智能的互联化通讯能力，帮助企业迅速搭建客户触达通道。  </li>
+</ol>
+<h3 id="nacos"><a href="#nacos" class="headerlink" title="nacos"></a>nacos</h3><p>nacos=eureka+Spring Cloud Config  </p>
+<h4 id="1-下载运行nacos"><a href="#1-下载运行nacos" class="headerlink" title="1.下载运行nacos"></a>1.下载运行nacos</h4><p>下载地址:<br><a href="https://github.com/alibaba/nacos/releases">https://github.com/alibaba/nacos/releases</a><br>也可参考:<a href="https://nacos.io/en-us/docs/quick-start.html" target="_blank" rel="external">https://nacos.io/en-us/docs/quick-start.html</a>  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/8.png" alt="">  </p>
+<h4 id="2-服务注册与发现实例"><a href="#2-服务注册与发现实例" class="headerlink" title="2.服务注册与发现实例"></a>2.服务注册与发现实例</h4><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/9.png" alt=""><br>运行3个实例:8050、8051注册到nacos上面  </p>
+<h5 id="2-1创建父工程"><a href="#2-1创建父工程" class="headerlink" title="2.1创建父工程"></a>2.1创建父工程</h5><p>1.创建工程<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/10.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/11.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/12.png" alt="">  </p>
+<p>2.修改pom.xml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/13.png" alt="">  </p>
+<h5 id="2-2-创建consumer工程"><a href="#2-2-创建consumer工程" class="headerlink" title="2.2 创建consumer工程"></a>2.2 创建consumer工程</h5><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/14.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/15.png" alt=""> </p>
+<p>添加相关依赖<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/16.png" alt="">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div></pre></td><td class="code"><pre><div class="line">&lt;!--依赖版本定义--&gt;</div><div class="line">   &lt;dependencyManagement&gt;</div><div class="line">       &lt;dependencies&gt;</div><div class="line">           &lt;dependency&gt;</div><div class="line">               &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">               &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</div><div class="line">               &lt;version&gt;Greenwich.RELEASE&lt;/version&gt;</div><div class="line">               &lt;type&gt;pom&lt;/type&gt;</div><div class="line">               &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">           &lt;/dependency&gt;</div><div class="line">           &lt;dependency&gt;</div><div class="line">               &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">               &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;</div><div class="line">               &lt;version&gt;0.2.1.RELEASE&lt;/version&gt;</div><div class="line">               &lt;type&gt;pom&lt;/type&gt;</div><div class="line">               &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">           &lt;/dependency&gt;</div><div class="line">       &lt;/dependencies&gt;</div><div class="line">   &lt;/dependencyManagement&gt;</div></pre></td></tr></table></figure>
+<p>再次添加:</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">添加Application服务发现客户端</div></pre></td></tr></table></figure>
+<p>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">application.yml</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-discovery-consumer<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>server:<br>  port: 8050<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">先启动nacos    </div><div class="line">https://nacos.io/en-us/docs/quick-start.html  </div><div class="line"></div><div class="line">然后输入:http://127.0.0.1:8848/nacos/  </div><div class="line">查看服务列表:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/17.png)  </div><div class="line"> </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"> </div><div class="line">##### 2.3 创建provider工程  </div><div class="line"></div><div class="line">类似的我们创建nacos-discovery-provider工程,并添加对应配置  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/18.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 2.4  让consumer去调用provider  </div><div class="line">1. 1.provider创建HelloController</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class HelloController {<br>    @GetMapping(“/hello”)<br>    public String hello(String name){<br>        return “Hello “+name;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.provider创建HelloController</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private RestTemplate restTemplate;<br>    @Autowired<br>    private LoadBalancerClient loadBalancerClient;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        ServiceInstance serviceInstance = loadBalancerClient.choose(“nacos-discovery-provider”);<br>        URI uri = serviceInstance.getUri();<br>        return restTemplate.getForObject(uri+”/hello?name=”+name, String.class);<br>    }<br>}<br>//NacosDiscoveryConsumerApplication注入:RestTemplate<br>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>    @Bean<br>    public RestTemplate restTemplate(){<br>        return new RestTemplate();<br>    }<br>}<br>```   </p>
+<p>3.测试<br><a href="http://127.0.0.1:8050/test?name=qaws" target="_blank" rel="external">http://127.0.0.1:8050/test?name=qaws</a><br>结果返回:<br>Hello qaws  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/25/SpringCloudAlibaba-1-nacos服务注册与发现/" class="archive-article-date">
+  	<time datetime="2020-01-25T15:38:42.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloud-11-服务追踪11" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -936,100 +1014,6 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/acdgate/">acdgate</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-work-11-nginx安装配置https" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/07/31/work-11-nginx安装配置https/">work-11-nginx安装配置https</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>参考1:<a href="https://www.cnblogs.com/wanghuaijun/p/5480554.html" target="_blank" rel="external">https://www.cnblogs.com/wanghuaijun/p/5480554.html</a><br>参考2:<a href="https://www.runoob.com/linux/nginx-install-setup.html" target="_blank" rel="external">https://www.runoob.com/linux/nginx-install-setup.html</a>  </p>
-<h3 id="安装nginx"><a href="#安装nginx" class="headerlink" title="安装nginx"></a>安装nginx</h3><p>软件需求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/63.png" alt=""><br>下载地址:<br>链接：<a href="https://pan.baidu.com/s/1OTFCGaTXOEQ54cnMtv8JJw" target="_blank" rel="external">https://pan.baidu.com/s/1OTFCGaTXOEQ54cnMtv8JJw</a><br>提取码：z3h5 </p>
-<h4 id="1-创建nginx用户"><a href="#1-创建nginx用户" class="headerlink" title="1.创建nginx用户"></a>1.创建nginx用户</h4><ol>
-<li>1.groupadd -r nginx</li>
-<li>2.useradd -r -g nginx -M nginx  </li>
-</ol>
-<h4 id="2-解压缩nginx的源码并安装"><a href="#2-解压缩nginx的源码并安装" class="headerlink" title="2.解压缩nginx的源码并安装"></a>2.解压缩nginx的源码并安装</h4><ol>
-<li>1.nginx-1.10.2.tar.gz、pcre-8.33.tar.gz、zlib-1.2.8.tar.gz上传文件到tools目录  </li>
-<li>2.解压:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/07/64.png" alt="">    </li>
-<li><p>3.cd nginx-1.10.2 执行:configure  </p>
-   <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">./configure --user=nginx --group=nginx --prefix=/founder/tools/nginx --with-http_stub_status_module --with-http_ssl_module</div><div class="line">--with-http_realip_module --with-http_addition_module --with-pcre=/founder/tools/pcre-8.33 --with-zlib=/founder/tools/zlib-1.2.8</div></pre></td></tr></table></figure>
-</li>
-<li><p>4.编译  make &amp;&amp; make install<br>如果出现以下错误按照要求修改即可:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/01.png" alt="">   </p>
-</li>
-<li><p>5.查看nginx版本<br>进入前面configure中配置的prefix下,执行如下命令: </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./nginx/sbin/nginx -v</div></pre></td></tr></table></figure>
-</li>
-<li><p>6.启动nginx  </p>
- <figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">./nginx/sbin/nginx</div></pre></td></tr></table></figure>
-</li>
-</ol>
-<h3 id="2-配置https"><a href="#2-配置https" class="headerlink" title="2.配置https"></a>2.配置https</h3><h4 id="2-1-配置前需要准备"><a href="#2-1-配置前需要准备" class="headerlink" title="2.1 配置前需要准备"></a>2.1 配置前需要准备</h4><ol>
-<li>1.配置前需要准备：域名、私钥文件、key文件、密码文件。如下图:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/03.png" alt="">  </li>
-</ol>
-<h5 id="2-2-开始配置"><a href="#2-2-开始配置" class="headerlink" title="2.2 开始配置"></a>2.2 开始配置</h5><ol>
-<li>1.安装证书<br>将证书置于服务器中，一般放于<code>/nginx/sslcrt</code>下。  </li>
-<li><p>2.修改配置文件<br>早期的配置文件是<code>/opt/nginx/conf/nginx.conf</code>，较新的项目是<code>/opt/nginx/conf.d/*.conf</code><br>找到需要添加https的服务所在的位置。进行如下配置：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/04.png" alt=""></p>
-</li>
-<li><p>3.重载nginx配置文件<br>/nginx/sbin/nginx -s reload</p>
-</li>
-</ol>
-<h3 id="3-nginx常见错误"><a href="#3-nginx常见错误" class="headerlink" title="3.nginx常见错误"></a>3.nginx常见错误</h3><ol>
-<li>1.解决nginx: [error] open() ＂/usr/local/nginx/logs/nginx.pid＂ failed错误<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/08/02.png" alt="">  </li>
-</ol>
-<h3 id="4-nginx其他命令"><a href="#4-nginx其他命令" class="headerlink" title="4.nginx其他命令"></a>4.nginx其他命令</h3><p>以下包含了 Nginx 常用的几个命令：</p>
-<ol>
-<li>1./usr/local/webserver/nginx/sbin/nginx -s reload            # 重新载入配置文件</li>
-<li>2./usr/local/webserver/nginx/sbin/nginx -s reopen            # 重启 Nginx</li>
-<li>3./usr/local/webserver/nginx/sbin/nginx -s stop              # 停止 Nginx</li>
-</ol>
-<h3 id="5-编译nginx平滑添加stream模块"><a href="#5-编译nginx平滑添加stream模块" class="headerlink" title="5.编译nginx平滑添加stream模块"></a>5.编译nginx平滑添加stream模块</h3><p>有时候我们如果直接不能连接服务器c,但是B服务器能够连接服务器c,所有我们通过在B服务器做代理直接连接c。<br><a href="http://www.mamicode.com/info-detail-2272209.html。" target="_blank" rel="external">http://www.mamicode.com/info-detail-2272209.html。</a></p>
-<pre><code><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">./configure --user=nginx --group=nginx --prefix=/founder/tools/nginx --with-http_stub_status_module --with-http_ssl_module</div><div class="line">--with-http_realip_module --with-http_addition_module --with-pcre=/founder/tools/pcre-8.33 --with-zlib=/founder/tools/zlib-1.2.8 --with-stream  </div><div class="line">--with-stream_ssl_module</div></pre></td></tr></table></figure>
-</code></pre><p>nginx实现端口监听:  </p>
-<p><a href="https://www.jianshu.com/p/c5097147ace3" target="_blank" rel="external">https://www.jianshu.com/p/c5097147ace3</a>  </p>
-<h3 id="6-安装stream模块"><a href="#6-安装stream模块" class="headerlink" title="6.安装stream模块"></a>6.安装stream模块</h3><p>./configure –with-stream –prefix=/usr/local/nginx &amp;&amp; make &amp;&amp; make install</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/07/31/work-11-nginx安装配置https/" class="archive-article-date">
-  	<time datetime="2019-07-31T06:59:33.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-07-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/work/">work</a></li></ul>
 	</div>
 
       
