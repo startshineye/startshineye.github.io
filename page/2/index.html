@@ -152,6 +152,57 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: ‘SpringCloudAlibaba-3-nacos服务注册与发现整合feign:webflux调用’<br>date: 2020-01-26 22:36:11<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="1-Feign"><a href="#1-Feign" class="headerlink" title="1.Feign"></a>1.Feign</h3><p>Feign是从Netflix中分离出来的轻量级项目，能够在类接口上添加注解，成为一个RES API客户端。  </p>
+<h3 id="2-OpenFegin"><a href="#2-OpenFegin" class="headerlink" title="2.OpenFegin"></a>2.OpenFegin</h3><p>Spring Cloud在netflix feign的基础上扩展了支持Spring MVC注解,并通过自动配置为Spring Boot应用程序提供快速集成。  </p>
+<h3 id="3-使用Fegin"><a href="#3-使用Fegin" class="headerlink" title="3.使用Fegin"></a>3.使用Fegin</h3><p>1.复制nacos-discovery-consumer项目，修改maven坐标及其在父工程里面添加module即可。<br>2.在nacos-discovery-consumer-fegin引入fegin依赖  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-openfeign&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<p>3.开启feign  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">@EnableFeignClients</div><div class="line">@EnableDiscoveryClient</div><div class="line">@SpringBootApplication</div><div class="line">public class NacosDiscoveryConsumerFeignApplication &#123;</div><div class="line">    public static void main(String[] args) &#123;</div><div class="line">        SpringApplication.run(NacosDiscoveryConsumerFeignApplication.class, args);</div><div class="line">    &#125;</div><div class="line">    @Bean</div><div class="line">    @LoadBalanced</div><div class="line">    public RestTemplate restTemplate()&#123;</div><div class="line">        return new RestTemplate();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>4.nacos-discovery-consumer-fegin调用nacos-discovery-provider  </p>
+<p>a.创建feign的cient端口,并且其是nacos-discovery-provider的调用接口  </p>
+<p>接口:HelloFeignService  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">//FeignClient注解里面填写的是provider服务名称</div><div class="line">@FeignClient(&quot;nacos-discovery-provider&quot;)</div><div class="line">public interface HelloFeignService &#123;</div><div class="line">    @GetMapping(&quot;/hello&quot;)</div><div class="line">    String hello(@RequestParam(&quot;name&quot;) String name);</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">类:TestController</div></pre></td></tr></table></figure>
+<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private HelloFeignService helloFeignService;<br>    @GetMapping(“/test”)<br>    public String test(String name){<br>        return helloFeignService.hello(name);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">测试:  </div><div class="line">http://127.0.0.1:8052/test?name=111  </div><div class="line">返回:  </div><div class="line">Hello 111 port:8051  </div><div class="line">  </div><div class="line"></div><div class="line">### 4.webflux  </div><div class="line">webflux是和Spring-webmvc进行的对比，如下:    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/26.png)  </div><div class="line"></div><div class="line">步骤：  </div><div class="line">1. 1.引入webflux的依赖  </div><div class="line">我们创建nacos-discovery-consumer-webflux;  </div><div class="line">修改里面的pom.xml文件:</div></pre></td></tr></table></figure></p>
+<p><dependency><br>   <groupid>org.springframework.boot</groupid><br>   <artifactid>spring-boot-starter-web</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">为:</div></pre></td></tr></table></figure></p>
+<p><dependency><br>    <groupid>org.springframework.boot</groupid><br>    <artifactid>spring-boot-starter-webflux</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">2. 2.创建WebClient.Builder(类似于mvc中的restTemplate)</div></pre></td></tr></table></figure></p>
+<p>@EnableDiscoveryClient<br>@SpringBootApplication<br>public class NacosDiscoveryConsumerApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(NacosDiscoveryConsumerApplication.class, args);<br>    }<br>    @Bean<br>    @LoadBalanced<br>    public WebClient.Builder webClientBuilder(){<br>          return WebClient.builder();<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.Controller中调用</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class TestController {<br>    @Autowired<br>    private WebClient.Builder webClientBuilder;<br>    @GetMapping(“/test”)<br>    public Mono<string> test(String name){<br>       return  webClientBuilder.build()<br>                .get()<br>                .uri(“<a href="http://nacos-discovery-provider/hello?name=" target="_blank" rel="external">http://nacos-discovery-provider/hello?name=</a>“ + name)<br>                .retrieve()<br>                .bodyToMono(String.class);<br>    }<br>}<br>```</string></p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/26/SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用/" class="archive-article-date">
+  	<time datetime="2020-01-26T14:36:11.524Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-26</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-2-nacos负载均衡、服务上下线、权重元信息" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -924,91 +975,6 @@ Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_ad
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
 		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/problem/">problem</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-ipcc-3-日常运维" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/11/28/ipcc-3-日常运维/">ipcc-3-日常运维</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>1.中间跳过的名单拨打处理<br>2.统计批次进度问题<br>3.重呼数据未拨打问题(重启后拨打)<br>4.查看某个租户是否配置了重呼轮呼策略<br>5.批次数据号码处理(加前缀去掉前缀) </p>
-<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><h3 id="1-中间跳过的名单拨打处理"><a href="#1-中间跳过的名单拨打处理" class="headerlink" title="1.中间跳过的名单拨打处理"></a>1.中间跳过的名单拨打处理</h3><p>先查看未拨打批次:  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT DISTINCT(ocm_buslist.event_id) FROM ocm_buslist ocm_buslist</div><div class="line">  LEFT JOIN cti_cdr cdr ON ocm_buslist.list_id = cdr.memberid LEFT JOIN ocm_event e ON e.event_id = ocm_buslist.event_id</div><div class="line">WHERE e.event_state IN(0,1,2) AND ocm_buslist.create_time&lt;&apos;2019-12-22 23:59:59&apos; AND cdr.id IS NULL ORDER BY ocm_buslist.list_id DESC</div></pre></td></tr></table></figure>
-<h4 id="1-1-数据量小时候处理"><a href="#1-1-数据量小时候处理" class="headerlink" title="1.1 数据量小时候处理"></a>1.1 数据量小时候处理</h4><p>1.查询出未拨打的数据保存成.sql文件:</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT ocm_buslist.* FROM ocm_buslist ocm_buslist</div><div class="line">  LEFT JOIN cti_cdr cdr ON ocm_buslist.list_id = cdr.memberid</div><div class="line">WHERE ocm_buslist.event_id = xxx  AND  cdr.id IS NULL ORDER BY ocm_buslist.list_id DESC</div></pre></td></tr></table></figure>
-<p>2.查询批次(比较max_member_id和查询的list_id大小)  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">SELECT event_name,max_member_id FROM ocm_event WHERE event_id = xxx;</div></pre></td></tr></table></figure>
-<p>2.然后执行插入  </p>
-<p>3.最后删除之前list_id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">DELETE FROM ocm_buslist WHERE event_id = xxx AND list_id IN(xxx1,xxx2);</div></pre></td></tr></table></figure></p>
-<p>4.查询导入之后数据大小  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">select count(*)  from ocm_buslist where list_id &gt; max_memberid</div></pre></td></tr></table></figure>
-<h4 id="1-2-数据量大时候处理"><a href="#1-2-数据量大时候处理" class="headerlink" title="1.2 数据量大时候处理"></a>1.2 数据量大时候处理</h4><p>批次是按照大于ocm_event表中的max_member_id对比进行拨打,在名单表中小于max_member_id将不会拨打。如果出现跳过拨打的数据,我们需要按照如下步骤处理:注意:首先先要查看对应的名单是否已经拨打但是没有插入扫cti_cdr表,防止重复导入拨打。[<br>操作:  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">grep 5314900 callnotify_callnotifysql01_1574*;</div></pre></td></tr></table></figure>
-<p>]</p>
-<ol>
-<li>1.未拨打数据采集:[查询未拨打客户名单-&gt;将其导入到名单模板中重新导入]  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">SELECT ob.customer_name,ob.customer_phone,ob.car_no,ob.cust_id FROM ocm_buslist ob</div><div class="line">  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid</div><div class="line">WHERE ob.event_id = xxx  AND  cdr.id IS NULL ORDER BY ob.list_id DESC</div></pre></td></tr></table></figure>
-<ol>
-<li>2.ocm_base_shbo处理:[删除未拨打的数据,删除之前先查询]<br>a.查询未拨打的数据:  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">SELECT sb.* FROM ocm_base_shbo sb WHERE sb.event_id = xxx AND sb.cust_id IN (SELECT DISTINCT ob.cust_id FROM ocm_buslist ob</div><div class="line">  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid</div><div class="line">WHERE ob.event_id = xxx  AND  cdr.id IS NULL);</div><div class="line">```  </div><div class="line"></div><div class="line">b.删除未拨打数据:</div></pre></td></tr></table></figure>
-<p>DELETE FROM ocm_base_shbo  WHERE event_id = xxx AND cust_id IN (SELECT  ob.cust_id FROM ocm_buslist ob<br>  LEFT JOIN cti_cdr cdr ON ob.list_id = cdr.memberid<br>WHERE ob.event_id = xxx  AND  cdr.id IS NULL);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.ocm_buslist处理:[删除未拨打的数据,删除之前先查询]  </div><div class="line">a.查询未拨打数据</div></pre></td></tr></table></figure></p>
-<p>select * FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">b.删除未拨打数据</div></pre></td></tr></table></figure></p>
-<p>DELETE FROM ocm_buslist WHERE event_id = xxx AND list_id NOT IN (SELECT DISTINCT memberid FROM cti_cdr WHERE notifyid = xxx);<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">4. 4.最后导入数据，修改批次统计:</div></pre></td></tr></table></figure></p>
-<p>select * from ocm_event_statistics where event_id = xxx<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">### 2.统计批次进度问题  </div><div class="line">批次进度统计主要是表:ocm_event_statistics,其中进度主要由3部分指标组成:  </div><div class="line">called_number(已拨打数量：从ocm_buslist中distinct cust_id)、filter_number(过滤掉的数量:从ocm_base_shbo表中count下:valid_flag=0的数据)、list_number(名单总数量:ocm_base_shbo中count(*))；如果ocm_buslist_timing表中含有数据的话即使ocm_buslist中数据拨打完了，也会是99%    </div><div class="line">   </div><div class="line">1. 查询批次整体进度情况</div></pre></td></tr></table></figure></p>
-<p>SELECT * FROM ocm_event_statistics WHERE event_id = xxx;  //xxx批次id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">1. 查看是否还有重呼数据</div></pre></td></tr></table></figure></p>
-<p>SELECT * FROM ocm_buslist_timing WHERE event_id = xxx;  //xxx批次id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">1. 查询导入到ocm_buslist中名单数量</div></pre></td></tr></table></figure></p>
-<p>SELECT COUNT(DISTINCT cust_id) FROM ocm_buslist WHERE event_id = xxx;  //xxx批次id</p>
-<p>SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = xxx AND valid_flag &gt;= 1; //xxx批次id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">1. 查询批次下总共数量:list_number</div></pre></td></tr></table></figure></p>
-<p>SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = xxx;  //xxx批次id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">1. 查看过滤掉的数据filter_number</div></pre></td></tr></table></figure></p>
-<p>SELECT COUNT(*) FROM ocm_base_shbo WHERE event_id = xxx AND valid_flag = 0;  //xxx批次id<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### 3.重呼数据未拨打问题(重启后拨打)  </div><div class="line">有时候,我们的重呼数据一直可能存在于:ocm_buslist_timing表中而不会拨打,所以我们需要处理这些批次,重新启用停用(对于在执行时间段内的批次)。  </div><div class="line"></div><div class="line">1. 1.查看在当前时间前未重呼的批次</div></pre></td></tr></table></figure></p>
-<p>SELECT event_id,event_state,event_name,send_time,over_time FROM ocm_event WHERE event_id IN (SELECT DISTINCT event_id FROM ocm_buslist_timing WHERE call_next_time<xxx); <figure="" class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### 4.查看某个租户是否配置了重呼轮呼策略</div></pre></td></tr></table></xxx);></p>
-<p>SELECT enti.id,enti.entname,enti.state,oc.id,oc.parameter FROM cti_entinfo enti LEFT JOIN ocm_after_call_action oc ON enti.id = oc.entid<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">### 5.批次数据号码处理(加前缀去掉前缀)  </div><div class="line"></div><div class="line">1. 1.参考</div><div class="line">参考:https://blog.csdn.net/xiaosongbk/article/details/77199007</div><div class="line">update forumdata_userttt set userLink=right(userLink,length(userLink)-2) where id &gt;= 137;   </div><div class="line"></div><div class="line"></div><div class="line">2. 2.去除批次号码的前缀（前两位）</div></pre></td></tr></table></figure></p>
-<p>UPDATE ocm_buslist SET customer_phone=RIGHT(customer_phone,LENGTH(customer_phone)-2) WHERE event_id = 1658 AND list_id&gt;6253939;<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"> </div><div class="line">3. 3.去除重呼表中93开头的号码前两位</div></pre></td></tr></table></figure></p>
-<p>UPDATE ocm_buslist_timing SET customer_phone RIGHT(customer_phone,LENGTH(customer_phone)-2) WHERE customer_phone LIKE ‘93%’;<br>```</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/11/28/ipcc-3-日常运维/" class="archive-article-date">
-  	<time datetime="2019-11-28T09:49:36.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-11-28</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/ipcc/">ipcc</a></li></ul>
 	</div>
 
       
