@@ -4,32 +4,26 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Startshineye的博客</title>
+  <title>SpringCloudAlibaba-12-sentinel热点限流 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
- SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
-内容
-1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
+  <meta name="description" content="前言我们已经对单机限流和集群限流有过一定了解了，但是他们都是针对一些固定的资源进行流控的，在实际的应用场景中我们可能会遇到各种复杂的情况，不可能通过固定的资源来进行限流。
+比如我们想要对一段时间内频繁访问的用户 ID 进行限制，又或者我们想统计一段时间内最常购买的商品 ID 并针对商品 ID 进行限制。那这里的用户 ID 和商品 ID 都是可变的资源，通过原先的固定资源已经无法满足我们的需求了，这">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-12-sentinel热点限流">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
- SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
-内容
-1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/22.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/23.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/24.png">
-<meta property="og:updated_time" content="2020-02-01T16:47:45.722Z">
+<meta property="og:description" content="前言我们已经对单机限流和集群限流有过一定了解了，但是他们都是针对一些固定的资源进行流控的，在实际的应用场景中我们可能会遇到各种复杂的情况，不可能通过固定的资源来进行限流。
+比如我们想要对一段时间内频繁访问的用户 ID 进行限制，又或者我们想统计一段时间内最常购买的商品 ID 并针对商品 ID 进行限制。那这里的用户 ID 和商品 ID 都是可变的资源，通过原先的固定资源已经无法满足我们的需求了，这">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/25.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/26.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/27.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/28.png">
+<meta property="og:updated_time" content="2020-02-02T01:11:49.091Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="title: SpringCloudAlibaba-11-sentinel黑白名单控制date: 2020-02-02 00:02:07tags:
- SpringCloudAlibaba前言上一节我们讲了sentinel的基于url和基于资源流量控制。这一章节我们说一下黑白名单  
-内容
-1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则自定义:IpRequestOriginParse">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-12-sentinel热点限流">
+<meta name="twitter:description" content="前言我们已经对单机限流和集群限流有过一定了解了，但是他们都是针对一些固定的资源进行流控的，在实际的应用场景中我们可能会遇到各种复杂的情况，不可能通过固定的资源来进行限流。
+比如我们想要对一段时间内频繁访问的用户 ID 进行限制，又或者我们想统计一段时间内最常购买的商品 ID 并针对商品 ID 进行限制。那这里的用户 ID 和商品 ID 都是可变的资源，通过原先的固定资源已经无法满足我们的需求了，这">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/25.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -165,37 +159,54 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-11-sentinel黑白名单控制" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-12-sentinel热点限流" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloudAlibaba-12-sentinel热点限流
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <hr>
-<p>title: SpringCloudAlibaba-11-sentinel黑白名单控制<br>date: 2020-02-02 00:02:07<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一节我们讲了sentinel的基于url和基于资源流量控制。<br>这一章节我们说一下黑白名单  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><ol>
-<li>1.我们这一节做一个客户端黑白名单访问限制，通过使用ip规则<br>自定义:IpRequestOriginParser实现RequestOriginParser接口:  </li>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们已经对单机限流和集群限流有过一定了解了，但是他们都是针对一些固定的资源进行流控的，在实际的应用场景中我们可能会遇到各种复杂的情况，不可能通过固定的资源来进行限流。</p>
+<p>比如我们想要对一段时间内频繁访问的用户 ID 进行限制，又或者我们想统计一段时间内最常购买的商品 ID 并针对商品 ID 进行限制。那这里的用户 ID 和商品 ID 都是可变的资源，通过原先的固定资源已经无法满足我们的需求了，这时我们就可以通过 Sentinel 为我们提供的 热点参数限流 来达到这样的效果</p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>参考:<a href="https://www.jianshu.com/p/2efe5058fcf4" target="_blank" rel="external">https://www.jianshu.com/p/2efe5058fcf4</a>  </p>
+<h4 id="1-什么是热点-参数"><a href="#1-什么是热点-参数" class="headerlink" title="1.什么是热点(参数)?"></a>1.什么是热点(参数)?</h4><ol>
+<li>首先我们需要知道什么是热点，热点就是访问非常频繁的参数  </li>
+<li>例如我们大家都知道的爬虫，就是通过脚本去爬取其他网站的数据，一般防爬虫的常用方法之一就是限制爬虫的 IP，那对应到这里 IP 就是一种热点的参数。  </li>
+<li><p>那么 Sentinel 是怎么知道哪些参数是热点，哪些参数不是热点的呢？Sentinel 利用 LRU 策略，结合底层的滑动窗口机制来实现热点参数统计。LRU 策略可以统计单位时间内，最近最常访问的热点参数，而滑动窗口机制可以帮助统计每个参数的 qps。</p>
+</li>
+<li><p>说简单点就是，Sentinel 会先检查出提交过来的参数，哪些是热点的参数，然后在应用热点参数的限流规则，将qps 超过设定阈值的请求给 block 掉，整个过程如下图所示：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/25.png" alt="">  </p>
+</li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">public class IpRequestOriginParser implements RequestOriginParser &#123;</div><div class="line">    @Override</div><div class="line">    public String parseOrigin(HttpServletRequest request) &#123;</div><div class="line">        return request.getRemoteAddr();</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>如果参数携带:axb；他的qps大于5,会被阻塞掉  </p>
+<h4 id="2-实战"><a href="#2-实战" class="headerlink" title="2.实战"></a>2.实战</h4><ol>
+<li>1.我们创建一个ParamController  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">public class ParamController &#123;</div><div class="line">    @GetMapping(&quot;/param&quot;)</div><div class="line">    @SentinelResource(value = &quot;param&quot;,blockHandler = &quot;exHandler&quot;)</div><div class="line">    public String param(String type)&#123;</div><div class="line">        return &quot;success&quot;;</div><div class="line">    &#125;</div><div class="line">    public String exHandler(String type)&#123;</div><div class="line">        /**</div><div class="line">         * 热点限流:参数限流</div><div class="line">         * 所以我们需要接受一个参数</div><div class="line">         * 如果不指定blockHandlerClass默认会从本类去寻找处理类:exHandler</div><div class="line">         */</div><div class="line">        return &quot;param request error&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
 <ol>
-<li>2.将此配置绑定到Sentinel上去  </li>
+<li>2.访问<br>curl <a href="http://127.0.0.1:18080/param" target="_blank" rel="external">http://127.0.0.1:18080/param</a><br>然后打开sentinel,我们发现在param下面挂载了一个param资源,此时我们点进去:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/26.png" alt=""><br>设置热线限流(全部限制):<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/27.png" alt=""></li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@Configuration</div><div class="line">public class SentinelConfig &#123;</div><div class="line">    @PostConstruct</div><div class="line">    public void init()&#123;</div><div class="line">        WebCallbackManager.setUrlBlockHandler(new DemoUrlBlockHandler());</div><div class="line">        WebCallbackManager.setRequestOriginParser(new IpRequestOriginParser());</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.定义一个SecurityController用作测试</div></pre></td></tr></table></figure>
-<p>@RestController<br>public class SecurityController {<br>    @GetMapping(“/white”)<br>    public String white() {<br>        return “hello white”;<br>    }<br>    @GetMapping(“/black”)<br>    public String black() {<br>        return “hello black”;<br>    }<br>}<br>```</p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/21.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/22.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/23.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/24.png" alt="">  </p>
+<ol>
+<li>3.测试访问<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/28.png" alt=""></li>
+</ol>
+<p>注意热线限流不支持接口资源，一定是带有@SentinelResource注解的资源  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/" class="archive-article-date">
-  	<time datetime="2020-02-01T16:02:07.736Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+      <a href="/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/" class="archive-article-date">
+  	<time datetime="2020-02-02T00:22:44.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
 </a>
       
       
@@ -208,18 +219,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          SpringCloudAlibaba-12-sentinel热点限流
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/02/01/SpringCloudAlibaba-10-sentinel限流功能使用/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloudAlibaba-10-sentinel限流功能使用</div>
+    <a href="/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -265,7 +267,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-11-sentinel黑白名单控制" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-11-sentinel黑白名单控制/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-12-sentinel热点限流" data-title="SpringCloudAlibaba-12-sentinel热点限流" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">
