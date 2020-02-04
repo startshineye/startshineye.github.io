@@ -152,6 +152,185 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-16-sentinel整合feign实现服务调用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/">SpringCloudAlibaba-16-sentinel整合feign实现服务调用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>使用sentinel实现服务间的调用,sentinel在这里面作为了是流量防护组件。他结合openfeign实现了服务降级等作用。 以下我们创建结合sentinel和feign的创建2个应用，服务消费方，服务提供方。     </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="服务提供方-provider创建"><a href="#服务提供方-provider创建" class="headerlink" title="服务提供方:provider创建"></a>服务提供方:provider创建</h4><ol>
+<li>1.创建spring项目  </li>
+<li>2.引入cloud依赖  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">&lt;!--依赖版本定义--&gt;</div><div class="line">    &lt;dependencyManagement&gt;</div><div class="line">        &lt;dependencies&gt;</div><div class="line">            &lt;dependency&gt;</div><div class="line">                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</div><div class="line">                &lt;version&gt;Hoxton.RELEASE&lt;/version&gt;</div><div class="line">                &lt;type&gt;pom&lt;/type&gt;</div><div class="line">                &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">            &lt;/dependency&gt;</div><div class="line">            &lt;dependency&gt;</div><div class="line">                &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">                &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;</div><div class="line">                &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;</div><div class="line">                &lt;type&gt;pom&lt;/type&gt;</div><div class="line">                &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">            &lt;/dependency&gt;</div><div class="line">        &lt;/dependencies&gt;</div><div class="line">    &lt;/dependencyManagement&gt;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">4. 4.使用sentinel、openfeign、discovery</div></pre></td></tr></table></figure>
+<p> <dependency><br>    <groupid>com.alibaba.cloud</groupid><br>    <artifactid>spring-cloud-starter-alibaba-nacos-discovery</artifactid><br></dependency></p>
+<p><dependency><br>    <groupid>com.alibaba.cloud</groupid><br>    <artifactid>spring-cloud-starter-alibaba-sentinel</artifactid><br></dependency></p>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-openfeign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">5. 5.我们是服务提供方,我们书写一个接口</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class DemoController {<br>    @GetMapping(“/feign”)<br>    public String feign(){<br>        return “hello sentinel feign”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.启动类添加注解</div></pre></td></tr></table></figure></p>
+<p>@SpringCloudApplication<br>public class SentinelFeignProviderApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(SentinelFeignProviderApplication.class, args);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">7. 7.添加配置文件application.yml</div></pre></td></tr></table></figure></p>
+<p>server:<br>  port: 18082<br>spring:<br>  application:<br>    name: sentinel-feign-provider<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 服务消费方:consumer创建  </div><div class="line">我们复制sentinel-feign-provider修改成 sentinel-feign-consumer  </div><div class="line">启动类上添加注解:@EnableFeignClients  </div><div class="line"></div><div class="line"></div><div class="line">1. 1.创建feign客户端</div></pre></td></tr></table></figure></p>
+<p>@FeignClient(value = “sentinel-feign-provider”,fallback =DemoFeignClientFallback.class)<br>public interface DemoFeginClient {<br>    @GetMapping(“/feign”)<br>    String feign();<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">2. 2.创建服务降级实现类</div></pre></td></tr></table></figure></p>
+<p>@Component<br>public class DemoFeignClientFallback implements DemoFeginClient {<br>    @Override<br>    public String feign() {<br>        return “error”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.创建consumer的测试请求类:</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class DemoController {<br>    @Autowired<br>    private DemoFeginClient demoFeginClient;<br>    @GetMapping(“/hello”)<br>    public String feign(){<br>        return demoFeginClient.feign();<br>    }<br>}<br>```</p>
+<p>测试:<br><a href="http://localhost:18083/hello" target="_blank" rel="external">http://localhost:18083/hello</a><br>结果：<br>hello sentinel feign  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/" class="archive-article-date">
+  	<time datetime="2020-02-02T05:08:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloudAlibaba-15-sentinel规则持久化-nacos" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/">SpringCloudAlibaba-15-sentinel规则持久化-nacos</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h4 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;com.alibaba.csp&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;sentinel-datasource-nacos&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;1.7.0&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<h4 id="2-application-yml添加配置"><a href="#2-application-yml添加配置" class="headerlink" title="2.application.yml添加配置"></a>2.application.yml添加配置</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">server:</div><div class="line">  port: 18080</div><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-core-example</div><div class="line">  cloud:</div><div class="line">    sentinel:</div><div class="line">      transport:</div><div class="line">        dashboard: 127.0.0.1:8080</div><div class="line">      datasource:</div><div class="line">        ds1:</div><div class="line">          file:</div><div class="line">            file: classpath:flowrule.json</div><div class="line">            data-type: json</div><div class="line">            rule-type: flow</div><div class="line">        ds2:</div><div class="line">          nacos:</div><div class="line">            server-addr: 127.0.0.0.1:8848</div><div class="line">            dataId: sentinel-core-example</div><div class="line">            groupId: DEFAULT_GROUP</div><div class="line">            data-type: json</div><div class="line">            rule-type: flow</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">#### 3.启动nacos  </div><div class="line">重启nacos,然后创建sentinel-core-example配置文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/33.png)  </div><div class="line"></div><div class="line">HellController添加:</div></pre></td></tr></table></figure>
+<p>  @GetMapping(“/resource1”)<br>    @SentinelResource(value = “hello2”, blockHandler = “exHandler”, blockHandlerClass = {ExceptionUtil.class})<br>    public String resource1() {<br>        return “hello resource1”;<br>    }<br>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/" class="archive-article-date">
+  	<time datetime="2020-02-02T04:12:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloudAlibaba-14-sentinel规则持久化-file" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: SpringCloudAlibaba-14-sentinel规则持久化-file<br>date: 2020-02-02 10:07:44<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前的限流及其其他操作，当我们重启应用后,对应的规则在sentinel里面已经丢失不复存在了。现在我们主要说明sentinel参数如何持久化?  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="1-规则持久化"><a href="#1-规则持久化" class="headerlink" title="1.规则持久化"></a>1.规则持久化</h4><p>目前支持file,nacos,zk,apollo,redis这5种类型<br>如果你想扩展其他的也提供了对应的接口。  </p>
+<h4 id="2-规则持久化-file"><a href="#2-规则持久化-file" class="headerlink" title="2.规则持久化-file"></a>2.规则持久化-file</h4><p>我们先讲解规则存放在file里面。  </p>
+<ol>
+<li>1.在应用程序的resources文件下创建file:flowrule.json  </li>
+<li><p>2.填写限流属性规则:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/31.png" alt="">  </p>
+</li>
+<li><p>3.我们将上面配置添加到配置中去:application.yml    </p>
+</li>
+</ol>
+<pre><code>server:
+  port: 18080
+spring:
+  application:
+    name: sentinel-core-example
+  cloud:
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080
+      datasource:
+        ds1:
+          file:
+            file: classpath:flowrule.json
+            data-type: json
+            rule-type: flow
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/32.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" class="archive-article-date">
+  	<time datetime="2020-02-02T02:07:44.554Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-13-sentinel自适应限流" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -551,219 +730,6 @@ shared-dataids: common.yml
       
       <a href="/2020/01/30/SpringCloudAlibaba-7-nacos配置文件共享规则/" class="archive-article-date">
   	<time datetime="2020-01-30T05:19:26.347Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloudAlibaba-6-nacos配置文件加载顺序" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/">SpringCloudAlibaba-6-nacos配置文件加载顺序</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  </p>
-<h4 id="1-profile"><a href="#1-profile" class="headerlink" title="1.profile"></a>1.profile</h4><p>新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载</p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load-dev.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;]&#125;</div></pre></td></tr></table></figure>
-<p>通过上面的启动日志我们知道，除了加载:nacos-config-client-load-dev.yml还会加载:nacos-config-client-load.yml  </p>
-<p>我们此时搜索data id发现控制台确实没有输出，这个说明我们在nacos配置文件是没有创建  </p>
-<p>我们创建<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/38.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/39.png" alt=""> </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/40.png" alt="">  </p>
-<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load-dev.yml  </p>
-<p>如果我们删除nacos-config-client-load-dev.yml<br>应用控制台会打印日志:nacos-config-client-load-dev.yml  </p>
-<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load.yml  </p>
-<p>结论:  </p>
-<ul>
-<li>优先使用配置是 applicationname-profile</li>
-<li>不存在时读取 applicationname </li>
-</ul>
-<h4 id="2-GROUP"><a href="#2-GROUP" class="headerlink" title="2.GROUP"></a>2.GROUP</h4><h5 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1 简介"></a>2.1 简介</h5><ol>
-<li>1.我们创建的配置文件,里面都有一个组的概念：Group，我们没有输入时候默认都是:DEFAULT_GROUP  </li>
-<li>2.组的概念主要是为了让我们创建的配置文件属于同一个组里面,各个应用之间的隔离都是可以通过这个属性来配置</li>
-<li>3.那么我们怎样去声明加载哪一个组呢?<br>我们在配置文件添加group属性,group默认属性是:DEFAULT_GROUP  </li>
-</ol>
-<h5 id="2-2-实践"><a href="#2-2-实践" class="headerlink" title="2.2 实践"></a>2.2 实践</h5><ol>
-<li>1.修改bootstrap.yml配置文件<br>我们在配置文件中添加group属性，其值为:alibaba<br>此时重启服务时候发现其加载的data id不存在,访问:<br><a href="http://127.0.0.1:8056/test/config输出结果是&#39;空test" target="_blank" rel="external">http://127.0.0.1:8056/test/config输出结果是&#39;空test</a>‘<br>原因是我们在配置中心没有添加 组为:alibaba的配置文件  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client-load</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">        file-extension: yml</div><div class="line">        group: alibaba</div><div class="line">server:</div><div class="line">  port: 8056</div><div class="line">```  </div><div class="line"></div><div class="line">2. 2.nacos控制台创建alibaba组下配置文件    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/41.png)  </div><div class="line"></div><div class="line">此时控制台打印出:  </div><div class="line">oading nacos data, dataId: &apos;nacos-config-client-load.yml&apos;, group: &apos;alibaba&apos;  </div><div class="line"></div><div class="line">测试:访问:http://127.0.0.1:8056/test/config  </div><div class="line">返回结果:nacos-config-client-load-alibaba.yml  </div><div class="line"></div><div class="line"></div><div class="line">#### 3.namespace  </div><div class="line">更深层次隔离:namespace  </div><div class="line">namespace-命名空间，在nacos里面简称租户  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/42.png)  </div><div class="line"></div><div class="line">##### 3.1 实践  </div><div class="line">1. 1.在nacos控制台创建命名空间  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/43.png)  </div><div class="line"></div><div class="line">2. 2.在bootstrap.yml配置文件添加属性:namespace</div></pre></td></tr></table></figure>
-<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: NS<br>server:<br>  port: 8056<br>```  </p>
-<p>此时重启服务发现我们没有产生data id<br>因为我们没有在nacos控制台创建NS下的配置文件  </p>
-<ol>
-<li>3.在nacos控制台下的NS命名空间下创建对应的配置文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/44.png" alt="">  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/45.png" alt="">  </p>
-<p>我们此时在控制台搜索data id发现还是没有对应文件生成。  </p>
-<ol>
-<li>4.我们修改下配置文件中namespace为命名空间ID<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/46.png" alt="">  </li>
-</ol>
-<p>测试:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>返回:<br>nacos-config-client-load-NS.yml  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/" class="archive-article-date">
-  	<time datetime="2020-01-29T16:06:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloudAlibaba-5-nacos配置中心快速使用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/29/SpringCloudAlibaba-5-nacos配置中心快速使用/">SpringCloudAlibaba-5-nacos配置中心快速使用</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们之前介绍了nacos作为注册中心，实现服务的注册与发现，这里主要介绍nacos作为配置中心  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>nacos作为配置中心<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/29.png" alt="">  </p>
-<h4 id="1-实践"><a href="#1-实践" class="headerlink" title="1.实践"></a>1.实践</h4><p>nacos服务注册和配置中心是两个不同的依赖模块,可以单独各自引入依赖</p>
-<h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
-<h5 id="2-配置"><a href="#2-配置" class="headerlink" title="2.配置"></a>2.配置</h5><p>我们需要修改appliaction.yml文件为bootstrap.yml文件，不然会报空指针异常错误。bootstartp.yml文件是会在application.yml文件加载前加载。保证初始化的bean能够提前获取到一些属性。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/30.png" alt=""></p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">server:</div><div class="line">  port: 8055</div><div class="line">```  </div><div class="line"></div><div class="line">##### 3.在nacos配置列表中创建properties文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/31.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 4.创建controller测试   </div><div class="line">我们已经创建了配置中心，我们看通过配置是否可以获取到值  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/32.png)  </div><div class="line"></div><div class="line">我们发现我们能够获取到以上的值 </div><div class="line"></div><div class="line">##### 5.修改controller注解,然后修改配置列表看是否实时生效  </div><div class="line">现在我们修改下配置中心里面的配置:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/33.png)  </div><div class="line"></div><div class="line">我们再次通过页面访问以上接口:  </div><div class="line">http://127.0.0.1:8055/test/config  </div><div class="line">结果:  </div><div class="line">yxm  </div><div class="line"></div><div class="line">我们修改值时候并没有实时刷新，所以我们在controller加上注解:@RefreshScope;然后重启服务。  </div><div class="line">即可实现以上实时刷新功能。  </div><div class="line"></div><div class="line">我们修改properties文件时候,idea的页面下回刷新出以下信息:</div></pre></td></tr></table></figure>
-<p>Refresh keys changed: [test]<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 6.yml文件配置加载  </div><div class="line">nacos默认加载:properties文件，是通过一个属性:file-extension  </div><div class="line">现在我们改成:yml文件  </div><div class="line"></div><div class="line">bootstrap.yml文件：</div></pre></td></tr></table></figure></p>
-<p>spring:<br>  application:<br>    name: nacos-config-client<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>server:<br>  port: 8055<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/34.png)  </div><div class="line"></div><div class="line">创建:nacos-config-client.yml配置文件  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/35.png)  </div><div class="line"></div><div class="line">访问后得到:  </div><div class="line">yml-test    </div><div class="line"></div><div class="line">##### 7.Data ID</div><div class="line">Data ID组成:spring.application.name+file-extension  </div><div class="line"></div><div class="line">我们从nacos的文档里面可以知道data id是由:应用名称+profiles+file-extension</div></pre></td></tr></table></figure></p>
-<p>spring:<br>  application:<br>    name: nacos-config-client<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>  profiles:<br>    active: dev<br>server:<br>  port: 8055<br>```  </p>
-<p>我们可以知道我们创建的配置文件在应用启动后默认加载:应用名称+profiles+file-extension 文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/36.png" alt="">  </p>
-<p>然后我们创建:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/37.png" alt="">  </p>
-<p>我们测试:<br><a href="http://127.0.0.1:8055/test/config" target="_blank" rel="external">http://127.0.0.1:8055/test/config</a><br>结果返回:<br>dev-yxm  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/29/SpringCloudAlibaba-5-nacos配置中心快速使用/" class="archive-article-date">
-  	<time datetime="2020-01-29T09:43:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-29</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用<br>date: 2020-01-27 13:12:39<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  </p>
-<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><h3 id="1-Gateway"><a href="#1-Gateway" class="headerlink" title="1.Gateway"></a>1.Gateway</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png" alt="">  </p>
-<h3 id="2-本节简介"><a href="#2-本节简介" class="headerlink" title="2.本节简介"></a>2.本节简介</h3><p>使用SpringCloud GateWay实现如下功能:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/28.png" alt="">  </p>
-<p>1.浏览器通过gateway(8054)端口访问到:provider(8051)服务<br>2.需要通过网关请求到provider服务,需要使用：LoadBalancerClient Filter  </p>
-<p>实现如下:  </p>
-<ol>
-<li>1.创建项目:nacos-discovery-gateway-server  </li>
-<li>2.修改pom.xml:去除spring-boot-starter-web和spring-boot-starter-test,引入：  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.父工程里面添加: &lt;module&gt;nacos-discovery-gateway-server&lt;/module&gt;  </div><div class="line">4. 4.配置gateway路由策略</div></pre></td></tr></table></figure>
-<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
-<pre><code>- id: nacos-discovery-provider
-  uri: lb://nacos-discovery-provider
-  predicates:
-    - Path=/hello
-</code></pre><p>server:<br>  port: 8054<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. 5.测试:  </div><div class="line">http://127.0.0.1:8054/hello?name=123   </div><div class="line">返回:Hello 123 port:8051  </div><div class="line">以上说明通过8054的网关访问到了8051的provider服务  </div><div class="line"></div><div class="line"></div><div class="line">6. 6.默认情况下:  </div><div class="line">我们访问:http://127.0.0.1:8054/provider/hello就可以访问到:http://127.0.0.1:8054/hello,所以我们访问某个微服务时候不能每次都配置一个路由前缀，需要我们统一管理:</div><div class="line"></div><div class="line">方法一:我们通过配置context-path作为微服务路由前缀；比如配置nacos-discovery-provider服务的context</div></pre></td></tr></table></figure></p>
-<p>//设置nacos-discovery-gatewayr的application.yml<br>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
-<pre><code>- id: nacos-discovery-provider
-  uri: lb://nacos-discovery-provider
-  predicates:
-    - Path=/provider
-</code></pre><p>//设置nacos-discovery-provider的context-path<br>server:<br>  port: 8051<br>  servlet:<br>    context-path: provider<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">方法二:  </div><div class="line">我们跳过前缀的第一个uri</div></pre></td></tr></table></figure></p>
-<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>        metadata:<br>          name: lengleng<br>    gateway:<br>      routes:</p>
-<pre><code>- id: nacos-discovery-provider
-  uri: lb://nacos-discovery-provider
-  predicates:
-    - Path=/provider/**
-  filters:
-    - StripPrefix=1
-</code></pre><p>```</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/" class="archive-article-date">
-  	<time datetime="2020-01-27T05:12:39.783Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-27</time>
 </a>
       
       

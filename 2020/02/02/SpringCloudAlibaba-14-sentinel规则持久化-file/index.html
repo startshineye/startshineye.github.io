@@ -6,25 +6,25 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
   <title>Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
+  <meta name="description" content="title: SpringCloudAlibaba-14-sentinel规则持久化-filedate: 2020-02-02 10:07:44tags:
+ SpringCloudAlibaba前言之前的限流及其其他操作，当我们重启应用后,对应的规则在sentinel里面已经丢失不复存在了。现在我们主要说明sentinel参数如何持久化?  
+内容1.规则持久化目前支持file,nacos,zk">
 <meta property="og:type" content="article">
 <meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/index.html">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png">
-<meta property="og:updated_time" content="2020-02-02T01:40:31.701Z">
+<meta property="og:description" content="title: SpringCloudAlibaba-14-sentinel规则持久化-filedate: 2020-02-02 10:07:44tags:
+ SpringCloudAlibaba前言之前的限流及其其他操作，当我们重启应用后,对应的规则在sentinel里面已经丢失不复存在了。现在我们主要说明sentinel参数如何持久化?  
+内容1.规则持久化目前支持file,nacos,zk">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/31.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/32.png">
+<meta property="og:updated_time" content="2020-02-02T04:00:37.893Z">
 <meta name="twitter:card" content="summary">
 <meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
+<meta name="twitter:description" content="title: SpringCloudAlibaba-14-sentinel规则持久化-filedate: 2020-02-02 10:07:44tags:
+ SpringCloudAlibaba前言之前的限流及其其他操作，当我们重启应用后,对应的规则在sentinel里面已经丢失不复存在了。现在我们主要说明sentinel参数如何持久化?  
+内容1.规则持久化目前支持file,nacos,zk">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/31.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -160,7 +160,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-13-sentinel自适应限流" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-14-sentinel规则持久化-file" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -169,26 +169,40 @@
     <div class="article-entry" itemprop="articleBody">
       
         <hr>
-<p>title: SpringCloudAlibaba-13-sentinel自适应限流<br>date: 2020-02-02 09:18:47<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><p>参考:<a href="https://www.jianshu.com/p/f1f052413d1c" target="_blank" rel="external">https://www.jianshu.com/p/f1f052413d1c</a>  </p>
-<h4 id="1-什么是自适应限流？"><a href="#1-什么是自适应限流？" class="headerlink" title="1.什么是自适应限流？"></a>1.什么是自适应限流？</h4><p>比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理,比如说:cpu设置70%负载,当超过这个阈值时候，我们系统不处理新的请求，保证业务稳定正常运行。</p>
-<h4 id="2-sentinel提供的限流类别"><a href="#2-sentinel提供的限流类别" class="headerlink" title="2.sentinel提供的限流类别"></a>2.sentinel提供的限流类别</h4><p>我们在sentinel控制台上有一个”系统规则”;点击新增时候里面有5个类别设置。  </p>
+<p>title: SpringCloudAlibaba-14-sentinel规则持久化-file<br>date: 2020-02-02 10:07:44<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>之前的限流及其其他操作，当我们重启应用后,对应的规则在sentinel里面已经丢失不复存在了。现在我们主要说明sentinel参数如何持久化?  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="1-规则持久化"><a href="#1-规则持久化" class="headerlink" title="1.规则持久化"></a>1.规则持久化</h4><p>目前支持file,nacos,zk,apollo,redis这5种类型<br>如果你想扩展其他的也提供了对应的接口。  </p>
+<h4 id="2-规则持久化-file"><a href="#2-规则持久化-file" class="headerlink" title="2.规则持久化-file"></a>2.规则持久化-file</h4><p>我们先讲解规则存放在file里面。  </p>
 <ol>
-<li>1.LOAD:linux/unix里面瞬间处理的进程数,比如cpu是8核,那么同时只能处理8个进程数。如果超过8会去等待。一般这个参数是:cpu个数x核数x0.7(保证系统70%临界)        </li>
-<li>2.RT:平均响应时间,其中RT单位为毫秒,比如我们设置1000ms都挂起,block掉。</li>
-<li>3.线程数  </li>
-<li>4.入口QPS:全局的qps</li>
-<li>5.CPU使用率:一般设置到0.7    </li>
+<li>1.在应用程序的resources文件下创建file:flowrule.json  </li>
+<li><p>2.填写限流属性规则:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/31.png" alt="">  </p>
+</li>
+<li><p>3.我们将上面配置添加到配置中去:application.yml    </p>
+</li>
 </ol>
-<h4 id="3-实践"><a href="#3-实践" class="headerlink" title="3.实践"></a>3.实践</h4><p>我们设置cpu使用率是0.1,测试下效果，因为我们本地的cpu使用率肯定超过了10%<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png" alt="">  </p>
-<p>请求后:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png" alt="">  </p>
+<pre><code>server:
+  port: 18080
+spring:
+  application:
+    name: sentinel-core-example
+  cloud:
+    sentinel:
+      transport:
+        dashboard: 127.0.0.1:8080
+      datasource:
+        ds1:
+          file:
+            file: classpath:flowrule.json
+            data-type: json
+            rule-type: flow
+</code></pre><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/32.png" alt="">  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/" class="archive-article-date">
-  	<time datetime="2020-02-02T01:18:47.116Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+      <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" class="archive-article-date">
+  	<time datetime="2020-02-02T02:07:44.554Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
 </a>
       
       
@@ -201,18 +215,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          (no title)
+          SpringCloudAlibaba-15-sentinel规则持久化-nacos
         
       </div>
     </a>
   
   
-    <a href="/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloudAlibaba-12-sentinel热点限流</div>
+    <a href="/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -258,7 +272,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-13-sentinel自适应限流" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-14-sentinel规则持久化-file" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

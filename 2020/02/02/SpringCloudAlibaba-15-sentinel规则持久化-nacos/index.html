@@ -4,27 +4,18 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Startshineye的博客</title>
+  <title>SpringCloudAlibaba-15-sentinel规则持久化-nacos | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
+  <meta name="description" content="1.引入依赖12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;    &amp;lt;version&amp;gt;1.7.0&amp;lt;/version&amp;gt;&amp;lt;/dependency">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-15-sentinel规则持久化-nacos">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png">
-<meta property="og:updated_time" content="2020-02-02T01:40:31.701Z">
+<meta property="og:description" content="1.引入依赖12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;    &amp;lt;version&amp;gt;1.7.0&amp;lt;/version&amp;gt;&amp;lt;/dependency">
+<meta property="og:updated_time" content="2020-02-02T04:50:52.664Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-15-sentinel规则持久化-nacos">
+<meta name="twitter:description" content="1.引入依赖12345&amp;lt;dependency&amp;gt;    &amp;lt;groupId&amp;gt;com.alibaba.csp&amp;lt;/groupId&amp;gt;    &amp;lt;artifactId&amp;gt;sentinel-datasource-nacos&amp;lt;/artifactId&amp;gt;    &amp;lt;version&amp;gt;1.7.0&amp;lt;/version&amp;gt;&amp;lt;/dependency">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -160,37 +151,41 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-13-sentinel自适应限流" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-15-sentinel规则持久化-nacos" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloudAlibaba-15-sentinel规则持久化-nacos
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <hr>
-<p>title: SpringCloudAlibaba-13-sentinel自适应限流<br>date: 2020-02-02 09:18:47<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><p>参考:<a href="https://www.jianshu.com/p/f1f052413d1c" target="_blank" rel="external">https://www.jianshu.com/p/f1f052413d1c</a>  </p>
-<h4 id="1-什么是自适应限流？"><a href="#1-什么是自适应限流？" class="headerlink" title="1.什么是自适应限流？"></a>1.什么是自适应限流？</h4><p>比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理,比如说:cpu设置70%负载,当超过这个阈值时候，我们系统不处理新的请求，保证业务稳定正常运行。</p>
-<h4 id="2-sentinel提供的限流类别"><a href="#2-sentinel提供的限流类别" class="headerlink" title="2.sentinel提供的限流类别"></a>2.sentinel提供的限流类别</h4><p>我们在sentinel控制台上有一个”系统规则”;点击新增时候里面有5个类别设置。  </p>
-<ol>
-<li>1.LOAD:linux/unix里面瞬间处理的进程数,比如cpu是8核,那么同时只能处理8个进程数。如果超过8会去等待。一般这个参数是:cpu个数x核数x0.7(保证系统70%临界)        </li>
-<li>2.RT:平均响应时间,其中RT单位为毫秒,比如我们设置1000ms都挂起,block掉。</li>
-<li>3.线程数  </li>
-<li>4.入口QPS:全局的qps</li>
-<li>5.CPU使用率:一般设置到0.7    </li>
-</ol>
-<h4 id="3-实践"><a href="#3-实践" class="headerlink" title="3.实践"></a>3.实践</h4><p>我们设置cpu使用率是0.1,测试下效果，因为我们本地的cpu使用率肯定超过了10%<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png" alt="">  </p>
-<p>请求后:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png" alt="">  </p>
+        <h4 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;com.alibaba.csp&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;sentinel-datasource-nacos&lt;/artifactId&gt;</div><div class="line">    &lt;version&gt;1.7.0&lt;/version&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<h4 id="2-application-yml添加配置"><a href="#2-application-yml添加配置" class="headerlink" title="2.application.yml添加配置"></a>2.application.yml添加配置</h4><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div></pre></td><td class="code"><pre><div class="line">server:</div><div class="line">  port: 18080</div><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-core-example</div><div class="line">  cloud:</div><div class="line">    sentinel:</div><div class="line">      transport:</div><div class="line">        dashboard: 127.0.0.1:8080</div><div class="line">      datasource:</div><div class="line">        ds1:</div><div class="line">          file:</div><div class="line">            file: classpath:flowrule.json</div><div class="line">            data-type: json</div><div class="line">            rule-type: flow</div><div class="line">        ds2:</div><div class="line">          nacos:</div><div class="line">            server-addr: 127.0.0.0.1:8848</div><div class="line">            dataId: sentinel-core-example</div><div class="line">            groupId: DEFAULT_GROUP</div><div class="line">            data-type: json</div><div class="line">            rule-type: flow</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line">#### 3.启动nacos  </div><div class="line">重启nacos,然后创建sentinel-core-example配置文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/02/33.png)  </div><div class="line"></div><div class="line">HellController添加:</div></pre></td></tr></table></figure>
+<p>  @GetMapping(“/resource1”)<br>    @SentinelResource(value = “hello2”, blockHandler = “exHandler”, blockHandlerClass = {ExceptionUtil.class})<br>    public String resource1() {<br>        return “hello resource1”;<br>    }<br>```</p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/" class="archive-article-date">
-  	<time datetime="2020-02-02T01:18:47.116Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+      <a href="/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/" class="archive-article-date">
+  	<time datetime="2020-02-02T04:12:50.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
 </a>
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
       
 
       <div class="clearfix"></div>
@@ -201,18 +196,18 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" id="article-nav-newer" class="article-nav-link-wrap">
+    <a href="/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/" id="article-nav-newer" class="article-nav-link-wrap">
       <i class="icon-circle-left"></i>
       <div class="article-nav-title">
         
-          (no title)
+          SpringCloudAlibaba-16-sentinel整合feign实现服务调用
         
       </div>
     </a>
   
   
-    <a href="/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloudAlibaba-12-sentinel热点限流</div>
+    <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title"></div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -258,7 +253,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-13-sentinel自适应限流" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-15-sentinel规则持久化-nacos" data-title="SpringCloudAlibaba-15-sentinel规则持久化-nacos" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

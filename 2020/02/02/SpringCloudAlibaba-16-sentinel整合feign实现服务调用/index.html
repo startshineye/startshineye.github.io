@@ -4,27 +4,33 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>Startshineye的博客</title>
+  <title>SpringCloudAlibaba-16-sentinel整合feign实现服务调用 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
+  <meta name="description" content="前言使用sentinel实现服务间的调用,sentinel在这里面作为了是流量防护组件。他结合openfeign实现了服务降级等作用。 以下我们创建结合sentinel和feign的创建2个应用，服务消费方，服务提供方。     
+内容服务提供方:provider创建
+1.创建spring项目  
+2.引入cloud依赖  
+
+12345678910111213141516171819202122">
 <meta property="og:type" content="article">
-<meta property="og:title" content="Startshineye的博客">
-<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-16-sentinel整合feign实现服务调用">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png">
-<meta property="og:updated_time" content="2020-02-02T01:40:31.701Z">
+<meta property="og:description" content="前言使用sentinel实现服务间的调用,sentinel在这里面作为了是流量防护组件。他结合openfeign实现了服务降级等作用。 以下我们创建结合sentinel和feign的创建2个应用，服务消费方，服务提供方。     
+内容服务提供方:provider创建
+1.创建spring项目  
+2.引入cloud依赖  
+
+12345678910111213141516171819202122">
+<meta property="og:updated_time" content="2020-02-04T05:04:01.932Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="Startshineye的博客">
-<meta name="twitter:description" content="title: SpringCloudAlibaba-13-sentinel自适应限流date: 2020-02-02 09:18:47tags:
- SpringCloudAlibaba参考:https://www.jianshu.com/p/f1f052413d1c  
-1.什么是自适应限流？比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-16-sentinel整合feign实现服务调用">
+<meta name="twitter:description" content="前言使用sentinel实现服务间的调用,sentinel在这里面作为了是流量防护组件。他结合openfeign实现了服务降级等作用。 以下我们创建结合sentinel和feign的创建2个应用，服务消费方，服务提供方。     
+内容服务提供方:provider创建
+1.创建spring项目  
+2.引入cloud依赖  
+
+12345678910111213141516171819202122">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -160,37 +166,54 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-13-sentinel自适应限流" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-16-sentinel整合feign实现服务调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
     
     
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloudAlibaba-16-sentinel整合feign实现服务调用
+    </h1>
+  
+
+      </header>
+    
     <div class="article-entry" itemprop="articleBody">
       
-        <hr>
-<p>title: SpringCloudAlibaba-13-sentinel自适应限流<br>date: 2020-02-02 09:18:47<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><p>参考:<a href="https://www.jianshu.com/p/f1f052413d1c" target="_blank" rel="external">https://www.jianshu.com/p/f1f052413d1c</a>  </p>
-<h4 id="1-什么是自适应限流？"><a href="#1-什么是自适应限流？" class="headerlink" title="1.什么是自适应限流？"></a>1.什么是自适应限流？</h4><p>比如说我们设置一个参数的阈值，当超过这个阈值时候，都把所有请求block掉,当低于这个阈值时候,正常处理,比如说:cpu设置70%负载,当超过这个阈值时候，我们系统不处理新的请求，保证业务稳定正常运行。</p>
-<h4 id="2-sentinel提供的限流类别"><a href="#2-sentinel提供的限流类别" class="headerlink" title="2.sentinel提供的限流类别"></a>2.sentinel提供的限流类别</h4><p>我们在sentinel控制台上有一个”系统规则”;点击新增时候里面有5个类别设置。  </p>
-<ol>
-<li>1.LOAD:linux/unix里面瞬间处理的进程数,比如cpu是8核,那么同时只能处理8个进程数。如果超过8会去等待。一般这个参数是:cpu个数x核数x0.7(保证系统70%临界)        </li>
-<li>2.RT:平均响应时间,其中RT单位为毫秒,比如我们设置1000ms都挂起,block掉。</li>
-<li>3.线程数  </li>
-<li>4.入口QPS:全局的qps</li>
-<li>5.CPU使用率:一般设置到0.7    </li>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>使用sentinel实现服务间的调用,sentinel在这里面作为了是流量防护组件。他结合openfeign实现了服务降级等作用。 以下我们创建结合sentinel和feign的创建2个应用，服务消费方，服务提供方。     </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="服务提供方-provider创建"><a href="#服务提供方-provider创建" class="headerlink" title="服务提供方:provider创建"></a>服务提供方:provider创建</h4><ol>
+<li>1.创建spring项目  </li>
+<li>2.引入cloud依赖  </li>
 </ol>
-<h4 id="3-实践"><a href="#3-实践" class="headerlink" title="3.实践"></a>3.实践</h4><p>我们设置cpu使用率是0.1,测试下效果，因为我们本地的cpu使用率肯定超过了10%<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/29.png" alt="">  </p>
-<p>请求后:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/30.png" alt="">  </p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div></pre></td><td class="code"><pre><div class="line">&lt;!--依赖版本定义--&gt;</div><div class="line">    &lt;dependencyManagement&gt;</div><div class="line">        &lt;dependencies&gt;</div><div class="line">            &lt;dependency&gt;</div><div class="line">                &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">                &lt;artifactId&gt;spring-cloud-dependencies&lt;/artifactId&gt;</div><div class="line">                &lt;version&gt;Hoxton.RELEASE&lt;/version&gt;</div><div class="line">                &lt;type&gt;pom&lt;/type&gt;</div><div class="line">                &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">            &lt;/dependency&gt;</div><div class="line">            &lt;dependency&gt;</div><div class="line">                &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">                &lt;artifactId&gt;spring-cloud-alibaba-dependencies&lt;/artifactId&gt;</div><div class="line">                &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;</div><div class="line">                &lt;type&gt;pom&lt;/type&gt;</div><div class="line">                &lt;scope&gt;import&lt;/scope&gt;</div><div class="line">            &lt;/dependency&gt;</div><div class="line">        &lt;/dependencies&gt;</div><div class="line">    &lt;/dependencyManagement&gt;</div><div class="line">```  </div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">4. 4.使用sentinel、openfeign、discovery</div></pre></td></tr></table></figure>
+<p> <dependency><br>    <groupid>com.alibaba.cloud</groupid><br>    <artifactid>spring-cloud-starter-alibaba-nacos-discovery</artifactid><br></dependency></p>
+<p><dependency><br>    <groupid>com.alibaba.cloud</groupid><br>    <artifactid>spring-cloud-starter-alibaba-sentinel</artifactid><br></dependency></p>
+<p><dependency><br>    <groupid>org.springframework.cloud</groupid><br>    <artifactid>spring-cloud-starter-openfeign</artifactid><br></dependency><br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">5. 5.我们是服务提供方,我们书写一个接口</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class DemoController {<br>    @GetMapping(“/feign”)<br>    public String feign(){<br>        return “hello sentinel feign”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.启动类添加注解</div></pre></td></tr></table></figure></p>
+<p>@SpringCloudApplication<br>public class SentinelFeignProviderApplication {<br>    public static void main(String[] args) {<br>        SpringApplication.run(SentinelFeignProviderApplication.class, args);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">7. 7.添加配置文件application.yml</div></pre></td></tr></table></figure></p>
+<p>server:<br>  port: 18082<br>spring:<br>  application:<br>    name: sentinel-feign-provider<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">#### 服务消费方:consumer创建  </div><div class="line">我们复制sentinel-feign-provider修改成 sentinel-feign-consumer  </div><div class="line">启动类上添加注解:@EnableFeignClients  </div><div class="line"></div><div class="line"></div><div class="line">1. 1.创建feign客户端</div></pre></td></tr></table></figure></p>
+<p>@FeignClient(value = “sentinel-feign-provider”,fallback =DemoFeignClientFallback.class)<br>public interface DemoFeginClient {<br>    @GetMapping(“/feign”)<br>    String feign();<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">2. 2.创建服务降级实现类</div></pre></td></tr></table></figure></p>
+<p>@Component<br>public class DemoFeignClientFallback implements DemoFeginClient {<br>    @Override<br>    public String feign() {<br>        return “error”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">3. 3.创建consumer的测试请求类:</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class DemoController {<br>    @Autowired<br>    private DemoFeginClient demoFeginClient;<br>    @GetMapping(“/hello”)<br>    public String feign(){<br>        return demoFeginClient.feign();<br>    }<br>}<br>```</p>
+<p>测试:<br><a href="http://localhost:18083/hello" target="_blank" rel="external">http://localhost:18083/hello</a><br>结果：<br>hello sentinel feign  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/" class="archive-article-date">
-  	<time datetime="2020-02-02T01:18:47.116Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
+      <a href="/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/" class="archive-article-date">
+  	<time datetime="2020-02-02T05:08:45.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-02</time>
 </a>
       
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
       
 
       <div class="clearfix"></div>
@@ -201,18 +224,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2020/02/02/SpringCloudAlibaba-14-sentinel规则持久化-file/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          (no title)
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/02/02/SpringCloudAlibaba-12-sentinel热点限流/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloudAlibaba-12-sentinel热点限流</div>
+    <a href="/2020/02/02/SpringCloudAlibaba-15-sentinel规则持久化-nacos/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-15-sentinel规则持久化-nacos</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -258,7 +272,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-13-sentinel自适应限流" data-title="" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-13-sentinel自适应限流/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-16-sentinel整合feign实现服务调用" data-title="SpringCloudAlibaba-16-sentinel整合feign实现服务调用" data-url="https://github.com/startshineye/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

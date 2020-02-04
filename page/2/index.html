@@ -152,6 +152,219 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-6-nacos配置文件加载顺序" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/">SpringCloudAlibaba-6-nacos配置文件加载顺序</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>上一节中我们简单实用nacos作为配置中心,实现了简单配置文件读取和实时刷新，本节主要讲解nacos配置文件的加载顺序。  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>当你有多个生命周期的配置文件时候,如何去加载，哪个先去加载，怎么去区分不同的环境。  </p>
+<h4 id="1-profile"><a href="#1-profile" class="headerlink" title="1.profile"></a>1.profile</h4><p>新建工程:nacos-config-client-load并将其配置到父工程的model里面.然后重新工程发现加载</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load-dev.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;]&#125;</div></pre></td></tr></table></figure>
+<p>通过上面的启动日志我们知道，除了加载:nacos-config-client-load-dev.yml还会加载:nacos-config-client-load.yml  </p>
+<p>我们此时搜索data id发现控制台确实没有输出，这个说明我们在nacos配置文件是没有创建  </p>
+<p>我们创建<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/38.png" alt="">  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/39.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/40.png" alt="">  </p>
+<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load-dev.yml  </p>
+<p>如果我们删除nacos-config-client-load-dev.yml<br>应用控制台会打印日志:nacos-config-client-load-dev.yml  </p>
+<p>此时我们请求:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>结果:<br>nacos-config-client-load.yml  </p>
+<p>结论:  </p>
+<ul>
+<li>优先使用配置是 applicationname-profile</li>
+<li>不存在时读取 applicationname </li>
+</ul>
+<h4 id="2-GROUP"><a href="#2-GROUP" class="headerlink" title="2.GROUP"></a>2.GROUP</h4><h5 id="2-1-简介"><a href="#2-1-简介" class="headerlink" title="2.1 简介"></a>2.1 简介</h5><ol>
+<li>1.我们创建的配置文件,里面都有一个组的概念：Group，我们没有输入时候默认都是:DEFAULT_GROUP  </li>
+<li>2.组的概念主要是为了让我们创建的配置文件属于同一个组里面,各个应用之间的隔离都是可以通过这个属性来配置</li>
+<li>3.那么我们怎样去声明加载哪一个组呢?<br>我们在配置文件添加group属性,group默认属性是:DEFAULT_GROUP  </li>
+</ol>
+<h5 id="2-2-实践"><a href="#2-2-实践" class="headerlink" title="2.2 实践"></a>2.2 实践</h5><ol>
+<li>1.修改bootstrap.yml配置文件<br>我们在配置文件中添加group属性，其值为:alibaba<br>此时重启服务时候发现其加载的data id不存在,访问:<br><a href="http://127.0.0.1:8056/test/config输出结果是&#39;空test" target="_blank" rel="external">http://127.0.0.1:8056/test/config输出结果是&#39;空test</a>‘<br>原因是我们在配置中心没有添加 组为:alibaba的配置文件  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client-load</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">        file-extension: yml</div><div class="line">        group: alibaba</div><div class="line">server:</div><div class="line">  port: 8056</div><div class="line">```  </div><div class="line"></div><div class="line">2. 2.nacos控制台创建alibaba组下配置文件    </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/41.png)  </div><div class="line"></div><div class="line">此时控制台打印出:  </div><div class="line">oading nacos data, dataId: &apos;nacos-config-client-load.yml&apos;, group: &apos;alibaba&apos;  </div><div class="line"></div><div class="line">测试:访问:http://127.0.0.1:8056/test/config  </div><div class="line">返回结果:nacos-config-client-load-alibaba.yml  </div><div class="line"></div><div class="line"></div><div class="line">#### 3.namespace  </div><div class="line">更深层次隔离:namespace  </div><div class="line">namespace-命名空间，在nacos里面简称租户  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/42.png)  </div><div class="line"></div><div class="line">##### 3.1 实践  </div><div class="line">1. 1.在nacos控制台创建命名空间  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/43.png)  </div><div class="line"></div><div class="line">2. 2.在bootstrap.yml配置文件添加属性:namespace</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: NS<br>server:<br>  port: 8056<br>```  </p>
+<p>此时重启服务发现我们没有产生data id<br>因为我们没有在nacos控制台创建NS下的配置文件  </p>
+<ol>
+<li>3.在nacos控制台下的NS命名空间下创建对应的配置文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/44.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/45.png" alt="">  </p>
+<p>我们此时在控制台搜索data id发现还是没有对应文件生成。  </p>
+<ol>
+<li>4.我们修改下配置文件中namespace为命名空间ID<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/46.png" alt="">  </li>
+</ol>
+<p>测试:<br><a href="http://127.0.0.1:8056/test/config" target="_blank" rel="external">http://127.0.0.1:8056/test/config</a><br>返回:<br>nacos-config-client-load-NS.yml  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/30/SpringCloudAlibaba-6-nacos配置文件加载顺序/" class="archive-article-date">
+  	<time datetime="2020-01-29T16:06:07.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloudAlibaba-5-nacos配置中心快速使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/01/29/SpringCloudAlibaba-5-nacos配置中心快速使用/">SpringCloudAlibaba-5-nacos配置中心快速使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>我们之前介绍了nacos作为注册中心，实现服务的注册与发现，这里主要介绍nacos作为配置中心  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>nacos作为配置中心<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/29.png" alt="">  </p>
+<h4 id="1-实践"><a href="#1-实践" class="headerlink" title="1.实践"></a>1.实践</h4><p>nacos服务注册和配置中心是两个不同的依赖模块,可以单独各自引入依赖</p>
+<h5 id="1-引入依赖"><a href="#1-引入依赖" class="headerlink" title="1.引入依赖"></a>1.引入依赖</h5><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-config&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<h5 id="2-配置"><a href="#2-配置" class="headerlink" title="2.配置"></a>2.配置</h5><p>我们需要修改appliaction.yml文件为bootstrap.yml文件，不然会报空指针异常错误。bootstartp.yml文件是会在application.yml文件加载前加载。保证初始化的bean能够提前获取到一些属性。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/30.png" alt=""></p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">server:</div><div class="line">  port: 8055</div><div class="line">```  </div><div class="line"></div><div class="line">##### 3.在nacos配置列表中创建properties文件  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/31.png)  </div><div class="line"></div><div class="line"></div><div class="line">##### 4.创建controller测试   </div><div class="line">我们已经创建了配置中心，我们看通过配置是否可以获取到值  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/32.png)  </div><div class="line"></div><div class="line">我们发现我们能够获取到以上的值 </div><div class="line"></div><div class="line">##### 5.修改controller注解,然后修改配置列表看是否实时生效  </div><div class="line">现在我们修改下配置中心里面的配置:  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/33.png)  </div><div class="line"></div><div class="line">我们再次通过页面访问以上接口:  </div><div class="line">http://127.0.0.1:8055/test/config  </div><div class="line">结果:  </div><div class="line">yxm  </div><div class="line"></div><div class="line">我们修改值时候并没有实时刷新，所以我们在controller加上注解:@RefreshScope;然后重启服务。  </div><div class="line">即可实现以上实时刷新功能。  </div><div class="line"></div><div class="line">我们修改properties文件时候,idea的页面下回刷新出以下信息:</div></pre></td></tr></table></figure>
+<p>Refresh keys changed: [test]<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">##### 6.yml文件配置加载  </div><div class="line">nacos默认加载:properties文件，是通过一个属性:file-extension  </div><div class="line">现在我们改成:yml文件  </div><div class="line"></div><div class="line">bootstrap.yml文件：</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-config-client<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>server:<br>  port: 8055<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/34.png)  </div><div class="line"></div><div class="line">创建:nacos-config-client.yml配置文件  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/35.png)  </div><div class="line"></div><div class="line">访问后得到:  </div><div class="line">yml-test    </div><div class="line"></div><div class="line">##### 7.Data ID</div><div class="line">Data ID组成:spring.application.name+file-extension  </div><div class="line"></div><div class="line">我们从nacos的文档里面可以知道data id是由:应用名称+profiles+file-extension</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-config-client<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>  profiles:<br>    active: dev<br>server:<br>  port: 8055<br>```  </p>
+<p>我们可以知道我们创建的配置文件在应用启动后默认加载:应用名称+profiles+file-extension 文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/36.png" alt="">  </p>
+<p>然后我们创建:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/37.png" alt="">  </p>
+<p>我们测试:<br><a href="http://127.0.0.1:8055/test/config" target="_blank" rel="external">http://127.0.0.1:8055/test/config</a><br>结果返回:<br>dev-yxm  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/29/SpringCloudAlibaba-5-nacos配置中心快速使用/" class="archive-article-date">
+  	<time datetime="2020-01-29T09:43:46.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-29</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
+    <article id="post-SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <hr>
+<p>title: SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用<br>date: 2020-01-27 13:12:39<br>tags:</p>
+<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h2 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h2><p>我们前几节主要介绍了nacos注册中心实现服务之间的互相调用,我们这一节通过讲解nacos作为注册中心实现服务路由转发功能。  </p>
+<h2 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h2><h3 id="1-Gateway"><a href="#1-Gateway" class="headerlink" title="1.Gateway"></a>1.Gateway</h3><p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/27.png" alt="">  </p>
+<h3 id="2-本节简介"><a href="#2-本节简介" class="headerlink" title="2.本节简介"></a>2.本节简介</h3><p>使用SpringCloud GateWay实现如下功能:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/28.png" alt="">  </p>
+<p>1.浏览器通过gateway(8054)端口访问到:provider(8051)服务<br>2.需要通过网关请求到provider服务,需要使用：LoadBalancerClient Filter  </p>
+<p>实现如下:  </p>
+<ol>
+<li>1.创建项目:nacos-discovery-gateway-server  </li>
+<li>2.修改pom.xml:去除spring-boot-starter-web和spring-boot-starter-test,引入：  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">    &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">    &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">3. 3.父工程里面添加: &lt;module&gt;nacos-discovery-gateway-server&lt;/module&gt;  </div><div class="line">4. 4.配置gateway路由策略</div></pre></td></tr></table></figure>
+<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/hello
+</code></pre><p>server:<br>  port: 8054<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">5. 5.测试:  </div><div class="line">http://127.0.0.1:8054/hello?name=123   </div><div class="line">返回:Hello 123 port:8051  </div><div class="line">以上说明通过8054的网关访问到了8051的provider服务  </div><div class="line"></div><div class="line"></div><div class="line">6. 6.默认情况下:  </div><div class="line">我们访问:http://127.0.0.1:8054/provider/hello就可以访问到:http://127.0.0.1:8054/hello,所以我们访问某个微服务时候不能每次都配置一个路由前缀，需要我们统一管理:</div><div class="line"></div><div class="line">方法一:我们通过配置context-path作为微服务路由前缀；比如配置nacos-discovery-provider服务的context</div></pre></td></tr></table></figure></p>
+<p>//设置nacos-discovery-gatewayr的application.yml<br>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/provider
+</code></pre><p>//设置nacos-discovery-provider的context-path<br>server:<br>  port: 8051<br>  servlet:<br>    context-path: provider<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">方法二:  </div><div class="line">我们跳过前缀的第一个uri</div></pre></td></tr></table></figure></p>
+<p>spring:<br>  application:<br>    name: nacos-discovery-gateway-server<br>  cloud:<br>    nacos:<br>      discovery:<br>        server-addr: 127.0.0.1:8848<br>        metadata:<br>          name: lengleng<br>    gateway:<br>      routes:</p>
+<pre><code>- id: nacos-discovery-provider
+  uri: lb://nacos-discovery-provider
+  predicates:
+    - Path=/provider/**
+  filters:
+    - StripPrefix=1
+</code></pre><p>```</p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/01/27/SpringCloudAlibaba-4-nacos服务注册与发现整合spring-cloud-gateway调用/" class="archive-article-date">
+  	<time datetime="2020-01-27T05:12:39.783Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-27</time>
+</a>
+      
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-3-nacos服务注册与发现整合feign-webflux调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -670,313 +883,6 @@
   	<time datetime="2019-12-15T00:53:59.778Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-15</time>
 </a>
       
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloud-10-服务追踪" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/14/SpringCloud-10-服务追踪/">SpringCloud-10-服务追踪</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>服务追踪,我们使用SpringCloudSleuth和Zipkin做服务追踪  </p>
-<h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>有时候,我们订单服务创建订单时候耗时很严重<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/76.png" alt=""><br>以上订单花费了2.2秒,耗时很严重。到底问题出现在哪里呢?可能是下单时候调用product服务获取商品信息时候耗时比较严重。也可能是扣库存地方耗时比较严重,那我们如何确认是哪个接口耗时比较严重呢?一般我们是通过计时:在调用之前计时,在调用之后计时,这样就得出结论来了。假设已经定位出问题是调用商品服务返回商品信息耗时严重,此时我们就会通知此接口开发者解决,但是获取商品信息接口又是调用了其他服务,<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/77.png" alt=""><br>就像上面的服务:A调用B,B调用C,这是一整套链路,当服务调用越来越多,链路越来越长时候,通过日志计时打点效率非常低而且排查起来不方便，这就牵涉到服务追踪。我们要做的其实就是链路监控。     </p>
-<h3 id="10-1-服务追踪"><a href="#10-1-服务追踪" class="headerlink" title="10.1 服务追踪"></a>10.1 服务追踪</h3><p>针对于链路监控,SpringCloud提供了非常方便的组件:Spring Cloud Sleuth,Sleuth是侦查,链路监控这一章节,要写的东西并不多,主要是要会看。  </p>
-<h4 id="10-1-1-使用SpringCloudSleuth"><a href="#10-1-1-使用SpringCloudSleuth" class="headerlink" title="10.1.1 使用SpringCloudSleuth"></a>10.1.1 使用SpringCloudSleuth</h4><ol>
-<li>1.引入依赖  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure>
-<ol>
-<li>2.使用postman请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/78.png" alt=""><br>从上图我们知道:<br>a.第一列:order-&gt;代表order服务<br>b.第二列:代表traceId(链路id);一条链路里面最多包含一个id,也就是说traceId是一条链路的唯一标识。<br>c.第三列:spanId,是一个基本单元；一条链路里面可以包含多个spanid,spanid可以理解成最基本的工作单元。<br>d.第四列:true表示要把这些信息输出到其他服务搜集和展示,false就是不搜集。  </li>
-</ol>
-<p>我们现在在本地配置文件中将日志级别改为debug模式  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">logging:</div><div class="line">  level:</div><div class="line">   org.springframework.cloud.openfeign: debug</div></pre></td></tr></table></figure>
-<p>此时展示出更多的日志:  </p>
-<pre><code>2019-12-15 08:15:41.058 DEBUG [order,dc93086b3bb2856a,eec9e8de8adb4274,false] 16616 --- [strix-product-2] o.s.c.openfeign.support.SpringEncoder    : Writing [[DecreaseStockInput{productId=&apos;157875227953464068&apos;, productQuantity=2}]] using [org.springframework.http.converter.json.MappingJackson2HttpMessageConverter@d43328]
-Hibernate: select ordermaste0_.order_id as order_id1_1_0_, ordermaste0_.buyer_address as buyer_ad2_1_0_, ordermaste0_.buyer_name as buyer_na3_1_0_, ordermaste0_.buyer_openid as buyer_op4_1_0_, ordermaste0_.buyer_phone as buyer_ph5_1_0_, ordermaste0_.create_time as create_t6_1_0_, ordermaste0_.order_amount as order_am7_1_0_, ordermaste0_.order_status as order_st8_1_0_, ordermaste0_.pay_status as pay_stat9_1_0_, ordermaste0_.update_time as update_10_1_0_ from order_master ordermaste0_ where ordermaste0_.order_id=?
-</code></pre><p>一条链路请求里面只有1个reaceId,order服务是调用product服务的,那么product服务是否也是拥有此traceId,我们在product服务也加上服务追踪的sleuth  </p>
-<p>我们用postman再次请求1次:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/79.png" alt="">  </p>
-<p>现在指标已经出来了,但是我们不可能一直在控制台上看,我们需要友好的,有计划的展示出来。这里我们用到Zipkin框架展示。  </p>
-<h4 id="10-1-1-使用Zipkin"><a href="#10-1-1-使用Zipkin" class="headerlink" title="10.1.1 使用Zipkin"></a>10.1.1 使用Zipkin</h4><p>访问官网:<a href="https://zipkin.io/" target="_blank" rel="external">https://zipkin.io/</a>     </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/12/14/SpringCloud-10-服务追踪/" class="archive-article-date">
-  	<time datetime="2019-12-14T02:32:09.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-14</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-SpringCloud-9-服务容错" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/12/SpringCloud-9-服务容错/">SpringCloud-9-服务容错</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="9-1-服务容错和Hystrix"><a href="#9-1-服务容错和Hystrix" class="headerlink" title="9.1 服务容错和Hystrix"></a>9.1 服务容错和Hystrix</h3><ol>
-<li><p>1.雪崩效应:在微服务架构中,通常会有多个服务层调用,如果某个服务不可用,导致几连故障,造成整个系统不可用的情况。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/31.png" alt=""><br>如上所示:服务A调用服务B,服务B调用服务C。当服务C发生故障时候,服务B调用不通服务C,则B发生故障,由于服务A也调用服务B,服务A调用不通服务B时候,会采取多次重连,同步等待会造成资源耗尽,则服务A也故障。最后都不可用。  </p>
-</li>
-<li><p>2.SpringCloud家族中防雪崩的利器就是:SpringCloud Hystrix,它是基于Netflix的开源框架（Hystrix的中文意思是豪猪:defend you app）；Hystrix目的就是给微服务提供一系列服务容错保护机制;还记得Eureka的意思吗?Eureka就是找到了,也就是服务注册中心  </p>
-</li>
-<li><p>3.Spring Cloud Hystrix具有如下功能:<br>a.服务降级  b.依赖隔离  c.服务熔断  d.监控(Hystrix Dashboard)  </p>
-</li>
-</ol>
-<h4 id="9-1-1-服务降级"><a href="#9-1-1-服务降级" class="headerlink" title="9.1.1 服务降级"></a>9.1.1 服务降级</h4><p>比如双十一时候,刷新网站时候会出现”哎呦喂,被挤爆了”,还有秒杀的时候,某些app提示网络开小差,请稍后再试,诸如此类问题,服务降级知道思想是要区分业务,具体是:  </p>
-<ol>
-<li>1.优先核心服务,非核心服务不可用或弱可用。<br>(比如在订单,商品微服务中:买家查询是核心服务,卖家查询是弱可用服务,我们需要优先保证买家查询服务)  </li>
-<li>2.在应用层面,使用服务降级很简单,通过HystrixCommand注解制定。在fallbackMethod(回退函数)中具体实现降级逻辑。   </li>
-</ol>
-<h3 id="9-2-触发降级"><a href="#9-2-触发降级" class="headerlink" title="9.2 触发降级"></a>9.2 触发降级</h3><p>在order服务中有一个create接口调用商品服务代码块    </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/32.png" alt="">  </p>
-<p>我们将其拎出来    </p>
-<p>我们单独在order服务的controller包中创建一个:HystrixController类,然后在里面使用restTemplate  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/33.png" alt="">  </p>
-<p>然后通过浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/34.png" alt="">    </p>
-<p>我们此时关掉product服务,然后再次请求:发现连接被拒绝:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/35.png" alt="">    </p>
-<h4 id="9-2-1服务降级应用搭建"><a href="#9-2-1服务降级应用搭建" class="headerlink" title="9.2.1服务降级应用搭建"></a>9.2.1服务降级应用搭建</h4><p>我们这个时候使用Hystrix用作服务降级,然后就是老套路了  </p>
-<ol>
-<li>1.引入依赖:(order-server的pom.xml文件中)  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;spring-cloud-starter-hystrix&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div></pre></td></tr></table></figure>
-<p>然后刷新一下:maven<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/36.png" alt="">  </p>
-<ol>
-<li>2.在启动类中加入注解:@EnableCircuitBreaker<br>此时我们发现在启动类上:OrderApplication有很多注解,这个时候,我们再看一个注解:@SpringCloudApplication  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">@Target(&#123;ElementType.TYPE&#125;)</div><div class="line">@Retention(RetentionPolicy.RUNTIME)</div><div class="line">@Documented</div><div class="line">@Inherited</div><div class="line">@SpringBootApplication</div><div class="line">@EnableDiscoveryClient</div><div class="line">@EnableCircuitBreaker</div><div class="line">public @interface SpringCloudApplication &#123;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
-<p>其实SpringCloudApplication可以替换上面 3个注解<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/37.png" alt="">  </p>
-<ol>
-<li>3.在请求的HystrixController类的方法中加入注解:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/39.png" alt="">  </li>
-</ol>
-<p>浏览器测试输入:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/38.png" alt="">    </p>
-<p>当被调用的server端不能正常提供服务时候,我们换一个思路,被请求的服务不是client端调用server端的代码,而是抛出一个异常:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/40.png" alt=""><br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/38.png" alt=""><br>以上情况说明:降级不一定用在这种场景:被调用的server端不能正常提供服务了,触发降级,我们也可以用在我们自己服务内部来触发降级(比如:自己服务内部抛出异常，内部服务并发数太高,或者数据库连接数太多时候,我们抛出一个异常)</p>
-<h3 id="9-2-超时设置"><a href="#9-2-超时设置" class="headerlink" title="9.2 超时设置"></a>9.2 超时设置</h3><p>以上就调用了一个fallback方法,那么如果我们有很多业务逻辑都需要处理的话,是不是都需要降级呢?这样写会不会很麻烦,其实SpringCloud提供了一个在类型注解默认的fallback方法:  </p>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">@DefaultProperties(defaultFallback = &quot;defaultFallback&quot;)</div></pre></td></tr></table></figure>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/41.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/42.png" alt="">  </p>
-<p>联系之前我们的介绍,比如我们上面getProductInfoList方法是我们核心业务的方法,比如就是买家查询商品时候,我们需要优先保证其正常使用,使用注解,自定义特殊的降级处理逻辑fallback,但是此时fallback中50%的概率是可以正常处理的,其他方法是非核心业务,统一的降级策略就是直接回到了一个静态页面之类。更多的场景其实要注意服务的时间,也就是超时的问题。比如我们在product服务中根据商品id查询商品时候,我们让其睡眠2秒。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/43.png" alt="">    </p>
-<p>我们在浏览器访问order服务获取商品接口:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/44.png" alt="">    </p>
-<p>其实我们可以在HystrixCommand里面设置超时时间。<br>我们进入源码发现其配置的默认超时时间是1秒<br>点击注解:@HystrixProperty  再点击:package com.netflix.hystrix.contrib.javanica.annotation;然后我们看到左边的源码:HystrixCommandProperties属性配置<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/45.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/46.png" alt="">  </p>
-<p>默认1秒,所以控制台请求响应一般为1秒左右,那我们该如何配置呢?在类中搜索一下:default_executionTimeoutInMilliseconds<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/47.png" alt="">    </p>
-<p>然后我们设置getProductInfoList个超时时间为4秒<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/48.png" alt="">    </p>
-<p>然后我们在浏览器请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/49.png" alt="">    </p>
-<p>超时时间配置很重要,具体超时时间设置需要看调用方和具体业务,比如有些场景请求到第三方:开发、充值等需要将超时时间设置为长一些。  </p>
-<h3 id="9-4-依赖隔离"><a href="#9-4-依赖隔离" class="headerlink" title="9.4 依赖隔离"></a>9.4 依赖隔离</h3><ol>
-<li><p>1.线程池隔离(依赖隔离)<br>SpringCloud Hystrix的依赖隔离类似于docker的”舱壁模式”；docker通过”舱壁模式”实现进程隔离,使得容器之间互不影响,而Hystrix使用该模式实现:“线程池隔离”；会为每一个HystrixCommand创建一个独立线程池,这样就算某个在Hystrix包装下的依赖服务出现延迟过高情况,也只是对该依赖服务的调用产生影响,并不会拖慢其他服务,使用HystrixCommand来将某个函数包装成了Hystrix命令时候,Hystrix框架自动地为这个函数实现了依赖隔离。所以依赖隔离,服务降级在使用时候都是一体化实现的,这样就可以实现服务容错保护。在编程模型上就会非常方便。</p>
-</li>
-<li><p>2.服务熔断：除了依赖隔离,服务降级之外,Hystrix还有另一一个重要元素:服务熔断。  </p>
-</li>
-</ol>
-<h4 id="9-4-1-服务熔断"><a href="#9-4-1-服务熔断" class="headerlink" title="9.4.1 服务熔断"></a>9.4.1 服务熔断</h4><ol>
-<li>1.服务熔断还是使用@HystrixCommand注解:<br>我们如何配置了,我们还是打开HystrixCommandProperties类:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/50.png" alt="">   </li>
-</ol>
-<p>我们将上面注解拷贝出来,使用在Order服务的getProductInfoList上  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/51.png" alt=""></p>
-<p>然后我们在浏览器测试:<a href="http://localhost:8082/getProductInfoList" target="_blank" rel="external">http://localhost:8082/getProductInfoList</a><br>发现其一直返回”默认提示:太拥挤了，请稍后再试~~~”  </p>
-<p>此时发现一直返回错误,我们该如何进行测试呢？我们加一个请求参数,如果number为偶数直接返回success,否则调用product服务;注意此时调用product服务肯定会进入服务降级回调,原因是因为上面execution.isolation.thread.timeoutInMilliseconds已经注释掉了并且product服务里面线程等待为2秒,并且execution.isolation.thread.timeoutInMilliseconds默认等待时间是1秒。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/52.png" alt=""></p>
-<ol>
-<li>2.产生熔断:我们不停地访问:<a href="http://localhost:8082/getProductInfoList?number=1让其错误率达到60%" target="_blank" rel="external">http://localhost:8082/getProductInfoList?number=1让其错误率达到60%</a>  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/53.png" alt="">  </p>
-<ol>
-<li>3.服务熔断:<br>circuitBreaker.requestVolumeThreshold<br>circuitBreaker.sleepWindowInMilliseconds<br>circuitBreaker.errorThresholdPercentage  </li>
-</ol>
-<p>这是我们上面用到的3个配置,3个配置前面都有一个共同的词:circuitBreaker<br>a.circuitBreaker:断路器(当某个服务发生故障,类似用电器发生短路,通过断路器的故障监控,就类似于熔断的保险丝,直接切断原来的主逻辑调用)<br>b.微服务和分布式里面容错必须是要考虑的,通常做法有两种:<br>1)重试机制：对于预期的短暂的故障问题,可以重试解决的<br>2)断路器模式:对于更长时间的故障问题,不断重试也是没有意义的,这个时候就可以使用断路器模式。  </p>
-<p>断路器模式是将受保护的服务封装在一个可监控的断路器对象里面,当故障到达一定的值,断路器将会跳闸,断路器对象返回错误。如下所示: </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/54.png" alt="">  </p>
-<p>上图描述了断路器模式的3中状态积:<br>1)close:熔断器的关闭状态,调用失败次数累计到一定阈值/比例时候,就会启动熔断机制。<br>2)open:熔断器的打开状态,对服务直接返回错误,但是有一个时钟,到达这个时钟之后,会进入半熔断状态,也就是half open,允许定量的服务请求,如果调用成功到一定比例就认为恢复了,就会关闭熔断器。否则,认为还没有好,又回到熔断器打开状态。<br>3):half open:</p>
-<ol>
-<li>4.参数含义:<br>circuitBreaker.sleepWindowInMilliseconds：这里面的Window很多地方会翻译成时间窗口,断路器确定是否需要断开统计一些请求和错误数据的时候,是有一个时间范围的,这个时间范围就被称为时间窗口；当断路器打开对主逻辑进行熔断之后,Hystrix会启动一个休眠时间窗,在这个时间窗内降级逻辑临时成为主逻辑,当休眠时间窗到期,断路器将进为半开状态,释放一些请求到原来的主逻辑上,如果此次请求正常返回,那么断路器将继续闭合,主逻辑恢复,如果此次请求依然有问题,断路器将继续进入打开状态,休眠时间窗重新计时。我们上面将此参数设置为10000ms。<br>circuitBreaker.requestVolumeThreshold :设置在滚动窗中,断路器的最小请求数<br>circuitBreaker.errorThresholdPercentage:设置断路器打开的错误百分比条件,上面设置的是60,表示在滚动时间窗口中,如果发生了10次调用,有7次异常超过60%,此时断路器设置为打开状态,否则设置为关闭状态。  </li>
-</ol>
-<h3 id="9-5-使用配置项"><a href="#9-5-使用配置项" class="headerlink" title="9.5 使用配置项"></a>9.5 使用配置项</h3><p>我们先注释掉所有配置:</p>
-<p>之前的关于断路器的配置都是在代码里面配置的，如下图所示，不利于后期的维护<br>我们能把上面的配置写到配置文件中去吗?我们先写到本地文件中的yml格式<br>现在要改成用配置文件的方式进行，我们针对超时时间来做一个配置,<br>Hystrix全局超时时间配置如下图所示,表示3秒  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/55.png" alt="">  </p>
-<p>有时候我们发现我们配置不起作用,服务器不触发降级,原因是我们没有在方法上添加@HystrixCommand注解  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/56.png" alt="">   </p>
-<p>加上之后就可以了。上面是配置的全局的default配置,如果我们想给某一个类单独配置:在方法上注解:@HystrixComman然后配置属性里面的comandKey,然后再配置文件中加上。  </p>
-<h3 id="9-6-feign-hystrix的使用"><a href="#9-6-feign-hystrix的使用" class="headerlink" title="9.6 feign-hystrix的使用"></a>9.6 feign-hystrix的使用</h3><p>feign如何搭配hystrix,我们先看一下feign依赖了哪些组件?  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/57.png" alt="">  </p>
-<p>再按:Ctrl+F  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/58.png" alt="">  </p>
-<p>说明feign已经依赖了hystrix,所以使用按照如下方式:  </p>
-<ol>
-<li>1.order服务添加依赖   </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/59.png" alt="">  </p>
-<ol>
-<li>2.product服务在client端改造:@FeignClient注解属性里面添加fallback<br>a.在fallback填写ProductClientFallback.class类。<br>b.书写内部静态类并且实现ProductClient接口。<br>c.内部静态类需要添加@Component注解。<br>d.将此包打出去:在Terminal中输入:mvn install<br>此时我们进入order服务里面OrderServiceImpl里面的productClient,然后点击进去：发现就有了。    </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/60.png" alt="">  </p>
-<p>启动order服务,我们发现报错了:<br>org.springframework.beans.factory.UnsatisfiedDependencyException: Error creating bean with name ‘orderServiceImpl’: Unsatisfied dependency expressed through field ‘productClient’; nested exception is org.springframework.beans.factory.BeanCreationException: Error creating bean with name ‘com.yxm.product.client.ProductClient’: FactoryBean threw exception on object creation; nested exception is java.lang.IllegalStateException: No fallback instance of type class com.yxm.product.client.ProductClient$ProductClientFallback found for feign client product</p>
-<p>以上说明orderServiceImpl里面引入的com.yxm.product.client.ProductClient$ProductClientFallbac没有实例化。  </p>
-<p>原因:以上order服务引入productClient时候,已经把其当做order服务代码的一部分引入,productClient已经是order服务里面的一块代码了，所以运行的时候是在order服务中运行的,为什么不起作用了,原因是我们的启动类中没有扫描到。  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/61.png" alt="">  </p>
-<p>明显和com.yxm.product.client.ProductClient不一样了,所以我们需要把扫描扩大:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/62.png" alt="">  </p>
-<p>然后启动正常。  </p>
-<p>使用post下单(此时我们的product服务没有启动)  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/63.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/64.png" alt="">  </p>
-<p>以上说明我们已经达到了我们的要求。  </p>
-<h3 id="9-7-hystrix-dashboard使用"><a href="#9-7-hystrix-dashboard使用" class="headerlink" title="9.7 hystrix-dashboard使用"></a>9.7 hystrix-dashboard使用</h3><p>hystrix-dashboard是进行可视化的一个组件,使用老套路  </p>
-<ol>
-<li>1.引入依赖  </li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line">&lt;dependency&gt;</div><div class="line">&lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">&lt;artifactId&gt;spring-cloud-netflix-hystrix-dashboard&lt;/artifactId&gt;</div><div class="line">&lt;/dependency&gt;</div><div class="line">```  </div><div class="line"></div><div class="line">有时候一些网站博客里面可能需要让我们再引入:</div></pre></td></tr></table></figure>
-<p><dependency></dependency></p>
-<p><groupid>org.springframework.boot</groupid></p>
-<p><artifactid>spring-boot-starter-actuator</artifactid><br><br>```  </p>
-<p>但是其实我们这里不需要再次引入了:</p>
-<p>有时候我们会遇到@EnableHystrixDashboard注解始终加不上问题,我们统一下SpringBoot和SpringCloud版本。<br>SpringBoot:2.1.8.RELEASE<br>SpringCloud:Greenwich.SR3     </p>
-<ol>
-<li>2.启动类加注解  </li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/65.png" alt="">  </p>
-<ol>
-<li>3.浏览器访问:<br><a href="http://localhost:8082/hystrix" target="_blank" rel="external">http://localhost:8082/hystrix</a><br>a.最上面输入框:填写应用地址<br>b.填写应用的3种方式,我们这里是Single Hystrix App所以使用：<a href="https://hystrix-app:port/actuator/hystrix.stream" target="_blank" rel="external">https://hystrix-app:port/actuator/hystrix.stream</a><br>Cluster via Turbine (default cluster): <a href="https://turbine-hostname:port/turbine.stream" target="_blank" rel="external">https://turbine-hostname:port/turbine.stream</a><br>Cluster via Turbine (custom cluster): <a href="https://turbine-hostname:port/turbine.stream?cluster=[clusterName" target="_blank" rel="external">https://turbine-hostname:port/turbine.stream?cluster=[clusterName</a>]<br>Single Hystrix App: <a href="https://hystrix-app:port/actuator/hystrix.stream" target="_blank" rel="external">https://hystrix-app:port/actuator/hystrix.stream</a></li>
-</ol>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/66.png" alt="">  </p>
-<p>我们点击Monitor Stream进去后进入:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/67.png" alt="">   </p>
-<p>Unable to connect to Command Metric Stream.<br>查看控制台发现:java.lang.IllegalArgumentException: Invalid character found in method name. HTTP method names must be tokens<br>参考:<br><a href="https://blog.csdn.net/HonsonNgai/article/details/89300789" target="_blank" rel="external">https://blog.csdn.net/HonsonNgai/article/details/89300789</a>  </p>
-<p>如果一直loading,我无意中的测试，发现这个Loading…是一直在等待负载均衡的提供方要去消费服务，即访问负载均衡服务器，去调用客户端，如果有数据响应则监控界面就会有图形数据展示：</p>
-<p>如果想让图中的数据发生变化，则需要循环多次的去访问负载均衡的提供方，让其消费服务，以至于达到监控的目的。<br><a href="http://localhost:8082/getProductInfoList?number=1" target="_blank" rel="external">http://localhost:8082/getProductInfoList?number=1</a>  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/69.png" alt="">   </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/68.png" alt="">  </p>
-<p>a.上面颜色小圈对应的就是:Success | Short-Circuited | Bad Request | Timeout | Rejected | Failure | Error<br>b.Circuit Closed表明已经是熔断了<br>c.中间有一个圆；圆越大说明流量就越大;圆颜色偏向于红色,表示服务越不健康。线条表示流量的相对变化。<br>d.最上面百分比是错误率；下面两个百分比是请求的频率。   </p>
-<p>在HystrixController中打开之前设置的参数,然后请求:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/70.png" alt="">  </p>
-<p>有时候,我们如果把熔断百分比设置比较大的话,我们一次次请求是很耗费时间的,其实postman提供了一个多次发送的功能:  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/71.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/72.png" alt=""> </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/73.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/74.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/12/75.png" alt="">  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/12/12/SpringCloud-9-服务容错/" class="archive-article-date">
-  	<time datetime="2019-12-12T12:39:29.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-12</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloud/">SpringCloud</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-常见问题" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2019/12/07/常见问题/">常见问题</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <h3 id="1-hexo编译错误"><a href="#1-hexo编译错误" class="headerlink" title="1. hexo编译错误"></a>1. hexo编译错误</h3><p>之前hexo博客使用{{没问题,但是重装机器系统之后,再次执行”hexo g”时候报如下错误:<br>问题及解决方案参考如下:<br><a href="https://github.com/hexojs/hexo/issues/2384">https://github.com/hexojs/hexo/issues/2384</a></p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2019/12/07/常见问题/" class="archive-article-date">
-  	<time datetime="2019-12-07T09:21:20.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-12-07</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/problem/">problem</a></li></ul>
-	</div>
-
       
 
       <div class="clearfix"></div>
