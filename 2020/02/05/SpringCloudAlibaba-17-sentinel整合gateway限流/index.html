@@ -1,0 +1,479 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" >
+  <title>SpringCloudAlibaba-17-sentinel整合gateway限流 | Startshineye的博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta name="description" content="前言本节主要讲解sentinel整合gateway网关  
+sentinel支持以下两种模式的限流  
+内容实践1.创建网关
+1.创建一个非web依赖的工程:sentinel-gateway  
+2.作为一个网关，需要使用sentinel限流,并且注册到nacos上，需要引入出基本的spring cloud组件后,需要再次引入：sentinel依赖，服务发现依赖，网关依赖，网关和sentinel结">
+<meta property="og:type" content="article">
+<meta property="og:title" content="SpringCloudAlibaba-17-sentinel整合gateway限流">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/index.html">
+<meta property="og:site_name" content="Startshineye的博客">
+<meta property="og:description" content="前言本节主要讲解sentinel整合gateway网关  
+sentinel支持以下两种模式的限流  
+内容实践1.创建网关
+1.创建一个非web依赖的工程:sentinel-gateway  
+2.作为一个网关，需要使用sentinel限流,并且注册到nacos上，需要引入出基本的spring cloud组件后,需要再次引入：sentinel依赖，服务发现依赖，网关依赖，网关和sentinel结">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/35.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/36.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/37.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/38.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/39.png">
+<meta property="og:updated_time" content="2020-02-05T08:40:03.651Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="SpringCloudAlibaba-17-sentinel整合gateway限流">
+<meta name="twitter:description" content="前言本节主要讲解sentinel整合gateway网关  
+sentinel支持以下两种模式的限流  
+内容实践1.创建网关
+1.创建一个非web依赖的工程:sentinel-gateway  
+2.作为一个网关，需要使用sentinel限流,并且注册到nacos上，需要引入出基本的spring cloud组件后,需要再次引入：sentinel依赖，服务发现依赖，网关依赖，网关和sentinel结">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/35.png">
+  
+    <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <script src="/style.js"></script>
+  
+
+</head>
+
+<body>
+  <div id="container">
+    <div class="left-col">
+      <div class="overlay"></div>
+<div class="intrude-less">
+	<header id="header" class="inner">
+		<a href="/" class="profilepic">
+			
+			 <img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+			
+		</a>
+
+		<hgroup>
+		  <h1 class="header-author"><a href="/">Startshineye</a></h1>
+		</hgroup>
+
+		
+		<p class="header-subtitle">淡泊明志，宁静致远</p>
+		
+
+		<nav class="header-menu">
+			<ul>
+			
+				<li><a href="/">主页</a></li>
+	        
+				<li><a href="/archives">所有文章</a></li>
+	        
+				<li><a href="/tags/随笔">随笔</a></li>
+	        
+			</ul>
+		</nav>
+		<nav class="header-smart-menu">
+	        
+    		
+    			
+    			<a class="js-smart-menu" data-idx="0" href="javascript:void(0)">所有文章</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="1" href="javascript:void(0)">标签</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="2" href="javascript:void(0)">友链</a>
+    			
+    			
+            
+    			
+    			<a class="js-smart-menu" data-idx="3" href="javascript:void(0)">关于我</a>
+    			
+    			
+            
+		</nav>
+		<nav class="header-nav">
+			<div class="social">
+				
+					<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+		        
+					<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+		        
+					<a class="rss" target="_blank" href="#" title="rss">rss</a>
+		        
+					<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+		        
+					<a class="mail" target="_blank" href="#" title="mail">mail</a>
+		        
+			</div>
+		</nav>
+	</header>		
+</div>
+
+    </div>
+    <div class="mid-col">
+      <nav id="mobile-nav">
+  	<div class="overlay">
+  		<div class="slider-trigger"><i class="icon-list"></i></div>
+  		<h1 class="header-author js-mobile-header hide">Startshineye</h1>
+  	</div>
+	<div class="intrude-less">
+		<header id="header" class="inner">
+			<div class="profilepic">
+				
+					<img src="https://raw.githubusercontent.com/startshineye/img/master/2017/king.jpg" class="js-avatar show">
+				
+			</div>
+			<hgroup>
+			  <h1 class="header-author">Startshineye</h1>
+			</hgroup>
+			
+			<p class="header-subtitle">淡泊明志，宁静致远</p>
+			
+			<nav class="header-menu">
+				<ul>
+				
+					<li><a href="/">主页</a></li>
+		        
+					<li><a href="/archives">所有文章</a></li>
+		        
+					<li><a href="/tags/随笔">随笔</a></li>
+		        
+				</ul>
+			</nav>
+			<nav class="header-nav">
+				<div class="social">
+					
+						<a class="github" target="_blank" href="https://github.com/startshineye" title="github">github</a>
+			        
+						<a class="weibo" target="_blank" href="#" title="weibo">weibo</a>
+			        
+						<a class="rss" target="_blank" href="#" title="rss">rss</a>
+			        
+						<a class="zhihu" target="_blank" href="#" title="zhihu">zhihu</a>
+			        
+						<a class="mail" target="_blank" href="#" title="mail">mail</a>
+			        
+				</div>
+			</nav>
+		</header>				
+	</div>
+</nav>
+
+      <div class="body-wrap">
+        <article id="post-SpringCloudAlibaba-17-sentinel整合gateway限流" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      SpringCloudAlibaba-17-sentinel整合gateway限流
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本节主要讲解sentinel整合gateway网关  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/35.png" alt=""><br>sentinel支持以下两种模式的限流<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/36.png" alt="">  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h4><h5 id="1-创建网关"><a href="#1-创建网关" class="headerlink" title="1.创建网关"></a>1.创建网关</h5><ol>
+<li>1.创建一个非web依赖的工程:sentinel-gateway  </li>
+<li>2.作为一个网关，需要使用sentinel限流,并且注册到nacos上，需要引入出基本的spring cloud组件后,需要再次引入：sentinel依赖，服务发现依赖，网关依赖，网关和sentinel结合依赖。  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">&lt;!--gateway--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--服务发现--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--sentinel--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-sentinel&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--sentinel和gateway整合--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-alibaba-sentinel-gateway&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.配置文件定义  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">server:</div><div class="line">  port: 18084</div><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-gateway</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      discovery:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">    sentinel:</div><div class="line">      transport:</div><div class="line">        dashboard: 127.0.0.1:8080</div><div class="line">        #配置降级策略</div><div class="line">      scg:</div><div class="line">        fallback:</div><div class="line">          mode: response</div><div class="line">          response-status: 426</div><div class="line">          response-body: error request</div><div class="line">    #gateway路由规则</div><div class="line">    gateway:</div><div class="line">      routes:</div><div class="line">        - id: test_route</div><div class="line">          uri: lb://sentinel-gateway-service</div><div class="line">          predicates:</div><div class="line">            - Path=/test/**</div></pre></td></tr></table></figure>
+<ol>
+<li>4.启动类添加注解:@SpringCloudApplication  </li>
+</ol>
+<h5 id="2-创建网关下游的服务"><a href="#2-创建网关下游的服务" class="headerlink" title="2.创建网关下游的服务"></a>2.创建网关下游的服务</h5><ol>
+<li>1.创建一个非web依赖的工程:sentinel-gateway-service    </li>
+<li>2.作为一个网关下测试服务，需要注册到nacos上。 </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;!--服务发现--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.配置文件定义  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-gateway-service</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      discovery:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">server:</div><div class="line">  port: 18086</div></pre></td></tr></table></figure>
+<ol>
+<li><p>4.启动类添加注解:@EnableDiscoveryClient、@SpringBootApplication </p>
+</li>
+<li><p>5.创建测试类:</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">public class DemoController &#123;</div><div class="line">    /**</div><div class="line">     * 因为在gateway中路由规则,都是test的会被拦截</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    @GetMapping(&quot;/test&quot;)</div><div class="line">    public String test()&#123;</div><div class="line">        return &quot;test&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="3-访问网关路由到对应的下游服务"><a href="#3-访问网关路由到对应的下游服务" class="headerlink" title="3.访问网关路由到对应的下游服务"></a>3.访问网关路由到对应的下游服务</h5><p>访问网关:<a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:test    </p>
+<h5 id="4-结合sentinel进行降级"><a href="#4-结合sentinel进行降级" class="headerlink" title="4.结合sentinel进行降级"></a>4.结合sentinel进行降级</h5><ol>
+<li>1.第一种限流规则:针对route</li>
+</ol>
+<p><a href="http://127.0.0.1:8080/进入登录sentinel" target="_blank" rel="external">http://127.0.0.1:8080/进入登录sentinel</a><br>然后”流控规则”<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/37.png" alt="">  </p>
+<p>再次访问:<br><a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:<br>error request  </p>
+<ol>
+<li>2.第二种限流规则:API分组限流<br>a.先创建api分组<br>Sentinel 控制台–&gt;API管理–&gt;新建API分组<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/38.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/39.png" alt=""> </p>
+<p>再次访问:<br><a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:<br>error request  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/" class="archive-article-date">
+  	<time datetime="2020-02-05T06:45:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+  
+<nav id="article-nav">
+  
+  
+    <a href="/2020/02/02/SpringCloudAlibaba-16-sentinel整合feign实现服务调用/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-16-sentinel整合feign实现服务调用</div>
+      <i class="icon-circle-right"></i>
+    </a>
+  
+</nav>
+
+
+
+
+<div class="share_jia">
+	<!-- JiaThis Button BEGIN -->
+	<div class="jiathis_style">
+		<span class="jiathis_txt">Share to: &nbsp; </span>
+		<a class="jiathis_button_facebook"></a> 
+	    <a class="jiathis_button_twitter"></a>
+	    <a class="jiathis_button_plus"></a> 
+	    <a class="jiathis_button_tsina"></a>
+		<a class="jiathis_button_cqq"></a>
+		<a class="jiathis_button_douban"></a>
+		<a class="jiathis_button_weixin"></a>
+		<a class="jiathis_button_tumblr"></a>
+    <a href="http://www.jiathis.com/share" class="jiathis jiathis_txt jtico jtico_jiathis" target="_blank"></a>
+	</div>
+	<script type="text/javascript" src="//v3.jiathis.com/code/jia.js?uid=1405949716054953" charset="utf-8"></script>
+	<!-- JiaThis Button END -->
+</div>
+
+
+
+
+<div class="share_addthis share_jia">
+  <div class="sharing addthis_toolbox share">
+  	<span class="jiathis_txt">Share to: &nbsp; </span>
+    <a class="addthis_button_facebook_like"></a>
+    <a class="addthis_button_tweet"></a>
+    <a class="addthis_button_google_plusone" g:plusone:size="medium"></a>
+    <a class="addthis_counter addthis_pill_style"></a>
+  </div>
+  <script type="text/javascript" src="//s7.addthis.com/js/300/addthis_widget.js#pubid=ra-560c64c35486b3d4" async="async"></script>
+</div>
+
+
+
+
+<div class="duoshuo">
+	<!-- 多说评论框 start -->
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-17-sentinel整合gateway限流" data-title="SpringCloudAlibaba-17-sentinel整合gateway限流" data-url="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/"></div>
+	<!-- 多说评论框 end -->
+	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
+	<script type="text/javascript">
+	var duoshuoQuery = {short_name:"true"};
+	(function() {
+		var ds = document.createElement('script');
+		ds.type = 'text/javascript';ds.async = true;
+		ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+		ds.charset = 'UTF-8';
+		(document.getElementsByTagName('head')[0] 
+		 || document.getElementsByTagName('body')[0]).appendChild(ds);
+	})();
+	</script>
+	<!-- 多说公共JS代码 end -->
+</div>
+
+
+
+
+
+      </div>
+      <footer id="footer">
+  <div class="outer">
+    <div id="footer-info">
+    	<div class="footer-left">
+    		&copy; 2020 Startshineye
+    	</div>
+      	<div class="footer-right">
+      		<a href="http://hexo.io/" target="_blank">Hexo</a>  Theme <a href="https://github.com/litten/hexo-theme-yilia" target="_blank">Yilia</a> by Litten
+      	</div>
+    </div>
+  </div>
+</footer>
+    </div>
+    <script>
+	var yiliaConfig = {
+		fancybox: true,
+		mathjax: false,
+		animate: true,
+		isHome: false,
+		isPost: true,
+		isArchive: false,
+		isTag: false,
+		isCategory: false,
+		open_in_new: false,
+		root: "/",
+		innerArchive: true
+	}
+</script>
+
+<script src="/./main.js"></script>
+
+
+    
+<div class="tools-col">
+  <ul class="btn-wrap">
+    
+      <li class="chose" data-hook="tools-section-all"><span class="text">全部</span><i class="icon-book"></i></li>
+    
+    
+      <li data-hook="tools-section-tag"><span class="text">标签</span><i class="icon-price-tags"></i></li>
+    
+    
+      <li data-hook="tools-section-friends"><span class="text">友链</span><i class="icon-link"></i></li>
+    
+    
+      <li data-hook="tools-section-me"><span class="text">我</span><i class="icon-smile"></i></li>
+    
+  </ul>
+  <div class="tools-wrap">
+    
+    	<section class="tools-section tools-section-all chose">
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-tag">
+    			<div class="widget tagcloud" id="js-tagcloud">
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 20px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
+    			</div>
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-friends">
+  		
+  			<div class="friends-wrap" id="js-friends">
+  			
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.baidu.com/">baidu</a>
+  	        
+  	          <a target="_blank" class="main-nav-link switch-friends-link" href="http://www.jd.com/">jd</a>
+  	        
+  	        </div>
+  		
+    	</section>
+    
+
+    
+    	<section class="tools-section tools-section-me">
+  	  	
+  	  		<div class="aboutme-wrap" id="js-aboutme">毕业于&lt;br&gt;相信技术可以改变人与人之间的生活&lt;br&gt;码农一枚</div>
+  	  	
+    	</section>
+    
+  </div>
+  
+</div>
+    <!-- Root element of PhotoSwipe. Must have class pswp. -->
+<div class="pswp" tabindex="-1" role="dialog" aria-hidden="true">
+
+    <!-- Background of PhotoSwipe. 
+         It's a separate element as animating opacity is faster than rgba(). -->
+    <div class="pswp__bg"></div>
+
+    <!-- Slides wrapper with overflow:hidden. -->
+    <div class="pswp__scroll-wrap">
+
+        <!-- Container that holds slides. 
+            PhotoSwipe keeps only 3 of them in the DOM to save memory.
+            Don't modify these 3 pswp__item elements, data is added later on. -->
+        <div class="pswp__container">
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+            <div class="pswp__item"></div>
+        </div>
+
+        <!-- Default (PhotoSwipeUI_Default) interface on top of sliding area. Can be changed. -->
+        <div class="pswp__ui pswp__ui--hidden">
+
+            <div class="pswp__top-bar">
+
+                <!--  Controls are self-explanatory. Order can be changed. -->
+
+                <div class="pswp__counter"></div>
+
+                <button class="pswp__button pswp__button--close" title="Close (Esc)"></button>
+
+                <button class="pswp__button pswp__button--share" style="display:none" title="Share"></button>
+
+                <button class="pswp__button pswp__button--fs" title="Toggle fullscreen"></button>
+
+                <button class="pswp__button pswp__button--zoom" title="Zoom in/out"></button>
+
+                <!-- Preloader demo http://codepen.io/dimsemenov/pen/yyBWoR -->
+                <!-- element will get class pswp__preloader--active when preloader is running -->
+                <div class="pswp__preloader">
+                    <div class="pswp__preloader__icn">
+                      <div class="pswp__preloader__cut">
+                        <div class="pswp__preloader__donut"></div>
+                      </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="pswp__share-modal pswp__share-modal--hidden pswp__single-tap">
+                <div class="pswp__share-tooltip"></div> 
+            </div>
+
+            <button class="pswp__button pswp__button--arrow--left" title="Previous (arrow left)">
+            </button>
+
+            <button class="pswp__button pswp__button--arrow--right" title="Next (arrow right)">
+            </button>
+
+            <div class="pswp__caption">
+                <div class="pswp__caption__center"></div>
+            </div>
+
+        </div>
+
+    </div>
+
+</div>
+  </div>
+</body>
+</html>

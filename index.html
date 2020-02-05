@@ -152,6 +152,96 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-17-sentinel整合gateway限流" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/">SpringCloudAlibaba-17-sentinel整合gateway限流</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本节主要讲解sentinel整合gateway网关  </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/35.png" alt=""><br>sentinel支持以下两种模式的限流<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/36.png" alt="">  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="实践"><a href="#实践" class="headerlink" title="实践"></a>实践</h4><h5 id="1-创建网关"><a href="#1-创建网关" class="headerlink" title="1.创建网关"></a>1.创建网关</h5><ol>
+<li>1.创建一个非web依赖的工程:sentinel-gateway  </li>
+<li>2.作为一个网关，需要使用sentinel限流,并且注册到nacos上，需要引入出基本的spring cloud组件后,需要再次引入：sentinel依赖，服务发现依赖，网关依赖，网关和sentinel结合依赖。  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">&lt;!--gateway--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;org.springframework.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-gateway&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--服务发现--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--sentinel--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-sentinel&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div><div class="line">       &lt;!--sentinel和gateway整合--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-alibaba-sentinel-gateway&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.配置文件定义  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div></pre></td><td class="code"><pre><div class="line">server:</div><div class="line">  port: 18084</div><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-gateway</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      discovery:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">    sentinel:</div><div class="line">      transport:</div><div class="line">        dashboard: 127.0.0.1:8080</div><div class="line">        #配置降级策略</div><div class="line">      scg:</div><div class="line">        fallback:</div><div class="line">          mode: response</div><div class="line">          response-status: 426</div><div class="line">          response-body: error request</div><div class="line">    #gateway路由规则</div><div class="line">    gateway:</div><div class="line">      routes:</div><div class="line">        - id: test_route</div><div class="line">          uri: lb://sentinel-gateway-service</div><div class="line">          predicates:</div><div class="line">            - Path=/test/**</div></pre></td></tr></table></figure>
+<ol>
+<li>4.启动类添加注解:@SpringCloudApplication  </li>
+</ol>
+<h5 id="2-创建网关下游的服务"><a href="#2-创建网关下游的服务" class="headerlink" title="2.创建网关下游的服务"></a>2.创建网关下游的服务</h5><ol>
+<li>1.创建一个非web依赖的工程:sentinel-gateway-service    </li>
+<li>2.作为一个网关下测试服务，需要注册到nacos上。 </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line">&lt;!--服务发现--&gt;</div><div class="line">       &lt;dependency&gt;</div><div class="line">           &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;</div><div class="line">           &lt;artifactId&gt;spring-cloud-starter-alibaba-nacos-discovery&lt;/artifactId&gt;</div><div class="line">       &lt;/dependency&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li>3.配置文件定义  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: sentinel-gateway-service</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      discovery:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">server:</div><div class="line">  port: 18086</div></pre></td></tr></table></figure>
+<ol>
+<li><p>4.启动类添加注解:@EnableDiscoveryClient、@SpringBootApplication </p>
+</li>
+<li><p>5.创建测试类:</p>
+</li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div></pre></td><td class="code"><pre><div class="line">@RestController</div><div class="line">public class DemoController &#123;</div><div class="line">    /**</div><div class="line">     * 因为在gateway中路由规则,都是test的会被拦截</div><div class="line">     * @return</div><div class="line">     */</div><div class="line">    @GetMapping(&quot;/test&quot;)</div><div class="line">    public String test()&#123;</div><div class="line">        return &quot;test&quot;;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h5 id="3-访问网关路由到对应的下游服务"><a href="#3-访问网关路由到对应的下游服务" class="headerlink" title="3.访问网关路由到对应的下游服务"></a>3.访问网关路由到对应的下游服务</h5><p>访问网关:<a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:test    </p>
+<h5 id="4-结合sentinel进行降级"><a href="#4-结合sentinel进行降级" class="headerlink" title="4.结合sentinel进行降级"></a>4.结合sentinel进行降级</h5><ol>
+<li>1.第一种限流规则:针对route</li>
+</ol>
+<p><a href="http://127.0.0.1:8080/进入登录sentinel" target="_blank" rel="external">http://127.0.0.1:8080/进入登录sentinel</a><br>然后”流控规则”<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/37.png" alt="">  </p>
+<p>再次访问:<br><a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:<br>error request  </p>
+<ol>
+<li>2.第二种限流规则:API分组限流<br>a.先创建api分组<br>Sentinel 控制台–&gt;API管理–&gt;新建API分组<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/38.png" alt="">  </li>
+</ol>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/39.png" alt=""> </p>
+<p>再次访问:<br><a href="http://localhost:18084/test" target="_blank" rel="external">http://localhost:18084/test</a><br>返回:<br>error request  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/" class="archive-article-date">
+  	<time datetime="2020-02-05T06:45:23.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-16-sentinel整合feign实现服务调用" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -688,67 +778,6 @@ spring:
 
 
   
-    <article id="post-SpringCloudAlibaba-7-nacos配置文件共享规则" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <hr>
-<p>title: SpringCloudAlibaba-7-nacos配置文件共享规则<br>date: 2020-01-30 13:19:26<br>tags:</p>
-<h2 id="SpringCloudAlibaba"><a href="#SpringCloudAlibaba" class="headerlink" title=" SpringCloudAlibaba"></a> SpringCloudAlibaba</h2><h3 id="nacos配置文件共享"><a href="#nacos配置文件共享" class="headerlink" title="nacos配置文件共享"></a>nacos配置文件共享</h3><h4 id="1-为什么需要配置文件共享"><a href="#1-为什么需要配置文件共享" class="headerlink" title="1.为什么需要配置文件共享?"></a>1.为什么需要配置文件共享?</h4><p>比如我们定义了一个application.yml文件,其他微服务全部依赖于此配置文件。比如:feign的一些参数、超时、可能所有微服务配置的时间都是一样的，但是每个微服务都有一个个性化的配置。因此需要一个通用的和个性化的配置文件。在微服务nacos里面的额客户端里面需要同时加载，那么nacos也对这种情况进行了支持-shared-dataIds。</p>
-<h4 id="2-实现同时加载2个配置文件"><a href="#2-实现同时加载2个配置文件" class="headerlink" title="2.实现同时加载2个配置文件"></a>2.实现同时加载2个配置文件</h4><ol>
-<li><p>1.nacos控制台创建common.yml文件<br>除了一个以:application为名称的yml文件外，我们再创建一个common.yml文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/01/48.png" alt="">  </p>
-</li>
-<li><p>2.在配置文件中添加如下配置:  </p>
-</li>
-</ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div></pre></td><td class="code"><pre><div class="line">spring:</div><div class="line">  application:</div><div class="line">    name: nacos-config-client-load</div><div class="line">  cloud:</div><div class="line">    nacos:</div><div class="line">      config:</div><div class="line">        server-addr: 127.0.0.1:8848</div><div class="line">        file-extension: yml</div><div class="line">        namespace: 83aa3869-684c-43af-919a-74bcceea120b</div><div class="line">        shared-dataids: common.yml</div><div class="line">server:</div><div class="line">  port: 8056</div><div class="line">```  </div><div class="line"></div><div class="line">重启服务:      </div><div class="line">Loading nacos data, dataId: &apos;common.yml&apos;, group: &apos;DEFAULT_GROUP&apos;    </div><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;common.yml&apos;&#125;]&#125;  </div><div class="line"></div><div class="line">以上具备data id 所以我们进行测试:  </div><div class="line"></div><div class="line">测试：http://127.0.0.1:8056/test/config  </div><div class="line">返回结果:  </div><div class="line">common-DEFAULT_GROUP.yml  </div><div class="line"></div><div class="line">以上是我们没有应用配置文件:$&#123;application&#125;.yml,现在我们在NS租户下创建nacos-config-client-load.yml  </div><div class="line"></div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/49.png)    </div><div class="line"></div><div class="line">再次请求：http://127.0.0.1:8056/test/config</div><div class="line">返回结果:</div><div class="line">NS-nacos-config-client-load.yml</div><div class="line"></div><div class="line"></div><div class="line">#### 3.配置group</div><div class="line">上面所有情况都是我们没有配置group参数进行的一些验证,现在我们配置group  </div><div class="line"></div><div class="line">1. 1.bootstrap.yml配置</div></pre></td></tr></table></figure>
-<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        shared-dataids: common.yml<br>        group: alibaba<br>server:<br>  port: 8056<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">2. 2.nacos控制台配置   </div><div class="line">nacos控制台新增group为alibaba的common.yml  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/50.png)    </div><div class="line"></div><div class="line">我们测试：http://127.0.0.1:8056/test/config  </div><div class="line">返回:   </div><div class="line">common-DEFAULT_GROUP.yml  </div><div class="line"></div><div class="line">这个其实是SpringCloudAlibaba的一个问题:  </div><div class="line">对于共享文件，他只传递了租户(namespace),并没有把我们的配置group传递过去  </div><div class="line"></div><div class="line">  </div><div class="line">#### 4.公共配置文件刷新  </div><div class="line">当我们修改common.yml文件里面的test属性值时候,我们在浏览器测试 访问时候，其test对应的值是没有刷新的,此时我们需要添加共享文件的另一个属性值:refreshable-dataids: common.yml  </div><div class="line"></div><div class="line">#### 5.ext-config  </div><div class="line">上面共享文件读取传递属性值时候,只是传递了namespace属性值,没有传递group属性值,那么有没有另外的解决方案呢?(注意: ext-config是一个list)</div></pre></td></tr></table></figure></p>
-<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        group: alibaba</p>
-<pre><code>#shared-dataids: common.yml
-#refreshable-dataids: common.yml
-ext-config:
-  - data-id: common.yml
-    group: alibaba
-    refresh: true
-</code></pre><p>server:<br>  port: 8056<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">重启服务后:  </div><div class="line">Loading nacos data, dataId: &apos;common.yml&apos;, group: &apos;alibaba&apos;  </div><div class="line">Located property source: CompositePropertySource &#123;name=&apos;NACOS&apos;, propertySources=[NacosPropertySource &#123;name=&apos;nacos-config-client-load.yml&apos;&#125;, NacosPropertySource &#123;name=&apos;common.yml&apos;&#125;]&#125;  </div><div class="line"></div><div class="line">测试后返回：alibaba-NS-common.yml  </div><div class="line"></div><div class="line">#### 6.ext-config与其他配置共存  </div><div class="line">nacos控制台配置的文件为：  </div><div class="line">![](https://raw.githubusercontent.com/startshineye/img/master/2020/01/51.png)  </div><div class="line"></div><div class="line">bootstrap.yml配置文件为:</div></pre></td></tr></table></figure></p>
-<p>spring:<br>  application:<br>    name: nacos-config-client-load<br>  cloud:<br>    nacos:<br>      config:<br>        server-addr: 127.0.0.1:8848<br>        file-extension: yml<br>        namespace: 83aa3869-684c-43af-919a-74bcceea120b<br>        group: alibaba<br>        ext-config:</p>
-<pre><code>  - data-id: common.yml
-    group: alibaba
-    refresh: true
-shared-dataids: common.yml
-</code></pre><p>server:<br>  port: 8056<br>```  </p>
-<p>重启后日志:<br>Loading nacos data, dataId: ‘common.yml’, group: ‘DEFAULT_GROUP’<br>Loading nacos data, dataId: ‘common.yml’, group: ‘alibaba’  </p>
-<p>由于后加载的配置文件会覆盖前面加载的配置文件；所以我们测试访问时候，返回结果为:<br>alibaba-NS-common.yml  </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/30/SpringCloudAlibaba-7-nacos配置文件共享规则/" class="archive-article-date">
-  	<time datetime="2020-01-30T05:19:26.347Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-30</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
       <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
@@ -814,7 +843,7 @@ shared-dataids: common.yml
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 17.5px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 15px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 12.5px;">work</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 20px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
     			</div>
     	</section>
     
