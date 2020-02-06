@@ -4,26 +4,24 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>SpringCloudAlibaba-18-seata分布式事务问题回显 | Startshineye的博客</title>
+  <title>SpringCloudAlibaba-19-seata分布式事务解决方案AT | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
-内容我们以案例出发,支付场景案例如下:  
-a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
+  <meta name="description" content="前言参考：https://www.jianshu.com/p/940e2cfab67equickstart:https://seata.io/zh-cn/docs/user/quickstart.html  
+内容1.seata简介Seata是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。TM:transaction managerRM:resource">
 <meta property="og:type" content="article">
-<meta property="og:title" content="SpringCloudAlibaba-18-seata分布式事务问题回显">
-<meta property="og:url" content="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-19-seata分布式事务解决方案AT">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/06/SpringCloudAlibaba-19-seata分布式事务解决方案AT/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
-内容我们以案例出发,支付场景案例如下:  
-a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png">
-<meta property="og:updated_time" content="2020-02-06T00:37:57.460Z">
+<meta property="og:description" content="前言参考：https://www.jianshu.com/p/940e2cfab67equickstart:https://seata.io/zh-cn/docs/user/quickstart.html  
+内容1.seata简介Seata是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。TM:transaction managerRM:resource">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/42.png">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/43.png">
+<meta property="og:updated_time" content="2020-02-06T04:09:23.732Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="SpringCloudAlibaba-18-seata分布式事务问题回显">
-<meta name="twitter:description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
-内容我们以案例出发,支付场景案例如下:  
-a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-19-seata分布式事务解决方案AT">
+<meta name="twitter:description" content="前言参考：https://www.jianshu.com/p/940e2cfab67equickstart:https://seata.io/zh-cn/docs/user/quickstart.html  
+内容1.seata简介Seata是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。TM:transaction managerRM:resource">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/42.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -159,7 +157,7 @@ a.首先支付请求进来以后,经过我们的biz-service(前面的业务处�
 </nav>
 
       <div class="body-wrap">
-        <article id="post-SpringCloudAlibaba-18-seata分布式事务问题回显" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-19-seata分布式事务解决方案AT" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -169,7 +167,7 @@ a.首先支付请求进来以后,经过我们的biz-service(前面的业务处�
         
   
     <h1 class="article-title" itemprop="name">
-      SpringCloudAlibaba-18-seata分布式事务问题回显
+      SpringCloudAlibaba-19-seata分布式事务解决方案AT
     </h1>
   
 
@@ -177,37 +175,46 @@ a.首先支付请求进来以后,经过我们的biz-service(前面的业务处�
     
     <div class="article-entry" itemprop="articleBody">
       
-        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  </p>
-<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>我们以案例出发,支付场景案例如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png" alt="">  </p>
-<p>a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三方接口,在这个地方:order-service和pay-service都会操作自己的数据库,操作完之后通过biz-service给用户返回一个请求。那么这里有三个微服务，本节我们就实现这3个微服务。  </p>
-<h4 id="1-创建3个服务"><a href="#1-创建3个服务" class="headerlink" title="1.创建3个服务"></a>1.创建3个服务</h4><ol>
-<li>1.创建3个服务  </li>
-<li>2.修改对应端口为上图所示  </li>
-<li>3.3个服务创建完毕,我们需要让order(alibaba-order)和pay(alibaba-pay)服务能够操作单独的数据库。   </li>
-<li>4.数据库脚本为:  </li>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>参考：<a href="https://www.jianshu.com/p/940e2cfab67e" target="_blank" rel="external">https://www.jianshu.com/p/940e2cfab67e</a><br>quickstart:<a href="https://seata.io/zh-cn/docs/user/quickstart.html" target="_blank" rel="external">https://seata.io/zh-cn/docs/user/quickstart.html</a>  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="1-seata简介"><a href="#1-seata简介" class="headerlink" title="1.seata简介"></a>1.seata简介</h4><p>Seata是一款开源的分布式事务解决方案，致力于在微服务架构下提供高性能和简单易用的分布式事务服务。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/42.png" alt=""><br>TM:transaction manager<br>RM:resource manager  </p>
+<p>1）TM：事务的发起者。用来告诉 TC，全局事务的开始，提交，回滚。<br>2）RM：具体的事务资源，每一个 RM 都会作为一个分支事务注册在 TC。<br>3）TC 事务的协调者。也可以看做是 Fescar-server，用于接收我们的事务的注册，提交和回滚。  </p>
+<h4 id="2-实战"><a href="#2-实战" class="headerlink" title="2.实战"></a>2.实战</h4><h5 id="2-1-准备"><a href="#2-1-准备" class="headerlink" title="2.1 准备"></a>2.1 准备</h5><ol>
+<li>1.我们从github上下载seata应用jar包  </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `order/pay` (</div><div class="line">  `id` int(11) DEFAULT NULL,</div><div class="line">  `username` varchar(20) DEFAULT NULL COMMENT &apos;用户名&apos;</div><div class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</div></pre></td></tr></table></figure>
 <ol>
-<li>5.操作数据库插入数据  </li>
+<li>2.在本地数据源数据库中添加seata的undo_log日志(在alibaba-order,alibaba-pay库里面)  </li>
 </ol>
-<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Service</div><div class="line">public class OrderService &#123;</div><div class="line">    @Autowired</div><div class="line">    private JdbcTemplate jdbcTemplate;</div><div class="line">    @Transactional</div><div class="line">    public void save()&#123;</div><div class="line">        jdbcTemplate.update(&quot;INSERT INTO `order`( `username`) VALUES (&apos;123&apos;);&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">```</div></pre></td></tr></table></figure>
-<p>@Service<br>public class PayService {<br>    @Autowired<br>    private JdbcTemplate jdbcTemplate;<br>    @Transactional<br>    public void save(){<br>        jdbcTemplate.update(“INSERT INTO <code>pay</code>( <code>username</code>) VALUES (‘123’);”);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.order/pay-service服务提供给biz-service访问的接口</div></pre></td></tr></table></figure></p>
-<p>@RestController<br>public class OrderController {<br>    @Autowired<br>    private OrderService orderService;<br>    @GetMapping(“/order”)<br>    public String order(){<br>        orderService.save();<br>        return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
-<p>@RestController<br>public class PayController {<br>    @Autowired<br>    private PayService payService;<br>    @GetMapping(“/pay”)<br>    public String pay(){<br>       payService.save();<br>       return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">#### 2.biz服务调用其他服务</div><div class="line">我们使用spring自带的RestTemplate模板  </div><div class="line"></div><div class="line">1. 1.创建service</div></pre></td></tr></table></figure></p>
-<p>@Service<br>public class BizService {<br>    @Autowired<br>    private RestTemplate restTemplate;<br>    @Transactional<br>    public void biz(){<br>        //order<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8020/order&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8020/order&quot;,String.class</a>);<br>        //pay<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8030/pay&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8030/pay&quot;,String.class</a>);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">2. 2.创建controller</div></pre></td></tr></table></figure></p>
-<p>@RestController<br>public class BizController {<br>    @Autowired<br>    private BizService bizService;<br>    @GetMapping(“/biz”)<br>    public String biz(){<br>        bizService.biz();<br>        return “success”;<br>    }<br>}<br>```</p>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `undo_log` (</div><div class="line">  `id` bigint(20) NOT NULL AUTO_INCREMENT,</div><div class="line">  `branch_id` bigint(20) NOT NULL,</div><div class="line">  `xid` varchar(100) NOT NULL,</div><div class="line">  `context` varchar(128) NOT NULL,</div><div class="line">  `rollback_info` longblob NOT NULL,</div><div class="line">  `log_status` int(11) NOT NULL,</div><div class="line">  `log_created` datetime NOT NULL,</div><div class="line">  `log_modified` datetime NOT NULL,</div><div class="line">  `ext` varchar(100) DEFAULT NULL,</div><div class="line">  PRIMARY KEY (`id`),</div><div class="line">  UNIQUE KEY `ux_undo_log` (`xid`,`branch_id`)</div><div class="line">) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=utf8;</div></pre></td></tr></table></figure>
 <ol>
-<li>3.重启3个服务<br>我们访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>结果返回:success<br>查看数据库表时候发现我们表中插入了数据。  </li>
+<li>3.需要使用tc，则需要启动,点击:seata-server.bat  </li>
 </ol>
-<h4 id="3-分布式事务出现情况"><a href="#3-分布式事务出现情况" class="headerlink" title="3.分布式事务出现情况"></a>3.分布式事务出现情况</h4><p>我们分析一下分布式事务会出现在什么情况下?<br>我们在biz服务调用其他两个服务的时候添加以下语句: int i = 1 / 0; 让其报错,这个时候pay/order服务会回滚吗?不会回滚的,因为pay/order是不同的jvm。本地事务是管不到其他jvm里面的(进程之间事务不具有传递性)。  </p>
-<p>我们重启:biz-service,然后访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>此时pay/order服务已经插入了数据  </p>
+<h5 id="2-2-工程集成"><a href="#2-2-工程集成" class="headerlink" title="2.2 工程集成"></a>2.2 工程集成</h5><ol>
+<li>1.引入依赖(3个服务都添加)    </li>
+</ol>
+<pre><code>&lt;dependency&gt;
+       &lt;groupId&gt;com.alibaba.cloud&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-cloud-starter-alibaba-seata&lt;/artifactId&gt;
+       &lt;version&gt;2.1.1.RELEASE&lt;/version&gt;
+   &lt;/dependency&gt;
+</code></pre><ol>
+<li><p>2.所有的资源服务中加入register,conf,因为服务端,客户端都需要注册,以及客户端配置;存放到resources目录下  </p>
+</li>
+<li><p>3.我们是在biz-service上开启一个全局的事物来管理:pay-service和order-service；所以需要在biz-service的对应业务层加一个全局的事务注解: @GlobalTransactional(在最早的服务上加这个注解就可以了)  </p>
+</li>
+<li><p>4.pay/order服务里面的jdbc是spring自己的数据源，这个时候,其实还没有完,我们需要使用seata来代理各个服务的数据源</p>
+</li>
+<li><p>5.启动biz-service时候报错,<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/43.png" alt=""><br>我们需要在file里面配置group,规则:appliactionname-seata-service-group  </p>
+</li>
+<li><p>6.测试访问biz-service<br>我们重启:biz-service,然后访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>此时pay/order服务已经没有插入了数据  </p>
+</li>
+</ol>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/" class="archive-article-date">
-  	<time datetime="2020-02-05T08:47:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-05</time>
+      <a href="/2020/02/06/SpringCloudAlibaba-19-seata分布式事务解决方案AT/" class="archive-article-date">
+  	<time datetime="2020-02-06T00:53:38.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-06</time>
 </a>
       
 	<div class="article-tag tagcloud">
@@ -225,18 +232,9 @@ a.首先支付请求进来以后,经过我们的biz-service(前面的业务处�
   
 <nav id="article-nav">
   
-    <a href="/2020/02/06/SpringCloudAlibaba-19-seata分布式事务解决方案AT/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          SpringCloudAlibaba-19-seata分布式事务解决方案AT
-        
-      </div>
-    </a>
   
-  
-    <a href="/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">SpringCloudAlibaba-17-sentinel整合gateway限流</div>
+    <a href="/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-18-seata分布式事务问题回显</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -282,7 +280,7 @@ a.首先支付请求进来以后,经过我们的biz-service(前面的业务处�
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-18-seata分布式事务问题回显" data-title="SpringCloudAlibaba-18-seata分布式事务问题回显" data-url="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-19-seata分布式事务解决方案AT" data-title="SpringCloudAlibaba-19-seata分布式事务解决方案AT" data-url="https://github.com/startshineye/2020/02/06/SpringCloudAlibaba-19-seata分布式事务解决方案AT/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

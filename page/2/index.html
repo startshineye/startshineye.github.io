@@ -152,6 +152,65 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-9-nacos集群搭建及使用" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/01/SpringCloudAlibaba-9-nacos集群搭建及使用/">SpringCloudAlibaba-9-nacos集群搭建及使用</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>Nacos的单节点，也就是我们最开始使用的standalone模式，配置的数据是默认存储到内嵌的数据库derby中。</p>
+<p>如果我们要搭建集群的话，那么肯定是不能用内嵌的数据库，不然数据无法共享。集群搭建的时候我们需要将Nacos对接Mysql进行数据存储。</p>
+<p>集群模式跟我们平时进行扩容是一样的，可以通过Nginx转发到多个节点，最前面挂一个域名即可，如下图：<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/8.png" alt="">  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><h4 id="1-nacos集群部署方案"><a href="#1-nacos集群部署方案" class="headerlink" title="1.nacos集群部署方案"></a>1.nacos集群部署方案</h4><ol>
+<li>我们开启3个nacos节点，对外提供一个可访问的虚拟ip、3个是通过nginx作为负载均衡  </li>
+<li>我们微服务通过注册到1111实现到3个节点，3个节点连接到同一个数据库mysql数据源，实现数据的统一  </li>
+</ol>
+<h4 id="2-修改启动脚本"><a href="#2-修改启动脚本" class="headerlink" title="2.修改启动脚本"></a>2.修改启动脚本</h4><p>修改启动脚本，支持自定义端口,自带的startup.cmd不具备更改端口功能,我们通过修改脚本实现上面三个节点及不同的端口。<br> nacos默认有个问题,就是默认启动时候端口8848是没有定义的，如果我们想修改成:1111,2222,3333等就需要扩展我们的启动脚本。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/10.png" alt=""> </p>
+<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/11.png" alt=""> </p>
+<h4 id="3-修配置cluster文件"><a href="#3-修配置cluster文件" class="headerlink" title="3.修配置cluster文件"></a>3.修配置cluster文件</h4><p>拷贝cluster.conf.example为:cluster.conf。填写如下信息:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/9.png" alt="">  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/01/SpringCloudAlibaba-9-nacos集群搭建及使用/" class="archive-article-date">
+  	<time datetime="2020-02-01T07:37:31.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-01</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-8-nacos配置中心持久化" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -684,67 +743,6 @@ shared-dataids: common.yml
       
       <a href="/2020/01/25/SpringCloud-11-服务追踪11/" class="archive-article-date">
   	<time datetime="2020-01-25T15:27:49.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-25</time>
-</a>
-      
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
-    <article id="post-linux-防火墙命令" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/06/linux-防火墙命令/">linux-防火墙命令</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>Linux关闭防火墙命令<br>问题:老是关闭防火墙太麻烦，所以选择彻底关闭防火墙，发现每次都记不住命令!</p>
-<p>下面是red hat/CentOs7关闭防火墙的命令!</p>
-<p>1:查看防火状态</p>
-<p>systemctl status firewalld</p>
-<p>service  iptables status</p>
-<p>2:暂时关闭防火墙</p>
-<p>systemctl stop firewalld</p>
-<p>service  iptables stop</p>
-<p>3:永久关闭防火墙</p>
-<p>systemctl disable firewalld</p>
-<p>chkconfig iptables off</p>
-<p>4:重启防火墙</p>
-<p>systemctl enable firewalld</p>
-<p>service iptables restart  </p>
-<p>5:永久关闭后重启</p>
-<p>//暂时还没有试过</p>
-<p>chkconfig iptables on</p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/06/linux-防火墙命令/" class="archive-article-date">
-  	<time datetime="2020-01-06T02:26:59.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-06</time>
 </a>
       
       
