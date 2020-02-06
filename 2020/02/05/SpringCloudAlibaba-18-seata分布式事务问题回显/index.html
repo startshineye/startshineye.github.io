@@ -4,23 +4,26 @@
   <meta charset="utf-8">
   
   <meta http-equiv="X-UA-Compatible" content="IE=edge" >
-  <title>acdgate-1-websocket404 | Startshineye的博客</title>
+  <title>SpringCloudAlibaba-18-seata分布式事务问题回显 | Startshineye的博客</title>
   <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  <meta name="description" content="将AcdGate发布到阿里云服务器之后,登录坐席一直报websocket连接不上的404，如下:
-查看原因是:tomcat下webapps打包后的AcdGate里面WEB-INF里面的lib下面含有:websocket-api.jar包,并且在部署的Tomcat下的lib里面也有:websocket-api.jar包,导致冲突,解决办法删除其中一个里面的websocket-api.jar即可">
+  <meta name="description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
+内容我们以案例出发,支付场景案例如下:  
+a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
 <meta property="og:type" content="article">
-<meta property="og:title" content="acdgate-1-websocket404">
-<meta property="og:url" content="https://github.com/startshineye/2019/09/14/acdgate-1-websocket404/index.html">
+<meta property="og:title" content="SpringCloudAlibaba-18-seata分布式事务问题回显">
+<meta property="og:url" content="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/index.html">
 <meta property="og:site_name" content="Startshineye的博客">
-<meta property="og:description" content="将AcdGate发布到阿里云服务器之后,登录坐席一直报websocket连接不上的404，如下:
-查看原因是:tomcat下webapps打包后的AcdGate里面WEB-INF里面的lib下面含有:websocket-api.jar包,并且在部署的Tomcat下的lib里面也有:websocket-api.jar包,导致冲突,解决办法删除其中一个里面的websocket-api.jar即可">
-<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/68.png">
-<meta property="og:updated_time" content="2019-09-14T05:53:33.600Z">
+<meta property="og:description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
+内容我们以案例出发,支付场景案例如下:  
+a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
+<meta property="og:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png">
+<meta property="og:updated_time" content="2020-02-06T00:37:57.460Z">
 <meta name="twitter:card" content="summary">
-<meta name="twitter:title" content="acdgate-1-websocket404">
-<meta name="twitter:description" content="将AcdGate发布到阿里云服务器之后,登录坐席一直报websocket连接不上的404，如下:
-查看原因是:tomcat下webapps打包后的AcdGate里面WEB-INF里面的lib下面含有:websocket-api.jar包,并且在部署的Tomcat下的lib里面也有:websocket-api.jar包,导致冲突,解决办法删除其中一个里面的websocket-api.jar即可">
-<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2019/09/68.png">
+<meta name="twitter:title" content="SpringCloudAlibaba-18-seata分布式事务问题回显">
+<meta name="twitter:description" content="前言本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  
+内容我们以案例出发,支付场景案例如下:  
+a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三">
+<meta name="twitter:image" content="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png">
   
     <link rel="alternative" href="/atom.xml" title="Startshineye的博客" type="application/atom+xml">
   
@@ -156,7 +159,7 @@
 </nav>
 
       <div class="body-wrap">
-        <article id="post-acdgate-1-websocket404" class="article article-type-post" itemscope itemprop="blogPost">
+        <article id="post-SpringCloudAlibaba-18-seata分布式事务问题回显" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
       <input type="hidden" class="isFancy" />
@@ -166,7 +169,7 @@
         
   
     <h1 class="article-title" itemprop="name">
-      acdgate-1-websocket404
+      SpringCloudAlibaba-18-seata分布式事务问题回显
     </h1>
   
 
@@ -174,20 +177,42 @@
     
     <div class="article-entry" itemprop="articleBody">
       
-        <p>将AcdGate发布到阿里云服务器之后,登录坐席一直报websocket连接不上的404，如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2019/09/68.png" alt=""></p>
-<p>查看原因是:tomcat下webapps打包后的AcdGate里面WEB-INF里面的lib下面含有:websocket-api.jar包,并且在部署的Tomcat下的lib里面也有:websocket-api.jar包,导致冲突,解决办法删除其中一个里面的websocket-api.jar即可</p>
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>我们以案例出发,支付场景案例如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png" alt="">  </p>
+<p>a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三方接口,在这个地方:order-service和pay-service都会操作自己的数据库,操作完之后通过biz-service给用户返回一个请求。那么这里有三个微服务，本节我们就实现这3个微服务。  </p>
+<h4 id="1-创建3个服务"><a href="#1-创建3个服务" class="headerlink" title="1.创建3个服务"></a>1.创建3个服务</h4><ol>
+<li>1.创建3个服务  </li>
+<li>2.修改对应端口为上图所示  </li>
+<li>3.3个服务创建完毕,我们需要让order(alibaba-order)和pay(alibaba-pay)服务能够操作单独的数据库。   </li>
+<li>4.数据库脚本为:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `order/pay` (</div><div class="line">  `id` int(11) DEFAULT NULL,</div><div class="line">  `username` varchar(20) DEFAULT NULL COMMENT &apos;用户名&apos;</div><div class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</div></pre></td></tr></table></figure>
+<ol>
+<li>5.操作数据库插入数据  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Service</div><div class="line">public class OrderService &#123;</div><div class="line">    @Autowired</div><div class="line">    private JdbcTemplate jdbcTemplate;</div><div class="line">    @Transactional</div><div class="line">    public void save()&#123;</div><div class="line">        jdbcTemplate.update(&quot;INSERT INTO `order`( `username`) VALUES (&apos;123&apos;);&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">```</div></pre></td></tr></table></figure>
+<p>@Service<br>public class PayService {<br>    @Autowired<br>    private JdbcTemplate jdbcTemplate;<br>    @Transactional<br>    public void save(){<br>        jdbcTemplate.update(“INSERT INTO <code>pay</code>( <code>username</code>) VALUES (‘123’);”);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.order/pay-service服务提供给biz-service访问的接口</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class OrderController {<br>    @Autowired<br>    private OrderService orderService;<br>    @GetMapping(“/order”)<br>    public String order(){<br>        orderService.save();<br>        return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class PayController {<br>    @Autowired<br>    private PayService payService;<br>    @GetMapping(“/pay”)<br>    public String pay(){<br>       payService.save();<br>       return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">#### 2.biz服务调用其他服务</div><div class="line">我们使用spring自带的RestTemplate模板  </div><div class="line"></div><div class="line">1. 1.创建service</div></pre></td></tr></table></figure></p>
+<p>@Service<br>public class BizService {<br>    @Autowired<br>    private RestTemplate restTemplate;<br>    @Transactional<br>    public void biz(){<br>        //order<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8020/order&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8020/order&quot;,String.class</a>);<br>        //pay<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8030/pay&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8030/pay&quot;,String.class</a>);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">2. 2.创建controller</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class BizController {<br>    @Autowired<br>    private BizService bizService;<br>    @GetMapping(“/biz”)<br>    public String biz(){<br>        bizService.biz();<br>        return “success”;<br>    }<br>}<br>```</p>
+<ol>
+<li>3.重启3个服务<br>我们访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>结果返回:success<br>查看数据库表时候发现我们表中插入了数据。  </li>
+</ol>
+<h4 id="3-分布式事务出现情况"><a href="#3-分布式事务出现情况" class="headerlink" title="3.分布式事务出现情况"></a>3.分布式事务出现情况</h4><p>我们分析一下分布式事务会出现在什么情况下?<br>我们在biz服务调用其他两个服务的时候添加以下语句: int i = 1 / 0; 让其报错,这个时候pay/order服务会回滚吗?不会回滚的,因为pay/order是不同的jvm。本地事务是管不到其他jvm里面的(进程之间事务不具有传递性)。  </p>
+<p>我们重启:biz-service,然后访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>此时pay/order服务已经插入了数据  </p>
 
       
     </div>
     <div class="article-info article-info-index">
       
-      <a href="/2019/09/14/acdgate-1-websocket404/" class="archive-article-date">
-  	<time datetime="2019-09-14T05:49:00.000Z" itemprop="datePublished"><i class="icon-clock"></i>2019-09-14</time>
+      <a href="/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/" class="archive-article-date">
+  	<time datetime="2020-02-05T08:47:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-05</time>
 </a>
       
 	<div class="article-tag tagcloud">
 		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/acdgate/">acdgate</a></li></ul>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
 	</div>
 
       
@@ -200,18 +225,9 @@
   
 <nav id="article-nav">
   
-    <a href="/2019/11/28/ipcc-3-日常运维/" id="article-nav-newer" class="article-nav-link-wrap">
-      <i class="icon-circle-left"></i>
-      <div class="article-nav-title">
-        
-          ipcc-3-日常运维
-        
-      </div>
-    </a>
   
-  
-    <a href="/2019/07/31/work-11-nginx安装配置https/" id="article-nav-older" class="article-nav-link-wrap">
-      <div class="article-nav-title">work-11-nginx安装配置https</div>
+    <a href="/2020/02/05/SpringCloudAlibaba-17-sentinel整合gateway限流/" id="article-nav-older" class="article-nav-link-wrap">
+      <div class="article-nav-title">SpringCloudAlibaba-17-sentinel整合gateway限流</div>
       <i class="icon-circle-right"></i>
     </a>
   
@@ -257,7 +273,7 @@
 
 <div class="duoshuo">
 	<!-- 多说评论框 start -->
-	<div class="ds-thread" data-thread-key="acdgate-1-websocket404" data-title="acdgate-1-websocket404" data-url="https://github.com/startshineye/2019/09/14/acdgate-1-websocket404/"></div>
+	<div class="ds-thread" data-thread-key="SpringCloudAlibaba-18-seata分布式事务问题回显" data-title="SpringCloudAlibaba-18-seata分布式事务问题回显" data-url="https://github.com/startshineye/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/"></div>
 	<!-- 多说评论框 end -->
 	<!-- 多说公共JS代码 start (一个网页只需插入一次) -->
 	<script type="text/javascript">

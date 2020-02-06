@@ -152,6 +152,79 @@
       <div class="body-wrap">
         
   
+    <article id="post-SpringCloudAlibaba-18-seata分布式事务问题回显" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-inner">
+    
+      <input type="hidden" class="isFancy" />
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 itemprop="name">
+      <a class="article-title" href="/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/">SpringCloudAlibaba-18-seata分布式事务问题回显</a>
+    </h1>
+  
+
+      </header>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <h3 id="前言"><a href="#前言" class="headerlink" title="前言"></a>前言</h3><p>本节介绍SpringCloudAlibaba中分布式事务解决方案seta,首先我们不介绍seta,我们先模拟分布式事务这个问题。  </p>
+<h3 id="内容"><a href="#内容" class="headerlink" title="内容"></a>内容</h3><p>我们以案例出发,支付场景案例如下:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/40.png" alt="">  </p>
+<p>a.首先支付请求进来以后,经过我们的biz-service(前面的业务处理)对参数进行校验，校验完之后调用我们的订单服务:order-service统一下单,下单完之后,调用我们的支付服务pay-service去调用三方接口,在这个地方:order-service和pay-service都会操作自己的数据库,操作完之后通过biz-service给用户返回一个请求。那么这里有三个微服务，本节我们就实现这3个微服务。  </p>
+<h4 id="1-创建3个服务"><a href="#1-创建3个服务" class="headerlink" title="1.创建3个服务"></a>1.创建3个服务</h4><ol>
+<li>1.创建3个服务  </li>
+<li>2.修改对应端口为上图所示  </li>
+<li>3.3个服务创建完毕,我们需要让order(alibaba-order)和pay(alibaba-pay)服务能够操作单独的数据库。   </li>
+<li>4.数据库脚本为:  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line">CREATE TABLE `order/pay` (</div><div class="line">  `id` int(11) DEFAULT NULL,</div><div class="line">  `username` varchar(20) DEFAULT NULL COMMENT &apos;用户名&apos;</div><div class="line">) ENGINE=InnoDB DEFAULT CHARSET=utf8</div></pre></td></tr></table></figure>
+<ol>
+<li>5.操作数据库插入数据  </li>
+</ol>
+<figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div></pre></td><td class="code"><pre><div class="line">@Service</div><div class="line">public class OrderService &#123;</div><div class="line">    @Autowired</div><div class="line">    private JdbcTemplate jdbcTemplate;</div><div class="line">    @Transactional</div><div class="line">    public void save()&#123;</div><div class="line">        jdbcTemplate.update(&quot;INSERT INTO `order`( `username`) VALUES (&apos;123&apos;);&quot;);</div><div class="line">    &#125;</div><div class="line">&#125;</div><div class="line">```</div></pre></td></tr></table></figure>
+<p>@Service<br>public class PayService {<br>    @Autowired<br>    private JdbcTemplate jdbcTemplate;<br>    @Transactional<br>    public void save(){<br>        jdbcTemplate.update(“INSERT INTO <code>pay</code>( <code>username</code>) VALUES (‘123’);”);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line">6. 6.order/pay-service服务提供给biz-service访问的接口</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class OrderController {<br>    @Autowired<br>    private OrderService orderService;<br>    @GetMapping(“/order”)<br>    public String order(){<br>        orderService.save();<br>        return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class PayController {<br>    @Autowired<br>    private PayService payService;<br>    @GetMapping(“/pay”)<br>    public String pay(){<br>       payService.save();<br>       return “success”;<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line">#### 2.biz服务调用其他服务</div><div class="line">我们使用spring自带的RestTemplate模板  </div><div class="line"></div><div class="line">1. 1.创建service</div></pre></td></tr></table></figure></p>
+<p>@Service<br>public class BizService {<br>    @Autowired<br>    private RestTemplate restTemplate;<br>    @Transactional<br>    public void biz(){<br>        //order<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8020/order&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8020/order&quot;,String.class</a>);<br>        //pay<br>        restTemplate.getForObject(“<a href="http://127.0.0.1:8030/pay&quot;,String.class" target="_blank" rel="external">http://127.0.0.1:8030/pay&quot;,String.class</a>);<br>    }<br>}<br><figure class="highlight plain"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">2. 2.创建controller</div></pre></td></tr></table></figure></p>
+<p>@RestController<br>public class BizController {<br>    @Autowired<br>    private BizService bizService;<br>    @GetMapping(“/biz”)<br>    public String biz(){<br>        bizService.biz();<br>        return “success”;<br>    }<br>}<br>```</p>
+<ol>
+<li>3.重启3个服务<br>我们访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>结果返回:success<br>查看数据库表时候发现我们表中插入了数据。  </li>
+</ol>
+<h4 id="3-分布式事务出现情况"><a href="#3-分布式事务出现情况" class="headerlink" title="3.分布式事务出现情况"></a>3.分布式事务出现情况</h4><p>我们分析一下分布式事务会出现在什么情况下?<br>我们在biz服务调用其他两个服务的时候添加以下语句: int i = 1 / 0; 让其报错,这个时候pay/order服务会回滚吗?不会回滚的,因为pay/order是不同的jvm。本地事务是管不到其他jvm里面的(进程之间事务不具有传递性)。  </p>
+<p>我们重启:biz-service,然后访问:<a href="http://127.0.0.1:8010/biz" target="_blank" rel="external">http://127.0.0.1:8010/biz</a><br>此时pay/order服务已经插入了数据  </p>
+
+      
+    </div>
+    <div class="article-info article-info-index">
+      
+      <a href="/2020/02/05/SpringCloudAlibaba-18-seata分布式事务问题回显/" class="archive-article-date">
+  	<time datetime="2020-02-05T08:47:55.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-02-05</time>
+</a>
+      
+	<div class="article-tag tagcloud">
+		<i class="icon-price-tags"></i>
+		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
+	</div>
+
+      
+
+      <div class="clearfix"></div>
+    </div>
+  </div>
+</article>
+
+
+
+
+
+
+
+
+
+
+  
     <article id="post-SpringCloudAlibaba-17-sentinel整合gateway限流" class="article article-type-post" itemscope itemprop="blogPost">
   <div class="article-inner">
     
@@ -720,67 +793,9 @@ spring:
 
 
   
-    <article id="post-SpringCloudAlibaba-8-nacos配置中心持久化" class="article article-type-post" itemscope itemprop="blogPost">
-  <div class="article-inner">
-    
-      <input type="hidden" class="isFancy" />
-    
-    
-      <header class="article-header">
-        
-  
-    <h1 itemprop="name">
-      <a class="article-title" href="/2020/01/31/SpringCloudAlibaba-8-nacos配置中心持久化/">SpringCloudAlibaba-8-nacos配置中心持久化</a>
-    </h1>
-  
-
-      </header>
-    
-    <div class="article-entry" itemprop="articleBody">
-      
-        <p>持久化从嵌入式数据库Derby数据库转为mysql<br>有时候,我们需要将nacos的配置参数持久化到数据库。<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/1.png" alt="">  </p>
-<p>在目录:nacos\distribution\target\nacos-server-1.2.0-SNAPSHOT\nacos\conf下有nacos-mysql.sql数据库脚本  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/2.png" alt="">  </p>
-<p><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/3.png" alt="">    </p>
-<p>然后重启服务,我们进去之后发现什么配置文件都没有</p>
-<p>我们先创建一个配置文件：test.yml<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/4.png" alt="">  </p>
-<p>此时数据库里面:<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/5.png" alt="">  </p>
-<p>我们修改nacos的test.yml文件的配置文件<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/6.png" alt="">  </p>
-<p>我们查看nacos控制台历史版本(从数据库his_config_info读取信息)<br><img src="https://raw.githubusercontent.com/startshineye/img/master/2020/02/7.png" alt=""> </p>
-
-      
-    </div>
-    <div class="article-info article-info-index">
-      
-      <a href="/2020/01/31/SpringCloudAlibaba-8-nacos配置中心持久化/" class="archive-article-date">
-  	<time datetime="2020-01-31T01:22:05.000Z" itemprop="datePublished"><i class="icon-clock"></i>2020-01-31</time>
-</a>
-      
-	<div class="article-tag tagcloud">
-		<i class="icon-price-tags"></i>
-		<ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/SpringCloudAlibaba/">SpringCloudAlibaba</a></li></ul>
-	</div>
-
-      
-
-      <div class="clearfix"></div>
-    </div>
-  </div>
-</article>
-
-
-
-
-
-
-
-
-
-
-  
   
     <nav id="page-nav">
-      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><a class="page-number" href="/page/4/">4</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
+      <span class="page-number current">1</span><a class="page-number" href="/page/2/">2</a><a class="page-number" href="/page/3/">3</a><span class="space">&hellip;</span><a class="page-number" href="/page/5/">5</a><a class="extend next" rel="next" href="/page/2/">Next &raquo;</a>
     </nav>
   
 
@@ -843,7 +858,7 @@ spring:
     
     	<section class="tools-section tools-section-tag">
     			<div class="widget tagcloud" id="js-tagcloud">
-    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 20px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 20px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 16.67px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 13.33px;">work</a>
+    				<a href="/tags/ElasticStack/" style="font-size: 10px;">ElasticStack</a> <a href="/tags/SpringCloud/" style="font-size: 17.5px;">SpringCloud</a> <a href="/tags/SpringCloudAlibaba/" style="font-size: 20px;">SpringCloudAlibaba</a> <a href="/tags/acdgate/" style="font-size: 10px;">acdgate</a> <a href="/tags/ipcc/" style="font-size: 15px;">ipcc</a> <a href="/tags/problem/" style="font-size: 10px;">problem</a> <a href="/tags/work/" style="font-size: 12.5px;">work</a>
     			</div>
     	</section>
     
